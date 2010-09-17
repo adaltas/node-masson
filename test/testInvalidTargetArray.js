@@ -6,11 +6,11 @@ var sys = require("sys"),
 
 var m = macon({
 	'target 1': function(){
-		this.depends(['unregistered target 1','unregistered target 2'],function(err){
+		this.in(['unregistered target 1','unregistered target 2'],function(err){
 			if(err){
 				assertions.push(err.message);
 			}
-			this.next();
+			this.out();
 		});
 	}
 },'target 1');

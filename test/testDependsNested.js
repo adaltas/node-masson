@@ -15,41 +15,41 @@ var sys = require("sys"),
 	
 var m = macon({
 	'a': function(){
-		this.depends(['aa','ab','ac'],function(){
-			this.next();
+		this.in(['aa','ab','ac'],function(){
+			this.out();
 		});
 	},
 	'aa': function(){
-		this.depends(['aaa','aab'],function(){
-			this.next();
+		this.in(['aaa','aab'],function(){
+			this.out();
 		});
 	},
 	'aaa': function(){
-		this.next();
+		this.out();
 	},
 	'aab': function(){
-		this.next();
+		this.out();
 	},
 	'ab': function(){
-		this.depends('aba',function(){
-			this.next();
+		this.in('aba',function(){
+			this.out();
 		});
 	},
 	'aba': function(){
-		this.next();
+		this.out();
 	},
 	'ac': function(){
-		this.depends(['aca'],function(){
-			this.next();
+		this.in(['aca'],function(){
+			this.out();
 		});
 	},
 	'aca': function(){
-		this.depends('acaa',function(){
-			this.next();
+		this.in('acaa',function(){
+			this.out();
 		});
 	},
 	'acaa': function(){
-		this.next();
+		this.out();
 	},
 	'target 2': function(){
 	}
