@@ -15,8 +15,8 @@ var m = macon({
 	}
 },'target 1');
 
-m.on('error',function(){
-	assertions.push('error: '+this.target);
+m.on('error',function(context){
+	assertions.push('error: '+context.target);
 });
 
 process.nextTick(function(){

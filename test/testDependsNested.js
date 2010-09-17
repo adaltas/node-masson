@@ -54,11 +54,11 @@ var m = macon({
 	'target 2': function(){
 	}
 },'a');
-m.on('before',function(){
-	assertions.push('before '+this.target);
+m.on('before',function(context){
+	assertions.push('before '+context.target);
 })
-m.on('after',function(){
-	assertions.push('after '+this.target);
+m.on('after',function(context){
+	assertions.push('after '+context.target);
 })
 
 process.nextTick(function(){
