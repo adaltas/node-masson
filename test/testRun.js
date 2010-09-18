@@ -1,24 +1,19 @@
 
 var masson = require('masson');
 
-exports['test multiple in in a same function'] = function(assert){
+exports['test calling run'] = function(assert){
 	var assertions = [];
 	var m = masson({
 		'target 1': function(){
 			this.out();
 		},
 		'target 2': function(){
-			this.out();
-		},
-		'target 3': function(){
 			this.in('target 1',function(){
 				this.out();
 			});
-			this.in('target 2',function(){
-				this.out();
-			});
 		}
-	},'target 3');
+	});
+	m.run('target 2');
 	m.on('before',function(context){
 		assertions.push('before '+context.target);
 	})
@@ -28,8 +23,7 @@ exports['test multiple in in a same function'] = function(assert){
 	
 	process.nextTick(function(){
 		assert.deepEqual(
-			// Note how 'after target 3' is called twice
-			['before target 3','before target 1','after target 1','after target 3','before target 2','after target 2','after target 3'],
+			['before target 2','before target 1','after target 1','after target 2'],
 			assertions
 		);
 	});
