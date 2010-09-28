@@ -24,6 +24,26 @@ Choose your style..
 	#!/usr/bin/env node
 	var masson = require('masson');
 	
+	masson()
+	.task( 'build', [ 'prepare', 'clean' ], function(){
+		this.out();
+	})
+	.task( 'prepare', function(){
+		this.out();
+	})
+	.task( 'clean', function(){
+		setTimeout(function(){
+			/* do some cleaning */
+			this.out();
+		},1000);
+	})
+	.run('build');
+
+..could be rewritten (and mixed) as
+
+	#!/usr/bin/env node
+	var masson = require('masson');
+	
 	masson([{
 		target: 'build',
 		depends: [ 'prepare', 'clean' ],

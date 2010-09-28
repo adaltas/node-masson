@@ -1,17 +1,14 @@
 
 var masson = require('masson');
 
-exports['test calling run method'] = function(assert){
+exports['test calling task method'] = function(assert){
 	var assertions = [];
-	masson({
-		'target 1': function(){
-			this.out();
-		},
-		'target 2': function(){
-			this.in('target 1',function(){
-				this.out();
-			});
-		}
+	masson()
+	.task('target 1',function(){
+		this.out();
+	})
+	.task('target 2','target 1',function(){
+		this.out();
 	})
 	.run('target 2')
 	.on('before',function(context){
@@ -20,10 +17,10 @@ exports['test calling run method'] = function(assert){
 	.on('after',function(context){
 		assertions.push('after '+context.target);
 	});
-	
+
 	process.nextTick(function(){
 		assert.deepEqual(
-			['before target 2','before target 1','after target 1','after target 2'],
+			['before target 1','after target 1','before target 2','after target 2'],
 			assertions
 		);
 	});
