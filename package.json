@@ -1,5 +1,5 @@
 { "name": "masson"
-, "version": "0.0.2"
+, "version": "0.0.3"
 , "description": "Build system and targeted workflow"
 , "author": "David Worms <david@adaltas.com>"
 , "main": "./lib/masson"

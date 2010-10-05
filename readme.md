@@ -16,7 +16,7 @@ Masson provide the following functionnalities:
 *   tested (using Expresso)
 *   arguments transmission between targets
 
-Masson by exemple
+Masson by example
 ----------------
 
 Choose your style..
