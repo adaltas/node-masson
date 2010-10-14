@@ -32,9 +32,10 @@ Choose your style..
 		this.out();
 	})
 	.task( 'clean', function(){
+		var self = this;
 		setTimeout(function(){
 			/* do some cleaning */
-			this.out();
+			self.out();
 		},1000);
 	})
 	.run('build');
@@ -59,9 +60,10 @@ Choose your style..
 	},{
 		target: 'clean',
 		callback: function(){
+			var self = this;
 			setTimeout(function(){
 				/* do some cleaning */
-				this.out();
+				self.out();
 			},1000);
 		}
 	}],'build');
@@ -89,7 +91,7 @@ Choose your style..
 Using Masson
 ------------
 
-When you require Masson as `var masson = require('masson');`, you recieve a function. Simply call it with the following arguments:
+When you require Masson as `var masson = require('masson');`, you receive a function. Simply call it with the following arguments:
 
 *   array or object configuration (see the two styles above)
 *   optional target to execute (save the pain of calling `my_masson.run('my target')`
@@ -105,7 +107,7 @@ Passing arguments
 
 Arguments may be transfered from parent to dependencies and from dependencies to parent callbacks.
 
-The `in` method may recieve an array of paramenters as a second argument, after the target(s). The same array will be available to all targets. The `out` method may also recieve an array of parameter as its first argument and the parent will get as first parameter and error and for the following one as many parameter as there were child targets to call. I'm aware for not being clear but you can take a look at the test in `test/testArguments.js`.
+The `in` method may receive an array of paramenters as a second argument, after the target(s). The same array will be available to all targets. The `out` method may also receive an array of parameter as its first argument and the parent will get as first parameter and error and for the following one as many parameter as there were child targets to call. I'm aware for not being clear but you can take a look at the test in `test/testArguments.js`.
 
 Running the tests
 -----------------
