@@ -1,7 +1,8 @@
 
-var masson = require('masson');
+var masson = require('masson'),
+	assert = require('assert');
 
-exports['test invalid target string'] = function(assert){
+exports['test invalid target string'] = function(){
 	(function(){
 	
 	var a = []; 

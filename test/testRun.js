@@ -1,7 +1,8 @@
 
-var masson = require('masson');
+var masson = require('masson'),
+	assert = require('assert');
 
-exports['test calling run method'] = function(assert){
+exports['test calling run method'] = function(){
 	var assertions = [];
 	masson({
 		'target 1': function(){

@@ -1,7 +1,8 @@
 
-var masson = require('masson');
+var masson = require('masson'),
+	assert = require('assert');
 
-exports['test context'] = function(assert){
+exports['test context'] = function(){
 	masson({
 		'target 1': function(){
 			this.out();

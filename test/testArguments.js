@@ -1,7 +1,8 @@
 
-var masson = require('masson');
+var masson = require('masson'),
+	assert = require('assert');
 
-exports['test arguments in'] = function(assert){
+exports['test arguments in'] = function(){
 	masson({
 		'target 0': function(){
 			assert.deepEqual(['my arg 0'],Array.prototype.slice.call(arguments));
@@ -27,7 +28,7 @@ exports['test arguments in'] = function(assert){
 	},'target 3',['my first arg 3','my second arg 3']);
 };
 
-exports['test arguments out'] = function(assert){
+exports['test arguments out in object'] = function(){
 	masson({
 		'target aaa': function(){
 			this.out('target aaa');

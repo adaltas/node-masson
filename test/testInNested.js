@@ -1,5 +1,6 @@
 
-var masson = require('masson');
+var masson = require('masson'),
+	assert = require('assert');
 
 /*
          aaa
@@ -11,7 +12,7 @@ a - ab - aba
     ac - aca - acaa
 */
 
-exports['test nested dependencies'] = function(assert){
+exports['test nested dependencies'] = function(){
 	var assertions = [];
 	var m = masson({
 		'a': function(){

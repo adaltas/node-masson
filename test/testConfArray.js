@@ -1,7 +1,8 @@
 
-var masson = require('masson');
+var masson = require('masson'),
+	assert = require('assert');
 
-exports['test configuration as array'] = function(assert){
+exports['test configuration as array'] = function(){
 	var assertions = [];
 	var m = masson([{
 		target: 'target a',
