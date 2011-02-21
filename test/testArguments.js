@@ -65,3 +65,18 @@ exports['test arguments out in object'] = function(){
 		}
 	},'target a');
 };
+
+exports['test arguments out in function'] = function(){
+	masson()
+	.task('target aa', function(){
+		this.out('aa');
+	})
+	.task('target ab', function(){
+		this.out(['ab']);
+	})
+	.task('target a',['target aa','target ab'], function(){
+		assert.deepEqual([null,['aa'],[['ab']]],Array.prototype.slice.call(arguments));
+		this.out();
+	})
+	.run('target a');
+};
