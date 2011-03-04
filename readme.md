@@ -3,7 +3,7 @@
             _ __ ___   __ _ ___ ___  ___  _ __  
            | '_ ` _ \ / _` / __/ __|/ _ \| '_ \ 
            | | | | | | (_| \__ \__ \ (_) | | | |
-           |_| |_| |_|\__,_|___/___/\___/|_| |_|
+           |_| |_| |_|\__,_|___/___/\___/|_| |_| New BSD License
 </pre>
 
 Masson is similar to tools like Make, Ant or Rake. It provides a simple workflow system where a target may be called along with others target it depends on.
