@@ -1,0 +1,18 @@
+{
+  "name": "wand",
+  "version": "0.0.0",
+  "dependencies": {
+    "coffee-script": "latest",
+    "coffee-trace": "latest",
+    "each": "latest",
+    "mecano": "latest",
+    "pad": "latest",
+    "parameters": "latest",
+    "superexec": "latest",
+    "ssh2": "latest"
+  },
+  "devDependencies": {
+    "mocha": "latest",
+    "should": "latest"
+  }
+}
