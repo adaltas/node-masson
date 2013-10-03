@@ -2,8 +2,6 @@
   "name": "wand",
   "version": "0.0.0",
   "dependencies": {
-    "coffee-script": "latest",
-    "coffee-trace": "latest",
     "each": "latest",
     "mecano": "latest",
     "pad": "latest",
@@ -12,6 +10,8 @@
     "ssh2": "latest"
   },
   "devDependencies": {
+    "coffee-script": "latest",
+    "istanbul": "latest",
     "mocha": "latest",
     "should": "latest"
   }
