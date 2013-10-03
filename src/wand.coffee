@@ -128,7 +128,7 @@ each(config.servers)
       # Filter by actions
       continue if params.actions? and params.actions.indexOf(action) is -1
       actions.push action
-  actions.unshift 'wand/actions/bootstrap'
+  actions.unshift 'histi/actions/bootstrap'
   return next() unless actions.length
   ctx = context (merge {}, config, server), params.command
   ctx.meta = {}
@@ -160,8 +160,8 @@ each(config.servers)
         return nextAction()
       print = (err, msg) ->
         if err or msg is ctx.TIMEOUT or msg is ctx.FAILED
-          # ctx.meta.name ?= "#{action}/#{command}/#{index}"
-          ctx.meta.name ?= "#{action}/#{command}/#{index}"
+          # ctx.meta.name ?= "#{action}/#{params.command}/#{index}"
+          ctx.meta.name ?= "#{action}/##{index}"
         else
           return unless ctx.meta.name
         util.print "#{pad server.host, 40}" if config.servers.length
