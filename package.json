@@ -1,6 +1,7 @@
 {
   "name": "wand",
   "version": "0.0.0",
+  "description": "Module execution engine for cluster deployment",
   "dependencies": {
     "each": "latest",
     "mecano": "latest",
