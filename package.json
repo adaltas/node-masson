@@ -1,5 +1,5 @@
 {
-  "name": "wand",
+  "name": "famas",
   "version": "0.0.0",
   "description": "Module execution engine for cluster deployment",
   "dependencies": {
