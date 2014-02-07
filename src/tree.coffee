@@ -61,7 +61,7 @@ Tree::actions = (modules, options, callback) ->
     modules = [modules] unless Array.isArray modules
     modules = flatten modules
     # Declare bootstrap as a required dependecies
-    modules.unshift 'histi/actions/bootstrap'
+    modules.unshift 'histi/bootstrap'
     # Buil a full tree
     try tree = @load_tree modules
     catch err
@@ -72,11 +72,11 @@ Tree::actions = (modules, options, callback) ->
     if options.modules.length
       modules = tree.map (leaf) -> leaf.module
       modules = options.modules.filter (module) -> modules.indexOf(module) isnt -1
-      modules.unshift 'histi/actions/bootstrap' if modules.length
+      modules.unshift 'histi/bootstrap' if modules.length
       tree = @load_tree modules
       # Filter with the fast options
       tree = tree.filter( (leaf) => 
-        leaf.module is 'histi/actions/bootstrap' or 
+        leaf.module.indexOf('histi/bootstrap') is 0 or 
         options.modules.indexOf(leaf.module) isnt -1
       ) if options.fast
     # Emit event and return actions
@@ -101,7 +101,7 @@ Tree::modules = (modules, options, callback) ->
     callback null, mods
 
 ###
-Return a array of object with the module anme and its associated actions
+Return a array of object with the module name and its associated actions
 ###
 Tree::load_tree = (modules) ->
   called = {}
@@ -140,7 +140,7 @@ Tree::load_module = (module) ->
     callback.module ?= module
     callback.index ?= i
     callback.skip = false
-    callback.required = true if module is 'histi/actions/bootstrap'
+    callback.required = true if module.indexOf('histi/bootstrap') is 0
     actions.push callback
   actions
 

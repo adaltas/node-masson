@@ -56,6 +56,7 @@ module.exports = ->
     line += "#{print_time time}" if status isnt ctx.STARTED
     if status is ctx.STARTED
       rl.write line
+      rl.write '\n' unless params.hosts?.length
     else
       rl.cursor = 0
       rl.line = ''
@@ -67,8 +68,15 @@ module.exports = ->
     rl.write "\x1b[32mInstallation is finished\x1b[39m\n"
     rl.close()
   .on 'error', (err) ->
-    rl.write '\n'
-    rl.write err.stack
+    print = (err) ->
+      rl.write '\n'
+      rl.write err.message
+      rl.write err.stack
+    if err.errors
+      for error in err.errors
+        print error
+    else
+      print err
     rl.close()
   .on 'server', (ctx, status) ->
     return unless config.servers.length
@@ -78,7 +86,7 @@ module.exports = ->
       when ctx.OK then "\x1b[36m#{ctx.OK_MSG}\x1b[39m"
       when ctx.FAILED then "\x1b[36m#{ctx.FAILED_MSG}\x1b[39m"
       else "INVALID CODE"
-    rl.write '\n'
+    # rl.write '\n'
     rl.write line
     rl.write '\n'
 

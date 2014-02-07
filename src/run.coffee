@@ -12,6 +12,7 @@ context = require './context'
 
 Run = (config, params) ->
   EventEmitter.call @
+  @setMaxListeners 100
   @config = config
   @params = params
   @tree = new Tree 
@@ -48,7 +49,8 @@ Run = (config, params) ->
         ctx.shared = shared
         ctx.hosts = hosts
         @actions server.host, params.command, params, (err, actions) =>
-          return next new Error "Invalid run list: #{@params.command}" unless actions?
+          # return next new Error "Invalid run list: #{@params.command}" unless actions?
+          return next() unless actions?
           actionRun = each(actions)
           .on 'item', (action, next) =>
             return next() if action.skip
@@ -86,7 +88,7 @@ Run = (config, params) ->
           .on 'both', (err) =>
             @emit 'server', ctx, if err then ctx.FAILED else ctx.OK
             if err 
-            then (ctx.emit 'error', ctx if ctx.listeners('error').lengths)
+            then (ctx.emit 'error', ctx if ctx.listeners('error').length)
             else ctx.emit 'end', ctx
             next err
       .on 'error', (err) =>
