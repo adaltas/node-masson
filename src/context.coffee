@@ -24,6 +24,8 @@ class Context extends EventEmitter
     @TIMEOUT_MSG = 'TIMEOUT'
     @WARN = 8
     @WARN_MSG = 'WARN'
+    @INAPPLICABLE = 9
+    @INAPPLICABLE_MSG = 'INAPPLICABLE'
     @tmp = {}
   # Return a list of servers with a give action
   hosts_with_module: (module, qtt) ->
