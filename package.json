@@ -13,7 +13,6 @@
   },
   "devDependencies": {
     "coffee-script": "latest",
-    "istanbul": "latest",
     "mocha": "latest",
     "should": "latest"
   }
