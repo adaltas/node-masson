@@ -1,6 +1,6 @@
 parameters = require 'parameters'
 
-module.exports = parameters(
+module.exports = parameters
   name: 'big'
   description: 'Hadoop cluster management'
   options: [
@@ -117,4 +117,4 @@ module.exports = parameters(
       description: 'Limit to a list of modules'
     ]
   ]
-).parse()
+

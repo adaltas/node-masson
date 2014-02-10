@@ -1,6 +1,7 @@
 
-
 params = require './params'
+params = params.parse()
+params.command ?= 'help'
 # Print help
 switch params.command
   when 'help' then require('./commands/help')()

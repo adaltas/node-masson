@@ -1,6 +1,8 @@
+
+util = require 'util'
 parameters = require 'parameters'
 params = require '../params'
 
 module.exports = ->
-  util.print parameters.help ctx.params.subcommand
+  util.print params.help params.parse().subcommand
 

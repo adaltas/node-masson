@@ -11,6 +11,7 @@ List all the actions to execute
 
 ###
 module.exports = ->
+  params = params.parse()
   hosts = config.servers.map (server) -> server.host
   server = hosts.indexOf(params.host)
   return util.print "\x1b[31mInvalid server \"#{server.host}\"\x1b[39m\n" if server is -1

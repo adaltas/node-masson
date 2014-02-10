@@ -1,6 +1,7 @@
 
 path = require 'path'
 params = require './params'
+params = params.parse()
 
 # Load configuration
 try

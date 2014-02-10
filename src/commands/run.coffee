@@ -22,6 +22,7 @@ module.exports = ->
     rl.write '\n'
     rl.write err.stack
     rl.close()
+  params = params.parse()
   run(config, params)
   .on 'action', (ctx, status) ->
     return if ctx.action.hidden

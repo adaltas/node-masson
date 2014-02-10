@@ -4,6 +4,7 @@ exec = require 'superexec'
 {merge} = require 'mecano/lib/misc'
 config = require '../config'
 params = require '../params'
+params = params.parse()
 
 module.exports = ->
   for server in config.servers
