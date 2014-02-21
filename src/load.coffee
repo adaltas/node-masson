@@ -22,7 +22,6 @@ module.exports = (request) ->
     m.require absrequest
   catch e
     if e instanceof SyntaxError and e.location
-      console.log '--'
       location = path.relative process.cwd(), absrequest
       throw new Error "#{location}:#{e.location.first_line}:#{e.location.first_column} #{e.message}"
     else throw e

@@ -7,32 +7,39 @@ tree = require './tree'
 class Context extends EventEmitter
   constructor: (@config, @command)->
     @PASS = 0
-    @PASS_MSG = 'PASS' #STABLE
+    @PASS_MSG = 'STABLE' #STABLE
     @OK = 1
     @OK_MSG = 'OK' #SUCCESS
     @FAILED = 2
-    @FAILED_MSG = 'FAILED' #ERROR
+    @FAILED_MSG = 'ERROR' #ERROR
     @DISABLED = 3
     @DISABLED_MSG = 'DISABLED'
     @TODO = 4
     @TODO_MSG = 'TODO'
     @STARTED = 5
-    @STARTED_MSG = 'STARTED' #START
+    @STARTED_MSG = 'RUNNING' #START
     @STOP = 6
-    @STOP_MSG = 'STOP'
+    @STOP_MSG = 'STOPPED' # CANCELED
     @TIMEOUT = 7
     @TIMEOUT_MSG = 'TIMEOUT'
     @WARN = 8
-    @WARN_MSG = 'WARN'
+    @WARN_MSG = 'WARNING'
     @INAPPLICABLE = 9
-    @INAPPLICABLE_MSG = 'INAPPLICABLE'
+    @INAPPLICABLE_MSG = 'SKIPPED'
     @tmp = {}
   # Return a list of servers with a give action
-  hosts_with_module: (module, qtt) ->
+  host_with_module: (module, strict) ->
     servers = []
     for host, ctx of @hosts
       servers.push host if ctx.modules.indexOf(module) isnt -1
-    throw new Error "Expect #{qtt} host(s) for module #{module} but got #{servers.length}" if qtt? and servers.length isnt qtt
+    throw new Error "Too many host with module #{module}: #{servers.length}" if servers.length > 1
+    throw new Error "Expect #{qtt} host(s) for module #{module} but got #{servers.length}" if strict and servers.length isnt 1
+    servers[0]
+  hosts_with_module: (module, qtt, strict) ->
+    servers = []
+    for host, ctx of @hosts
+      servers.push host if ctx.modules.indexOf(module) isnt -1
+    throw new Error "Expect #{qtt} host(s) for module #{module} but got #{servers.length}" if strict and qtt? and servers.length isnt qtt
     if qtt is 1 then servers[0] else servers
   # Return all the servers matching the provided filter. 
   # Filter may contains action and role

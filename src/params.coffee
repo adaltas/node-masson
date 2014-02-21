@@ -29,7 +29,7 @@ module.exports = parameters
       description: 'Limit to a list of server hostnames'
       required: true
     ,
-      name: 'modules', shortcut: 'm'
+      name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
     , 
       name: 'fast', shortcut: 'f', type: 'boolean'
@@ -39,13 +39,13 @@ module.exports = parameters
     name: 'install'
     description: 'Install components and deploy configuration'
     options: [
-      name: 'hosts', shortcut: 'h'
+      name: 'hosts', shortcut: 'h', type: 'array'
       description: 'Limit to a list of server hostnames'
     ,
       name: 'roles', shortcut: 'r'
       description: 'Limit to a list of roles'
     ,
-      name: 'modules', shortcut: 'm'
+      name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
     , 
       name: 'fast', shortcut: 'f', type: 'boolean'
@@ -55,66 +55,97 @@ module.exports = parameters
     name: 'start'
     description: 'Start server components'
     options: [
-      name: 'hosts', shortcut: 'h'
+      name: 'hosts', shortcut: 'h', type: 'array'
       description: 'Limit to a list of server hostnames'
     ,
       name: 'roles', shortcut: 'r'
       description: 'Limit to a list of roles'
     ,
-      name: 'modules', shortcut: 'm'
+      name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
+    , 
+      name: 'fast', shortcut: 'f', type: 'boolean'
+      description: 'Fast mode without dependency resolution'
     ]
   ,
     name: 'reload'
     description: 'Start server components'
     options: [
-      name: 'hosts', shortcut: 'h'
+      name: 'hosts', shortcut: 'h', type: 'array'
       description: 'Limit to a list of server hostnames'
     ,
       name: 'roles', shortcut: 'r'
       description: 'Limit to a list of roles'
     ,
-      name: 'modules', shortcut: 'm'
+      name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
+    , 
+      name: 'fast', shortcut: 'f', type: 'boolean'
+      description: 'Fast mode without dependency resolution'
+    ]
+  ,
+    name: 'status'
+    description: 'Status of server components'
+    options: [
+      name: 'hosts', shortcut: 'h', type: 'array'
+      description: 'Limit to a list of server hostnames'
+    ,
+      name: 'roles', shortcut: 'r'
+      description: 'Limit to a list of roles'
+    ,
+      name: 'modules', shortcut: 'm', type: 'array'
+      description: 'Limit to a list of modules'
+    , 
+      name: 'fast', shortcut: 'f', type: 'boolean'
+      description: 'Fast mode without dependency resolution'
     ]
   ,
     name: 'stop',
     description: 'Stop server components'
     options: [
-      name: 'hosts', shortcut: 'h'
+      name: 'hosts', shortcut: 'h', type: 'array'
       description: 'Limit to a list of server hostnames'
     ,
       name: 'roles', shortcut: 'r'
       description: 'Limit to a list of roles'
     ,
-      name: 'modules', shortcut: 'm'
+      name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
+    , 
+      name: 'fast', shortcut: 'f', type: 'boolean'
+      description: 'Fast mode without dependency resolution'
     ]
   ,
     name: 'check',
     description: 'Check the server',
     options: [
-      name: 'hosts', shortcut: 'h'
+      name: 'hosts', shortcut: 'h', type: 'array'
       description: 'Limit to a list of server hostnames'
     ,
       name: 'roles', shortcut: 'r'
       description: 'Limit to a list of roles'
     ,
-      name: 'modules', shortcut: 'm'
+      name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
+    , 
+      name: 'fast', shortcut: 'f', type: 'boolean'
+      description: 'Fast mode without dependency resolution'
     ]
   ,
     name: 'clean'
     description: 'Clean the server'
     options: [
-      name: 'hosts', shortcut: 'h'
+      name: 'hosts', shortcut: 'h', type: 'array'
       description: 'Limit to a list of server hostnames'
     ,
       name: 'roles', shortcut: 'r'
       description: 'Limit to a list of roles'
     ,
-      name: 'modules', shortcut: 'm'
+      name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
+    , 
+      name: 'fast', shortcut: 'f', type: 'boolean'
+      description: 'Fast mode without dependency resolution'
     ]
   ]
 

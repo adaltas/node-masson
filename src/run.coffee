@@ -18,23 +18,19 @@ Run = (config, params) ->
   @tree = new Tree 
   # @tree = new Tree 
   setImmediate =>
-    params.hosts = params.hosts.split ',' if params.hosts
-    params.roles = params.roles.split ',' if params.roles
-    params.actions = params.actions.split ',' if params.actions
     # Work on each server
-    hosts = {}
+    contexts = {}
     shared = {}
-    # trees = trees config, params.command
     each(config.servers)
     .parallel(true)
     .on 'item', (server, next) =>
-      hosts[server.host] = context (merge {}, config, server), params.command
+      contexts[server.host] = context (merge {}, config, server), params.command
       @actions server.host, 'install', {}, (err, actions) =>
         return next err if err
-        hosts[server.host].actions = actions or []
+        contexts[server.host].actions = actions or []
         @modules server.host, 'install', {}, (err, modules) =>
           return next err if err
-          hosts[server.host].modules = modules or []
+          contexts[server.host].modules = modules or []
           next()
     .on 'error', (err) =>
       @emit 'error', err
@@ -44,10 +40,10 @@ Run = (config, params) ->
       .on 'item', (server, next) =>
         # Filter by hosts
         return next() if params.hosts? and params.hosts.indexOf(server.host) is -1
-        ctx = hosts[server.host]
+        ctx = contexts[server.host]
         ctx.run = @
         ctx.shared = shared
-        ctx.hosts = hosts
+        ctx.hosts = contexts
         @actions server.host, params.command, params, (err, actions) =>
           # return next new Error "Invalid run list: #{@params.command}" unless actions?
           return next() unless actions?
@@ -57,14 +53,20 @@ Run = (config, params) ->
             # Action
             ctx.action = action
             timedout = null
-            @emit 'action', ctx, ctx.STARTED
+            emit_action = (status) =>
+              ctx.emit 'action', status
+              @emit 'action', ctx, status
+            emit_action ctx.STARTED
+            # @emit 'action', ctx, ctx.STARTED
             # Cleanup and pass to the next action
             done = (err, statusOrMsg) =>
               clearTimeout timeout if timeout
               timedout = true
               if err
-              then @emit 'action', ctx, ctx.FAILED
-              else @emit 'action', ctx, statusOrMsg
+              then emit_action ctx.FAILED
+              else emit_action statusOrMsg
+              # then @emit 'action', ctx, ctx.FAILED
+              # else @emit 'action', ctx, statusOrMsg
               next err
             # Timeout, default to 100s
             action.timeout ?= 100000
@@ -73,22 +75,26 @@ Run = (config, params) ->
                 timedout = true
                 done new Error 'TIMEOUT'
               , action.timeout
-            # Synchronous action
-            if action.callback.length is 1
-              merge action, action.callback.call ctx, ctx
-              process.nextTick ->
-                action.timeout = -1
-                done null, ctx.DISABLED
-            # Asynchronous action
-            else
-              count = 0
-              merge action, action.callback.call ctx, ctx, (err, statusOrMsg) =>
-                actionRun.end() if statusOrMsg is ctx.STOP
-                done err, statusOrMsg
+            try
+              # Prevent "Maximum call stack size exceeded" when
+              # timeout, interval and setImmediate is used inside the callback
+              setImmediate =>
+                # Synchronous action
+                if action.callback.length is 1
+                  merge action, action.callback.call ctx, ctx
+                  process.nextTick ->
+                    action.timeout = -1
+                    done null, ctx.DISABLED
+                # Asynchronous action
+                else
+                  merge action, action.callback.call ctx, ctx, (err, statusOrMsg) =>
+                    actionRun.end() if statusOrMsg is ctx.STOP
+                    done err, statusOrMsg
+            catch e then done e
           .on 'both', (err) =>
             @emit 'server', ctx, if err then ctx.FAILED else ctx.OK
             if err 
-            then (ctx.emit 'error', ctx if ctx.listeners('error').length)
+            then (ctx.emit 'error', err if ctx.listeners('error').length)
             else ctx.emit 'end', ctx
             next err
       .on 'error', (err) =>
