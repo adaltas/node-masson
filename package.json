@@ -8,7 +8,6 @@
     "pad": "latest",
     "parameters": "latest",
     "superexec": "latest",
-    "level": "latest",
     "ssh2": "latest"
   },
   "devDependencies": {
