@@ -7,7 +7,7 @@ params = require '../params'
 params = params.parse()
 
 module.exports = ->
-  for server in config.servers
+  config.servers.forEach (server) ->
     config = merge {}, server,
       username: 'root'
       password: null
