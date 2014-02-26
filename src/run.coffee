@@ -44,6 +44,7 @@ Run = (config, params) ->
         ctx.run = @
         ctx.shared = shared
         ctx.hosts = contexts
+        @emit 'context', ctx
         @actions server.host, params.command, params, (err, actions) =>
           # return next new Error "Invalid run list: #{@params.command}" unless actions?
           return next() unless actions?
@@ -95,7 +96,7 @@ Run = (config, params) ->
             @emit 'server', ctx, if err then ctx.FAILED else ctx.OK
             if err 
             then (ctx.emit 'error', err if ctx.listeners('error').length)
-            else ctx.emit 'end', ctx
+            else ctx.emit 'end'
             next err
       .on 'error', (err) =>
         @emit 'error', err
