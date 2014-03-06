@@ -41,27 +41,6 @@ class Context extends EventEmitter
       servers.push host if ctx.modules.indexOf(module) isnt -1
     throw new Error "Expect #{qtt} host(s) for module #{module} but got #{servers.length}" if strict and qtt? and servers.length isnt qtt
     if qtt is 1 then servers[0] else servers
-  # Return all the servers matching the provided filter. 
-  # Filter may contains action and role
-  # servers: (filter = {}) ->
-  #   filter.role = [filter.role] if typeof filter.role is 'string'
-  #   filter.action = [filter.action] if typeof filter.action is 'string'
-  #   if not filter.role? and not filter.action?
-  #     return @config.servers.map (server) -> server.host
-  #   servers = []
-  #   breaking = false
-  #   for serverConf in @config.servers
-  #     continue unless serverConf.run[@command]
-  #     for role in serverConf.run[@command]
-  #       if filter.role and filter.role.indexOf(role) isnt -1
-  #         servers.push serverConf.host
-  #         break
-  #       roleConf = @config.roles[role]
-  #       for action in roleConf
-  #         if filter.action and filter.action.indexOf(action) isnt -1
-  #           servers.push serverConf.host
-  #           break
-  #  servers
   has_module: (module) ->
     @modules.indexOf(module) isnt -1
   has_all_modules: (modules...) ->
