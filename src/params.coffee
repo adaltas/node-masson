@@ -4,8 +4,8 @@ module.exports = parameters
   name: 'big'
   description: 'Hadoop cluster management'
   options: [
-    name: 'config', shortcut: 'c'
-    description: 'Configuration file'
+    name: 'config', shortcut: 'c', type: 'array'
+    description: 'One or multiple configuration files'
     required: true
   , 
     name: 'debug', shortcut: 'd', type: 'boolean'
