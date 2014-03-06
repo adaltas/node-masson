@@ -112,6 +112,10 @@ Tree::load_tree = (modules) ->
     leaf = module: module, actions: []
     for action in @load_module module
       if typeof action is 'string'
+        # Split the current module actions in two and
+        # insert the dependency actions in between
+        tree.push leaf if leaf.actions.length
+        leaf = module: module, actions: []
         build_tree action
       else
         leaf.actions.push action
