@@ -15,34 +15,26 @@ print_time = (time) ->
     "#{time}ms"
 
 module.exports = ->
-  running = []
+  # running = []
   rl = readline.createInterface process.stdin, process.stdout
   rl.setPrompt ''
-  process.on 'uncaughtException', (err) ->
-    rl.write '\n'
-    rl.write "\x1b[31m#{err.stack or err.message}\x1b[39m"
-    rl.close()
   hostlength = 20
   for s in config.servers then hostlength = Math.max(hostlength, s.host.length+2)
   params = params.parse()
   multihost = params.hosts?.length isnt 1 and config.servers.length isnt 1
+  times = {}
   run(config, params)
   .on 'context', (ctx) ->
     ctx
     .on 'action', (status) ->
       return if ctx.action.hidden
       status ?= ctx.DISABLED
-      time = null
       if status is ctx.STARTED
-        running.push [ctx.config.host, ctx.action.name, Date.now()]
+        times[ctx.config.host] = Date.now()
       else
-        for i in [running.length-1..0]
-          if running[i][0] is ctx.config.host and running[i][1] is ctx.action.name
-            time = Date.now() - running[i][2]
-            running.splice(i, 1)
-            break
+        time = Date.now() - times[ctx.config.host]
       line = ''
-      line += "#{pad ctx.config.host, hostlength}" #if config.servers.length
+      line += "#{pad ctx.config.host, hostlength}"
       line += "#{pad ctx.action.name, 40}"
       statusmsg = switch status
         when ctx.PASS then "\x1b[36m#{ctx.PASS_MSG}\x1b[39m"
@@ -58,7 +50,7 @@ module.exports = ->
         when ctx.INAPPLICABLE then "\x1b[36m#{ctx.INAPPLICABLE_MSG}\x1b[39m"
         else (if typeof status is 'number' then "INVALID CODE" else "\x1b[36m#{status}\x1b[39m")
       line += "#{pad statusmsg, 20}"
-      line += "#{print_time time}" if status isnt ctx.STARTED
+      line += "#{print_time time}" if time
       if status is ctx.STARTED
         rl.write line unless multihost
       else
