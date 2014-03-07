@@ -35,6 +35,10 @@ Run = (config, params) ->
     .on 'error', (err) =>
       @emit 'error', err
     .on 'end', =>
+      process.on 'uncaughtException', (err) =>
+        for host, ctx of contexts
+          ctx.emit 'error', err if ctx.listeners('error').length
+        @emit 'error', err
       each(config.servers)
       .parallel(true)
       .on 'item', (server, next) =>
@@ -56,18 +60,13 @@ Run = (config, params) ->
             timedout = null
             emit_action = (status) =>
               ctx.emit 'action', status
-              @emit 'action', ctx, status
             emit_action ctx.STARTED
-            # @emit 'action', ctx, ctx.STARTED
-            # Cleanup and pass to the next action
             done = (err, statusOrMsg) =>
               clearTimeout timeout if timeout
               timedout = true
               if err
               then emit_action ctx.FAILED
               else emit_action statusOrMsg
-              # then @emit 'action', ctx, ctx.FAILED
-              # else @emit 'action', ctx, statusOrMsg
               next err
             # Timeout, default to 100s
             action.timeout ?= 100000
