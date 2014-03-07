@@ -1,4 +1,4 @@
-
+  
 path = require 'path'
 fs = require 'fs'
 {merge} = require 'mecano/lib/misc'
@@ -30,4 +30,5 @@ try
   module.exports = config
 catch e
   process.stderr.write "Fail to load configuration file: #{params.config}\n"
-  return console.log e
+  console.log e.stack
+  process.exit()
