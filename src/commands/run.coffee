@@ -90,24 +90,14 @@ module.exports = ->
       when ctx.OK then "\x1b[36m#{ctx.OK_MSG}\x1b[39m"
       when ctx.FAILED then "\x1b[36m#{ctx.FAILED_MSG}\x1b[39m"
       else "INVALID CODE"
-    # rl.write '\n'
     rl.write line
     rl.write '\n'
   .on 'end', ->
     rl.write "\x1b[32mInstallation is finished\x1b[39m\n"
     rl.close()
   .on 'error', (err) ->
-    print = (err) ->
-      rl.write '\n'
-      line = ''
-      # line += "#{pad ctx.config.host, hostlength+40}"
-      line += "\x1b[31m#{err.stack or err.message}\x1b[39m"
-      rl.write line
-    if err.errors
-      for error in err.errors
-        print error
-    else
-      print err
+    rl.write '\n'
+    rl.write "\x1b[31m#{err.stack or err.message}\x1b[39m"
     rl.close()
 
 
