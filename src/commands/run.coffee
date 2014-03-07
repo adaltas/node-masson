@@ -72,6 +72,7 @@ module.exports = ->
       rl._refreshLine()
       rl.write line
     .on 'waited', ->
+      return if multihost
       statusmsg = "\x1b[36m#{ctx.STARTED_MSG}\x1b[39m"
       line = ''
       line += "#{pad ctx.config.host, hostlength}"
