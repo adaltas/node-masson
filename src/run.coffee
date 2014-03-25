@@ -10,6 +10,17 @@ load = require './load'
 context = require './context'
 {Tree} = require './tree'
 
+###
+The execution is done in 2 passes.
+
+On the first pass, a context object is build for each server. A context is the 
+same object inject to a callback action as first argument. In a context, other 
+server contexts are available through the `hosts` object where keys are the 
+server name. A context object is enriched with the "actions" and "modules" 
+properties which are respectively a list of "actions" and a list of modules.
+
+On the second pass, the action are executed.
+###
 Run = (config, params) ->
   EventEmitter.call @
   @setMaxListeners 100
