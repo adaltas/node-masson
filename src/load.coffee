@@ -16,8 +16,7 @@ module.exports = (request) ->
       err.code = 'MODULE_NOT_FOUND'
       throw err
   else
-    absrequest = path.resolve '.'
-  # m.require absrequest
+    absrequest = path.resolve '.', request
   try
     m.require absrequest
   catch e
