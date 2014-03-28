@@ -8,7 +8,6 @@ params = params.parse()
 # Load configuration
 try
   configs = []
-  # console.log params.config
   for config in params.config
     location = "#{path.resolve process.cwd(), config}"
     exists = fs.existsSync location
