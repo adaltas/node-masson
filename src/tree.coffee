@@ -60,8 +60,6 @@ Tree::actions = (modules, options, callback) ->
   setImmediate =>
     modules = [modules] unless Array.isArray modules
     modules = flatten modules
-    # Declare bootstrap as a required dependecies
-    modules.unshift 'phyla/bootstrap'
     # Buil a full tree
     try tree = @load_tree modules
     catch err
@@ -72,12 +70,13 @@ Tree::actions = (modules, options, callback) ->
     if options.modules.length
       modules = tree.map (leaf) -> leaf.module
       modules = options.modules.filter (module) -> modules.indexOf(module) isnt -1
-      modules.unshift 'phyla/bootstrap' if modules.length
       tree = @load_tree modules
       # Filter with the fast options
       tree = tree.filter( (leaf) => 
-        leaf.module.indexOf('phyla/bootstrap') is 0 or 
-        options.modules.indexOf(leaf.module) isnt -1
+        return true if options.modules.indexOf(leaf.module) isnt -1
+        leaf.actions = leaf.actions.filter (action) =>
+          action.required
+        leaf.actions.length
       ) if options.fast
     # Emit event and return actions
     actions = []
@@ -123,30 +122,73 @@ Tree::load_tree = (modules) ->
   for module in modules then build_tree module
   tree
 
+# ###
+# Load a module and return its actions
+# A module may be prefixed with:
+# *   "?": Load this module only if it is defined by the user in the run list.
+# *   "!": Force this module to be loaded and executed, apply to "fast" mode.
+# ###
+# Tree::load_module = (module) ->
+#   @cache ?= {}
+#   return @cache[module] if @cache[module]
+#   @cache[module] = actions = []
+#   # Load the module
+#   # required = false
+#   # [_, meta, module] = /([\!\?]?)(.*)/.exec module
+#   # console.log meta, module
+#   # switch meta
+#   #   when '?' then # nothing yet
+#   #   when '!' then required = true
+#   actions = load module
+#   actions = [actions] unless Array.isArray actions
+#   for action, i in actions
+#     # Module dependencies
+#     if typeof action is 'string'
+#       actions.push action
+#       continue
+#     action = callback: action if typeof action is 'function'
+#     action.hidden ?= true unless action.name
+#     action.name ?= "#{module}/#{i}"
+#     action.module ?= module
+#     action.index ?= i
+#     # action.required ?= required
+#     action.skip = false
+#     action.required = true if module.indexOf('phyla/bootstrap') is 0
+#     actions.push action
+#   actions
+
 ###
-Load a module and return its actions
+Load a module and return its actions.
+
+Module actions when defining a string dependency may be prefixed with:  
+
+*   "?": Load this module only if it is defined by the user in the run list.
+*   "!": Force this module to be loaded and executed, apply to "fast" mode.
+
 ###
 Tree::load_module = (module) ->
   @cache ?= {}
   return @cache[module] if @cache[module]
-  @cache[module] = actions = []
   # Load the module
-  callbacks = load module
-  callbacks = [callbacks] unless Array.isArray callbacks
-  for callback, i in callbacks
+  required = false
+  [_, meta, module] = /([\!\?]?)(.*)/.exec module
+  switch meta
+    when '?' then # nothing yet
+    when '!' then required = true
+  # Load the module
+  actions = load module
+  actions = [actions] unless Array.isArray actions
+  for callback, i in actions
     # Module dependencies
-    if typeof callback is 'string'
-      actions.push callback
-      continue
-    callback = callback: callback if typeof callback is 'function'
+    continue if typeof callback is 'string'
+    callback = actions[i] = callback: callback if typeof callback is 'function'
     callback.hidden ?= true unless callback.name
     callback.name ?= "#{module}/#{i}"
     callback.module ?= module
     callback.index ?= i
-    callback.skip = false
-    callback.required = true if module.indexOf('phyla/bootstrap') is 0
-    actions.push callback
-  actions
+    callback.skip ?= false
+    callback.required = true if required
+  @cache[module] = actions
 
 module.exports = (modules, options, callback)->
   (new Tree).actions modules, options, callback
