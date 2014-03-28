@@ -1,7 +1,14 @@
 {
   "name": "masson",
   "version": "0.0.1",
-  "description": "Module execution engine for cluster deployment",
+  "description": "Module execution engine for cluster deployments.",
+  "homepage": "https://github.com/wdavidw/node-masson",
+  "bugs": "https://github.com/wdavidw/node-masson/issues",
+  "author": "David Worms <david@adaltas.com>",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/wdavidw/node-masson.git"
+  },
   "dependencies": {
     "each": "latest",
     "mecano": "latest",
@@ -14,5 +21,8 @@
     "coffee-script": "latest",
     "mocha": "latest",
     "should": "latest"
+  },
+  "bin" : {
+    "masson" : "./bin/masson"
   }
 }
