@@ -6,7 +6,6 @@ each = require 'each'
 {EventEmitter} = require 'events'
 {merge} = require 'mecano/lib/misc'
 {flatten} = require './misc'
-load = require './load'
 context = require './context'
 {Tree} = require './tree'
 
@@ -35,13 +34,15 @@ Run = (config, params) ->
     each(config.servers)
     .parallel(true)
     .on 'item', (server, next) =>
-      contexts[server.host] = context (merge {}, config, server), params.command
+      ctx = contexts[server.host] = context (merge {}, config, server), params.command
+      ctx.hosts = contexts
+      ctx.shared = shared
       @actions server.host, 'install', {}, (err, actions) =>
         return next err if err
-        contexts[server.host].actions = actions or []
+        ctx.actions = actions or []
         @modules server.host, 'install', {}, (err, modules) =>
           return next err if err
-          contexts[server.host].modules = modules or []
+          ctx.modules = modules or []
           next()
     .on 'error', (err) =>
       @emit 'error', err
@@ -57,8 +58,6 @@ Run = (config, params) ->
         return next() if params.hosts? and params.hosts.indexOf(server.host) is -1
         ctx = contexts[server.host]
         ctx.run = @
-        ctx.shared = shared
-        ctx.hosts = contexts
         @emit 'context', ctx
         @actions server.host, params.command, params, (err, actions) =>
           # return next new Error "Invalid run list: #{@params.command}" unless actions?
