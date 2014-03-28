@@ -1,5 +1,3 @@
 
-module.exports = [
-  (ctx, next) ->
-    next null, 'required by a end # 1'
-]
+module.exports = (ctx, next) ->
+  next null, 'required by a end # 1'

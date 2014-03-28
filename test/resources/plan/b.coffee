@@ -1,6 +1,8 @@
 
-module.exports = [
-  'wand/test/resources/plan/required_by_ab_begin'
-  (ctx, next) ->
-    next null, 'b # 1'
-]
+module.exports = []
+
+module.exports.push 'wand/test/resources/plan/required_by_ab_begin'
+
+module.exports (ctx, next) ->
+  next null, 'b # 1'
+
