@@ -24,5 +24,6 @@
   },
   "bin" : {
     "masson" : "./bin/masson"
-  }
+  },
+  "main": "./lib"
 }
