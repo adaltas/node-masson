@@ -1,7 +1,29 @@
-{ "name": "masson"
-, "version": "0.0.4"
-, "description": "Build system and targeted workflow"
-, "author": "David Worms <david@adaltas.com>"
-, "main": "./lib/masson"
-, "engines": { "node": ">= 0.1.90" }
+{
+  "name": "masson",
+  "version": "0.0.5",
+  "description": "Module execution engine for cluster deployments.",
+  "homepage": "https://github.com/wdavidw/node-masson",
+  "bugs": "https://github.com/wdavidw/node-masson/issues",
+  "author": "David Worms <david@adaltas.com>",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/wdavidw/node-masson.git"
+  },
+  "dependencies": {
+    "each": "latest",
+    "mecano": "latest",
+    "pad": "latest",
+    "parameters": "latest",
+    "superexec": "latest",
+    "ssh2": "latest"
+  },
+  "devDependencies": {
+    "coffee-script": "latest",
+    "mocha": "latest",
+    "should": "latest"
+  },
+  "bin" : {
+    "masson" : "./bin/masson"
+  },
+  "main": "./lib"
 }
