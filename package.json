@@ -11,11 +11,14 @@
   },
   "dependencies": {
     "each": "latest",
+    "ldapjs": "latest",
+    "masson": "latest",
     "mecano": "latest",
     "pad": "latest",
     "parameters": "latest",
-    "superexec": "latest",
-    "ssh2": "latest"
+    "regexp-quote": "latest",
+    "semver": "latest",
+    "ssh2-exec": "latest"
   },
   "devDependencies": {
     "coffee-script": "latest",
