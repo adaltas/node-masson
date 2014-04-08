@@ -59,14 +59,14 @@ Example:
     module.exports.push module.exports.configure = (ctx) ->
       require('./krb5_server').configure ctx
       ctx.config.krb5.sshd ?= {}
-      ctx.config.krb5.sshd = misc.merge
-        ChallengeResponseAuthentication: 'yes'
-        KerberosAuthentication: 'yes'
-        KerberosOrLocalPasswd: 'yes'
-        KerberosTicketCleanup: 'yes'
-        GSSAPIAuthentication: 'yes'
-        GSSAPICleanupCredentials: 'yes'
-      , ctx.config.krb5.sshd
+      # ctx.config.krb5.sshd = misc.merge
+      #   #ChallengeResponseAuthentication: 'yes'
+      #   #KerberosAuthentication: 'yes'
+      #   #KerberosOrLocalPasswd: 'yes'
+      #   #KerberosTicketCleanup: 'yes'
+      #   #GSSAPIAuthentication: 'yes'
+      #   #GSSAPICleanupCredentials: 'yes'
+      # , ctx.config.krb5.sshd
 
 ## Install
 
@@ -150,6 +150,7 @@ configuration object. By default, we set the following properties to "yes": "Cha
         match: new RegExp "^#{k}.*$", 'mg'
         replace: "#{k} #{v}"
         append: true
+      return next null, ctx.DISABLED if write.length is 0
       ctx.log 'Write /etc/ssh/sshd_config'
       ctx.write
         write: write
