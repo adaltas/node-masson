@@ -107,12 +107,10 @@ properties found in the "ssh.sshd_config" object.
     module.exports.push name: 'SSH # Configure', timeout: -1, callback: (ctx, next) ->
       {sshd_config} = ctx.config.ssh
       return next() unless sshd_config
-      write = []
-      for k, v of sshd_config
-        write.push
-          match: new RegExp "^#{k}.*$", 'mg'
-          replace: "#{k} #{v}"
-          append: true
+      write = for k, v of sshd_config
+        match: new RegExp "^#{k}.*$", 'mg'
+        replace: "#{k} #{v}"
+        append: true
       ctx.log 'Write configuration in /etc/ssh/sshd_config'
       ctx.write
         write: write
