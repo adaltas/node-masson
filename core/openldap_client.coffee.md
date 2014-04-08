@@ -29,7 +29,7 @@ hash=`openssl x509 -noout -hash -in cert.pem`
 mv cert.pem /etc/openldap/cacerts/$hash.0
 ```
 
-    module.exports.push (ctx) ->
+    module.exports.push module.exports.configure = (ctx) ->
       require('./openldap_server').configure ctx
       openldap_server = ctx.hosts_with_module 'masson/core/openldap_server'
       openldap_server_secured = ctx.hosts_with_module 'masson/core/openldap_server_tls'

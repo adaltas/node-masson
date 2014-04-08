@@ -79,7 +79,7 @@ ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=co
       objectClass: account
       objectClass: posixAccount
       objectClass: shadowAccount
-      #userPassword: {SSHA}uQcSsw5CySTkBXjOY/N0hcduA6yFiI0k
+      userPassword: {SSHA}uQcSsw5CySTkBXjOY/N0hcduA6yFiI0k
       shadowLastChange: 15140
       shadowMin: 0
       shadowMax: 99999
@@ -95,8 +95,20 @@ ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=co
       objectClass: posixGroup
       gidNumber: 801
       description: Network Service Switch Proxy
+
+      dn: cn=test,ou=groups,dc=adaltas,dc=com
+      cn: test.group
+      objectClass: top
+      objectClass: posixGroup
+      gidNumber: 1101
+      description: Test Group
       """, (err, added) ->
         next err, if added then ctx.OK else ctx.PASS
+
+      
+
+
+
 
 
 
