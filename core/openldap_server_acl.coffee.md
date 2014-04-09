@@ -12,6 +12,7 @@ layout: module
     module.exports.push (ctx, next) ->
       # Register "ctx.ldap_add" function
       require('./openldap_server').configure ctx
+      require('./openldap_client_security').configure ctx
       # Obtain an ldap connection
       require('./openldap_connection').configure ctx, next
 
@@ -54,8 +55,9 @@ ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=co
         next err, if modified then ctx.OK else ctx.PASS
 
     module.exports.push name: 'OpenLDAP ACL # Insert User', callback: (ctx, next) ->
+      {users_container_dn, groups_container_dn} = ctx.config.openldap_client_security
       ctx.ldap_add ctx, """
-      dn: cn=nssproxy,ou=users,dc=adaltas,dc=com
+      dn: cn=nssproxy,#{users_container_dn}
       uid: nssproxy
       gecos: Network Service Switch Proxy User
       objectClass: top
@@ -72,7 +74,7 @@ ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=co
       gidNumber: 801
       homeDirectory: /home/nssproxy
 
-      dn: cn=test,ou=users,dc=adaltas,dc=com
+      dn: cn=test,#{users_container_dn}
       uid: test
       gecos: Test User
       objectClass: top
@@ -89,14 +91,14 @@ ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=co
       gidNumber: 1101
       homeDirectory: /home/test
 
-      dn: cn=nssproxy,ou=groups,dc=adaltas,dc=com
+      dn: cn=nssproxy,#{groups_container_dn}
       cn: nssproxy
       objectClass: top
       objectClass: posixGroup
       gidNumber: 801
       description: Network Service Switch Proxy
 
-      dn: cn=test,ou=groups,dc=adaltas,dc=com
+      dn: cn=test,#{groups_container_dn}
       cn: test.group
       objectClass: top
       objectClass: posixGroup
