@@ -99,7 +99,7 @@ ctx.waitForExecution cmd: "test -f /tmp/sth", (err) ->
           options = {}
         options.interval ?= 2000
         options.code_skipped ?= 1
-        ctx.log "Wait for command to execute"
+        ctx.log "Start wait for execution"
         ctx.emit 'wait'
         running = false
         run = ->
@@ -114,6 +114,7 @@ ctx.waitForExecution cmd: "test -f /tmp/sth", (err) ->
             return if not err and not ready
             return callback err if err
             clearInterval clear if clear
+            ctx.log "Finish wait for execution"
             ctx.emit 'waited'
             callback err, stdout, stderr
         clear = setInterval ->
@@ -185,13 +186,14 @@ ctx.waitIsOpen ["master1.hadoop", "master2.hadoop"], 8020, (err) ->
             cmd = "while ! `bash -c 'echo > /dev/tcp/#{server.host}/#{server.port}'` && [[ ! -f #{randfile} ]]; do sleep 2; done;"
           else
             cmd = "while ! bash -c 'echo > /dev/tcp/#{server.host}/#{server.port}'; do sleep 2; done;"
-          ctx.log "Wait for #{server.host} #{server.port}"
+          ctx.log "Start wait for #{server.host} #{server.port}"
           ctx.emit 'wait', server.host, server.port
           ctx.execute
             cmd: cmd
           , (err, executed) ->
             clearTimeout clear if clear
             err = new Error "Reached timeout #{options.timeout}" if not err and timedout
+            ctx.log 'Finish wait for #{server.host} #{server.port}'
             ctx.emit 'waited', server.host, server.port
             next err
         .on 'both', callback
