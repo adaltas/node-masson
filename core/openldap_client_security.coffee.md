@@ -97,8 +97,6 @@ layout: module
       """
       ctx.config.openldap_client_security.system_auth_ac += '\n'
 
-      
-
     module.exports.push name: 'OpenLDAP ACL # Services', callback: (ctx, next) ->
       ctx.service [
         name: 'openldap'
@@ -145,6 +143,7 @@ nslcd - local LDAP name service daemon
         ctx.write
           content: nslcd
           destination: '/etc/nslcd.conf'
+          backup: true
         , (err, written) ->
           return next err if err
           # return next err, ctx.PASS if err or (not uploaded and not written)
@@ -171,17 +170,21 @@ nslcd - local LDAP name service daemon
       ctx.write [
         content: pam_ldap
         destination: '/etc/pam_ldap.conf'
+        backup: true
       ,
         match: new RegExp "^UsePAM\s.*$", 'mg'
         replace: "UsePAM yes"
         append: true
         destination: '/etc/ssh/sshd_config'
+        backup: true
       ,
         content: pamd_sshd
         destination: '/etc/pam.d/sshd.conf'
+        backup: true
       ,
         content: system_auth_ac
         destination: '/etc/pam.d/system-auth-ac'
+        backup: true
       ], (err, written) ->
         next err, if written then ctx.OK else ctx.PASS
 
