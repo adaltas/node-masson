@@ -16,9 +16,17 @@ Modify the various network related configuration files such as
 
 The module accept the following properties:
 
-*   `hosts_disabled` (boolean)   
+*   `hostname` (boolean)   
+    The server hostname as return by the command "hostname" and defined by the 
+    property "HOSTNAME" inside the "/etc/sysconfig/network" file, must not be 
+    configure globally, default to the "host" property.
+*   `network.hosts_disabled` (boolean)   
     Do not update the "/etc/hosts" file, disable the effect of the 
     "network.hosts_auto" and "network.hosts" properties, default to "false".   
+*   `network.hostname_disabled` (boolean)   
+    Do not update the "/etc/sysconfig/network" file, disable the effect of the
+    "hostname" property (which itself default to "host"), 
+    default to false.   
 *   `network.hosts_auto` (boolean)   
     Enrich the "/etc/hosts" file with the server hostname present on 
     the cluster, default to false   
@@ -41,7 +49,9 @@ Example:
 ```
 
     module.exports.push (ctx) ->
+      ctx.config.hostname ?= ctx.config.host
       ctx.config.network ?= {}
+      ctx.config.network.hostname_disabled ?= false
       ctx.config.network.hosts_disabled ?= false
       ctx.config.network.hosts_auto ?= false
 
@@ -74,9 +84,11 @@ Declare the server hostname. On CentOs like system, the
 relevant file is "/etc/sysconfig/network".
 
     module.exports.push name: 'Network # Hostname', callback: (ctx, next) ->
+      {hostname, network} = ctx.config
+      return next() if network.hostname_disabled
       ctx.write
         match: /^HOSTNAME=.*/mg
-        replace: "HOSTNAME=#{ctx.config.host}"
+        replace: "HOSTNAME=#{hostname}"
         destination: '/etc/sysconfig/network'
       , (err, replaced) ->
         return next err if err
