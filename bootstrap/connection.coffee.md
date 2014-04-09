@@ -114,7 +114,7 @@ existing key would be overwritten.
           # First attempt failed, we go collecting bootstrap information on err
           return do_collect() if err and attempts is 1
           # Once we are sure the server went for reboot, we wait for a new connection
-          if has_rebooted and err and (err.code is 'ETIMEDOUT' or err.code is 'ECONNREFUSED')
+          if has_rebooted and err and (['ETIMEDOUT', 'ECONNREFUSED', 'EHOSTUNREACH'].indexOf(err.code) isnt -1)
             ctx.log 'Wait for reboot'
             console.log 'wait for reboot'
             return setTimeout do_ssh, 10
