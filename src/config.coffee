@@ -24,7 +24,7 @@ try
       configs.push require location
   config = merge {}, configs...
   config.servers = for k, v of config.servers
-    v.host = k
+    v.host ?= k
     v
   module.exports = config
 catch e
