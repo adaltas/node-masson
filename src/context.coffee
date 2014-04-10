@@ -1,7 +1,6 @@
 
 {EventEmitter} = require 'events'
-{merge} = require 'mecano/lib/misc'
-{flatten} = require './misc'
+{flatten, merge} = require './misc'
 tree = require './tree'
 
 class Context extends EventEmitter
@@ -32,7 +31,7 @@ class Context extends EventEmitter
     servers = []
     for host, ctx of @hosts
       servers.push host if ctx.modules.indexOf(module) isnt -1
-    throw new Error "Too many host with module #{module}: #{servers.length}" if servers.length > 1
+    throw new Error "Too many hosts with module #{module}: #{servers.length}" if servers.length > 1
     throw new Error "Expect #{qtt} host(s) for module #{module} but got #{servers.length}" if strict and servers.length isnt 1
     servers[0]
   hosts_with_module: (module, qtt, strict) ->

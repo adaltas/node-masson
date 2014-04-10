@@ -1,7 +1,7 @@
   
 path = require 'path'
 fs = require 'fs'
-{merge} = require 'mecano/lib/misc'
+{merge} = require './misc'
 params = require './params'
 params = params.parse()
 

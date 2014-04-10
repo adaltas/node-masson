@@ -1,4 +1,6 @@
 
+{merge} = require 'mecano/lib/misc'
+
 misc = module.exports =
   flatten: (arr, ret) ->
     ret ?= []
@@ -8,3 +10,4 @@ misc = module.exports =
       else
         ret.push arr[i]
     ret
+  merge: merge

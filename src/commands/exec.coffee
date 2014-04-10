@@ -1,7 +1,7 @@
 
 util = require 'util'
 exec = require 'superexec'
-{merge} = require 'mecano/lib/misc'
+{merge} = require '../misc'
 config = require '../config'
 params = require '../params'
 params = params.parse()
