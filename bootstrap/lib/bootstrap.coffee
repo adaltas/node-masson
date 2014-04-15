@@ -1,6 +1,6 @@
 
 util = require 'util'
-connect = require 'ssh2-exec/lib/connect'
+connect = require 'ssh2-connect'
 each = require 'each'
 
 ###

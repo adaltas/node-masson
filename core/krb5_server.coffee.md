@@ -203,11 +203,6 @@ Example:
           'admin_keytab': '/var/kerberos/krb5kdc/kadm5.keytab'
           'supported_enctypes': 'aes256-cts:normal aes128-cts:normal des3-hmac-sha1:normal arcfour-hmac:normal des-hmac-sha1:normal des-cbc-md5:normal des-cbc-crc:normal'
         , config
-      # console.log etc_krb5_conf
-      # console.log ''
-      # console.log ''
-      # console.log ''
-      # console.log ''
 
     module.exports.push name: 'Krb5 Server # LDAP Install', timeout: -1, callback: (ctx, next) ->
       ctx.service
@@ -259,7 +254,7 @@ Example:
         keyfileContent = null
         do_read = ->
           ctx.log 'Read current keyfile if it exists'
-          misc.file.readFile ctx.ssh, "#{ldap_service_password_file}", 'utf8', (err, content) ->
+          ctx.fs.readFile "#{ldap_service_password_file}", 'utf8', (err, content) ->
             return do_mkdir() if err and err.code is 'ENOENT'
             return next err if err
             keyfileContent = content
@@ -293,7 +288,7 @@ Example:
           unless keyfileContent
             modified = true
             return next()
-          misc.file.readFile ctx.ssh, "#{ldap_service_password_file}", 'utf8', (err, content) ->
+          ctx.fs.readFile "#{ldap_service_password_file}", 'utf8', (err, content) ->
             return next err if err
             modified = if keyfileContent is content then false else true
             next()
@@ -327,7 +322,7 @@ Example:
       modified = false
       exists = false
       chkexists = ->
-        misc.file.exists ctx.ssh, '/etc/krb5.conf', (err, e) ->
+        ctx.fs.exists '/etc/krb5.conf', (err, e) ->
           exists = e
       do_krb5 = ->
         ctx.log 'Update /etc/krb5.conf'

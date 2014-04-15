@@ -8,6 +8,7 @@ layout: module
 Predefined Mecano functions with context related information.
 
     mecano = require 'mecano'
+    fs = require 'ssh2-fs'
     module.exports = []
 
 For example, this:
@@ -72,6 +73,15 @@ ctx.execute
             else
               mecano[action].call null, goptions, options, callback
         next null, ctx.PASS
+
+    module.exports.push name: 'Bootstrap # FS', required: true, timeout: -1, callback:  (ctx) ->
+      ctx.fs ?= {}
+      [ 'rename', 'chown', 'chmod', 'stat', 'lstat', 'unlink', 'symlink', 
+        'readlink', 'unlink', 'mkdir', 'readdir', 'readFile', 'writeFile', 
+        'exists', 'createReadStream', 'createWriteStream' ].forEach (fn) ->
+        ctx.fs[fn] = ->
+          fs[fn].call null, ctx.ssh, arguments...
+      ctx.PASS
 
 
 

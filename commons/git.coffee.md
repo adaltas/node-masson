@@ -108,10 +108,10 @@ Deploy the git configuration.
             return next err if err
             do_users()
         remove = () ->
-          misc.file.exists ctx.ssh, '/etc/gitconfig', (err, exists) ->
+          ctx.fs.exists '/etc/gitconfig', (err, exists) ->
             return next err if err
             return do_users() unless exists
-            misc.file.remove ctx.ssh, '/etc/gitconfig', (err) ->
+            ctx.fs.exists.remove '/etc/gitconfig', (err) ->
               return next err if err
               modified = true
               do_users()

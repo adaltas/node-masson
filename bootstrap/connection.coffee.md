@@ -14,7 +14,7 @@ continue as soon as an SSH connection is again available.
     fs = require 'fs'
     {exec} = require 'child_process'
     misc = require 'mecano/lib/misc'
-    connect = require 'ssh2-exec/lib/connect'
+    connect = require 'ssh2-connect'
     collect = require './lib/collect'
     bootstrap = require './lib/bootstrap'
     module.exports = []
@@ -116,12 +116,10 @@ existing key would be overwritten.
           # Once we are sure the server went for reboot, we wait for a new connection
           if has_rebooted and err and (['ETIMEDOUT', 'ECONNREFUSED', 'EHOSTUNREACH'].indexOf(err.code) isnt -1)
             ctx.log 'Wait for reboot'
-            console.log 'wait for reboot'
             return setTimeout do_ssh, 10
           # We detect a reboot
           if attempts isnt 1 and not has_rebooted 
             has_rebooted = true if err
-            console.log 'has_rebooted', has_rebooted
             return setTimeout do_ssh, 10
           return next err if err
           ctx.log "SSH connected"

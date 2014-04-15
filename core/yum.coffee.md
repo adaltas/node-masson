@@ -115,7 +115,7 @@ in "/etc/yum.repos.d"
       do_clean = ->
         return do_update() unless clean
         ctx.log "Clean /etc/yum.repos.d/*"
-        misc.file.readdir ctx.ssh, '/etc/yum.repos.d', (err, remote_basenames) ->
+        ctx.fs.readdir '/etc/yum.repos.d', (err, remote_basenames) ->
           return next err if err
           remove_basenames = []
           for rfn in remote_basenames
@@ -125,7 +125,7 @@ in "/etc/yum.repos.d"
           return do_update() if remove_basenames.length is 0
           each(remove_basenames)
           .on 'item', (filename, next) ->
-            misc.file.unlink ctx.ssh, "/etc/yum.repos.d/#{filename}", next
+            ctx.fs.unlink "/etc/yum.repos.d/#{filename}", next
           .on 'error', (err) ->
             next err
           .on 'end', ->
