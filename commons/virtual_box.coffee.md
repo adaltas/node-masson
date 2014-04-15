@@ -36,6 +36,7 @@ layout: module
             /etc/init.d/vboxadd setup
             chkconfig --add vboxadd
             chkconfig vboxadd on
+            umount /mnt
             """
           ctx.log.out.write cmd
           ctx.execute cmd, (err, executed, stdout, stderr) ->
