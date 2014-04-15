@@ -61,6 +61,7 @@ mv cert.pem /etc/openldap/cacerts/$hash.0
           match: new RegExp "^#{k}.*$", 'mg'
           replace: "#{k} #{v}"
           append: true
+          eof: true
       ctx.write
         write: write
         destination: '/etc/openldap/ldap.conf'
