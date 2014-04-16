@@ -5,46 +5,90 @@ layout: module
 
 # OpenLDAP Client
 
+Install and configure the OpenLDAP client utilities. The
+file "/etc/openldap/ldap.conf" is configured by the "openldap_client.config"
+object property. The property "openldap\_client.ca\_cert" may reference a 
+certificate to upload.
+
     url = require 'url'
     each = require 'each'
-    {merge} = require 'mecano/lib/misc'
+    crypto = require 'crypto'
     module.exports = []
     module.exports.push 'masson/bootstrap/'
     module.exports.push 'masson/bootstrap/utils'
     module.exports.push 'masson/core/yum'
 
-Install and configure the OpenLDAP client utilities. The
-file "/etc/openldap/ldap.conf" is configured by the "openldap_client.config"
-object property. The property "openldap\_client.ca\_cert" define the 
-certificate upload if not null.
+## Configuration
 
-SSL certifcate could be defined in "/etc/ldap.conf" by 
-the "TLS\_CACERT" or the "TLS\_CACERTDIR" properties. When 
-using "TLS_CACERTDIR", the name of the file  must be the 
-certicate hash with a numeric suffix. Here's an example 
-showing how to place the certificate inside "TLS\_CACERTDIR":
+*   `openldap_client.config` (object)   
+    Configuration of the "/etc/openldap/ldap.conf" file.   
+*   `openldap_client.config.TLS_CACERTDIR` (string)   
+    Default to "/etc/openldap/cacerts".   
+*   `openldap_client.config.TLS_REQCERT` (string)   
+    Default to "allow".   
+*   `openldap_client.config.TIMELIMIT` (string|number)   
+    Default to "15".   
+*   `openldap_client.config.TIMEOUT` (string|number)  
+    Default to "10".    
+*   `openldap_client.suffix` (string)   
+    LDAP suffix used by the test, default to null or discovered.   
+*   `openldap_client.root_dn` (string)   
+    LDAP user used by the test, default to null or discovered.   
+*   `openldap_client.root_password` (string)   
+    LDAP password used by the test, default to null or discovered.   
+*   `openldap_client.certificates` (array)   
+    Paths to the certificates to upload.   
 
-```bash
-hash=`openssl x509 -noout -hash -in cert.pem`
-mv cert.pem /etc/openldap/cacerts/$hash.0
+The properties `openldap_client.config.BASE`, `openldap_client.suffix`, 
+`openldap_client.root_dn` and `openldap_client.root_password` are discovered if 
+there is only one LDAP server or if an LDAP server is deployed on the same 
+server.
+
+The property `openldap_client.config.URI` is generated with the list of 
+configured LDAP servers.
+
+Example:
+
+```json
+{
+  "openldap_client": {
+    "config": {
+      "TLS_REQCERT": "allow",
+      "TIMELIMIT": "15".
+      "TIMEOUT": "10"
+    },
+    "certificates": [
+      "./cert.pem"
+    ]
+  }
+}
 ```
 
     module.exports.push module.exports.configure = (ctx) ->
-      require('./openldap_server').configure ctx
-      openldap_server = ctx.hosts_with_module 'masson/core/openldap_server'
-      openldap_server_secured = ctx.hosts_with_module 'masson/core/openldap_server_tls'
-      ctx.config.openldap_client ?= {}
+      config = ctx.config.openldap_client ?= {}
       ctx.config.openldap_client.config ?= {}
-      ctx.config.openldap_client.config['BASE'] ?= ctx.config.openldap_server.suffix
-      ctx.config.openldap_client.config['URI'] ?= "ldaps://#{openldap_server_secured[0]}" if openldap_server_secured.length
-      ctx.config.openldap_client.config['URI'] ?= "ldap://#{openldap_server[0]}" if openldap_server.length
-      # ctx.config.openldap_client.config['TLS_CACERT'] = '/etc/pki/tls/certs/openldap.hadoop.cer'
-      ctx.config.openldap_client.config['TLS_REQCERT'] = 'allow'
-      ctx.config.openldap_client.config['TIMELIMIT'] = '15'
-      ctx.config.openldap_client.config['TIMEOUT'] = '20'
-      ctx.config.openldap_client.ca_cert ?= null
-      if ctx.config.openldap_client.ca_cert
-        ctx.config.openldap_client.config['TLS_CACERT'] ?= ctx.config.openldap_client.ca_cert.destination
+      openldap_servers = ctx.hosts_with_module 'masson/core/openldap_server'
+      # openldap_server = ctx.hosts_with_module 'masson/core/openldap_server'
+      if openldap_servers.length isnt 1
+        openldap_server = openldap_servers.filter (server) -> server is ctx.config.host
+      openldap_server = if openldap_servers.length is 1 then openldap_servers[0] else null
+      openldap_servers_secured = ctx.hosts_with_module 'masson/core/openldap_server_tls'
+      uris = {}
+      for server in openldap_servers then uris[server] = "ldap://#{server}"
+      for server in openldap_servers_secured then uris[server] = "ldaps://#{server}"
+      uris = for _, uri of uris then uri
+      if openldap_server
+        ctx_server = ctx.hosts[openldap_server]
+        require('./openldap_server').configure ctx_server
+        config.config['BASE'] ?= ctx_server.config.openldap_server.suffix
+        config.suffix ?= ctx_server.config.openldap_server.suffix
+        config.root_dn ?= ctx_server.config.openldap_server.root_dn
+        config.root_password ?= ctx_server.config.openldap_server.root_password
+      config.config['URI'] ?= uris.join ' '
+      config.config['TLS_CACERTDIR'] ?= '/etc/openldap/cacerts'
+      config.config['TLS_REQCERT'] ?= 'allow'
+      config.config['TIMELIMIT'] ?= '15'
+      config.config['TIMEOUT'] ?= '20'
 
     module.exports.push name: 'OpenLDAP Client # Install', timeout: -1, callback: (ctx, next) ->
       ctx.service
@@ -68,19 +112,51 @@ mv cert.pem /etc/openldap/cacerts/$hash.0
       , (err, written) ->
         next err, if written then ctx.OK else ctx.PASS
 
-    module.exports.push name: 'OpenLDAP Client # Upload certificate', timeout: -1, callback: (ctx, next) ->
-      {ca_cert} = ctx.config.openldap_client
-      return next null, ctx.DISABLED unless ca_cert
-      ctx.upload ca_cert, (err, uploaded) ->
-        next err, if uploaded then ctx.OK else ctx.PASS
+## Upload certificate
+
+SSL certifcate could be defined in "/etc/ldap.conf" by 
+the "TLS\_CACERT" or the "TLS\_CACERTDIR" properties. When 
+using "TLS_CACERTDIR", the name of the file  must be the 
+certicate hash with a numeric suffix. Here's an example 
+showing how to place the certificate inside "TLS\_CACERTDIR":
+
+```bash
+hash=`openssl x509 -noout -hash -in cert.pem`
+mv cert.pem /etc/openldap/cacerts/$hash.0
+```
+
+Certificates are temporarily uploaded to the "/tmp" folder and registered with
+the command `authconfig --update --ldaploadcacert={file}`.
+
+    module.exports.push name: 'OpenLDAP Client # Certificate', timeout: -1, callback: (ctx, next) ->
+      {certificates, config} = ctx.config.openldap_client
+      modified = false
+      each(certificates)
+      .on 'item', (certificate, next) ->
+        hash = crypto.createHash('md5').update(certificate).digest('hex')
+        ctx.upload
+          source: certificate
+          destination: "/tmp/#{hash}"
+        , (err) ->
+          return next err if err
+          ctx.execute # openssh is executed remotely
+            cmd: "openssl x509 -noout -hash -in /tmp/#{hash}; rm -rf /tmp/#{hash}"
+          , (err, _, stdout) ->
+            return next err if err
+            stdout = stdout.trim()
+            ctx.upload 
+              source: certificate
+              destination: "#{config.TLS_CACERTDIR}/#{stdout}.0"
+            , (err, uploaded) ->
+              return next err if err
+              modified = true if uploaded
+              next()
+      .on 'both', (err) ->
+        next err, if modified then ctx.OK else ctx.PASS
 
     module.exports.push name: 'OpenLDAP Client # Check URI', timeout: -1, callback: (ctx, next) ->
       {config} = ctx.config.openldap_client
-      uris = []
-      for k, v of config
-        continue unless k.toLowerCase() is 'uri'
-        for uri in v.split(' ') then uris.push uri
-      each(uris)
+      each(config['URI'].split ' ')
       .on 'item', (uri, next) ->
         uri = url.parse uri
         return next() if ['ldap:', 'ldaps:'].indexOf(uri.protocol) is -1
@@ -91,34 +167,9 @@ mv cert.pem /etc/openldap/cacerts/$hash.0
         next err, ctx.PASS
 
     module.exports.push name: 'OpenLDAP Client # Check Search', callback: (ctx, next) ->
-      {suffix, root_dn, root_password} = ctx.config.openldap_server
-      return next null, ctx.INAPPLICABLE unless suffix
+      {suffix, root_dn, root_password} = ctx.config.openldap_client
+      return next() unless suffix
       ctx.execute
         cmd: "ldapsearch -x -D #{root_dn} -w #{root_password} -b '#{suffix}'"
       , (err, executed) ->
         next err, ctx.PASS
-
-    module.exports.push name: 'OpenLDAP Client # PAM Services', callback: (ctx, next) ->
-      {suffix, root_dn, root_password} = ctx.config.openldap_server
-      return next null, ctx.INAPPLICABLE unless suffix
-      ctx.service [
-        name: 'nss-pam-ldapd'
-      ,
-        name: 'pam_ldap'
-      ]
-      , (err, executed) ->
-        next err, ctx.PASS
-
-    module.exports.push name: 'OpenLDAP Client # PAM Configuration', callback: (ctx, next) ->
-      {suffix, root_dn, root_password} = ctx.config.openldap_server
-      return next null, ctx.INAPPLICABLE unless suffix
-      ctx.service [
-        name: 'nss-pam-ldapd'
-      ,
-        name: 'pam_ldap'
-      ]
-      , (err, executed) ->
-        next err, ctx.PASS
-
-
-
