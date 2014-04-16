@@ -113,8 +113,7 @@ the command `authconfig --update --ldaploadcacert={file}`.
           destination: "/tmp/#{hash}"
         , (err) ->
           return next err if err
-          # openssh is executed remotely
-          ctx.execute
+          ctx.execute # openssh is executed remotely
             cmd: "openssl x509 -noout -hash -in /tmp/#{hash}; rm -rf /tmp/#{hash}"
           , (err, _, stdout) ->
             return next err if err
