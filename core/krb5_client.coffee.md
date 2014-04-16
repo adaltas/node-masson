@@ -44,7 +44,15 @@ Example:
     "kdc": "krb5.hadoop",
     "kadmin_server": "krb5.hadoop",
     "kadmin_principal": "wdavidw/admin@ADALTAS.COM",
-    "kadmin_password": "test"
+    "kadmin_password": "test",
+    "sshd": {
+      "ChallengeResponseAuthentication: "yes",
+      "KerberosAuthentication: "yes",
+      "KerberosOrLocalPasswd: "yes",
+      "KerberosTicketCleanup: "yes",
+      "GSSAPIAuthentication: "yes",
+      "GSSAPICleanupCredentials: "yes"
+    }
   }
 }
 ```
@@ -59,14 +67,6 @@ Example:
     module.exports.push module.exports.configure = (ctx) ->
       require('./krb5_server').configure ctx
       ctx.config.krb5.sshd ?= {}
-      # ctx.config.krb5.sshd = misc.merge
-      #   #ChallengeResponseAuthentication: 'yes'
-      #   #KerberosAuthentication: 'yes'
-      #   #KerberosOrLocalPasswd: 'yes'
-      #   #KerberosTicketCleanup: 'yes'
-      #   #GSSAPIAuthentication: 'yes'
-      #   #GSSAPICleanupCredentials: 'yes'
-      # , ctx.config.krb5.sshd
 
 ## Install
 
