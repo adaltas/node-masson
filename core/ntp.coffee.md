@@ -78,7 +78,7 @@ change to this file is detected.
       for server in ctx.config.ntp.servers
         write.push
           match: new RegExp "^server #{quote server}$", 'mg'
-          replace: "server #{server}"
+          replace: "server #{server} iburst"
           append: 'Please consider joining'
       ctx.write
         destination: '/etc/ntp.conf'
