@@ -92,8 +92,8 @@ Example:
       ctx.config.krb5 ?= {}
       etc_krb5_conf = misc.merge {}, module.exports.etc_krb5_conf, ctx.config.krb5.etc_krb5_conf
       ctx.config.krb5.etc_krb5_conf = etc_krb5_conf
-      # Generate dynamic "krb5.dbmodules" object
       openldap_hosts = ctx.hosts_with_module 'masson/core/openldap_server_krb5'
+      # Generate dynamic "krb5.dbmodules" object
       for host in openldap_hosts
         {kerberos_container_dn, users_container_dn, manager_dn, manager_password} = ctx.hosts[host].config.openldap_krb5
         name = "openldap_#{host.split('.')[0]}"
@@ -194,9 +194,6 @@ which create a Kerberos file with complementary information.
 
 Create a user principal for this host. The principal is named like "host/{hostname}@{realm}".
 
-Note, I need to check if this isnt too Hadoop specific, in which case it should 
-be moved to "phyla/hadoop/core".
-
     module.exports.push name: 'Krb5 client # Host Principal', timeout: -1, callback: (ctx, next) ->
       {etc_krb5_conf} = ctx.config.krb5
       modified = false
@@ -207,9 +204,12 @@ be moved to "phyla/hadoop/core".
         # ctx.waitIsOpen krb5_admin_servers, 88, (err) ->
         cmd = misc.kadmin 
           realm: realm
-          kadmin_principal: kadmin_principal if admin_server isnt ctx.config.host
-          kadmin_password: kadmin_password if admin_server isnt ctx.config.host
-          kadmin_server: admin_server if admin_server isnt ctx.config.host
+          # kadmin_principal: kadmin_principal if admin_server isnt ctx.config.host
+          # kadmin_password: kadmin_password if admin_server isnt ctx.config.host
+          # kadmin_server: admin_server if admin_server isnt ctx.config.host
+          kadmin_principal: kadmin_principal
+          kadmin_password: kadmin_password
+          kadmin_server: admin_server
         , 'listprincs'
         # ctx.waitForExecution "kadmin -p #{kadmin_principal} -s #{admin_server} -w #{kadmin_password} -q 'listprincs'", (err) ->
         ctx.waitForExecution cmd, (err) ->
@@ -217,9 +217,12 @@ be moved to "phyla/hadoop/core".
           ctx.krb5_addprinc
             principal: "host/#{ctx.config.host}@#{realm}"
             randkey: true
-            kadmin_principal: kadmin_principal if admin_server isnt ctx.config.host
-            kadmin_password: kadmin_password if admin_server isnt ctx.config.host
-            kadmin_server: admin_server if admin_server isnt ctx.config.host
+            # kadmin_principal: kadmin_principal if admin_server isnt ctx.config.host
+            # kadmin_password: kadmin_password if admin_server isnt ctx.config.host
+            # kadmin_server: admin_server if admin_server isnt ctx.config.host
+            kadmin_principal: kadmin_principal
+            kadmin_password: kadmin_password
+            kadmin_server: admin_server
           , (err, created) ->
             return next err if err
             modified = true if created
