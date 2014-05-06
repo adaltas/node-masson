@@ -70,7 +70,7 @@ Example:
       openldap_servers = ctx.hosts_with_module 'masson/core/openldap_server'
       # openldap_server = ctx.hosts_with_module 'masson/core/openldap_server'
       if openldap_servers.length isnt 1
-        openldap_server = openldap_servers.filter (server) -> server is ctx.config.host
+        openldap_servers = openldap_servers.filter (server) -> server is ctx.config.host
       openldap_server = if openldap_servers.length is 1 then openldap_servers[0] else null
       openldap_servers_secured = ctx.hosts_with_module 'masson/core/openldap_server_tls'
       uris = {}
