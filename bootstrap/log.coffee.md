@@ -3,7 +3,7 @@ title:
 layout: module
 ---
 
-# Log
+# Bootstrap Log
 
 Gather system information
 

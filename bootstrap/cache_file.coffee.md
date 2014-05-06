@@ -3,7 +3,7 @@ title:
 layout: module
 ---
 
-# Cache File
+# Bootstrap Cache File
 
     fs = require 'fs'
     each = require 'each'

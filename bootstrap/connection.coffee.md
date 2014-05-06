@@ -4,7 +4,7 @@ module: masson/bootstrap/connection
 layout: module
 ---
 
-# Connection
+# Bootstrap Connection
 
 Prepare the system to receive password-less root login and 
 initialize an SSH connection. Additionnally, it disable SELINUX which require a 

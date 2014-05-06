@@ -4,7 +4,7 @@ module: masson/bootstrap/utils
 layout: module
 ---
 
-# Utils
+# Bootstrap Utils
 
 The `utils` module enriches the bootstraping process with commonly used functions.
 
@@ -193,7 +193,7 @@ ctx.waitIsOpen ["master1.hadoop", "master2.hadoop"], 8020, (err) ->
           , (err, executed) ->
             clearTimeout clear if clear
             err = new Error "Reached timeout #{options.timeout}" if not err and timedout
-            ctx.log 'Finish wait for #{server.host} #{server.port}'
+            ctx.log "Finish wait for #{server.host} #{server.port}"
             ctx.emit 'waited', server.host, server.port
             next err
         .on 'both', callback

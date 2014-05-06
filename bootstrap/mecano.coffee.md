@@ -3,13 +3,15 @@ title:
 layout: module
 ---
 
-# Mecano
+# Bootstrap Mecano
 
 Predefined Mecano functions with context related information.
 
     mecano = require 'mecano'
     fs = require 'ssh2-fs'
     module.exports = []
+    module.exports.push 'masson/bootstrap/log'
+    module.exports.push 'masson/bootstrap/cache_memory'
 
 For example, this:
 
