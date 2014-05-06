@@ -25,6 +25,16 @@ layout: module
     action, default is true
 *   `update`
     Update packages on the system
+*   `packages` (array)
+    List of packages to be installed by YUM
+
+Examples
+
+```json
+{
+  
+}
+```
 
     module.exports.push module.exports.configure = (ctx) ->
       require('./proxy').configure ctx
@@ -36,7 +46,8 @@ layout: module
       ctx.config.yum.proxy ?= true
       ctx.config.yum.config ?= {}
       ctx.config.yum.config.main ?= {}
-      ctx.config.yum.config.main.keepcache ?= '1'
+      ctx.config.yum.config.main.keepcache ?= '0'
+      ctx.config.yum.packages ?= []
       {http_proxy_no_auth, username, password} = ctx.config.proxy
       if ctx.config.yum.proxy
         ctx.config.yum.config.main.proxy = http_proxy_no_auth
@@ -147,6 +158,18 @@ in "/etc/yum.repos.d"
         cmd: 'yum -y update'
       , (err, executed, stdout, stderr) ->
         next err, if /No Packages marked for Update/.test(stdout) then ctx.PASS else ctx.OK
+
+    module.exports.push name: 'Service # Install', timeout: -1, callback: (ctx, next) ->
+      serviced = 0
+      {packages} = ctx.config.yum
+      each(packages)
+      .on 'item', (service, next) ->
+        service = name: service if typeof service is 'string'
+        ctx.service service, (err, s) ->
+          serviced += s
+          next err
+      .on 'both', (err) ->
+        next err, if serviced then ctx.OK else ctx.PASS
 
 
 
