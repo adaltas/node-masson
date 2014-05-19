@@ -138,7 +138,7 @@ Example:
           # *   only one OpenLDAP server accross the cluster or
           # *   an OpenLDAP server in this host
           openldap_index = openldap_hosts.indexOf ctx.config.host
-          openldap_host = if openldap_hosts.length is 1 then openldap_hosts[0] else if openldap_index isnt -1 then openldap_index
+          openldap_host = if openldap_hosts.length is 1 then openldap_hosts[0] else if openldap_index isnt -1 then openldap_hosts[openldap_index]
           throw new Error "Could not find a suitable OpenLDAP server" unless openldap_host
           config.database_module = "openldap_#{openldap_host.split('.')[0]}"
       # Now that we have db_modules and realms, filter and validate the used db_modules
@@ -200,18 +200,12 @@ Create a user principal for this host. The principal is named like "host/{hostna
       each(etc_krb5_conf.realms)
       .on 'item', (realm, config, next) ->
         {kadmin_principal, kadmin_password, admin_server} = config
-        # krb5_admin_servers = for realm, config of etc_krb5_conf.realms then  config.admin_server
-        # ctx.waitIsOpen krb5_admin_servers, 88, (err) ->
-        cmd = misc.kadmin 
+        cmd = misc.kadmin
           realm: realm
-          # kadmin_principal: kadmin_principal if admin_server isnt ctx.config.host
-          # kadmin_password: kadmin_password if admin_server isnt ctx.config.host
-          # kadmin_server: admin_server if admin_server isnt ctx.config.host
           kadmin_principal: kadmin_principal
           kadmin_password: kadmin_password
           kadmin_server: admin_server
         , 'listprincs'
-        # ctx.waitForExecution "kadmin -p #{kadmin_principal} -s #{admin_server} -w #{kadmin_password} -q 'listprincs'", (err) ->
         ctx.waitForExecution cmd, (err) ->
           return next err if err
           ctx.krb5_addprinc
