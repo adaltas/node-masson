@@ -14,6 +14,7 @@ Build a tree with all the actions to execute from a list of modules.
 Action properties:
 
 -   `hidden`  Visibility of the action name
+-   `retry`   Re-execute an action multiple times, default to 2 or infinite if true
 -   `name`    Name of the action
 -   `module`  Module where the action is defined
 -   `index`   Position of the action inside the module

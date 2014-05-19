@@ -66,39 +66,42 @@ Run = (config, params) ->
             return next() if action.skip
             # Action
             ctx.action = action
-            timedout = null
+            retry = action.retry or 2
+            attempts = 0
             emit_action = (status) =>
               ctx.emit 'action', status
             emit_action ctx.STARTED
             done = (err, statusOrMsg) =>
               clearTimeout timeout if timeout
-              timedout = true
+              if err and (retry is true or ++attempts < retry)
+                ctx.log "Get error #{err.message}, retry #{attempts} of #{retry}"
+                return setTimeout(run, 1) 
               if err
               then emit_action ctx.FAILED
               else emit_action statusOrMsg
               next err
+            run = =>
+              # Synchronous action
+              if action.callback.length is 1
+                merge action, action.callback.call ctx, ctx
+                process.nextTick ->
+                  action.timeout = -1
+                  done null, ctx.DISABLED
+              # Asynchronous action
+              else
+                merge action, action.callback.call ctx, ctx, (err, statusOrMsg) =>
+                  actionRun.end() if statusOrMsg is ctx.STOP
+                  done err, statusOrMsg
+            # Prevent "Maximum call stack size exceeded" when
+            # timeout, interval and setImmediate is used inside the callback
             # Timeout, default to 100s
             action.timeout ?= 100000
             if action.timeout > 0
               timeout = setTimeout ->
-                timedout = true
                 done new Error 'TIMEOUT'
               , action.timeout
             try
-              # Prevent "Maximum call stack size exceeded" when
-              # timeout, interval and setImmediate is used inside the callback
-              setImmediate =>
-                # Synchronous action
-                if action.callback.length is 1
-                  merge action, action.callback.call ctx, ctx
-                  process.nextTick ->
-                    action.timeout = -1
-                    done null, ctx.DISABLED
-                # Asynchronous action
-                else
-                  merge action, action.callback.call ctx, ctx, (err, statusOrMsg) =>
-                    actionRun.end() if statusOrMsg is ctx.STOP
-                    done err, statusOrMsg
+              setImmediate run
             catch e then done e
           .on 'both', (err) =>
             @emit 'server', ctx, if err then ctx.FAILED else ctx.OK
