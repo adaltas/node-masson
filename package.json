@@ -12,7 +12,6 @@
   "dependencies": {
     "each": "latest",
     "ldapjs": "latest",
-    "masson": "latest",
     "mecano": "latest",
     "pad": "latest",
     "parameters": "latest",
