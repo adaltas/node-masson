@@ -89,13 +89,28 @@ Example:
 
 Install the services defined by the "sssd.services" property. By default, the 
 following service: "sssd", "sssd-client", "pam\_krb5", "pam\_ldap" and 
-"sssd-tools".
+"sssd-tools". It also ensures SSSD is marked as a startup service.
 
     module.exports.push name: 'SSSD # Install', timeout: -1, callback: (ctx, next) ->
       {services} = ctx.config.sssd
       services = for name in services then name: name
-      ctx.service services, (err, serviced) ->
-        next err, if serviced then ctx.OK else ctx.PASS
+      modified = true
+      do_install = ->
+        ctx.service services, (err, serviced) ->
+          return next err if err
+          modified = true if serviced
+          do_startup()
+      do_startup = ->
+        ctx.service
+          name: 'sssd'
+          startup: true
+        , (err, serviced) ->
+          return next err if err
+          modified = true if serviced
+          do_end()
+      do_end = ->
+        next null, if modified then ctx.OK else ctx.PASS
+      do_install()
 
 ## Certificates
 
