@@ -141,6 +141,7 @@ Example:
           openldap_host = if openldap_hosts.length is 1 then openldap_hosts[0] else if openldap_index isnt -1 then openldap_hosts[openldap_index]
           throw new Error "Could not find a suitable OpenLDAP server" unless openldap_host
           config.database_module = "openldap_#{openldap_host.split('.')[0]}"
+        config.principals ?= []
       # Now that we have db_modules and realms, filter and validate the used db_modules
       database_modules = for realm, config of etc_krb5_conf.realms
         config.database_module
@@ -163,7 +164,7 @@ Example:
 
 The package "krb5-workstation" is installed.
 
-    module.exports.push name: 'Krb5 client # Install', timeout: -1, callback: (ctx, next) ->
+    module.exports.push name: 'Krb5 Client # Install', timeout: -1, callback: (ctx, next) ->
       ctx.service
         name: 'krb5-workstation'
       , (err, serviced) ->
@@ -177,7 +178,7 @@ This is to avoid any conflict where both modules would try to write
 their own configuration one. We give the priority to the server module 
 which create a Kerberos file with complementary information.
 
-    module.exports.push name: 'Krb5 client # Configure', timeout: -1, callback: (ctx, next) ->
+    module.exports.push name: 'Krb5 Client # Configure', timeout: -1, callback: (ctx, next) ->
       # Kerberos config is also managed by the kerberos server action.
       ctx.log 'Check who manage /etc/krb5.conf'
       return next null, ctx.INAPPLICABLE if ctx.has_module 'masson/core/krb5_server'
@@ -194,7 +195,7 @@ which create a Kerberos file with complementary information.
 
 Create a user principal for this host. The principal is named like "host/{hostname}@{realm}".
 
-    module.exports.push name: 'Krb5 client # Host Principal', timeout: -1, callback: (ctx, next) ->
+    module.exports.push name: 'Krb5 Client # Host Principal', timeout: -1, callback: (ctx, next) ->
       {etc_krb5_conf} = ctx.config.krb5
       modified = false
       each(etc_krb5_conf.realms)
@@ -224,6 +225,35 @@ Create a user principal for this host. The principal is named like "host/{hostna
       .on 'both', (err) ->
         next err, if modified then ctx.OK else ctx.PASS
 
+## principals
+
+Populate the Kerberos database with new principals.
+
+    module.exports.push name: 'Krb5 Client # Principals', callback: (ctx, next) ->
+      {etc_krb5_conf} = ctx.config.krb5
+      modified = false
+      utils = require 'util'
+      console.log ''
+      console.log utils.inspect etc_krb5_conf.realms, colors: true, depth: null
+      each(etc_krb5_conf.realms)
+      .on 'item', (realm, config, next) ->
+        {kadmin_principal, kadmin_password, admin_server, principals} = config
+        return next() if principals.length is 0
+        principals = for principal in principals
+          misc.merge
+            kadmin_principal: kadmin_principal
+            kadmin_password: kadmin_password
+            kadmin_server: admin_server
+          , principal
+        ctx.log "Create principal #{principal.principal}"
+        # console.log principals
+        ctx.krb5_addprinc principals, (err, created) ->
+          return next err if err
+          modified = true if created
+          next()
+      .on 'both', (err) ->
+        next err, if modified then ctx.OK else ctx.PASS
+
 ## Configure SSHD
 
 Updated the "/etc/ssh/sshd\_config" file with properties provided by the "krb5.sshd" 
@@ -231,7 +261,7 @@ configuration object. By default, we set the following properties to "yes": "Cha
 "KerberosAuthentication", "KerberosOrLocalPasswd", "KerberosTicketCleanup", "GSSAPIAuthentication", 
 "GSSAPICleanupCredentials". The "sshd" service will be restarted if a change to the configuration is detected.
 
-    module.exports.push name: 'Krb5 client # Configure SSHD', timeout: -1, callback: (ctx, next) ->
+    module.exports.push name: 'Krb5 Client # Configure SSHD', timeout: -1, callback: (ctx, next) ->
       {sshd} = ctx.config.krb5
       return next null, ctx.DISABLED unless sshd
       write = for k, v of sshd

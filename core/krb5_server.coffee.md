@@ -231,9 +231,10 @@ Example:
       {realm, etc_krb5_conf, kdc_conf} = ctx.config.krb5
       modified = false
       exists = false
-      chkexists = ->
+      do_exists = ->
         ctx.fs.exists '/etc/krb5.conf', (err, e) ->
           exists = e
+          do_krb5()
       do_krb5 = ->
         ctx.log 'Update /etc/krb5.conf'
         # Clone etc_krb5_conf
@@ -289,7 +290,7 @@ Example:
           srv_name: 'kadmin'
         ], (err, serviced) ->
           next err, ctx.OK
-      do_krb5()
+      do_exists()
 
     module.exports.push name: 'Krb5 Server # Log', timeout: 100000, callback: (ctx, next) ->
       modified = false
@@ -385,51 +386,6 @@ Call the "masson/core/krb5_client" dependency which will register this host to
 each Kerberos servers.
 
     module.exports.push '!masson/core/krb5_client'
-
-# ## Populate
-
-# Populate DB with machines and users principals.
-
-#     module.exports.push name: 'Krb5 Server # Populate', timeout: -1, callback: (ctx, next) ->
-#       {realm, principals, kadmin_principal, kadmin_password, kadmin_server} = ctx.config.krb5
-#       modified = false
-#       do_wait = ->
-#         # It takes time after Kerberos is started and before `kadmin` is really ready
-#         ctx.waitForExecution "kadmin -p #{kadmin_principal} -w #{kadmin_password} -s #{kadmin_server} -q ?", (err) ->
-#           return next err if err
-#           do_createMachinePrincipal()
-#       do_createMachinePrincipal = ->
-#         ctx.log "Create principal host/#{ctx.config.host}@#{realm}"
-#         ctx.krb5_addprinc
-#           principal: "host/#{ctx.config.host}@#{realm}"
-#           randkey: true
-#           kadmin_principal: kadmin_principal
-#           kadmin_password: kadmin_password
-#           kadmin_server: kadmin_server
-#         , (err, created) ->
-#           return next err if err
-#           modified = true if created
-#           do_createConfigPrincipals()
-#       do_createConfigPrincipals = ->
-#         each(principals)
-#         .on 'item', (principal, next) ->
-#           ctx.log "Create principal {principal}"
-#           options = 
-#             kadmin_principal: kadmin_principal
-#             kadmin_password: kadmin_password
-#             kadmin_server: kadmin_server
-#           for k, v of principal then options[k] = v
-#           ctx.krb5_addprinc options, (err, created) ->
-#             return next err if err
-#             modified = true if created
-#             next()
-#         .on 'both', (err) ->
-#           do_end err
-#       do_end = (err) ->
-#         next err, if modified then ctx.OK else ctx.PASS
-#       do_wait()
-
-
 
 ## Notes
 
