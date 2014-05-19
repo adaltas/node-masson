@@ -49,7 +49,13 @@ Dig isn't available by default on CentOS and is installed by the
         cmd: "dig -x #{ctx.config.ip} +short"
         code_skipped: 1
       , (err, executed, stdout) ->
-        next err, if "#{ctx.config.host}." is stdout.trim() then ctx.PASS else ctx.WARN
+        if err
+          next err
+        else if "#{ctx.config.host}." isnt stdout.trim()
+          ctx.log "Invalid host #{stdout.trim()}"
+          next null, ctx.WARN
+        else
+         next null, ctx.PASS
 
 ## Forward Lookup with getent
 
