@@ -233,8 +233,6 @@ Populate the Kerberos database with new principals.
       {etc_krb5_conf} = ctx.config.krb5
       modified = false
       utils = require 'util'
-      console.log ''
-      console.log utils.inspect etc_krb5_conf.realms, colors: true, depth: null
       each(etc_krb5_conf.realms)
       .on 'item', (realm, config, next) ->
         {kadmin_principal, kadmin_password, admin_server, principals} = config
@@ -246,7 +244,6 @@ Populate the Kerberos database with new principals.
             kadmin_server: admin_server
           , principal
         ctx.log "Create principal #{principal.principal}"
-        # console.log principals
         ctx.krb5_addprinc principals, (err, created) ->
           return next err if err
           modified = true if created

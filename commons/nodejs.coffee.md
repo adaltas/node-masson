@@ -57,6 +57,7 @@ Example:
       ctx.config.nodejs.version ?= 'stable'
       ctx.config.nodejs.merge ?= true
       ctx.config.nodejs.config ?= {}
+      ctx.config.nodejs.method ?= 'binary' # one of "binary" or "n"
       ctx.config.nodejs.config['registry'] ?= 'http://registry.npmjs.org/'
       ctx.config.nodejs.config['proxy'] ?= ctx.config.proxy.http_proxy
       ctx.config.nodejs.config['https-proxy'] ?= ctx.config.proxy.http_proxy
@@ -68,7 +69,8 @@ N is a Node.js binary management system, similar to nvm and nave.
 
     module.exports.push name: 'Node.js # N', timeout: 100000, callback: (ctx, next) ->
       # Accoring to current test, proxy env var arent used by ssh exec
-      {http_proxy, https_proxy} = ctx.config.nodejs
+      {method, http_proxy, https_proxy} = ctx.config.nodejs
+      return next() unless method is 'n'
       env = {}
       env.http_proxy = http_proxy if http_proxy
       env.https_proxy = https_proxy if https_proxy
@@ -91,10 +93,12 @@ N is a Node.js binary management system, similar to nvm and nave.
 Multiple installation of Node.js may coexist with N.
 
     module.exports.push name: 'Node.js # installation', timeout: -1, callback: (ctx, next) ->
-      ctx.execute
-        cmd: "n #{ctx.config.nodejs.version}"
-      , (err, executed) ->
-        next err, if executed is 0 then ctx.OK else ctx.PASS
+      if method is 'n'
+        ctx.execute
+          cmd: "n #{ctx.config.nodejs.version}"
+        , (err, executed) ->
+          next err, if executed is 0 then ctx.OK else ctx.PASS
+      else if
 
 
 ## NPM configuration
