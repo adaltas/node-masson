@@ -44,12 +44,8 @@ ctx.execute
           options.installed = cache['mecano:installed']
           options.updates = cache['mecano:updates']
           options
-        [ 'chmod', 'chown', 'copy', 'download', 'execute', 
-          'extract', 'git', 'ini', 'krb5_addprinc', 'krb5_delprinc', 
-          'ldap_acl', 'ldap_index', 'ldap_schema', 'link', 'mkdir', 
-          'move', 'remove', 'render', 'service', 'touch', 
-          'upload', 'write'
-        ].forEach (action) ->
+        functions = for k, v of mecano then k
+        functions.forEach (action) ->
           ctx[action] = (goptions, options, callback) ->
             if arguments.length is 2
               callback = options
