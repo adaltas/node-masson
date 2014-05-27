@@ -77,7 +77,7 @@ inside the configuration. The properties "jce\_local\_policy" and
           return next err if err
           ctx.log 'Install jdk in /usr/java'
           ctx.execute
-            cmd: " yes | sh /tmp/#{path.basename location}"
+            cmd: "yes | sh /tmp/#{path.basename location}"
           , (err, executed) ->
             return next err if err
             ctx.remove

@@ -26,6 +26,8 @@ try
   config.servers = for k, v of config.servers
     v.host ?= k
     v
+  for server in config.servers
+    config.servers[server.host] = server
   module.exports = config
 catch e
   process.stderr.write "Fail to load configuration file: #{params.config}\n"

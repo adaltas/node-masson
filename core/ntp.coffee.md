@@ -52,6 +52,7 @@ time when the `ntpd` daemon isnt yet started.
 
     module.exports.push name: 'NTP # Install', timeout: -1, callback: (ctx, next) -> 
       ctx.log 'Install the NTP service and turn on the service'
+      return next() unless ctx.config.ntp.servers?.length
       ctx.service
         name: 'ntp'
         chk_name: 'ntpd'

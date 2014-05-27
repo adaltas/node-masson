@@ -9,6 +9,7 @@ layout: module
 Modify the various network related configuration files such as
 "/etc/hosts" and "/etc/resolv.conf".
 
+    quote = require 'regexp-quote'
     module.exports = []
     module.exports.push 'masson/bootstrap/'
 
@@ -54,6 +55,9 @@ Example:
       ctx.config.network.hostname_disabled ?= false
       ctx.config.network.hosts_disabled ?= false
       ctx.config.network.hosts_auto ?= false
+      ctx.config.shortname ?= ctx.config.host.split('.')[0]
+      for host, server of ctx.config.servers
+        server.shortname ?= server.host.split('.')[0]
 
 ## Network # Hosts
 
@@ -65,16 +69,27 @@ this file.
 
     module.exports.push name: 'Network # Hosts', callback: (ctx, next) ->
       {hosts, hosts_auto, hosts_disabled} = ctx.config.network
-      return next() if hosts_disabled
-      content = ''
+      # return next() if hosts_disabled
+      # content = ''
+      write = []
       if hosts_auto then for server in ctx.config.servers
-        content += "#{server.ip} #{server.host}\n"
+        # content += "#{server.ip} #{server.host}\n"
+        write.push 
+          match: RegExp "^#{quote server.ip}\\s.*$", 'gm'
+          replace: "#{server.ip} #{server.host} #{server.shortname}"
+          append: true
       for ip, hostnames of hosts
-        content += "#{ip} #{hostnames}\n"
+        # content += "#{ip} #{hostnames}\n"
+        write.push 
+          match: RegExp "^#{quote server.ip}\\s.*$", 'gm'
+          replace: "#{server.ip} #{server.host} #{server.shortname}"
+          append: true
+      return next() unless write.length
       ctx.write
         destination: '/etc/hosts'
-        content: content
+        write: write
         backup: true
+        eof: true
       , (err, written) ->
         return next err, if written then ctx.OK else ctx.PASS
 

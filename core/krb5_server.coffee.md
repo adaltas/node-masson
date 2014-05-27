@@ -26,6 +26,7 @@ Resources:
 
     module.exports.push 'masson/bootstrap/'
     module.exports.push 'masson/core/openldap_client'
+    module.exports.push 'masson/core/iptables'
     module.exports.push 'masson/core/yum'
 
 ## Configuration
@@ -87,6 +88,7 @@ Example:
 
     module.exports.push module.exports.configure = (ctx) ->
       require('./krb5_client').configure ctx
+      require('./iptables').configure ctx
       {etc_krb5_conf} = ctx.config.krb5
       openldap_hosts = ctx.hosts_with_module 'masson/core/openldap_server_krb5'
       throw new Error "Expect at least one server with action \"masson/core/openldap_server_krb5\"" if openldap_hosts.length is 0
@@ -94,19 +96,21 @@ Example:
       kdc_conf = ctx.config.krb5.kdc_conf ?= {}
       misc.merge kdc_conf,
         'kdcdefaults':
-          'kdc_ports': 88
-          'kdc_tcp_ports': 88
+          'kdc_ports': '88'
+          'kdc_tcp_ports': '88'
         'realms': {}
         'logging':
             'kdc': 'FILE:/var/log/kdc.log'
       , kdc_conf
-      # Add realm present in etc_krb5_conf
-      for realm of etc_krb5_conf.realms
+      # Multiple kerberos servers accross the cluster are defined in server
+      # specific configuration
+      realms = ctx.config.servers[ctx.config.host].krb5?.etc_krb5_conf?.realms
+      realms = etc_krb5_conf.realms if not realms or realms.length is 0
+      for realm, i of realms
         kdc_conf.realms[realm] = {}
       # Set default values each realm
       for realm, config of kdc_conf.realms
         kdc_conf.realms[realm] = misc.merge
-          '#master_key_type': 'aes256-cts'
           'default_principal_flags': '+preauth'
           'acl_file': '/var/kerberos/krb5kdc/kadm5.acl'
           'dict_file': '/usr/share/dict/words'
@@ -114,45 +118,102 @@ Example:
           'supported_enctypes': 'aes256-cts:normal aes128-cts:normal des3-hmac-sha1:normal arcfour-hmac:normal des-hmac-sha1:normal des-cbc-md5:normal des-cbc-crc:normal'
         , config
 
+## IPTables
+
+| Service                    | Port   | Protocol | Parameter         |
+|----------------------------|--------|--------|-------------------- |
+| NameNode WebUI             | 50070  | http   | `dfs.http.address`  |
+|                            | 50470  | https  | `dfs.https.address` |
+| NameNode metadata service  | 8020   | ipc    | `fs.default.name`   |
+
+IPTables rules are only inserted if the parameter "iptables.action" is set to 
+"start" (default value).
+
+    module.exports.push name: 'Krb5 Server # IPTables', callback: (ctx, next) ->
+      {etc_krb5_conf, kdc_conf} = ctx.config.krb5
+      rules = []
+      add_default_kadmind_port = false
+      add_default_kdc_ports = false
+      add_default_kdc_tcp_ports = false
+      for realm, config of kdc_conf.realms
+        if config.kadmind_port
+          rules.push chain: 'INPUT', target: 'ACCEPT', dport: kadmind_port, protocol: 'tcp', state: 'NEW', comment: "Kerberos administration server (kadmind daemon)"
+        else add_default_kadmind_port = true
+        if config.kdc_ports
+          for port in config.kdc_ports.split /\s,/
+            rules.push chain: 'INPUT', target: 'ACCEPT', dport: port, protocol: 'udp', state: 'NEW', comment: "Kerberos Authentication Service and Key Distribution Center (krb5kdc daemon)"
+        else add_default_kdc_ports = true
+        if config.kdc_tcp_ports
+          kdc_tcp_ports = true
+          for port in config.kdc_ports.split /\s,/
+            rules.push chain: 'INPUT', target: 'ACCEPT', dport: port, protocol: 'tcp', state: 'NEW', comment: "Kerberos Authentication Service and Key Distribution Center (krb5kdc daemon)"
+        else add_default_kdc_tcp_ports = true
+      if add_default_kadmind_port
+        port = kdc_conf.kdcdefaults.kadmind_port or '749'
+        rules.push chain: 'INPUT', target: 'ACCEPT', dport: port, protocol: 'tcp', state: 'NEW', comment: "Kerberos administration server (kadmind daemon)"
+      if add_default_kdc_ports
+        for port in (kdc_conf.kdcdefaults.kdc_ports or '88').split /\s,/
+          rules.push chain: 'INPUT', target: 'ACCEPT', dport: port, protocol: 'udp', state: 'NEW', comment: "Kerberos Authentication Service and Key Distribution Center (krb5kdc daemon)"
+      if add_default_kdc_tcp_ports
+        for port in (kdc_conf.kdcdefaults.kdc_tcp_ports or '88').split /\s,/
+          rules.push chain: 'INPUT', target: 'ACCEPT', dport: port, protocol: 'tcp', state: 'NEW', comment: "Kerberos Authentication Service and Key Distribution Center (krb5kdc daemon)"
+      ctx.iptables
+        rules: rules
+        if: ctx.config.iptables.action is 'start'
+      , (err, configured) ->
+        next err, if configured then ctx.OK else ctx.PASS
+
     module.exports.push name: 'Krb5 Server # LDAP Install', timeout: -1, callback: (ctx, next) ->
       ctx.service
         name: 'krb5-server-ldap'
       , (err, installed) ->
         next err, if installed then ctx.OK else ctx.PASS
 
+    module.exports.push name: 'Krb5 Server # LDAP Configuration', timeout: 100000, callback: (ctx, next) ->
+      {etc_krb5_conf} = ctx.config.krb5
+      ctx.ini
+        content: safe_etc_krb5_conf etc_krb5_conf
+        destination: '/etc/krb5.conf'
+        stringify: misc.ini.stringify_square_then_curly
+        backup: true
+      , (err, written) ->
+        return next err if err
+        next err, if written then ctx.OK else ctx.PASS
+
     module.exports.push name: 'Krb5 Server # LDAP Insert Entries', timeout: 100000, callback: (ctx, next) ->
       {etc_krb5_conf, kdc_conf} = ctx.config.krb5
       modified = false
-      do_ini = ->
-        ctx.log 'Update /etc/krb5.conf'
-        ctx.ini
-          content: safe_etc_krb5_conf etc_krb5_conf
-          destination: '/etc/krb5.conf'
-          stringify: misc.ini.stringify_square_then_curly
-          backup: true
-        , (err, written) ->
-          return next err if err
-          modified = true if written
-          do_subtrees()
-      do_subtrees = ->
-        each(etc_krb5_conf.realms)
-        .on 'item', (realm, config, next) ->
-          return next() unless config.database_module
-          {kdc_master_key, ldap_kerberos_container_dn, manager_dn, manager_password} = etc_krb5_conf.dbmodules[config.database_module]
+      each(etc_krb5_conf.realms)
+      .on 'item', (realm, config, next) ->
+        return next() unless config.database_module
+        {kdc_master_key, ldap_kerberos_container_dn, manager_dn, manager_password, ldap_servers} = etc_krb5_conf.dbmodules[config.database_module]
+        ldap_server = ldap_servers.split(' ')[0]
+        do_wait = ->
+          ctx.waitForExecution 
+            cmd: "ldapsearch -x -LLL -H #{ldap_server} -D \"#{manager_dn}\" -w #{manager_password} -b \"#{ldap_kerberos_container_dn}\""
+            code_skipped: 32
+          , (err) ->
+            return next err if err
+            do_exists()
+        do_exists = ->
+          searchbase = "cn=#{realm},#{ldap_kerberos_container_dn}"
+          ctx.execute 
+            cmd: "ldapsearch -x -H #{ldap_server} -D \"#{manager_dn}\" -w #{manager_password} -b \"#{searchbase}\""
+            code_skipped: 32
+          , (err, exists) ->
+            return next err if err
+            if exists then next() else do_subtrees()
+        do_subtrees = ->
           # Note, kdb5_ldap_util is using /etc/krb5.conf (server version)
-          ctx.log 'Run kdb5_ldap_util'
           ctx.execute
             cmd: "kdb5_ldap_util -D \"#{manager_dn}\" -w #{manager_password} create -subtrees \"#{ldap_kerberos_container_dn}\" -r #{realm} -s -P #{kdc_master_key}"
-            code_skipped: 1
           , (err, executed, stdout, stderr) ->
-            # Warnig, exit code 1 for also for connect error
-            # TODO: Test if the realm LDAP entry already exists
             return next err if err
             modified = true if executed
             next()
-        .on 'both', (err) ->
-          next err, if modified then ctx.OK else ctx.PASS
-      do_ini()
+        do_wait()
+      .on 'both', (err) ->
+        next err, if modified then ctx.OK else ctx.PASS
 
     module.exports.push name: 'Krb5 Server # LDAP Stash password', callback: (ctx, next) ->
       {etc_krb5_conf} = ctx.config.krb5

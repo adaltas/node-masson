@@ -105,10 +105,10 @@ Example:
           match: new RegExp "^#{k}.*$", 'mg'
           replace: "#{k} #{v}"
           append: true
-          eof: true
       ctx.write
         write: write
         destination: '/etc/openldap/ldap.conf'
+        eof: true # was 4 lines up in write.push
       , (err, written) ->
         next err, if written then ctx.OK else ctx.PASS
 

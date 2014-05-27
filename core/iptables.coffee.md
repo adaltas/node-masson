@@ -25,12 +25,12 @@ Example:
 {
   "iptables": {
     "startup": "2,3,4,5",
-    "action": "start"
+    "action": "stop"
   }
 }
 ```
 
-    module.exports.push (ctx) ->
+    module.exports.push module.exports.configure = (ctx) ->
       ctx.config.iptables ?= {}
       ctx.config.iptables.action ?= 'start'
       # Service supports chkconfig, but is not referenced in any runlevel

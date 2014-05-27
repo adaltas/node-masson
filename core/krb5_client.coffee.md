@@ -115,6 +115,8 @@ Example:
           'manager_dn': manager_dn
           'manager_password': manager_password
         , etc_krb5_conf.dbmodules[name]
+        ldapservers = etc_krb5_conf.dbmodules[name].ldap_servers
+        etc_krb5_conf.dbmodules[name].ldap_servers = ldapservers.join ' ' if Array.isArray ldapservers
       # Merge global with server-based configuration
       krb5_server_hosts = ctx.hosts_with_module "masson/core/krb5_server"
       for krb5_server_host in krb5_server_hosts
@@ -122,6 +124,7 @@ Example:
         for realm, config of realms
           delete config.database_module
           realms[realm].kdc ?= krb5_server_host
+          realms[realm].kdc = [realms[realm].kdc] unless Array.isArray realms[realm].kdc
           realms[realm].admin_server ?= krb5_server_host
           realms[realm].default_domain ?= realm.toLowerCase()
         misc.merge etc_krb5_conf.realms, realms
