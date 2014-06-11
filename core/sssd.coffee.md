@@ -198,7 +198,7 @@ $user`. The command is only executed if a test user is defined by the
       {test_user, force_check} = ctx.config.sssd
       return next() unless test_user
       ctx.fs.exists '/var/db/masson/sssd_getent_passwd', (err, exists) ->
-        return next err, ctx.PASS if (err or exists) and not force_check
+        # return next err, ctx.PASS if (err or exists) and not force_check
         ctx.execute
           cmd: "getent passwd #{test_user}"
         , (err, executed, stdout, stderr) ->
@@ -219,7 +219,7 @@ user is defined by the "sssd.test_user" property.
       return next() unless test_user
       ctx.execute
         cmd: "su -l #{test_user} -c 'touch .masson_check_pam'"
-        not_if_exists: if force_check then null else "/home/#{test_user}/.masson_check_pam"
+        # not_if_exists: if force_check then null else "/home/#{test_user}/.masson_check_pam"
       , (err, executed, stdout, stderr) ->
         return next err, if executed then ctx.OK else ctx.PASS
         
