@@ -101,25 +101,30 @@ ctx.waitForExecution cmd: "test -f /tmp/sth", (err) ->
         options.code_skipped ?= 1
         ctx.log "Start wait for execution"
         ctx.emit 'wait'
-        running = false
+        count = 0
+        # running = false
         run = ->
-          return if running
-          running = true
+          # return if running
+          # running = true
+          ctx.log "Attempt #{++count}"
           ctx.execute
             cmd: cmd
             code: options.code or 0
             code_skipped: options.code_skipped
           , (err, ready, stdout, stderr) ->
-            running = false
-            return if not err and not ready
+            # running = false
+            #return if not err and not ready
+            if not err and not ready
+              setTimeout run, options.interval
+              return
             return callback err if err
-            clearInterval clear if clear
+            # clearInterval clear if clear
             ctx.log "Finish wait for execution"
             ctx.emit 'waited'
             callback err, stdout, stderr
-        clear = setInterval ->
-          run()
-        , options.interval
+        # clear = setInterval ->
+        #   run()
+        # , options.interval
         run()
       inc = 0
 
