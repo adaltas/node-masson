@@ -12,6 +12,3 @@ layout: module
     module.exports.push 'masson/core/curl'
     module.exports.push 'masson/core/yum'
     module.exports.push 'masson/core/ntp'
-    module.exports.push 'masson/core/krb5_server'
-    # module.exports.push 'masson/core/krb5_server_stop'
-    # module.exports.push 'masson/core/krb5_server_start'
