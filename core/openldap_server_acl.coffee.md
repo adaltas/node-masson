@@ -74,22 +74,22 @@ ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=co
       gidNumber: 801
       homeDirectory: /home/nssproxy
 
-      dn: cn=test,#{users_container_dn}
-      uid: test
-      gecos: Test User
-      objectClass: top
-      objectClass: account
-      objectClass: posixAccount
-      objectClass: shadowAccount
-      userPassword: {SSHA}uQcSsw5CySTkBXjOY/N0hcduA6yFiI0k
-      shadowLastChange: 15140
-      shadowMin: 0
-      shadowMax: 99999
-      shadowWarning: 7
-      loginShell: /bin/bash
-      uidNumber: 1101
-      gidNumber: 1101
-      homeDirectory: /home/test
+      # dn: cn=test,#{users_container_dn}
+      # uid: test
+      # gecos: Test User
+      # objectClass: top
+      # objectClass: account
+      # objectClass: posixAccount
+      # objectClass: shadowAccount
+      # userPassword: {SSHA}uQcSsw5CySTkBXjOY/N0hcduA6yFiI0k
+      # shadowLastChange: 15140
+      # shadowMin: 0
+      # shadowMax: 99999
+      # shadowWarning: 7
+      # loginShell: /bin/bash
+      # uidNumber: 1101
+      # gidNumber: 1101
+      # homeDirectory: /home/test
 
       dn: cn=nssproxy,#{groups_container_dn}
       cn: nssproxy
@@ -98,12 +98,12 @@ ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=co
       gidNumber: 801
       description: Network Service Switch Proxy
 
-      dn: cn=test,#{groups_container_dn}
-      cn: test.group
-      objectClass: top
-      objectClass: posixGroup
-      gidNumber: 1101
-      description: Test Group
+      # dn: cn=test,#{groups_container_dn}
+      # cn: test.group
+      # objectClass: top
+      # objectClass: posixGroup
+      # gidNumber: 1101
+      # description: Test Group
       """, (err, added) ->
         next err, if added then ctx.OK else ctx.PASS
 
