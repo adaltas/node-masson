@@ -18,6 +18,7 @@ module.exports = ->
   # running = []
   rl = readline.createInterface process.stdin, process.stdout
   rl.setPrompt ''
+  rl.on 'SIGINT', process.exit
   hostlength = 20
   for s in config.servers then hostlength = Math.max(hostlength, s.host.length+2)
   params = params.parse()
