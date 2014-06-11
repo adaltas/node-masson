@@ -20,10 +20,7 @@ The module accept the following properties:
 *   `hostname` (boolean)   
     The server hostname as return by the command "hostname" and defined by the 
     property "HOSTNAME" inside the "/etc/sysconfig/network" file, must not be 
-    configure globally, default to the "host" property.
-*   `network.hosts_disabled` (boolean)   
-    Do not update the "/etc/hosts" file, disable the effect of the 
-    "network.hosts_auto" and "network.hosts" properties, default to "false".   
+    configure globally, default to the "host" property. 
 *   `network.hostname_disabled` (boolean)   
     Do not update the "/etc/sysconfig/network" file, disable the effect of the
     "hostname" property (which itself default to "host"), 
@@ -53,7 +50,6 @@ Example:
       ctx.config.hostname ?= ctx.config.host
       ctx.config.network ?= {}
       ctx.config.network.hostname_disabled ?= false
-      ctx.config.network.hosts_disabled ?= false
       ctx.config.network.hosts_auto ?= false
       ctx.config.shortname ?= ctx.config.host.split('.')[0]
       for host, server of ctx.config.servers
@@ -68,8 +64,7 @@ set. Set the "network.hosts_disabled" to "true" if you dont wish to overwrite
 this file.
 
     module.exports.push name: 'Network # Hosts', callback: (ctx, next) ->
-      {hosts, hosts_auto, hosts_disabled} = ctx.config.network
-      # return next() if hosts_disabled
+      {hosts, hosts_auto} = ctx.config.network
       # content = ''
       write = []
       if hosts_auto then for server in ctx.config.servers
@@ -81,8 +76,8 @@ this file.
       for ip, hostnames of hosts
         # content += "#{ip} #{hostnames}\n"
         write.push 
-          match: RegExp "^#{quote server.ip}\\s.*$", 'gm'
-          replace: "#{server.ip} #{server.host} #{server.shortname}"
+          match: RegExp "^#{quote ip}\\s.*$", 'gm'
+          replace: "#{ip} #{hostnames}"
           append: true
       return next() unless write.length
       ctx.write
