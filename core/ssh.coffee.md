@@ -35,12 +35,12 @@ two new properties "sshd\_config" and "banner".
 ```json
 {
   "users": [{
-    "username": "root"
+    "name": "root"
     "authorized_keys": [ "ssh-rsa AAAA...ZZZZ me@email.com" ],
     "rsa": "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCA...PKToe4z7C9BqMT7Og==\n-----END RSA PRIVATE KEY-----"
     "rsa_pub": "ssh-rsa AAAA...YYYY user@hadoop"
   },{
-    "username": "sweet"
+    "name": "sweet"
     "home": "/home/sweet" 
     "authorized_keys": [ "ssh-rsa AAAA...XXXX you@email.com" ]
   }]
@@ -76,8 +76,8 @@ defined inside "users.[].authorized_keys".
       .on 'item', (user, next) ->
         return next() unless user.home
         ctx.mkdir 
-          destination: "#{user.home}/.ssh"
-          uid: user.username
+          destination: "#{user.home or '/home/'+user.name}/.ssh"
+          uid: user.name
           gid: null
           mode: 0o700 # was "permissions: 16832"
         , (err, created) ->
@@ -87,9 +87,9 @@ defined inside "users.[].authorized_keys".
             replace: key
             append: true
           ctx.write
-            destination: "#{user.home}/.ssh/authorized_keys"
+            destination: "#{user.home or '/home/'+user.name}/.ssh/authorized_keys"
             write: write
-            uid: user.username
+            uid: user.name
             gid: null
             mode: 0o600
           , (err, written) ->
@@ -141,18 +141,18 @@ the "users.[].rsa\_pub" propery and is written in "~/.ssh/id\_rsa.pub".
         return next new Error "Property rsa required if rsa_pub defined" if user.rsa_pub and not user.rsa
         return next() unless user.rsa
         ctx.write
-          destination: "#{user.home}/.ssh/id_rsa"
+          destination: "#{user.home or '/home/'+user.name}/.ssh/id_rsa"
           content: user.rsa
-          uid: user.username
+          uid: user.name
           gid: null
           mode: 0o600
         , (err, written) ->
           return next err if err
           ok = true if written
           ctx.write
-            destination: "#{user.home}/.ssh/id_rsa.pub"
+            destination: "#{user.home or '/home/'+user.name}/.ssh/id_rsa.pub"
             content: user.rsa_pub
-            uid: user.username
+            uid: user.name
             gid: null
             mode: 0o600
           , (err, written) ->
