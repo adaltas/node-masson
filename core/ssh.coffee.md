@@ -61,7 +61,7 @@ two new properties "sshd\_config" and "banner".
       require('./users').configure ctx
       ctx.config.ssh ?= {}
       ctx.config.ssh.sshd_config ?= null
-      for user in ctx.config.users
+      for _, user of ctx.config.users
         user.authorized_keys ?= []
         user.authorized_keys = [user.authorized_keys] if typeof user.authorized_keys is 'string'
 
@@ -71,7 +71,7 @@ Update the "~/.ssh/authorized_keys" file for each users and add the public SSH k
 defined inside "users.[].authorized_keys".
 
     module.exports.push name: 'SSH # Authorized Keys', timeout: -1, callback: (ctx, next) ->
-      ok = 0
+      modified = false
       each(ctx.config.users)
       .on 'item', (user, next) ->
         return next() unless user.home
@@ -94,10 +94,10 @@ defined inside "users.[].authorized_keys".
             mode: 0o600
           , (err, written) ->
             return next err if err
-            ok++ if written
+            modified = true if written
             next()
       .on 'both', (err) ->
-        next err, if ok then ctx.OK else ctx.PASS
+        next err, if modified then ctx.OK else ctx.PASS
 
 ## Configure
 
