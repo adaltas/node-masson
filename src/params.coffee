@@ -1,8 +1,8 @@
 parameters = require 'parameters'
 
 module.exports = parameters
-  name: 'big'
-  description: 'Hadoop cluster management'
+  name: 'masson'
+  description: 'Cluster deployment and management'
   options: [
     name: 'config', shortcut: 'c', type: 'array'
     description: 'One or multiple configuration files'
@@ -14,12 +14,19 @@ module.exports = parameters
   action: 'command'
   actions: [
     name: 'help'
-    main: name: 'subcommand'
+    main:
+      name: 'subcommand'
+      description: 'Print the help relative to the command'
+    description: "Print this help and exit"
   ,
     name: 'exec'
-    main: name: 'subcommand'
+    main:
+      name: 'subcommand'
+      description: 'The subcommand to execute'
+    description: "Distribute a shell command"
   ,
     name: 'tree'
+    description: "Print the execution plan"
     options: [
       name: 'run', shortcut: 'r'
       description: 'Run list holding the list of modules'
