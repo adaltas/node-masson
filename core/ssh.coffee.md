@@ -72,7 +72,8 @@ defined inside "users.[].authorized_keys".
 
     module.exports.push name: 'SSH # Authorized Keys', timeout: -1, callback: (ctx, next) ->
       modified = false
-      each(ctx.config.users)
+      users = for _, user of ctx.config.users then user
+      each(users)
       .on 'item', (user, next) ->
         return next() unless user.home
         ctx.mkdir 
@@ -134,7 +135,8 @@ the "users.[].rsa\_pub" propery and is written in "~/.ssh/id\_rsa.pub".
 
     module.exports.push name: 'SSH # Public and Private Key', timeout: -1, callback: (ctx, next) ->
       ok = false
-      each(ctx.config.users)
+      users = for _, user of ctx.config.users then user
+      each(users)
       .on 'item', (user, next) ->
         return next() unless user.home
         return next new Error "Property rsa_pub required if rsa defined" if user.rsa and not user.rsa_pub
