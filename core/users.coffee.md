@@ -17,6 +17,7 @@ A module to create and manage unix users and groups.
       ctx.config.groups ?= {}
       for name, user of ctx.config.users
         user.name ?= name
+        user.home ?= '/root' if name is 'root'
       for name, group of ctx.config.groups
         group.name ?= name
 
