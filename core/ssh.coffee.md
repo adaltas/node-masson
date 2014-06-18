@@ -93,6 +93,7 @@ defined inside "users.[].authorized_keys".
             uid: user.name
             gid: null
             mode: 0o600
+            eof: true
           , (err, written) ->
             return next err if err
             modified = true if written
