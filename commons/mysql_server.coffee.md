@@ -13,19 +13,47 @@ layout: module
 
 ## Configure
 
+
+*   `sql_on_install` (array|string)
+*   `current_password` (string)
+*   `password` (string)
+*   `remove_anonymous` (boolean)
+*   `disallow_remote_root_login` (boolean)
+*   `remove_test_db` (boolean)
+*   `reload_privileges` (boolean)
+*   `my_cnf` (object)
+    Object to be serialized into the "ini" format inside "/etc/my.cnf"
+
+Default configuration:
+
+```
+{ "mysql_server": {
+    "sql_on_install": [],
+    "current_password": "",
+    "password": "",
+    "remove_anonymous": true,
+    "disallow_remote_root_login": false,
+    "remove_test_db": true,
+    "reload_privileges": true,
+    "my_cnf": {
+      "mysqld": {
+        "tmpdir": "/tmp/mysql"
+} } } }
+```
+
     module.exports.push module.exports.configure = (ctx) ->
       ctx.config.mysql_server ?= {}
+      # User SQL
       ctx.config.mysql_server.sql_on_install ?= []
       ctx.config.mysql_server.sql_on_install = [ctx.config.mysql_server.sql_on_install] if typeof ctx.config.mysql_server.sql_on_install is 'string'
+      # Secure Installation
       ctx.config.mysql_server.current_password ?= ''
-      ctx.config.mysql_server.port ?= '3306'
-      ctx.config.mysql_server.username ?= 'root'
       ctx.config.mysql_server.password ?= ''
       ctx.config.mysql_server.remove_anonymous ?= true
       ctx.config.mysql_server.disallow_remote_root_login ?= false
       ctx.config.mysql_server.remove_test_db ?= true
       ctx.config.mysql_server.reload_privileges ?= true
-      # /etc/my.cnf
+      # Service Configuration
       ctx.config.mysql_server.my_cnf ?= {}
       ctx.config.mysql_server.my_cnf['mysqld'] ?= {}
       ctx.config.mysql_server.my_cnf['mysqld']['tmpdir'] ?= '/tmp/mysql'
@@ -42,7 +70,6 @@ Install the Mysql database server. Secure the temporary directory.
           name: 'mysql-server'
           chk_name: 'mysqld'
           startup: '235'
-          # action: 'start'
         , (err, serviced) ->
           return next err if err
           modified = true if serviced
@@ -65,23 +92,6 @@ Install the Mysql database server. Secure the temporary directory.
             return next err if err
             modified = true if updated
             do_end()
-      # do_socket = ->
-      #   # Create the socket inside "/tmp" instead of default "/var/lib/mysql/mysql.sock". That
-      #   # way, on restart, there won't be any existing file preventing the mysql server to start
-      #   ctx.ini
-      #     destination: '/etc/my.cnf'
-      #     content: mysqld: socket: '/tmp/mysql/mysql.sock'
-      #     merge: true
-      #     backup: true
-      #   , (err, updated) ->
-      #     return next err if err
-      #     modified = true if updated
-      #     ctx.link
-      #       source: '/tmp/mysql/mysql.sock'
-      #       destination: '/var/lib/mysql/mysql.sock'
-      #     , (err, linked) ->
-      #       modified = true if linked
-      #       do_start()
       do_end = ->
         next null, if modified then ctx.OK else ctx.PASS
       do_install()
@@ -101,7 +111,6 @@ Install the Mysql database server. Secure the temporary directory.
       do_clean_sock = ->
         console.log 'do_clean_sock'
         ctx.remove
-          # destination: "/tmp/mysql/mysql.sock"
           destination: "/var/lib/mysql/mysql.sock"
         , (err, removed) ->
           return next err if err
