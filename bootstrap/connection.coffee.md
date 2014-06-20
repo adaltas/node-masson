@@ -29,7 +29,7 @@ found at "~/.ssh/id_rsa", if it is deployed on the remote server for
 the root user (commonly found inside the "/root/.ssh/authorized_keys" file) and 
 if the remote server is ready to accept root SSH connections (the 
 "PermitRootLogin" property inside the "/etc/ssh/sshd_config" configuration 
-file), then there nothing else to configuration. Otherwise, the server will be
+file), then there nothing else to configure. Otherwise, the server will be
 prepared to do so. You must declare a super user with sudo permissions using 
 the "username" and "password" properties. The script will use those credentials
 to loggin and will try to become root with the "su -" command. Use the "cmd" 
