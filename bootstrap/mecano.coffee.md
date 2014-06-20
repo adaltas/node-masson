@@ -62,12 +62,14 @@ ctx.execute
               mecano[action].call null, options, (err) ->
                 return callback.apply null, arguments if err
                 cache['mecano:installed'] = arguments[2] 
-                cache['mecano:updates'] = arguments[3] 
+                cache['mecano:updates'] = arguments[3]
+                args = arguments
                 ctx.cache.set
                   'mecano:installed': arguments[2] 
                   'mecano:updates': arguments[3]
                 , (err) ->
-                  callback.apply null, arguments
+                  args.err = err
+                  callback.apply null, args
             else
               mecano[action].call null, goptions, options, callback
         next null, ctx.PASS
