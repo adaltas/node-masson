@@ -125,11 +125,11 @@ Example:
 
 ## IPTables
 
-| Service                    | Port   | Protocol | Parameter         |
-|----------------------------|--------|--------|-------------------- |
-| NameNode WebUI             | 50070  | http   | `dfs.http.address`  |
-|                            | 50470  | https  | `dfs.https.address` |
-| NameNode metadata service  | 8020   | ipc    | `fs.default.name`   |
+| Service    | Port | Proto | Parameter                            |
+|------------|------|-------|--------------------------------------|
+| kadmin     | 749  | tcp   | `kdc_conf.kdcdefaults.kadmind_port`  |
+| kadmin     | 88   | upd   | `kdc_conf.kdcdefaults.kdc_ports`     |
+| krb5kdc    | 88   | tcp   | `kdc_conf.kdcdefaults.kdc_tcp_ports` |
 
 IPTables rules are only inserted if the parameter "iptables.action" is set to 
 "start" (default value).
@@ -142,26 +142,26 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
       add_default_kdc_tcp_ports = false
       for realm, config of kdc_conf.realms
         if config.kadmind_port
-          rules.push chain: 'INPUT', target: 'ACCEPT', dport: kadmind_port, protocol: 'tcp', state: 'NEW', comment: "Kerberos administration server (kadmind daemon)"
+          rules.push chain: 'INPUT', jump: 'ACCEPT', dport: kadmind_port, protocol: 'tcp', state: 'NEW', comment: "Kerberos administration server (kadmind daemon)"
         else add_default_kadmind_port = true
         if config.kdc_ports
           for port in config.kdc_ports.split /\s,/
-            rules.push chain: 'INPUT', target: 'ACCEPT', dport: port, protocol: 'udp', state: 'NEW', comment: "Kerberos Authentication Service and Key Distribution Center (krb5kdc daemon)"
+            rules.push chain: 'INPUT', jump: 'ACCEPT', dport: port, protocol: 'udp', state: 'NEW', comment: "Kerberos Authentication Service and Key Distribution Center (krb5kdc daemon)"
         else add_default_kdc_ports = true
         if config.kdc_tcp_ports
           kdc_tcp_ports = true
           for port in config.kdc_ports.split /\s,/
-            rules.push chain: 'INPUT', target: 'ACCEPT', dport: port, protocol: 'tcp', state: 'NEW', comment: "Kerberos Authentication Service and Key Distribution Center (krb5kdc daemon)"
+            rules.push chain: 'INPUT', jump: 'ACCEPT', dport: port, protocol: 'tcp', state: 'NEW', comment: "Kerberos Authentication Service and Key Distribution Center (krb5kdc daemon)"
         else add_default_kdc_tcp_ports = true
       if add_default_kadmind_port
         port = kdc_conf.kdcdefaults.kadmind_port or '749'
-        rules.push chain: 'INPUT', target: 'ACCEPT', dport: port, protocol: 'tcp', state: 'NEW', comment: "Kerberos administration server (kadmind daemon)"
+        rules.push chain: 'INPUT', jump: 'ACCEPT', dport: port, protocol: 'tcp', state: 'NEW', comment: "Kerberos administration server (kadmind daemon)"
       if add_default_kdc_ports
         for port in (kdc_conf.kdcdefaults.kdc_ports or '88').split /\s,/
-          rules.push chain: 'INPUT', target: 'ACCEPT', dport: port, protocol: 'udp', state: 'NEW', comment: "Kerberos Authentication Service and Key Distribution Center (krb5kdc daemon)"
+          rules.push chain: 'INPUT', jump: 'ACCEPT', dport: port, protocol: 'udp', state: 'NEW', comment: "Kerberos Authentication Service and Key Distribution Center (krb5kdc daemon)"
       if add_default_kdc_tcp_ports
         for port in (kdc_conf.kdcdefaults.kdc_tcp_ports or '88').split /\s,/
-          rules.push chain: 'INPUT', target: 'ACCEPT', dport: port, protocol: 'tcp', state: 'NEW', comment: "Kerberos Authentication Service and Key Distribution Center (krb5kdc daemon)"
+          rules.push chain: 'INPUT', jump: 'ACCEPT', dport: port, protocol: 'tcp', state: 'NEW', comment: "Kerberos Authentication Service and Key Distribution Center (krb5kdc daemon)"
       ctx.iptables
         rules: rules
         if: ctx.config.iptables.action is 'start'
