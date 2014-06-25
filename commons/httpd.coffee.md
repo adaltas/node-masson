@@ -7,12 +7,14 @@ layout: module
 
     module.exports = []
     module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/core/iptables'
 
 ## Configuration
 
 Configure the HTTPD server.
 
     module.exports.push (ctx) ->
+      require('../core/iptables').configure ctx
       ctx.config.httpd ?= {}
       # Service
       ctx.config.httpd.startup ?= '235'
@@ -31,6 +33,26 @@ Configure the HTTPD server.
       ctx.config.httpd.group ?= {}
       ctx.config.httpd.group.name ?= 'apache'
       ctx.config.httpd.group.system ?= true
+
+## IPTables
+
+| Service    | Port | Proto    | Parameter       |
+|------------|------|----------|-----------------|
+| httpd      | 80   | tcp/http | -               |
+
+IPTables rules are only inserted if the parameter "iptables.action" is set to 
+"start" (default value).
+
+    module.exports.push name: 'HTTPD # IPTables', callback: (ctx, next) ->
+      {etc_krb5_conf, kdc_conf} = ctx.config.krb5
+      rules = []
+      ctx.iptables
+        rules: [
+          chain: 'INPUT', jump: 'ACCEPT', dport: 80, protocol: 'tcp', state: 'NEW', comment: "HTTPD"
+        ]
+        if: ctx.config.iptables.action is 'start'
+      , (err, configured) ->
+        next err, if configured then ctx.OK else ctx.PASS
 
 ## Users & Groups
 
