@@ -157,10 +157,17 @@ ctx.waitIsOpen ["master1.hadoop", "master2.hadoop"], 8020, (err) ->
 
       ctx.waitIsOpen = ->
         if typeof arguments[0] is 'string'
-          # host, port, [options], callback
-          servers = [host: arguments[0], port: arguments[1]]
-          options = arguments[2]
-          callback = arguments[3]
+          if Array.isArray port
+             # host, ports, [options], callback
+            servers = for port in arguments[1]
+              [host: arguments[0], port: port]
+            options = arguments[2]
+            callback = arguments[3]
+          else
+            # host, port, [options], callback
+            servers = [host: arguments[0], port: arguments[1]]
+            options = arguments[2]
+            callback = arguments[3]
         else if Array.isArray(arguments[0]) and typeof arguments[1] is 'number'
           # hosts, port, [options], callback
           servers = for h in arguments[0] then host: h, port: arguments[1]
