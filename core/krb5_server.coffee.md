@@ -451,7 +451,8 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
 Call the "masson/core/krb5_client" dependency which will register this host to
 each Kerberos servers.
 
-    module.exports.push '!masson/core/krb5_client'
+    # module.exports.push '!masson/core/krb5_client'
+    module.exports.push 'masson/core/krb5_client'
 
 ## Notes
 
