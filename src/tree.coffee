@@ -123,41 +123,6 @@ Tree::load_tree = (modules) ->
   for module in modules then build_tree module
   tree
 
-# ###
-# Load a module and return its actions
-# A module may be prefixed with:
-# *   "?": Load this module only if it is defined by the user in the run list.
-# *   "!": Force this module to be loaded and executed, apply to "fast" mode.
-# ###
-# Tree::load_module = (module) ->
-#   @cache ?= {}
-#   return @cache[module] if @cache[module]
-#   @cache[module] = actions = []
-#   # Load the module
-#   # required = false
-#   # [_, meta, module] = /([\!\?]?)(.*)/.exec module
-#   # console.log meta, module
-#   # switch meta
-#   #   when '?' then # nothing yet
-#   #   when '!' then required = true
-#   actions = load module
-#   actions = [actions] unless Array.isArray actions
-#   for action, i in actions
-#     # Module dependencies
-#     if typeof action is 'string'
-#       actions.push action
-#       continue
-#     action = callback: action if typeof action is 'function'
-#     action.hidden ?= true unless action.name
-#     action.name ?= "#{module}/#{i}"
-#     action.module ?= module
-#     action.index ?= i
-#     # action.required ?= required
-#     action.skip = false
-#     action.required = true if module.indexOf('phyla/bootstrap') is 0
-#     actions.push action
-#   actions
-
 ###
 Load a module and return its actions.
 
