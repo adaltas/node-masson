@@ -9,6 +9,7 @@ layout: module
     escape = (text) -> text.replace(/[\\"]/g, "\\$&")
     module.exports = []
     module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/core/iptables'
     module.exports.push 'masson/commons/mysql_client' # Install the mysql driver
 
 ## Configure
@@ -42,6 +43,7 @@ Default configuration:
 ```
 
     module.exports.push module.exports.configure = (ctx) ->
+      require('../core/iptables').configure ctx
       ctx.config.mysql_server ?= {}
       # User SQL
       ctx.config.mysql_server.sql_on_install ?= []
@@ -57,6 +59,25 @@ Default configuration:
       ctx.config.mysql_server.my_cnf ?= {}
       ctx.config.mysql_server.my_cnf['mysqld'] ?= {}
       ctx.config.mysql_server.my_cnf['mysqld']['tmpdir'] ?= '/tmp/mysql'
+
+## IPTables
+
+| Service    | Port | Proto | Parameter |
+|------------|------|-------|-----------|
+| MySQL      | 3306 | tcp   | -         |
+
+
+IPTables rules are only inserted if the parameter "iptables.action" is set to 
+"start" (default value).
+
+    module.exports.push name: 'HDP ZooKeeper # IPTables', callback: (ctx, next) ->
+      ctx.iptables
+        rules: [
+          { chain: 'INPUT', jump: 'ACCEPT', dport: 3306, protocol: 'tcp', state: 'NEW', comment: "MySQL" }
+        ]
+        if: ctx.config.iptables.action is 'start'
+      , (err, configured) ->
+        next err, if configured then ctx.OK else ctx.PASS
 
 ## Package
 
