@@ -26,10 +26,33 @@ rom ISC.
 See the the "resources section" for additional information.
 
     module.exports.push (ctx) ->
+      require('./iptables').configure ctx
       ctx.config.bind_server ?= []
       ctx.config.bind_server.zones ?= []
       if typeof ctx.config.bind_server.zones is 'string'
         ctx.config.bind_server.zones = [ctx.config.bind_server.zones]
+
+## IPTables
+
+| Service    | Port | Proto | Parameter       |
+|------------|------|-------|-----------------|
+| named      | 53   | tcp   | -               |
+| named      | 53   | upd   | -               |
+
+IPTables rules are only inserted if the parameter "iptables.action" is set to 
+"start" (default value).
+
+    module.exports.push name: 'Bind Server # IPTables', callback: (ctx, next) ->
+      {etc_krb5_conf, kdc_conf} = ctx.config.krb5
+      rules = []
+      ctx.iptables
+        rules: [
+          { chain: 'INPUT', jump: 'ACCEPT', dport: 53, protocol: 'tcp', state: 'NEW', comment: "Named" }
+          { chain: 'INPUT', jump: 'ACCEPT', dport: 53, protocol: 'udp', state: 'NEW', comment: "Named" }
+        ]
+        if: ctx.config.iptables.action is 'start'
+      , (err, configured) ->
+        next err, if configured then ctx.OK else ctx.PASS
 
 ## Install
 
