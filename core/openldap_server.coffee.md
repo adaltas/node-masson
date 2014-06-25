@@ -63,21 +63,21 @@ and should correspond to "openldap_server.config_password".
 
 ## IPTables
 
-| Service    | Port | Proto | Parameter       |
-|------------|------|-------|-----------------|
-| slapd      | 389  | ldap  | -               |
-| slapd      | 636  | ldaps | -               |
+| Service    | Port | Proto     | Parameter       |
+|------------|------|-----------|-----------------|
+| slapd      | 389  | tcp/ldap  | -               |
+| slapd      | 636  | tcp/ldaps | -               |
 
 IPTables rules are only inserted if the parameter "iptables.action" is set to 
 "start" (default value).
 
-    module.exports.push name: 'Krb5 Server # IPTables', callback: (ctx, next) ->
+    module.exports.push name: 'OpenLDAP Server # IPTables', callback: (ctx, next) ->
       {etc_krb5_conf, kdc_conf} = ctx.config.krb5
       rules = []
       ctx.iptables
         rules: [
-          chain: 'INPUT', jump: 'ACCEPT', dport: 389, protocol: 'tcp', state: 'NEW', comment: "LDAP (non-secured)"
-          chain: 'INPUT', jump: 'ACCEPT', dport: 636, protocol: 'tcp', state: 'NEW', comment: "LDAP (secured)"
+          { chain: 'INPUT', jump: 'ACCEPT', dport: 389, protocol: 'tcp', state: 'NEW', comment: "LDAP (non-secured)" }
+          { chain: 'INPUT', jump: 'ACCEPT', dport: 636, protocol: 'tcp', state: 'NEW', comment: "LDAP (secured)" }
         ]
         if: ctx.config.iptables.action is 'start'
       , (err, configured) ->
