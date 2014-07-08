@@ -170,7 +170,7 @@ default overwritten unless the "sssd.merge" is `true`.
           ldapauth: false
           # Enable SSSD for system authentication
           # https://access.redhat.com/site/documentation/en-US/Red_Hat_Enterprise_Linux/6/html/Deployment_Guide/Configuration_Options-PAM_Configuration_Options.html
-          sssdauth: false
+          sssdauth: true # Allow ldap user to login with their password
         # Update configuration files with changed settings
         cmd = 'authconfig --update'
         for k, v of options
