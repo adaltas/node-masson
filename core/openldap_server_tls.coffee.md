@@ -361,7 +361,7 @@ If you are on a different server, place your certificate into "/etc/pki/tls/cert
 You shall now be able to query the ldap server over ldaps.
 
 ```
-ldapsearch -H ldaps://openldap.hadoop -x -D cn=Manager,dc=adaltas,dc=com -w test -b dc=adaltas,dc=com
+ldapsearch -H ldaps://master3.hadoop:636 -x -D cn=Manager,dc=adaltas,dc=com -w test -b dc=adaltas,dc=com
 ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=adaltas,dc=com
 ```
 

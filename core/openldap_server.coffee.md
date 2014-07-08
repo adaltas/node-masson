@@ -25,7 +25,7 @@ and should correspond to "openldap_server.config_password".
 
     module.exports.push module.exports.configure = (ctx) ->
       require('./iptables').configure ctx
-      # Todo: Generate '*_slappasswd' with command `slappasswd`, but only the first time, we
+      # Todo: Generate '*_slappasswd' with command `slappasswd -s $password`, but only the first time, we
       # need a mechanism to store configuration properties before.
       ctx.config.openldap_server ?= {}
       throw new Error "Missing \"openldap_server.suffix\" property" unless ctx.config.openldap_server.suffix
@@ -358,7 +358,8 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
 ldapsearch -LLLY EXTERNAL -H ldapi:/// -b cn=schema,cn=config dn
 
 # Search from remote:
-ldapsearch -x -LLL -H ldap://openldap.hadoop:389 -D cn=Manager,dc=adaltas,dc=com -w test -b "dc=adaltas,dc=com" "objectClass=*" 
+ldapsearch -x -LLL -H ldap://master3.hadoop:389 -D cn=Manager,dc=adaltas,dc=com -w test -b "dc=adaltas,dc=com" "objectClass=*" 
+ldapsearch -H ldaps://master3.hadoop:636 -x -D cn=Manager,dc=adaltas,dc=com -w test -b dc=adaltas,dc=com
 ldapsearch -D cn=admin,cn=config -w test -d 1 -b "cn=config"
 ldapsearch -D cn=Manager,dc=adaltas,dc=com -w test -b "dc=adaltas,dc=com"
 ldapsearch -ZZ -d 5 -D cn=Manager,dc=adaltas,dc=com -w test -b "dc=adaltas,dc=com"
@@ -369,7 +370,6 @@ slaptest -v -d5 -u
 # Change user password:
 ldappasswd -xZWD cn=Manager,dc=adaltas,dc=com -S cn=wdavidw,ou=users,dc=adaltas,dc=com
 ```
-
 
 Enable ldapi:// access to root on our ldap tree
   vi /etc/openldap/slapd.d/cn=config/olcDatabase={2}bdb.ldif
