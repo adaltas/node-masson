@@ -92,8 +92,34 @@ Example:
       {etc_krb5_conf} = ctx.config.krb5
       openldap_hosts = ctx.hosts_with_module 'masson/core/openldap_server_krb5'
       throw new Error "Expect at least one server with action \"masson/core/openldap_server_krb5\"" if openldap_hosts.length is 0
+      
       # Prepare configuration for "kdc.conf"
       kdc_conf = ctx.config.krb5.kdc_conf ?= {}
+      # Generate dynamic "krb5.dbmodules" object
+      for host in openldap_hosts
+        {kerberos_container_dn, users_container_dn, manager_dn, manager_password} = ctx.hosts[host].config.openldap_krb5
+        name = "openldap_#{host.split('.')[0]}"
+        scheme = if ctx.hosts[host].has_module 'masson/core/openldap_server_tls' then "ldap://" else "ldaps://"
+        ldap_server =  "#{scheme}#{host}"
+        kdc_conf.dbmodules[name] = misc.merge
+          'db_library': 'kldap'
+          'ldap_kerberos_container_dn': kerberos_container_dn
+          'ldap_kdc_dn': users_container_dn
+           # this object needs to have read rights on
+           # the realm container, principal container and realm sub-trees
+          'ldap_kadmind_dn': users_container_dn
+           # this object needs to have read and write rights on
+           # the realm container, principal container and realm sub-trees
+          'ldap_service_password_file': "/etc/krb5.d/#{name}.stash.keyfile"
+          # 'ldap_servers': 'ldapi:///'
+          'ldap_servers': ldap_server
+          'ldap_conns_per_server': 5
+          'manager_dn': manager_dn
+          'manager_password': manager_password
+        , kdc_conf.dbmodules[name]
+        ldapservers = kdc_conf.dbmodules[name].ldap_servers
+        kdc_conf.dbmodules[name].ldap_servers = ldapservers.join ' ' if Array.isArray ldapservers
+      # Set default
       misc.merge kdc_conf,
         'kdcdefaults':
           'kdc_ports': '88'
@@ -122,6 +148,38 @@ Example:
           'admin_keytab': '/var/kerberos/krb5kdc/kadm5.keytab'
           'supported_enctypes': 'aes256-cts:normal aes128-cts:normal des3-hmac-sha1:normal arcfour-hmac:normal des-hmac-sha1:normal des-cbc-md5:normal des-cbc-crc:normal'
         , config
+      for realm, config of kdc_conf.realms
+        # Check if realm point to a database_module
+        console.log '>>', etc_krb5_conf.realms[realm].admin_server, ctx.config.host
+        if config.database_module
+          # Make sure this db module is registered
+          dbmodules = Object.keys(kdc_conf.dbmodules).join ','
+          valid = kdc_conf.dbmodules[config.database_module]?
+          throw new Error "Property database_module \"#{config.database_module}\" not in list: \"#{dbmodules}\"" unless valid
+        # Set a database module if we manage the realm locally
+        else if etc_krb5_conf.realms[realm].admin_server is ctx.config.host
+          # Valid if
+          # *   only one OpenLDAP server accross the cluster or
+          # *   an OpenLDAP server in this host
+          openldap_index = openldap_hosts.indexOf ctx.config.host
+          openldap_host = if openldap_hosts.length is 1 then openldap_hosts[0] else if openldap_index isnt -1 then openldap_hosts[openldap_index]
+          throw new Error "Could not find a suitable OpenLDAP server" unless openldap_host
+          config.database_module = "openldap_#{openldap_host.split('.')[0]}"
+        config.principals ?= []
+      # Now that we have db_modules and realms, filter and validate the used db_modules
+      database_modules = for realm, config of kdc_conf.realms
+        config.database_module
+      for name, config of kdc_conf.dbmodules
+        # Filter
+        if database_modules.indexOf(name) is -1
+          delete kdc_conf.dbmodules[name]
+          continue
+        # Validate
+        throw new Error "Kerberos property `krb5.dbmodules.#{name}.kdc_master_key` is required" unless config.kdc_master_key
+        throw new Error "Kerberos property `krb5.dbmodules.#{name}.ldap_kerberos_container_dn` is required" unless config.ldap_kerberos_container_dn
+        throw new Error "Kerberos property `krb5.dbmodules.#{name}.ldap_kdc_dn` is required" unless config.ldap_kdc_dn
+        throw new Error "Kerberos property `krb5.dbmodules.#{name}.ldap_kadmind_dn` is required" unless config.ldap_kadmind_dn
+      console.log kdc_conf
 
 ## IPTables
 
@@ -185,7 +243,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
         return next err if err
         next err, if written then ctx.OK else ctx.PASS
 
-    module.exports.push name: 'Krb5 Server # LDAP Insert Entries', timeout: 100000, callback: (ctx, next) ->
+    module.exports.push name: 'Krb5 Server # LDAP Insert Entries', timeout: -1, callback: (ctx, next) ->
       {etc_krb5_conf, kdc_conf} = ctx.config.krb5
       modified = false
       each(etc_krb5_conf.realms)
@@ -331,7 +389,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
       do_kdc = ->
         ctx.log 'Update /var/kerberos/krb5kdc/kdc.conf'
         ctx.ini
-          content: kdc_conf
+          content: safe_etc_krb5_conf kdc_conf
           destination: '/var/kerberos/krb5kdc/kdc.conf'
           stringify: misc.ini.stringify_square_then_curly
           backup: true

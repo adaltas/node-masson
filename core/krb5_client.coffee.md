@@ -92,72 +92,17 @@ Example:
       ctx.config.krb5 ?= {}
       etc_krb5_conf = misc.merge {}, module.exports.etc_krb5_conf, ctx.config.krb5.etc_krb5_conf
       ctx.config.krb5.etc_krb5_conf = etc_krb5_conf
-      openldap_hosts = ctx.hosts_with_module 'masson/core/openldap_server_krb5'
-      # Generate dynamic "krb5.dbmodules" object
-      for host in openldap_hosts
-        {kerberos_container_dn, users_container_dn, manager_dn, manager_password} = ctx.hosts[host].config.openldap_krb5
-        name = "openldap_#{host.split('.')[0]}"
-        scheme = if ctx.hosts[host].has_module 'masson/core/openldap_server_tls' then "ldap://" else "ldaps://"
-        ldap_server =  "#{scheme}#{host}"
-        etc_krb5_conf.dbmodules[name] = misc.merge
-          'db_library': 'kldap'
-          'ldap_kerberos_container_dn': kerberos_container_dn
-          'ldap_kdc_dn': users_container_dn
-           # this object needs to have read rights on
-           # the realm container, principal container and realm sub-trees
-          'ldap_kadmind_dn': users_container_dn
-           # this object needs to have read and write rights on
-           # the realm container, principal container and realm sub-trees
-          'ldap_service_password_file': "/etc/krb5.d/#{name}.stash.keyfile"
-          # 'ldap_servers': 'ldapi:///'
-          'ldap_servers': ldap_server
-          'ldap_conns_per_server': 5
-          'manager_dn': manager_dn
-          'manager_password': manager_password
-        , etc_krb5_conf.dbmodules[name]
-        ldapservers = etc_krb5_conf.dbmodules[name].ldap_servers
-        etc_krb5_conf.dbmodules[name].ldap_servers = ldapservers.join ' ' if Array.isArray ldapservers
       # Merge global with server-based configuration
       krb5_server_hosts = ctx.hosts_with_module "masson/core/krb5_server"
       for krb5_server_host in krb5_server_hosts
-        {realms} = misc.merge {}, ctx.hosts[krb5_server_host].config.krb5.etc_krb5_conf
+        {realms} = misc.merge {}, ctx.config.servers[krb5_server_host].krb5.etc_krb5_conf
         for realm, config of realms
           delete config.database_module
           realms[realm].kdc ?= krb5_server_host
           realms[realm].kdc = [realms[realm].kdc] unless Array.isArray realms[realm].kdc
           realms[realm].admin_server ?= krb5_server_host
           realms[realm].default_domain ?= realm.toLowerCase()
-        misc.merge etc_krb5_conf.realms, realms
-      for realm, config of etc_krb5_conf.realms
-        # Check if realm point to a database_module
-        if config.database_module
-          # Make sure this db module is registered
-          dbmodules = Object.keys(etc_krb5_conf.dbmodules).join ','
-          valid = etc_krb5_conf.dbmodules[config.database_module]?
-          throw new Error "Property database_module \"#{config.database_module}\" not in list: \"#{dbmodules}\"" unless valid
-        # Set a database module if we manage the realm locally
-        if config.admin_server is ctx.config.host
-          # Valid if
-          # *   only one OpenLDAP server accross the cluster or
-          # *   an OpenLDAP server in this host
-          openldap_index = openldap_hosts.indexOf ctx.config.host
-          openldap_host = if openldap_hosts.length is 1 then openldap_hosts[0] else if openldap_index isnt -1 then openldap_hosts[openldap_index]
-          throw new Error "Could not find a suitable OpenLDAP server" unless openldap_host
-          config.database_module = "openldap_#{openldap_host.split('.')[0]}"
-        config.principals ?= []
-      # Now that we have db_modules and realms, filter and validate the used db_modules
-      database_modules = for realm, config of etc_krb5_conf.realms
-        config.database_module
-      for name, config of etc_krb5_conf.dbmodules
-        # Filter
-        if database_modules.indexOf(name) is -1
-          delete etc_krb5_conf.dbmodules[name]
-          continue
-        # Validate
-        throw new Error "Kerberos property `krb5.dbmodules.#{name}.kdc_master_key` is required" unless config.kdc_master_key
-        throw new Error "Kerberos property `krb5.dbmodules.#{name}.ldap_kerberos_container_dn` is required" unless config.ldap_kerberos_container_dn
-        throw new Error "Kerberos property `krb5.dbmodules.#{name}.ldap_kdc_dn` is required" unless config.ldap_kdc_dn
-        throw new Error "Kerberos property `krb5.dbmodules.#{name}.ldap_kadmind_dn` is required" unless config.ldap_kadmind_dn
+        etc_krb5_conf.realms = misc.merge {}, realms, etc_krb5_conf.realms
       # Generate the "domain_realm" property
       for realm of etc_krb5_conf.realms
         etc_krb5_conf.domain_realm[".#{realm.toLowerCase()}"] = realm
