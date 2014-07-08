@@ -18,14 +18,45 @@ an implementation of either one of the Java SE, Java EE or Java ME platforms[1]
 released by Oracle Corporation in the form of a binary product aimed at Java 
 developers on Solaris, Linux, Mac OS X or Windows.
 
+```json
+{
+  "java": {
+    "java_home": "/usr/java/default"
+    "open_jdk": false
+    "oracle_jdk": "./java/jdk-6u45-linux-x64-rpm.bin"
+  }
+}
+```
+
+[Oracle JDK 6]: http://www.oracle.com/technetwork/java/javasebusiness/downloads/java-archive-downloads-javase6-419409.html#jdk-6u45-oth-JPR
+[Oracle JDK 7]: http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html
+
     module.exports.push module.exports.configure = (ctx) ->
       require('../core/proxy').configure ctx
-      ctx.config.java ?= {}
-      ctx.config.java.java_home ?= '/usr/java/default'
-      ctx.config.java.proxy = ctx.config.proxy.http_proxy if typeof ctx.config.java is 'undefined'
-      throw new Error "Configuration property 'java.location' is required." unless ctx.config.java.location
-      throw new Error "Configuration property 'java.version' is required." unless ctx.config.java.version
+      java = ctx.config.java ?= {}
+      # ctx.config.java['openjdk-1.7.0'] ?= true
+      # ctx.config.java.java_home ?= '/usr/java/default'
+      # Shared
+      java.java_home ?= '/usr/lib/jvm/java'
+      java.proxy = ctx.config.proxy.http_proxy if typeof ctx.config.java is 'undefined'
+      # OpenJDK
+      java.openjdk ?= true
+      # throw new Error "Configuration property 'java.location' is required." unless ctx.config.java.location
+      # throw new Error "Configuration property 'java.version' is required." unless ctx.config.java.version
       # ctx.config.java.version ?= (/\w+-([\w\d]+)-/.exec path.basename ctx.config.java.location)[0]
+      # JCE
+      ctx.log "JCE not configured" unless ctx.config.java.jce_local_policy or ctx.config.java.jce_us_export_policy
+        
+
+## OpenJDK
+
+    module.exports.push name: 'Java # OpenJDK', callback: (ctx, next) ->
+      {openjdk} = ctx.config.java
+      return next() unless openjdk
+      ctx.service
+        name: 'java-1.7.0-openjdk-devel'
+      , (err, serviced) ->
+        return next err, if serviced then ctx.OK else ctx.PASS
 
 ## Remove OpenJDK
 
@@ -33,6 +64,8 @@ At this time, it is recommanded to run Hadoop against the Oracle Java JDK. Since
 come with the OpenJDK installed and to avoid any ambiguity, we simply remove the OpenJDK.
 
     module.exports.push name: 'Java # Remove OpenJDK', callback: (ctx, next) ->
+      {openjdk} = ctx.config.java
+      return next() if openjdk
       ctx.execute
         cmd: 'yum list installed | grep openjdk'
         code_skipped: 1
@@ -52,7 +85,7 @@ inside the configuration. The properties "jce\_local\_policy" and
 "jce\_us\_export_policy" must be modified accordingly with an appropriate location.
 
     module.exports.push name: 'Java # Install', timeout: -1, callback: (ctx, next) ->
-      {proxy, location, version} = ctx.config.java
+      {proxy, jdk} = ctx.config.java # location, version
       ctx.log "Check if java is here and which version it is"
       ctx.execute
         cmd: 'ls -d /usr/java/jdk*'
@@ -63,29 +96,38 @@ inside the configuration. The properties "jce\_local\_policy" and
         if installed_version
           installed_version = /jdk(.*)/.exec(installed_version)[1]
           installed_version = installed_version.replace('_', '').replace('0', '')
-          version = version.replace('_', '').replace('0', '')
+          version = jdk.version.replace('_', '').replace('0', '')
           unless semver.gt version, installed_version
             return next null, ctx.PASS
-        action = if url.parse(location).protocol is 'http:' then 'download' else 'upload'
+        action = if url.parse(jdk.location).protocol is 'http:' then 'download' else 'upload'
         ctx.log "Java #{action}"
+        tmpdir = "/tmp/masson_java_#{Date.now()}"
+        destination = "#{tmpdir}/#{path.basename jdk.location}"
         ctx[action]
-          source: location
+          source: jdk.location
           proxy: proxy
-          destination: "/tmp/#{path.basename location}"
+          destination: "#{destination}"
           binary: true
         , (err, downloaded) ->
           return next err if err
           ctx.log 'Install jdk in /usr/java'
           ctx.execute
-            cmd: "yes | sh /tmp/#{path.basename location}"
-          , (err, executed) ->
-            return next err if err
-            ctx.remove
-              destination: "/tmp/#{path.basename location}"
-            , (err, executed) ->
-              next err, ctx.OK
+            # cmd: "yes | sh /tmp/#{path.basename jdk.location}"
+            cmd: """
+            mkdir -p /usr/java
+            tar xzf #{destination} -C #{tmpdir}
+            rm -rf #{destination}
+            version=`ls #{tmpdir}`
+            mv #{tmpdir}/$version /usr/java
+            ln -sf /usr/java/${version} /usr/java/latest
+            ln -sf /usr/java/$version /usr/java/default
+            rm -rf #{tmpdir}
+            """
+            trap_on_error: true
+          , (err, executed, stdout) ->
+            return next err, ctx.OK
 
-##Java JCE
+## Java JCE
 
 The Java Cryptography Extension (JCE) provides a framework and implementation for encryption, 
 key generation and key agreement, and Message Authentication Code (MAC) algorithms. JCE 
@@ -98,29 +140,32 @@ reference it inside the configuration. The properties "jce\_local\_policy" and
 "jce\_us\_export_policy" must be modified accordingly with an appropriate location.
 
     module.exports.push name: 'Java # Java JCE', timeout: -1, callback: (ctx, next) ->
-      {java_home, jce_local_policy, jce_us_export_policy} = ctx.config.java
-      return next Error "JCE not configured" unless jce_local_policy or jce_us_export_policy
+      {jdk, jce_local_policy, jce_us_export_policy} = ctx.config.java
+      return next() unless jce_local_policy or jce_us_export_policy
+      return next() unless jdk
+      jdk_home = "/usr/java/jdk#{jdk.version}"
       ctx.log "Download jce-6 Security JARs"
       ctx.upload [
         source: jce_local_policy
-        destination: "#{java_home}/jre/lib/security/local_policy.jar"
+        destination: "#{jdk_home}/jre/lib/security/local_policy.jar"
         binary: true
-        sha1: 'c557a5da9075f41ede10829e9ff562b132b3246d'
+        sha1: true
       ,
         source: jce_us_export_policy
-        destination: "#{java_home}/jre/lib/security/US_export_policy.jar"
+        destination: "#{jdk_home}/jre/lib/security/US_export_policy.jar"
         binary: true
-        sha1: '1b5eb80bd3699de9b668d5f7b1a1d89681a91190'
+        sha1: true
       ], (err, downloaded) ->
         next err, if downloaded then ctx.OK else ctx.PASS
 
     module.exports.push name: 'Java # Env', timeout: -1, callback: (ctx, next) ->
+      {java_home} = ctx.config.java
       ctx.write
         destination: '/etc/profile.d/java.sh'
-        mode: 644
+        mode: 0o644
         content: """
-        export JAVA_HOME=/usr/java/default
-        export PATH=$PATH:/usr/java/default/bin
+        export JAVA_HOME=#{java_home}
+        export PATH=$PATH:#{java_home}/bin
         """
       , (err, written) ->
         next err, if written then ctx.OK else ctx.PASS
