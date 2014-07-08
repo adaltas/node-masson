@@ -177,7 +177,7 @@ service will be restarted if this action had any effect.
       return next() unless banner
       ctx.log 'Upload banner content'
       banner.content += '\n\n' if banner.content
-      ctx.upload banner, (err, uploaded) ->
+      ctx.write banner, (err, uploaded) ->
         return next err if err
         ctx.log 'Write banner path to configuration'
         ctx.write
