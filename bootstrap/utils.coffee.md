@@ -112,8 +112,6 @@ ctx.waitForExecution cmd: "test -f /tmp/sth", (err) ->
             code: options.code or 0
             code_skipped: options.code_skipped
           , (err, ready, stdout, stderr) ->
-            # running = false
-            #return if not err and not ready
             if not err and not ready
               setTimeout run, options.interval
               return
@@ -157,10 +155,10 @@ ctx.waitIsOpen ["master1.hadoop", "master2.hadoop"], 8020, (err) ->
 
       ctx.waitIsOpen = ->
         if typeof arguments[0] is 'string'
-          if Array.isArray port
+          if Array.isArray arguments[1]
              # host, ports, [options], callback
             servers = for port in arguments[1]
-              [host: arguments[0], port: port]
+              host: arguments[0], port: port
             options = arguments[2]
             callback = arguments[3]
           else
