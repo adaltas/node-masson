@@ -17,24 +17,31 @@ Configuration is declared through the key "iptables" and may contains the follow
 
 *   `iptables.startup` (boolean|string)
     Start the service on system startup, default to "2,3,4,5".
-*   `iptables.action`
-    Action to apply to the service, default to "start".
+*   `iptables.action` (string)
+    Action to apply to the service, possible vales are "start" and "stop",
+    default to "start".
+*   `iptables.rules` (array)
+    A list of rules to be added to iptables.
 
 Example:
 ```json
 {
   "iptables": {
     "startup": "2,3,4,5",
-    "action": "stop"
+    "action": "stop",
+    "rules": [
+      { "chain": "INPUT", "jump": "ACCEPT", "source": "10.10.10.0/24", "comment": "Local" }
+    ]
   }
 }
 ```
 
     module.exports.push module.exports.configure = (ctx) ->
-      ctx.config.iptables ?= {}
-      ctx.config.iptables.action ?= 'start'
+      iptables = ctx.config.iptables ?= {}
+      iptables.action ?= 'start'
       # Service supports chkconfig, but is not referenced in any runlevel
-      ctx.config.iptables.startup ?= ''
+      iptables.startup ?= ''
+      iptables.rules ?= []
 
 ## Package
 
@@ -48,3 +55,17 @@ The package "iptables" is installed.
         action: action
       , (err, serviced) ->
         next err, if serviced then ctx.OK else ctx.PASS
+
+## Rules
+
+Add user defined rules to IPTables.
+
+    module.exports.push name: 'Iptables # Rules', timeout: -1, callback: (ctx, next) ->
+      {rules, action} = ctx.config.iptables
+      return next null, ctx.PASS unless rules.length
+      ctx.iptables
+        rules: rules
+        if: action is 'start'
+      , (err, configured) ->
+        next err, if configured then ctx.OK else ctx.PASS
+
