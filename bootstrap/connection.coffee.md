@@ -68,6 +68,12 @@ Example:
       ctx.config.bootstrap.public_key ?= []
       ctx.config.bootstrap.public_key = [ctx.config.bootstrap.public_key] if typeof ctx.config.bootstrap.public_key is 'string'
       ctx.config.bootstrap.cmd ?= 'su -'
+      # ctx.config.bootstrap.ssh ?=
+      #     host: ctx.config.ip or ctx.config.host
+      #     private_key: null # make sure "bootstap.private_key" isnt used by ssh2
+      #     username: 'root'
+      #     password: null
+      #     readyTimeout: 120 * 1000 # default to 10s, now 2mn
 
 ## Connection
 
