@@ -28,6 +28,7 @@ layout: module
           source = "http://download.virtualbox.org/virtualbox/#{version}/VBoxGuestAdditions_#{version}.iso"
           destination = "/tmp/VBoxGuestAdditions_#{version}.iso"
           cmd = """
+            yum install -y gcc kernel-* # might need to reboot
             curl -L #{source} -o #{destination}
             mount #{destination} -o loop /mnt
             cd /mnt
