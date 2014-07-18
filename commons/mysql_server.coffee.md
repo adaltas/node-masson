@@ -181,7 +181,7 @@ Remove test database and access to it? [Y/n] y
       ctx.ssh.shell (err, stream) ->
         stream.write '/usr/bin/mysql_secure_installation\n'
         data = ''
-        error = null
+        error = exit = null
         stream.on 'data', (data, extended) ->
           ctx.log[if extended is 'stderr' then 'err' else 'out'].write data
           switch
@@ -214,12 +214,14 @@ Remove test database and access to it? [Y/n] y
               stream.write "#{if reload_privileges then 'y' else 'n'}\n"
               data = ''
             when /All done/.test data
-              stream.end()
+              stream.end 'exit\n' unless exit
+              exit = true
             when /ERROR/.test data
               return if data.toString().indexOf('ERROR 1008 (HY000) at line 1: Can\'t drop database \'test\'') isnt -1
               error = new Error data
-              stream.end()
-        stream.on 'close', ->
+              stream.end 'exit\n' unless exit
+              exit = true
+        stream.on 'exit', ->
           return next error if error
           if disallow_remote_root_login then return next null, if modified then ctx.OK else ctx.PASS
           # Note, "WITH GRANT OPTION" is required for root

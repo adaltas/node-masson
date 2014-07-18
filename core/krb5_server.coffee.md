@@ -382,7 +382,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
             return next err if err
             cmd = "kdb5_ldap_util -D \"#{manager_dn}\" -w #{manager_password} stashsrvpw -f #{ldap_service_password_file} #{ldap_kadmind_dn}"
             ctx.log "Run #{cmd}"
-            reentered = false
+            reentered = done = false
             stream.write "#{cmd}\n"
             stream.on 'data', (data, stderr) ->
               ctx.log[if stderr then 'err' else 'out'].write data
@@ -392,9 +392,10 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
               else if /Re-enter password for/.test data
                 stream.write "#{kdc_master_key}\n\n"
                 reentered = true
-              else if reentered
-                stream.end()
-            stream.on 'close', ->
+              else if reentered and not done
+                done = true
+                stream.end 'exit\n'
+            stream.on 'exit', ->
               do_compare()
         do_compare = ->
           unless keyfileContent
@@ -464,12 +465,12 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
       touch()
 
     module.exports.push name: 'Krb5 Server # Admin principal', timeout: -1, callback: (ctx, next) ->
-      {etc_krb5_conf} = ctx.config.krb5
+      {etc_krb5_conf, kdc_conf} = ctx.config.krb5
       modified = false
       each(etc_krb5_conf.realms)
       .on 'item', (realm, config, next) ->
-        {database_module, kadmin_principal, kadmin_password} = config
-        return next() unless database_module
+        {kadmin_principal, kadmin_password} = config
+        return next() unless kdc_conf.realms[realm]?.database_module
         ctx.log "Create principal #{kadmin_principal}"
         ctx.krb5_addprinc
           # We dont provide an "kadmin_server". Instead, we need
