@@ -1,6 +1,6 @@
 {
   "name": "masson",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Module execution engine for cluster deployments.",
   "homepage": "https://github.com/wdavidw/node-masson",
   "bugs": "https://github.com/wdavidw/node-masson/issues",
