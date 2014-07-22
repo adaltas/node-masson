@@ -81,28 +81,26 @@ Run = (config, params) ->
               else emit_action statusOrMsg
               next err
             run = =>
-              # Synchronous action
-              if action.callback.length is 1
-                merge action, action.callback.call ctx, ctx
-                process.nextTick ->
-                  action.timeout = -1
-                  done null, ctx.DISABLED
-              # Asynchronous action
-              else
-                merge action, action.callback.call ctx, ctx, (err, statusOrMsg) =>
-                  actionRun.end() if statusOrMsg is ctx.STOP
-                  done err, statusOrMsg
-            # Prevent "Maximum call stack size exceeded" when
-            # timeout, interval and setImmediate is used inside the callback
+              try
+                # Synchronous action
+                if action.callback.length is 1
+                  merge action, action.callback.call ctx, ctx
+                  process.nextTick ->
+                    action.timeout = -1
+                    done null, ctx.DISABLED
+                # Asynchronous action
+                else
+                  merge action, action.callback.call ctx, ctx, (err, statusOrMsg) =>
+                    actionRun.end() if statusOrMsg is ctx.STOP
+                    done err, statusOrMsg
+              catch e then done e
             # Timeout, default to 100s
             action.timeout ?= 100000
             if action.timeout > 0
               timeout = setTimeout ->
                 done new Error 'TIMEOUT'
               , action.timeout
-            try
-              setImmediate run
-            catch e then done e
+            run()
           .on 'both', (err) =>
             @emit 'server', ctx, if err then ctx.FAILED else ctx.OK
             if err 
