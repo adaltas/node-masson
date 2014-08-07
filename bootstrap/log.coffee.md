@@ -9,21 +9,48 @@ Gather system information
 
     fs = require 'fs'
     pad = require 'pad'
+    path = require 'path'
+    mustache = require 'mustache'
     mecano = require 'mecano'
     module.exports = []
     module.exports.push 'masson/bootstrap/mecano'
 
+## Configure
+
+*   `basedir`   
+    Directory where log files will be stored, default to "./logs".   
+*   `filename_stdout`   
+    Name of the file to redirect stdout, default to "{{logs.host_reversed}}.stdout.log".   
+*   `filename_stderr`   
+    Name of the file to redirect stderr, default to "{{logs.host_reversed}}.stderr.log".   
+
+All properties are optional and are integrated with the moustache templating
+engine. All properties from the configuration are exposed to moustache with the
+additionnal "logs.host_reversed" property used in the default filename to
+preserve alphanumerical ordering of files.
+
+    module.exports.push required: true, callback: (ctx) ->
+      logs = ctx.config.logs ?= {}
+      logs.basedir ?= './logs'
+      logs.host_reversed = ctx.config.host.split('.').reverse().join('.')
+      logs.filename_stdout ?= '{{logs.host_reversed}}.stdout.log'
+      logs.filename_stderr ?= '{{logs.host_reversed}}.stderr.log'
+      # Rendering
+      logs.basedir = mustache.render logs.basedir, ctx.config
+      logs.filename_stdout = mustache.render logs.filename_stdout, ctx.config
+      logs.filename_stderr = mustache.render logs.filename_stderr, ctx.config
+
     module.exports.push name: 'Bootstrap # Log', required: true, callback: (ctx, next) ->
+      {basedir, filename_stdout, filename_stderr} = ctx.config.logs
       mecano.mkdir
-        destination: './logs'
+        destination: "#{basedir}"
       , (err, created) ->
         return next err if err
-        host = ctx.config.host.split('.').reverse().join('.')
         # Add log interface
         ctx.log = log = (msg) ->
           log.out.write "#{msg}\n"
-        log.out = fs.createWriteStream "./logs/#{host}_out.log"
-        log.err = fs.createWriteStream "./logs/#{host}_err.log"
+        log.out = fs.createWriteStream path.resolve basedir, filename_stdout
+        log.err = fs.createWriteStream path.resolve basedir, filename_stderr
         close = ->
           setTimeout ->
             log.out.close()
