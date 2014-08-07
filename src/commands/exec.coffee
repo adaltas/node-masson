@@ -9,11 +9,12 @@ params = params.parse()
 
 module.exports = ->
   config.servers.forEach (server) ->
-    config = merge {}, server,
-      host: server.ip or server.host # Prefer ip or host in case dns resolution is not yet active
+    c = merge {}, config.connection,
       username: 'root'
-      password: null
-    connect config, (err, ssh) ->
+      host: server.ip or server.host
+      port: 22
+      privateKey: config.connection.private_key
+    connect c, (err, ssh) ->
       return util.print "\x1b[31m#{err.message}\x1b[39m\n" if err
       exec ssh, params.subcommand, (err, stdout, stderr) ->
         util.print "\n"
