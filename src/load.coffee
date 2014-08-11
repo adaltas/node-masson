@@ -21,6 +21,6 @@ module.exports = (request) ->
     m.require absrequest
   catch e
     if e instanceof SyntaxError and e.location
-      location = path.relative process.cwd(), absrequest
+      location = path.relative process.cwd(), e.filename
       throw new Error "#{location}:#{e.location.first_line}:#{e.location.first_column} #{e.message}"
     else throw e
