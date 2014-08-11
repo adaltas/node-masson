@@ -74,7 +74,7 @@ Run = (config, params) ->
             done = (err, statusOrMsg) =>
               clearTimeout timeout if timeout
               if err and (retry is true or ++attempts < retry)
-                ctx.log "Get error #{err.message}, retry #{attempts} of #{retry}"
+                ctx.log? "Get error #{err.message}, retry #{attempts} of #{retry}"
                 return setTimeout(run, 1) 
               if err
               then emit_action ctx.FAILED
