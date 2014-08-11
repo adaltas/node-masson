@@ -13,6 +13,8 @@
     "each": "latest",
     "ldapjs": "latest",
     "mecano": "latest",
+    "multimatch": "latest",
+    "mustache": "latest",
     "pad": "latest",
     "parameters": "latest",
     "regexp-quote": "latest",
