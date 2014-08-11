@@ -12,6 +12,7 @@ restart. The restart is handle by Masson and the installation procedure will
 continue as soon as an SSH connection is again available.
 
     fs = require 'fs'
+    # path = require 'path'
     {exec} = require 'child_process'
     misc = require 'mecano/lib/misc'
     connect = require 'ssh2-connect'
@@ -39,6 +40,11 @@ Options include:
 
 *   `cmd` (string)   
     Command used to become the root user on the remote server, default to "su -".   
+*   `private_key` (string)   
+    Private key for Ryba, optional, default to the value defined by
+    "bootstrap.privateKey_location".   
+*   `private_key_location` (string)   
+    Path where to read the private key for Ryba, default to "~/.ssh/id_rsa".   
 *   `public_key` (array|string)   
     List of public keys to be written on the remote root "authorized_keys" file.   
 *   `password` (string)   
@@ -61,19 +67,23 @@ Example:
 }
 ```
 
-    module.exports.push (ctx) ->
-      ctx.config.bootstrap ?= {}
-      ctx.config.bootstrap.host ?= if ctx.config.ip then ctx.config.ip else ctx.config.host
-      ctx.config.bootstrap.port ?= ctx.config.port or 22
-      ctx.config.bootstrap.public_key ?= []
-      ctx.config.bootstrap.public_key = [ctx.config.bootstrap.public_key] if typeof ctx.config.bootstrap.public_key is 'string'
-      ctx.config.bootstrap.cmd ?= 'su -'
-      # ctx.config.bootstrap.ssh ?=
-      #     host: ctx.config.ip or ctx.config.host
-      #     private_key: null # make sure "bootstap.private_key" isnt used by ssh2
-      #     username: 'root'
-      #     password: null
-      #     readyTimeout: 120 * 1000 # default to 10s, now 2mn
+    module.exports.push required: true, callback: (ctx) ->
+      ctx.config.connection ?= {}
+      ctx.config.connection.username ?= 'root'
+      ctx.config.connection.host ?= if ctx.config.ip then ctx.config.ip else ctx.config.host
+      ctx.config.connection.port ?= ctx.config.port or 22
+      ctx.config.connection.private_key ?= null
+      ctx.config.connection.private_key_location ?= '~/.ssh/id_rsa'
+      ctx.config.connection.public_key ?= []
+      ctx.config.connection.public_key = [ctx.config.connection.public_key] if typeof ctx.config.connection.public_key is 'string'
+      ctx.config.connection.retry = 3
+      ctx.config.connection.wait = 1000
+      ctx.config.connection.bootstrap ?= {}
+      ctx.config.connection.bootstrap.host ?= if ctx.config.ip then ctx.config.ip else ctx.config.host
+      ctx.config.connection.bootstrap.cmd ?= 'su -'
+      ctx.config.connection.bootstrap.username ?= null
+      ctx.config.connection.bootstrap.password ?= null
+      ctx.config.connection.bootstrap.retry = 3
 
 ## Connection
 
@@ -83,7 +93,7 @@ However, it is important in such circumstances that we guarantee no
 existing key would be overwritten.
 
     module.exports.push name: 'Bootstrap # Connection', required: true, timeout: -1, callback: (ctx, next) ->
-      {private_key} = ctx.config.bootstrap
+      {private_key, private_key_location} = ctx.config.connection
       close = -> ctx.ssh?.end()
       ctx.run.on 'error', close
       ctx.run.on 'end', close
@@ -91,58 +101,45 @@ existing key would be overwritten.
       has_rebooted = false
       modified = false
       do_private_key = ->
-        return do_ssh() unless private_key
-        ctx.log "Place SSH private key inside \"~/.ssh\""
-        # Handle tilde
-        misc.path.normalize '~/.ssh/id_rsa', (id_rsa) ->
-          fs.readFile id_rsa, 'ascii', (err, content) ->
-            return next Error err if err and err.code isnt 'ENOENT'
-            return next Error "Could not overwritte existing key" if not err and content.trim() isnt private_key.trim()
-            return do_ssh() if content is private_key
-            exec """
-            mkdir -p ~/.ssh
-            chmod 700 ~/.ssh
-            echo '#{private_key}' > ~/.ssh/id_rsa
-            chmod 600 ~/.ssh/id_rsa
-            """, (err, stdout, stderr) ->
-              return next err if err
-              do_ssh()
-      do_ssh = ->
-        attempts++
-        ctx.log "SSH login #{attempts} to root@#{ctx.config.host}"
-        config = misc.merge {}, ctx.config.bootstrap,
-          host: ctx.config.ip or ctx.config.host
-          private_key: null # make sure "bootstap.private_key" isnt used by ssh2
-          username: 'root'
-          password: null
-          readyTimeout: 120 * 1000 # default to 10s, now 2mn
+        return do_connect() if private_key
+        misc.path.normalize private_key_location, (location) ->
+          fs.readFile location, 'ascii', (err, content) ->
+            return next Error "Private key doesnt exists: #{JSON.encode location}" if err and err.code is 'ENOENT'
+            return next err if err
+            ctx.config.connection.private_key = content
+            do_connect()
+      do_connect = ->
+        config = misc.merge {}, ctx.config.connection,
+          privateKey: ctx.config.connection.private_key
         connect config, (err, connection) ->
-          # First attempt failed, we go collecting bootstrap information on err
-          return do_collect() if err and attempts is 1
-          # Once we are sure the server went for reboot, we wait for a new connection
-          if has_rebooted and err and (['ETIMEDOUT', 'ECONNREFUSED', 'EHOSTUNREACH'].indexOf(err.code) isnt -1)
-            ctx.log 'Wait for reboot'
-            return setTimeout do_ssh, 10
-          # We detect a reboot
-          if attempts isnt 1 and not has_rebooted 
-            has_rebooted = true if err
-            return setTimeout do_ssh, 10
-          return next err if err
+          return do_bootstrap() if err
           ctx.log "SSH connected"
           ctx.ssh = connection
-          next null, if modified then ctx.OK else ctx.PASS
-      do_collect = ->
-        modified = true
-        ctx.log 'Collect login information'
-        collect ctx.config.bootstrap, (err) ->
-          return next err if err
-          do_boot()
-      do_boot = ->
-        ctx.log 'Deploy ssh key'
+          next null, ctx.PASS
+      do_bootstrap = ->
         bootstrap ctx, (err) ->
           return next err if err
-          ctx.log 'Reboot and login'
-          do_ssh()
+          do_wait_reboot()
+      do_wait_reboot = ->
+        ctx.log 'Wait for reboot'
+        config = misc.merge {}, ctx.config.connection,
+          privateKey: ctx.config.connection.private_key
+          retry: 3
+        connect config, (err, conn) ->
+          return do_connect_after_bootstrap() if err
+          conn.end()
+          conn.on 'error', do_wait_reboot
+          conn.on 'end', do_wait_reboot
+      do_connect_after_bootstrap = ->
+        ctx.log 'Connect when rebooted'
+        config = misc.merge {}, ctx.config.connection,
+          privateKey: ctx.config.connection.private_key
+          retry: true
+        connect config, (err, conn) ->
+          return next err if err
+          ctx.log "SSH connected"
+          ctx.ssh = conn
+          next null, ctx.OK
       do_private_key()
 
 
