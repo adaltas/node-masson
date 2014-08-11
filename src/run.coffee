@@ -1,6 +1,7 @@
 
 crypto = require 'crypto'
 util = require 'util'
+multimatch = require 'multimatch'
 pad = require 'pad'
 each = require 'each'
 {EventEmitter} = require 'events'
@@ -54,7 +55,8 @@ Run = (config, params) ->
       .parallel(true)
       .on 'item', (server, next) =>
         # Filter by hosts
-        return next() if params.hosts? and params.hosts.indexOf(server.host) is -1
+        # return next() if params.hosts? and params.hosts.indexOf(server.host) is -1
+        return next() if params.hosts? and multimatch(server.host, params.hosts).indexOf(server.host) is -1
         ctx = contexts[server.host]
         ctx.run = @
         @emit 'context', ctx
