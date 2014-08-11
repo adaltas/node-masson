@@ -14,16 +14,21 @@ module.exports = parameters
   action: 'command'
   actions: [
     name: 'help'
+    description: "Print this help and exit"
     main:
       name: 'subcommand'
       description: 'Print the help relative to the command'
-    description: "Print this help and exit"
   ,
     name: 'exec'
+    description: "Distribute a shell command"
     main:
       name: 'subcommand'
       description: 'The subcommand to execute'
-    description: "Distribute a shell command"
+    options: [
+      name: 'hosts', shortcut: 'h'
+      description: 'Limit to a list of server hostnames'
+      required: true
+    ]
   ,
     name: 'tree'
     description: "Print the execution plan"
@@ -33,7 +38,7 @@ module.exports = parameters
       required: true
     ,
       name: 'host', shortcut: 'h'
-      description: 'Limit to a list of server hostnames'
+      description: 'Server hostname associated with the plan'
       required: true
     ,
       name: 'modules', shortcut: 'm', type: 'array'
