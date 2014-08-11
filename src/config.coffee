@@ -25,6 +25,7 @@ try
   config = merge {}, configs...
   config.servers = for k, v of config.servers
     v.host ?= k
+    v.shortname ?= k.split('.')[0]
     v
   for server in config.servers
     config.servers[server.host] = server
