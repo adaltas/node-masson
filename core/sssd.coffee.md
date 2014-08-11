@@ -156,6 +156,7 @@ default overwritten unless the "sssd.merge" is `true`.
         destination: '/etc/sssd/sssd.conf'
         merge: merge
         mode: 0o600
+        backup: true
       , (err, written) ->
         # return next err, ctx.PASS unless written
         options =
