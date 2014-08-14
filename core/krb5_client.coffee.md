@@ -141,13 +141,18 @@ which create a Kerberos file with complementary information.
 
 ## Host Principal
 
-Create a user principal for this host. The principal is named like "host/{hostname}@{realm}".
+Create a user principal for this host. The principal is named like 
+"host/{hostname}@{realm}". Only apply to the default realm 
+("krb5.etc\_krb5\_conf.libdefaults.default_realm") unless the property
+"etc_krb5_conf[realm].create\_hosts" is set.
 
     module.exports.push name: 'Krb5 Client # Host Principal', timeout: -1, callback: (ctx, next) ->
       {etc_krb5_conf} = ctx.config.krb5
+      default_realm = etc_krb5_conf.libdefaults.default_realm
       modified = false
       each(etc_krb5_conf.realms)
       .on 'item', (realm, config, next) ->
+        return next() unless default_realm is realm or not config.create_hosts
         {kadmin_principal, kadmin_password, admin_server} = config
         cmd = misc.kadmin
           realm: realm
@@ -184,7 +189,7 @@ Populate the Kerberos database with new principals.
       each(etc_krb5_conf.realms)
       .on 'item', (realm, config, next) ->
         {kadmin_principal, kadmin_password, admin_server, principals} = config
-        return next() if principals.length is 0
+        return next() unless principals?.length > 0
         principals = for principal in principals
           misc.merge
             kadmin_principal: kadmin_principal
