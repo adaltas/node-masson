@@ -5,7 +5,9 @@ layout: module
 
 # Bootstrap Log
 
-Gather system information
+Gather system information.
+
+TODO: look at https://github.com/trentm/node-bunyan
 
     fs = require 'fs'
     pad = require 'pad'
