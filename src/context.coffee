@@ -32,7 +32,7 @@ class Context extends EventEmitter
     for host, ctx of @hosts
       servers.push host if ctx.modules.indexOf(module) isnt -1
     throw new Error "Too many hosts with module #{module}: #{servers.length}" if servers.length > 1
-    throw new Error "Expect #{qtt} host(s) for module #{module} but got #{servers.length}" if strict and servers.length isnt 1
+    throw new Error "No host found for module #{module}" if strict and servers.length is 0
     servers[0]
   hosts_with_module: (module, qtt, strict) ->
     servers = []
