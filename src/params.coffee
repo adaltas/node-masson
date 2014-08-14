@@ -27,7 +27,6 @@ module.exports = parameters
     options: [
       name: 'hosts', shortcut: 'h'
       description: 'Limit to a list of server hostnames'
-      required: true
     ]
   ,
     name: 'tree'
