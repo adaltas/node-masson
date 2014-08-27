@@ -16,13 +16,10 @@ module.exports = (ctx, callback) ->
       stream.stderr.pipe ctx.log.err, end: false
       exit = 0
       stream.stderr.on 'end', ->
-        console.log 'EEEEENNNNDD stderr'
         conn.end() if ++exit is 3
       stream.on 'exit', (code, signal) ->
-        console.log 'EEXXXXXIITT', code
         conn.end() if ++exit is 3
       stream.on 'end', ->
-        console.log 'EEEEENNNNDD stdout'
         conn.end() if ++exit is 3
       steps = []
       if bootstrap.username isnt 'root' then steps.push
@@ -31,7 +28,6 @@ module.exports = (ctx, callback) ->
           if /^\[root[\@]/.test data
             next()
           else if /mot de passe/.test(data.toLowerCase()) or /password/.test(data.toLowerCase())
-            console.log 'write password'
             stream.write "#{bootstrap.password}\n"
       steps.push
         cmd: "sed -i.back 's/.*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config\n"
@@ -69,7 +65,7 @@ module.exports = (ctx, callback) ->
         else
           stream.end step.cmd
       .on 'both', (err) ->
-        console.log 'EXIT'
+        # EXIT
     conn.on 'error', (err) ->
       callback if err.code is 'ECONNREFUSED' then null else err
     conn.on 'end', ->
