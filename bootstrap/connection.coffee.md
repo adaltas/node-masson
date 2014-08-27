@@ -102,6 +102,7 @@ existing key would be overwritten.
       modified = false
       do_private_key = ->
         return do_connect() if private_key
+        ctx.log "Read private key file: #{private_key_location}"
         misc.path.normalize private_key_location, (location) ->
           fs.readFile location, 'ascii', (err, content) ->
             return next Error "Private key doesnt exists: #{JSON.encode location}" if err and err.code is 'ENOENT'
@@ -109,6 +110,7 @@ existing key would be overwritten.
             ctx.config.connection.private_key = content
             do_connect()
       do_connect = ->
+        ctx.log "Connect with private key"
         config = misc.merge {}, ctx.config.connection,
           privateKey: ctx.config.connection.private_key
         connect config, (err, connection) ->
@@ -117,6 +119,7 @@ existing key would be overwritten.
           ctx.ssh = connection
           next null, ctx.PASS
       do_bootstrap = ->
+        ctx.log "Connection failed, bootstrap"
         bootstrap ctx, (err) ->
           return next err if err
           do_wait_reboot()
