@@ -42,7 +42,8 @@ Example:
       # Service supports chkconfig, but is not referenced in any runlevel
       iptables.startup ?= ''
       iptables.rules ?= []
-      iptables.log ?= true
+      iptables.log ?= false
+      iptables.log = iptables.log is 'true' if typeof iptables.log is 'string'
       iptables.log_prefix ?= 'IPTables-Dropped: '
       iptables.log_level ?= 4
       iptables.log_rules ?= [
@@ -70,7 +71,7 @@ Redirect input logs in "/var/log/messages".
 
     module.exports.push name: 'Iptables # Log', timeout: -1, callback: (ctx, next) ->
       {action, log, log_rules} = ctx.config.iptables
-      return next() unless action is 'start'
+      return next() if action isnt 'start' or log is false
       ctx.iptables
         rules: log_rules
         # if: action is 'start'
