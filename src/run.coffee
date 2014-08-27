@@ -68,12 +68,14 @@ Run = (config, params) ->
             return next() if action.skip
             # Action
             ctx.action = action
-            retry = action.retry or 2
+            retry = if action.retry? then actions.retry else 2
             attempts = 0
+            disregard_done = false
             emit_action = (status) =>
               ctx.emit 'action', status
             emit_action ctx.STARTED
             done = (err, statusOrMsg) =>
+              return if disregard_done
               clearTimeout timeout if timeout
               if err and (retry is true or ++attempts < retry)
                 ctx.log? "Get error #{err.message}, retry #{attempts} of #{retry}"
@@ -95,11 +97,13 @@ Run = (config, params) ->
                   merge action, action.callback.call ctx, ctx, (err, statusOrMsg) =>
                     actionRun.end() if statusOrMsg is ctx.STOP
                     done err, statusOrMsg
+                    disregard_done = true
               catch e then done e
             # Timeout, default to 100s
             action.timeout ?= 100000
             if action.timeout > 0
               timeout = setTimeout ->
+                retry = 0 # Dont retry on timeout or we risk to get the callback called multiple times
                 done new Error 'TIMEOUT'
               , action.timeout
             run()
