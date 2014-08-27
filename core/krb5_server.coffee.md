@@ -6,8 +6,6 @@ layout: module
 
 ## Kerberos with OpenLDAP Back-End
 
-robert.mroczkowski@allegrogroup.com
-
 Usefull server commands:
 *   Backup the db: `kdb5_util dump /path/to/dumpfile`
 *   Initialize realm: `kdb5_ldap_util -D "cn=Manager,dc=adaltas,dc=com" -w test create -subtrees "ou=kerberos,ou=services,dc=adaltas,dc=com" -r ADALTAS.COM -s -P test`
