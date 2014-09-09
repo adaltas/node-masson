@@ -47,7 +47,10 @@ Examples
       ctx.config.yum.config ?= {}
       ctx.config.yum.config.main ?= {}
       ctx.config.yum.config.main.keepcache ?= '0'
-      ctx.config.yum.packages ?= []
+      ctx.config.yum.packages ?= {}
+      ctx.config.yum.packages['yum-plugin-priorities'] ?= true
+      ctx.config.yum.packages['man'] ?= true
+      ctx.config.yum.packages['ksh'] ?= true
       {http_proxy_no_auth, username, password} = ctx.config.proxy
       if ctx.config.yum.proxy
         ctx.config.yum.config.main.proxy = http_proxy_no_auth
@@ -159,17 +162,21 @@ in "/etc/yum.repos.d"
       , (err, executed, stdout, stderr) ->
         next err, if /No Packages marked for Update/.test(stdout) then ctx.PASS else ctx.OK
 
-    module.exports.push name: 'Service # Install', timeout: -1, callback: (ctx, next) ->
-      serviced = 0
-      {packages} = ctx.config.yum
-      each(packages)
-      .on 'item', (service, next) ->
-        service = name: service if typeof service is 'string'
-        ctx.service service, (err, s) ->
-          serviced += s
-          next err
-      .on 'both', (err) ->
+    module.exports.push name: 'YUM # Packages', timeout: -1, callback: (ctx, next) ->
+      services = for name, active of ctx.config.yum.packages
+        continue unless active
+        name: name
+      ctx.service services, (err, serviced) ->
         next err, if serviced then ctx.OK else ctx.PASS
+      # each(packages)
+      # .on 'item', (service, active, next) ->
+      #   return next() unless active
+      #   service = name: service if typeof service is 'string'
+      #   ctx.service service, (err, s) ->
+      #     serviced += s
+      #     next err
+      # .on 'both', (err) ->
+      #   next err, if serviced then ctx.OK else ctx.PASS
 
 
 
