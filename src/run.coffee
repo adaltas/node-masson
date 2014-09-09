@@ -97,7 +97,6 @@ Run = (config, params) ->
                   merge action, action.callback.call ctx, ctx, (err, statusOrMsg) =>
                     actionRun.end() if statusOrMsg is ctx.STOP
                     done err, statusOrMsg
-                    disregard_done = true
               catch e then done e
             # Timeout, default to 100s
             action.timeout ?= 100000
@@ -105,6 +104,7 @@ Run = (config, params) ->
               timeout = setTimeout ->
                 retry = 0 # Dont retry on timeout or we risk to get the callback called multiple times
                 done new Error 'TIMEOUT'
+                disregard_done = true
               , action.timeout
             run()
           .on 'both', (err) =>
