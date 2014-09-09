@@ -23,8 +23,6 @@ Option includes:
 *   `sssd.merge`   
     Merge the configuration with the one already present on the server, default 
     to false.
-*   `sssd.force_check`   
-    Force check commands to be executed on each run, default to false   
 *   `sssd.config`   
 *   `sssd.certificates`   
 *   `sssd.services` (array|string)   
@@ -37,7 +35,6 @@ Example:
 {
   "sssd": {
     "test_user": "test"
-    "force_check": true
     "config":
       "domain/my_domain":
         "cache_credentials": "True"
@@ -79,7 +76,6 @@ Example:
       ctx.config.sssd ?= {}
       ctx.config.sssd.certificates ?= []
       ctx.config.sssd.merge ?= false
-      ctx.config.sssd.force_check ?= false
       ctx.config.sssd.config ?= {}
       ctx.config.sssd.services ?= ['sssd', 'sssd-client', 'pam_krb5', 'pam_ldap'] #, 'sssd-tools'
       ctx.config.sssd.services = ctx.config.sssd.services.split ' ' if typeof ctx.config.sssd.services is 'string'
@@ -196,10 +192,9 @@ $user`. The command is only executed if a test user is defined by the
 "sssd.test_user" property.
 
     module.exports.push name: 'SSSD # Check NSS', callback: (ctx, next) ->
-      {test_user, force_check} = ctx.config.sssd
+      {test_user} = ctx.config.sssd
       return next() unless test_user
       ctx.fs.exists '/var/db/masson/sssd_getent_passwd', (err, exists) ->
-        # return next err, ctx.PASS if (err or exists) and not force_check
         ctx.execute
           cmd: "getent passwd #{test_user}"
         , (err, executed, stdout, stderr) ->
@@ -216,11 +211,10 @@ Check if PAM is correctly configured by executing the command
 user is defined by the "sssd.test_user" property.
 
     module.exports.push name: 'SSSD # Check PAM', callback: (ctx, next) ->
-      {test_user, force_check} = ctx.config.sssd
+      {test_user} = ctx.config.sssd
       return next() unless test_user
       ctx.execute
         cmd: "su -l #{test_user} -c 'touch .masson_check_pam'"
-        # not_if_exists: if force_check then null else "/home/#{test_user}/.masson_check_pam"
       , (err, executed, stdout, stderr) ->
         return next err, if executed then ctx.OK else ctx.PASS
         
