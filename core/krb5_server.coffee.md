@@ -299,6 +299,22 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
         , (err, written) ->
           return next err if err
           modified = true if written
+          do_sysconfig()
+      do_sysconfig = ->
+        realm = Object.keys(kdc_conf.realms)[0]
+        ctx.write [
+          destination: '/etc/sysconfig/kadmin'
+          match: /^KRB5REALM=.*$/mg
+          replace: "KRB5REALM=#{realm}"
+          backup: true
+        ,
+          destination: '/etc/sysconfig/krb5kdc'
+          match: /^KRB5REALM=.*$/mg
+          replace: "KRB5REALM=#{realm}"
+          backup: true
+        ], (err, written) ->
+          return next err if err
+          modified = true if written
           do_end()
       do_end = (err) ->
         return next err if err
@@ -474,6 +490,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
           # We dont provide an "kadmin_server". Instead, we need
           # to use "kadmin.local" because the principal used
           # to login with "kadmin" isnt created yet
+          realm: realm
           principal: kadmin_principal
           password: kadmin_password
         , (err, created) ->
