@@ -88,8 +88,9 @@ Example:
       'dbmodules': {}
 
     module.exports.push module.exports.configure = (ctx) ->
-      ctx.config.krb5.sshd ?= {}
       ctx.config.krb5 ?= {}
+      ctx.config.krb5.sshd ?= {}
+      ctx.config.krb5.kinit ?= '/usr/bin/kinit'
       etc_krb5_conf = misc.merge {}, module.exports.etc_krb5_conf, ctx.config.krb5.etc_krb5_conf
       ctx.config.krb5.etc_krb5_conf = etc_krb5_conf
       # Merge global with server-based configuration
