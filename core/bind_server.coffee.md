@@ -60,7 +60,6 @@ The packages "bind" is installed as a startup item and not yet installed.
 
     module.exports.push name: 'Bind Server # Install', timeout: -1, callback: (ctx, next) ->
       ctx.service
-        name: 'bind'
         srv_name: 'named'
         startup: true
       , (err, serviced) ->
@@ -87,7 +86,6 @@ and setting "allow-query" to any. The "named" service is restarted if modified.
         return next err if err
         return next null, ctx.PASS unless written
         ctx.service
-          name: 'bind'
           srv_name: 'named'
           action: 'restart'
         , (err, restarted) ->
@@ -138,7 +136,6 @@ Upload the zones definition files provided in the configuration file.
           , (err, executed) ->
             ctx.log 'Restart named service'
             ctx.service
-              name: 'bind'
               srv_name: 'named'
               action: 'restart'
             , (err, restarted) ->
@@ -150,7 +147,6 @@ Now the service being configured, the "named" service is started.
 
     module.exports.push name: 'Bind Server # Start', callback: (ctx, next) ->
       ctx.service
-        name: 'bind'
         srv_name: 'named'
         action: 'start'
       , (err, serviced) ->
