@@ -67,7 +67,7 @@ Example:
 }
 ```
 
-    module.exports.push required: true, callback: (ctx) ->
+    module.exports.push required: true, callback: module.exports.configure = (ctx) ->
       ctx.config.connection ?= {}
       ctx.config.connection.username ?= 'root'
       ctx.config.connection.host ?= if ctx.config.ip then ctx.config.ip else ctx.config.host

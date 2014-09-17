@@ -8,8 +8,9 @@ layout: module
 
 The `utils` module enriches the bootstraping process with commonly used functions.
 
+    fs = require 'fs'
     each = require 'each'
-    {merge} = require 'mecano/lib/misc'
+    misc = require 'mecano/lib/misc'
     connect = require 'ssh2-connect'
     module.exports = []
     module.exports.push name: 'Bootstrap # Utils', required: true, callback: (ctx) ->
@@ -29,7 +30,7 @@ process is finished.
         ssh = ->
           attempts++
           ctx.log "SSH login attempt: #{attempts}"
-          config = merge {}, ctx.config.bootstrap,
+          config = misc.merge {}, ctx.config.bootstrap,
             username: 'root'
             password: null
           connect config, (err, connection) ->
@@ -228,25 +229,38 @@ ctx.connect username: root, host: "master1.hadoop", (err, ssh) ->
 ```
 
       ctx.connect = (config, callback) ->
+        return callback null, ctx.ssh unless config?
         ctx.connections ?= {}
-        config = (ctx.config.servers.filter (s) -> s.host is config)[0] if typeof config is 'string'
+        if typeof config is 'string'
+          destctx = ctx.hosts[config]
+          require('./connection').configure destctx
+          config = destctx.config.connection
         ctx.log "SSH connection to #{config.host}"
+        # Connection already created, use it
         return callback null, ctx.connections[config.host] if ctx.connections[config.host]
-        config.username ?= 'root'
-        config.password ?= null
-        ctx.log "SSH connection initiated"
-        connect config, (err, connection) ->
-          return callback err if err
-          ctx.connections[config.host] = connection
-          close = (err) ->
-            ctx.log "SSH connection closed for #{config.host}"
-            ctx.log "Error closing connection: #{err.stack or err.message}" if err
-            connection.end()
-          ctx.on 'error', close
-          ctx.on 'end', close
-          # ctx.run.on 'error', close
-          # ctx.run.on 'end', close
-          callback null, connection
+        do_private_key = ->
+          return do_connect() if config.private_key
+          ctx.log "Read private key file: #{config.private_key_location}"
+          misc.path.normalize config.private_key_location, (location) ->
+            fs.readFile location, 'ascii', (err, content) ->
+              return next Error "Private key doesnt exists: #{JSON.encode location}" if err and err.code is 'ENOENT'
+              return next err if err
+              config.private_key = content
+              do_connect()
+        do_connect = ->
+          config.privateKey = config.private_key
+          connect config, (err, connection) ->
+            return callback err if err
+            ctx.log "SSH connection open"
+            ctx.connections[config.host] = connection
+            close = (err) ->
+              ctx.log "SSH connection closed for #{config.host}"
+              ctx.log "Error closing connection: #{err.stack or err.message}" if err
+              connection.end()
+            ctx.on 'error', close
+            ctx.on 'end', close
+            callback null, connection
+        do_private_key()
 
 [ssh2]: https://github.com/mscdex/ssh2
 [exec]: https://github.com/wdavidw/node-ssh2-exec/blob/master/src/connect.coffee.md
