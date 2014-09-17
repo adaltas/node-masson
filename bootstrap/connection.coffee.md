@@ -95,8 +95,10 @@ existing key would be overwritten.
     module.exports.push name: 'Bootstrap # Connection', required: true, timeout: -1, callback: (ctx, next) ->
       {private_key, private_key_location} = ctx.config.connection
       close = -> ctx.ssh?.end()
-      ctx.run.on 'error', close
-      ctx.run.on 'end', close
+      # ctx.run.on 'error', close
+      # ctx.run.on 'end', close
+      ctx.on 'error', close
+      ctx.on 'end', close
       attempts = 0
       has_rebooted = false
       modified = false
