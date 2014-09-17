@@ -18,10 +18,7 @@ Resources:
 *   [Replication](http://tldp.org/HOWTO/Kerberos-Infrastructure-HOWTO/server-replication.html)
 *   [Kerberos with LDAP backend on ubuntu](http://labs.opinsys.com/blog/2010/02/05/setting-up-openldap-kerberos-on-ubuntu-10-04-lucid/)
 
-    each = require 'each'
-    misc = require 'mecano/lib/misc'
     module.exports = []
-
     module.exports.push 'masson/bootstrap/'
     module.exports.push 'masson/core/openldap_client'
     module.exports.push 'masson/core/iptables'
@@ -536,6 +533,11 @@ each Kerberos servers.
 
     # module.exports.push '!masson/core/krb5_client'
     module.exports.push 'masson/core/krb5_client'
+
+## Module Dependencies
+
+    each = require 'each'
+    misc = require 'mecano/lib/misc'
 
 ## Notes
 
