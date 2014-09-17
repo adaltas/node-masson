@@ -26,7 +26,8 @@ class Context extends EventEmitter
     @INAPPLICABLE = 9
     @INAPPLICABLE_MSG = 'SKIPPED'
     @tmp = {}
-  # Return a list of servers with a give action
+  # Return a server for a given action
+  # Throw an error in strict mode if no server or more than one server is found.
   host_with_module: (module, strict) ->
     servers = []
     for host, ctx of @hosts
@@ -34,11 +35,13 @@ class Context extends EventEmitter
     throw new Error "Too many hosts with module #{module}: #{servers.length}" if servers.length > 1
     throw new Error "No host found for module #{module}" if strict and servers.length is 0
     servers[0]
-  hosts_with_module: (module, qtt, strict) ->
+  # Return a list of servers with a give action
+  hosts_with_module: (module, qtt, strict, null_if_empty) ->
     servers = []
     for host, ctx of @hosts
       servers.push host if ctx.modules.indexOf(module) isnt -1
     throw new Error "Expect #{qtt} host(s) for module #{module} but got #{servers.length}" if strict and qtt? and servers.length isnt qtt
+    return null if servers.length is 0 and null_if_empty
     if qtt is 1 then servers[0] else servers
   has_module: (module) ->
     @modules.indexOf(module) isnt -1

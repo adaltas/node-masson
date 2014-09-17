@@ -33,14 +33,14 @@ Run = (config, params) ->
     shared = {}
     each(config.servers)
     .parallel(true)
-    .on 'item', (server, next) =>
-      ctx = contexts[server.host] = context (merge {}, config, server), params.command
+    .on 'item', (host, hconfig, next) =>
+      ctx = contexts[host] = context (merge {}, config, hconfig), params.command
       ctx.hosts = contexts
       ctx.shared = shared
-      @actions server.host, 'install', {}, (err, actions) =>
+      @actions host, 'install', {}, (err, actions) =>
         return next err if err
         ctx.actions = actions or []
-        @modules server.host, 'install', {}, (err, modules) =>
+        @modules host, 'install', {}, (err, modules) =>
           return next err if err
           ctx.modules = modules or []
           next()
@@ -53,14 +53,13 @@ Run = (config, params) ->
         @emit 'error', err
       each(config.servers)
       .parallel(true)
-      .on 'item', (server, next) =>
+      .on 'item', (host, config, next) =>
         # Filter by hosts
-        # return next() if params.hosts? and params.hosts.indexOf(server.host) is -1
-        return next() if params.hosts? and multimatch(server.host, params.hosts).indexOf(server.host) is -1
-        ctx = contexts[server.host]
+        return next() if params.hosts? and multimatch(host, params.hosts).indexOf(host) is -1
+        ctx = contexts[host]
         ctx.run = @
         @emit 'context', ctx
-        @actions server.host, params.command, params, (err, actions) =>
+        @actions host, params.command, params, (err, actions) =>
           # return next new Error "Invalid run list: #{@params.command}" unless actions?
           return next() unless actions?
           actionRun = each(actions)
@@ -126,8 +125,9 @@ or null if the host didnt register any run list for this command.
 ###
 Run::actions = (host, command, options, callback) ->
   # Get the server config
-  for server in @config.servers
-    config = server if server.host is host
+  # for server in @config.servers
+  #   config = server if server.host is host
+  config = @config.servers[host]
   return callback new Error "Invalid host: #{host}" unless config
   # Check the run list
   run = config.run[command]
@@ -143,8 +143,9 @@ or null if the host didnt register any run list for this command.
 ###
 Run::modules = (host, command, options, callback) ->
   # Get the server config
-  for server in @config.servers
-    config = server if server.host is host
+  # for server in @config.servers
+  #   config = server if server.host is host
+  config = @config.servers[host]
   return callback new Error "Invalid host: #{host}" unless config
   # Check the run list
   run = config.run[command]
