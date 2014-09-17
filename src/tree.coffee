@@ -2,6 +2,7 @@
 crypto = require 'crypto'
 util = require 'util'
 {EventEmitter} = require 'events'
+multimatch = require 'multimatch'
 load = require './load'
 {flatten} = require './misc'
 
@@ -70,11 +71,11 @@ Tree::actions = (modules, options, callback) ->
     # Filter with the modules options
     if options.modules.length
       modules = tree.map (leaf) -> leaf.module
-      modules = options.modules.filter (module) -> modules.indexOf(module) isnt -1
+      modules = multimatch modules, options.modules
       tree = @load_tree modules
       # Filter with the fast options
-      tree = tree.filter( (leaf) => 
-        return true if options.modules.indexOf(leaf.module) isnt -1
+      tree = tree.filter( (leaf) =>
+        return true if multimatch(leaf.module, options.modules).length
         leaf.actions = leaf.actions.filter (action) =>
           action.required
         leaf.actions.length
@@ -101,7 +102,17 @@ Tree::modules = (modules, options, callback) ->
     callback null, mods
 
 ###
-Return a array of object with the module name and its associated actions
+Return a array of objects with the module name and its associated actions.
+
+```json
+[ { module: 'masson/bootstrap/cache_memory',
+    actions: [ [Object], [Object] ] },
+  { module: 'masson/bootstrap/mecano',
+    actions: [ [Object], [Object] ] },
+  { module: 'masson/bootstrap/', actions: [] },
+  { module: 'masson/commons/java',
+    actions: [ [Object], [Object], [Object], [Object], [Object], [Object] ] } ]
+```
 ###
 Tree::load_tree = (modules) ->
   called = {}
