@@ -1,6 +1,6 @@
 ---
 title: DNS
-module: masson/core/dns
+module: masson/core/network_check
 layout: module
 ---
 
