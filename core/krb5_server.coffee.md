@@ -135,12 +135,14 @@ Example:
           # 'kpasswd_port': 464 # http://www.opensource.apple.com/source/Kerberos/Kerberos-47/KerberosFramework/Kerberos5/Documentation/kadmin/kpasswd.protocol
           'max_life': '10h 0m 0s'
           'max_renewable_life': '7d 0h 0m 0s'
-          'master_key_type': 'aes256-cts'
+          #'master_key_type': 'aes256-cts'
+          'master_key_type': 'aes256-cts-hmac-sha1-96'
           'default_principal_flags': '+preauth'
           'acl_file': '/var/kerberos/krb5kdc/kadm5.acl'
           'dict_file': '/usr/share/dict/words'
           'admin_keytab': '/var/kerberos/krb5kdc/kadm5.keytab'
-          'supported_enctypes': 'aes256-cts:normal aes128-cts:normal des3-hmac-sha1:normal arcfour-hmac:normal des-hmac-sha1:normal des-cbc-md5:normal des-cbc-crc:normal'
+          #'supported_enctypes': 'aes256-cts:normal aes128-cts:normal des3-hmac-sha1:normal arcfour-hmac:normal des-hmac-sha1:normal des-cbc-md5:normal des-cbc-crc:normal'
+          'supported_enctypes': 'aes256-cts-hmac-sha1-96:normal aes128-cts-hmac-sha1-96:normal des3-hmac-sha1:normal arcfour-hmac-md5:normal'
         , config
       for realm, config of kdc_conf.realms
         # Check if realm point to a database_module
