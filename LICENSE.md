@@ -1,5 +1,6 @@
 Software License Agreement (BSD License)
 ========================================
+
 Copyright (c) 2008-2010, SARL Adaltas.
 
 All rights reserved.
