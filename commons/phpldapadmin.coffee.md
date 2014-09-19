@@ -5,10 +5,9 @@ layout: module
 
 # phpLDAPadmin
 
-http://www.server-world.info/en/note?os=CentOS_6&p=ldap&f=4
-
-http://localhost/phpldapadmin
-http://localhost/ldap
+Install the phpLDAPadmin and register it to the Apache HTTPD server. Upon
+installation, the web application will be accessible at the following URL:
+"http://localhost/ldap".
 
     module.exports = []
     module.exports.push 'masson/bootstrap/'
@@ -20,36 +19,45 @@ http://localhost/ldap
       ctx.config.phpldapadmin.config_path ?= '/etc/phpldapadmin/config.php'
       ctx.config.phpldapadmin.config_httpd_path ?= '/etc/httpd/conf.d/phpldapadmin.conf'
 
+## Install
+
+Install the "phpldapadmin" package.
+
     module.exports.push name: 'phpLDAPadmin # Install', timeout: -1, callback: (ctx, next) ->
       ctx.service
         name: 'phpldapadmin'
       , (err, serviced) ->
         next err, if serviced then ctx.OK else ctx.PASS
 
-    module.exports.push name: 'phpLDAPadmin # Configure', timeout: 100000, callback: (ctx, next) ->
+## Configure
+
+Configure the application. The configuration file is defined by the
+"phpldapadmin.config_path" property (default to "/etc/phpldapadmin/config.php").
+
+    module.exports.push name: 'phpLDAPadmin # Configure', callback: (ctx, next) ->
       ctx.write
-        match: /^(\/\/)(.*'login','attr','dn'.*)$/m
-        replace: '$2'
+        write: [
+          {match: /^(\/\/)(.*'login','attr','dn'.*)$/m, replace: '$2'}
+          {match: /^(?!\/\/)(.*'login','attr','uid'.*)$/m, replace: '//$1'}
+        ],
         destination: ctx.config.phpldapadmin.config_path
         backup: true
-      , (err, w1) ->
-        return next err if err
-        ctx.write
-          ssh: ctx.ssh
-          match: /^(?!\/\/)(.*'login','attr','uid'.*)$/m
-          replace: '//$1'
-          destination: ctx.config.phpldapadmin.config_path
-          backup: true
-        , (err, w2) ->
-          return next err if err
-          return next null, ctx.PASS unless w1 or w2
-          ctx.service
-            name: 'httpd'
-            action: 'restart'
-          , (err, serviced) ->
-            next err, ctx.OK
+      , (err, written) ->
+        return next err, ctx.PASS if err or not written
+        ctx.service
+          name: 'httpd'
+          action: 'restart'
+        , (err, serviced) ->
+          next err, ctx.OK
 
-    module.exports.push name: 'phpLDAPadmin # HTTPD', timeout: 100000, callback: (ctx, next) ->
+## HTTPD
+
+Register phpLDAPAdmin into the Apache HTTPD server. It modify the file defined
+by the "phpldapadmin.config_httpd_path" property (default to 
+"/etc/httpd/conf.d/phpldapadmin.conf") and made the application visible under
+the "http://{host}/ldapadmin" URL path.
+
+    module.exports.push name: 'phpLDAPadmin # HTTPD', callback: (ctx, next) ->
       ctx.write
         destination: ctx.config.phpldapadmin.config_httpd_path
         write: [

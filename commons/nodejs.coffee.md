@@ -98,7 +98,8 @@ Multiple installation of Node.js may coexist with N.
           cmd: "n #{ctx.config.nodejs.version}"
         , (err, executed) ->
           next err, if executed is 0 then ctx.OK else ctx.PASS
-      else if
+      else
+        console.log 'not ready'
 
 
 ## NPM configuration
