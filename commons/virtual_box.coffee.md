@@ -10,7 +10,6 @@ layout: module
     module.exports.push 'masson/core/curl'
 
     module.exports.push name: 'VirtualBox # Guest Additions', timeout: -1, callback: (ctx, next) ->
-      ctx.log 'Get VirtualBox version on host machine'
       ctx.execute
         ssh: false
         cmd: 'VBoxManage -v'
@@ -27,22 +26,20 @@ layout: module
           ctx.log "Install latest Guest Additions #{version}"
           source = "http://download.virtualbox.org/virtualbox/#{version}/VBoxGuestAdditions_#{version}.iso"
           destination = "/tmp/VBoxGuestAdditions_#{version}.iso"
-          cmd = """
-            yum install -y gcc kernel-* # might need to reboot
-            curl -L #{source} -o #{destination}
-            mount #{destination} -o loop /mnt
-            cd /mnt
-            sh VBoxLinuxAdditions.run --nox11
-            rm #{destination}
-            /etc/init.d/vboxadd setup
-            chkconfig --add vboxadd
-            chkconfig vboxadd on
-            umount /mnt
-            """
-          ctx.log.out.write cmd
-          ctx.execute cmd, (err, executed, stdout, stderr) ->
-            console.log stdout
-            console.log stderr
+          ctx.execute
+            cmd: """
+              yum install -y gcc kernel-* # might need to reboot
+              curl -L #{source} -o #{destination}
+              mount #{destination} -o loop /mnt
+              cd /mnt
+              sh VBoxLinuxAdditions.run --nox11
+              rm #{destination}
+              /etc/init.d/vboxadd setup
+              chkconfig --add vboxadd
+              chkconfig vboxadd on
+              umount /mnt
+              """
+          , (err, executed, stdout, stderr) ->
             return next err if err
             ctx.reboot (err) ->
               next err, ctx.OK
