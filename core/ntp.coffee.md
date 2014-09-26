@@ -62,6 +62,7 @@ time when the `ntpd` daemon isnt yet started.
         return next null, ctx.PASS unless serviced
         ctx.execute
           cmd: "ntpdate #{ctx.config.ntp.servers[0]}"
+          if: ctx.config.ntp.servers[0] isnt ctx.config.host
         , (err) ->
           next err, ctx.OK
 
@@ -110,7 +111,7 @@ Start the `ntpd` daemon if it isnt yet running.
 
 ## Check
 
-This action compare the date on the remote server with the one where Phyla is
+This action compare the date on the remote server with the one where Masson is
 being exectued. If the gap is greater than the one defined by the "ntp.lag"
 property, the `ntpd` daemon is stop, the `ntpdate` command is used to 
 synchronization the date and the `ntpd` daemon is finally restarted.
@@ -118,6 +119,7 @@ synchronization the date and the `ntpd` daemon is finally restarted.
     module.exports.push name: 'NTP # Check', callback: (ctx, next) ->
       # Here's good place to compare the date, maybe with the host maching:
       # if gap is greather than threehold, stop ntpd, ntpdate, start ntpd
+      return next() if ctx.config.ntp.servers[0] is ctx.config.host
       ctx.log "Synchronize the system clock with #{ctx.config.ntp.servers[0]}"
       {lag} = ctx.config.ntp
       return next null, ctx.INAPPLICABLE if lag < 1
