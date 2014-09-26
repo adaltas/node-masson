@@ -19,7 +19,7 @@ properties "kernel\_name", "nodename", "kernel\_release", "kernel\_version",
 "processor" and "operating_system".
 
     module.exports.push name: 'Bootstrap # Server Info', required: true, callback: (ctx, next) ->
-      mecano.exec
+      mecano.execute
         ssh: ctx.ssh
         cmd: 'uname -snrvmo'
         stdout: ctx.log.out
@@ -73,7 +73,7 @@ It will output:
 ```
 
     module.exports.push name: 'Bootstrap # CPU Info', required: true, callback: (ctx, next) ->
-      mecano.exec
+      mecano.execute
         ssh: ctx.ssh
         cmd: 'cat /proc/cpuinfo'
         stdout: ctx.log.out
@@ -124,7 +124,7 @@ It will output:
 ```
 
     module.exports.push name: 'Bootstrap # Mem Info', required: true, callback: (ctx, next) ->
-      mecano.exec
+      mecano.execute
         ssh: ctx.ssh
         cmd: 'cat /proc/meminfo'
         stdout: ctx.log.out
