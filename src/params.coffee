@@ -11,8 +11,7 @@ module.exports = parameters
     name: 'debug', shortcut: 'd', type: 'boolean'
     description: 'Print readable stacktrace'
   ]
-  action: 'command'
-  actions: [
+  commands: [
     name: 'help'
     description: "Print this help and exit"
     main:
@@ -80,7 +79,7 @@ module.exports = parameters
     ]
   ,
     name: 'reload'
-    description: 'Start server components'
+    description: 'Reload network sensitive components'
     options: [
       name: 'hosts', shortcut: 'h', type: 'array'
       description: 'Limit to a list of server hostnames'
