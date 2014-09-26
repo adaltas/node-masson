@@ -7,15 +7,14 @@ params = require '../params'
 ###
 List all the actions to execute
 
-`famas -c ./config tree -h hadoop1.hadoop -r install`
+`ryba -c ./config tree -h hadoop1.hadoop -r install`
 
 ###
 module.exports = ->
   params = params.parse()
-  hosts = config.servers.map (server) -> server.host
-  server = hosts.indexOf(params.host)
-  return util.print "\x1b[31mInvalid server \"#{server.host}\"\x1b[39m\n" if server is -1
-  server = config.servers[server]
+  hosts = Object.keys config.servers
+  server = config.servers[params.host]
+  return util.print "\x1b[31mInvalid server \"#{params.host}\"\x1b[39m\n" unless server
   modules = server.run[params.run]
   return util.print "\x1b[31mInvalid run list \"#{server.run}\"\x1b[39m\n" unless modules
   tree(modules, params)
