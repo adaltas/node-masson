@@ -71,7 +71,7 @@ ctx.execute
                   args.err = err
                   callback.apply null, args
             else
-              mecano[action].call null, goptions, options, callback
+              mecano[action].call null, options, goptions, callback
         next null, ctx.PASS
 
     module.exports.push name: 'Bootstrap # FS', required: true, timeout: -1, callback:  (ctx) ->
