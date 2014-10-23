@@ -81,8 +81,7 @@ Install the git package.
     module.exports.push name: 'Git # Package', timeout: -1, callback: (ctx, next) ->
       ctx.service
         name: 'git'
-      , (err, serviced) ->
-        next err, if serviced then ctx.OK else ctx.PASS
+      , next
 
 ## Config
 
@@ -122,7 +121,6 @@ Deploy the git configuration.
           return next() unless user.home
           file = "#{user.home}/.gitconfig"
           work user, file, {}, next
-        .on 'both', (err) ->
-          next err, if modified then ctx.OK else ctx.PASS
+        .on 'both', next
       do_global()
 

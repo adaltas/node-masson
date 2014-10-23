@@ -11,5 +11,4 @@
         chk_name: 'docker'
         startup: true
         action: 'start'
-      , (err, serviced) ->
-        next err, if serviced then ctx.OK else ctx.PASS
+      , next

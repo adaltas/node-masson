@@ -55,8 +55,7 @@ developers on Solaris, Linux, Mac OS X or Windows.
       return next() unless openjdk
       ctx.service
         name: 'java-1.7.0-openjdk-devel'
-      , (err, serviced) ->
-        return next err, if serviced then ctx.OK else ctx.PASS
+      , next
 
 ## Remove OpenJDK
 
@@ -74,8 +73,8 @@ come with the OpenJDK installed and to avoid any ambiguity, we simply remove the
         packages = for l in stdout.trim().split('\n') then /(.*?) .*$/.exec(l)?[1] or l
         ctx.execute
           cmd: "yum remove -y #{packages.join ' '}"
-        , (err) ->
-          next err, ctx.OK
+          if: installed
+        , next
 
 ## Install
 
@@ -98,7 +97,7 @@ inside the configuration. The properties "jce\_local\_policy" and
           installed_version = installed_version.replace('_', '').replace('0', '')
           version = jdk.version.replace('_', '').replace('0', '')
           unless semver.gt version, installed_version
-            return next null, ctx.PASS
+            return next null, false
         action = if url.parse(jdk.location).protocol is 'http:' then 'download' else 'upload'
         ctx.log "Java #{action}"
         tmpdir = "/tmp/masson_java_#{Date.now()}"
@@ -125,7 +124,7 @@ inside the configuration. The properties "jce\_local\_policy" and
             """
             trap_on_error: true
           , (err, executed, stdout) ->
-            return next err, ctx.OK
+            return next err, true
 
 ## Java JCE
 
@@ -155,8 +154,7 @@ reference it inside the configuration. The properties "jce\_local\_policy" and
         destination: "#{jdk_home}/jre/lib/security/US_export_policy.jar"
         binary: true
         sha1: true
-      ], (err, downloaded) ->
-        next err, if downloaded then ctx.OK else ctx.PASS
+      ], next
 
     module.exports.push name: 'Java # Env', timeout: -1, callback: (ctx, next) ->
       {java_home} = ctx.config.java
@@ -167,8 +165,7 @@ reference it inside the configuration. The properties "jce\_local\_policy" and
         export JAVA_HOME=#{java_home}
         export PATH=$PATH:#{java_home}/bin
         """
-      , (err, written) ->
-        next err, if written then ctx.OK else ctx.PASS
+      , next
 
 ## Notes
 

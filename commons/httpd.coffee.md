@@ -51,8 +51,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
           chain: 'INPUT', jump: 'ACCEPT', dport: 80, protocol: 'tcp', state: 'NEW', comment: "HTTPD"
         ]
         if: ctx.config.iptables.action is 'start'
-      , (err, configured) ->
-        next err, if configured then ctx.OK else ctx.PASS
+      , next
 
 ## Users & Groups
 
@@ -70,7 +69,7 @@ apache:x:48:
       ctx.group group, (err, gmodified) ->
         return next err if err
         ctx.user user, (err, umodified) ->
-          next err, if gmodified or umodified then ctx.OK else ctx.PASS
+          next err, gmodified or umodified
 
 ## Install
 
@@ -82,7 +81,6 @@ Install the HTTPD service and declare it as a startup service.
         name: 'httpd'
         startup: startup
         action: action
-      , (err, serviced) ->
-        next err, if serviced then ctx.OK else ctx.PASS
+      , next
 
 

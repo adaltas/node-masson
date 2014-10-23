@@ -29,4 +29,4 @@ Currently being written, not yet registered in any config.
           destination: '/usr/lib/maven'
         , (err, extracted) ->
           return next err if err
-          next null, ctx.OK
+          next null, true
