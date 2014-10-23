@@ -77,7 +77,7 @@ Example:
       ctx.config.sssd.certificates ?= []
       ctx.config.sssd.merge ?= false
       ctx.config.sssd.config ?= {}
-      ctx.config.sssd.services ?= ['sssd', 'sssd-client', 'pam_krb5', 'pam_ldap'] #, 'sssd-tools'
+      ctx.config.sssd.services ?= ['sssd', 'sssd-client', 'pam_krb5', 'pam_ldap', 'authconfig'] #, 'sssd-tools'
       ctx.config.sssd.services = ctx.config.sssd.services.split ' ' if typeof ctx.config.sssd.services is 'string'
       ctx.config.sssd.test_user ?= null
 
