@@ -70,7 +70,7 @@ Default configuration:
 IPTables rules are only inserted if the parameter "iptables.action" is set to 
 "start" (default value).
 
-    module.exports.push name: 'HDP ZooKeeper # IPTables', callback: (ctx, next) ->
+    module.exports.push name: 'Mysql Server # IPTables', callback: (ctx, next) ->
       ctx.iptables
         rules: [
           { chain: 'INPUT', jump: 'ACCEPT', dport: 3306, protocol: 'tcp', state: 'NEW', comment: "MySQL" }
