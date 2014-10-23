@@ -159,8 +159,9 @@ Tree::load_module = (module) ->
     # Module dependencies
     continue if typeof callback is 'string'
     callback = actions[i] = callback: callback if typeof callback is 'function'
-    callback.hidden ?= true unless callback.name
-    callback.name ?= "#{module}/#{i}"
+    # callback.hidden ?= true unless callback.name
+    callback.id ?= "#{module}/#{i}"
+    callback.name ?= null
     callback.module ?= module
     callback.index ?= i
     callback.skip ?= false
