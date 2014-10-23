@@ -39,8 +39,8 @@ Example:
 
     module.exports.push (ctx) ->
       ctx.config.ntp ?= {}
-      ctx.config.ntp.servers ?= ['pool.ntp.org']
-      ctx.config.ntp.servers = [ctx.config.ntp.servers] if typeof ctx.config.ntp.servers is 'string'
+      ctx.config.ntp.servers ?= []
+      ctx.config.ntp.servers = ctx.config.ntp.servers.split(',') if typeof ctx.config.ntp.servers is 'string'
       ctx.config.ntp.lag ?= 2000
 
 
@@ -50,9 +50,8 @@ The installation respect the procedure published on [cyberciti][cyberciti]. The
 "ntp" server is installed as a startup service and `ntpdate` is run a first 
 time when the `ntpd` daemon isnt yet started.
 
-    module.exports.push name: 'NTP # Install', timeout: -1, callback: (ctx, next) -> 
-      ctx.log 'Install the NTP service and turn on the service'
-      return next() unless ctx.config.ntp.servers?.length
+    module.exports.push name: 'NTP # Install', timeout: -1, callback: (ctx, next) ->
+      {servers} = ctx.config.ntp
       ctx.service
         name: 'ntp'
         chk_name: 'ntpd'
@@ -60,9 +59,10 @@ time when the `ntpd` daemon isnt yet started.
       , (err, serviced) ->
         return next err if err
         return next null, false unless serviced
+        return next null, false unless servers?.length
         ctx.execute
-          cmd: "ntpdate #{ctx.config.ntp.servers[0]}"
-          if: ctx.config.ntp.servers[0] isnt ctx.config.host
+          cmd: "ntpdate #{servers[0]}"
+          if: servers[0] isnt ctx.config.host
         , (err) ->
           next err, true
 
@@ -73,11 +73,13 @@ defined by the "ntp.servers" property. The "ntp" service is restarted if any
 change to this file is detected.
 
     module.exports.push name: 'NTP # Configure', callback: (ctx, next) ->
+      {servers} = ctx.config.ntp
+      return next() unless servers?.length
       write = []
       write.push
         match: /^(server [\d]+.*$)/mg
         replace: "#$1"
-      for server in ctx.config.ntp.servers
+      for server in servers
         write.push
           match: new RegExp "^server #{quote server}.*$", 'mg'
           replace: "server #{server} iburst"
@@ -117,9 +119,10 @@ synchronization the date and the `ntpd` daemon is finally restarted.
       # Here's good place to compare the date, maybe with the host maching:
       # if gap is greather than threehold, stop ntpd, ntpdate, start ntpd
       return next() if ctx.config.ntp.servers[0] is ctx.config.host
+      return next() if ctx.config.ntp.servers.length is 0
       ctx.log "Synchronize the system clock with #{ctx.config.ntp.servers[0]}"
       {lag} = ctx.config.ntp
-      return next null, ctx.INAPPLICABLE if lag < 1
+      return next() if lag < 1
       ctx.execute
         cmd: "date +%s"
       , (err, executed, stdout) ->
