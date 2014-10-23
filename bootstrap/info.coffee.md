@@ -22,8 +22,9 @@ properties "kernel\_name", "nodename", "kernel\_release", "kernel\_version",
       mecano.execute
         ssh: ctx.ssh
         cmd: 'uname -snrvmo'
-        stdout: ctx.log.out
-        stderr: ctx.log.err
+        # too verbose
+        # stdout: ctx.log.out
+        # stderr: ctx.log.err
       , (err, executed, stdout, stderr) ->
         return next err if err
         # Linux hadoop1 2.6.32-279.el6.x86_64 #1 SMP Fri Jun 22 12:19:21 UTC 2012 x86_64 x86_64 x86_64 GNU/Linux
@@ -76,8 +77,9 @@ It will output:
       mecano.execute
         ssh: ctx.ssh
         cmd: 'cat /proc/cpuinfo'
-        stdout: ctx.log.out
-        stderr: ctx.log.err
+        # too verbose
+        # stdout: ctx.log.out
+        # stderr: ctx.log.err
       , (err, executed, stdout, stderr) ->
         return next err if err
         ctx.cpuinfo = []
@@ -127,8 +129,9 @@ It will output:
       mecano.execute
         ssh: ctx.ssh
         cmd: 'cat /proc/meminfo'
-        stdout: ctx.log.out
-        stderr: ctx.log.err
+        # too verbose
+        # stdout: ctx.log.out
+        # stderr: ctx.log.err
       , (err, executed, stdout, stderr) ->
         return next err if err
         ctx.meminfo = {}
