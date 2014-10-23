@@ -29,18 +29,18 @@ Resources:
 *   `krb5_server.{realm}.ldap_manager_dn` (string)   
     The LDAP user with read and write access to the realm dn
     defined by the `ldap_realms_dn` property. Default to the 
-    `openldap_krb5.manager_dn` property if you have one OpenLDAP server with 
+    `openldap_server_krb5.manager_dn` property if you have one OpenLDAP server with 
     kerberos support declared inside the cluster by the 
     "masson/core/openldap\_server\_krb5" module, otherwise required.      
 *   `krb5_server.{realm}.ldap_manager_password` (string)   
     The password of the LDAP user with read and write access to the realm dn
     defined by the `ldap_realms_dn` property. Default to the 
-    `openldap_krb5.manager_password` property if you have one OpenLDAP server with 
+    `openldap_server_krb5.manager_password` property if you have one OpenLDAP server with 
     kerberos support declared inside the cluster by the 
     "masson/core/openldap\_server\_krb5" module, otherwise required.      
 *   `krb5_server.{realm}.ldap_realms_dn` (string)   
     The location where to store the realms inside the LDAP tree. Default to the 
-    `openldap_krb5.realms_dn` property if you have one OpenLDAP server with 
+    `openldap_server_krb5.realms_dn` property if you have one OpenLDAP server with 
     kerberos support declared inside the cluster by the 
     "masson/core/openldap\_server\_krb5" module, otherwise required.   
 
@@ -91,17 +91,19 @@ Example:
       kdc_conf = ctx.config.krb5.kdc_conf ?= {}
       # Generate dynamic "krb5.dbmodules" object
       for host in openldap_hosts
-        {kerberos_container_dn, users_container_dn, manager_dn, manager_password} = ctx.hosts[host].config.openldap_krb5
+        ctx_krb5 = ctx.hosts[host]
+        require('./openldap_server_krb5').configure ctx_krb5
+        {kerberos_dn, krbadmin_user, manager_dn, manager_password} = ctx_krb5.config.openldap_server_krb5
         name = "openldap_#{host.split('.')[0]}"
         scheme = if ctx.hosts[host].has_module 'masson/core/openldap_server_tls' then "ldap://" else "ldaps://"
         ldap_server =  "#{scheme}#{host}"
         kdc_conf.dbmodules[name] = misc.merge
           'db_library': 'kldap'
-          'ldap_kerberos_container_dn': kerberos_container_dn
-          'ldap_kdc_dn': users_container_dn
+          'ldap_kerberos_container_dn': kerberos_dn
+          'ldap_kdc_dn': krbadmin_user.dn
            # this object needs to have read rights on
            # the realm container, principal container and realm sub-trees
-          'ldap_kadmind_dn': users_container_dn
+          'ldap_kadmind_dn': krbadmin_user.dn
            # this object needs to have read and write rights on
            # the realm container, principal container and realm sub-trees
           'ldap_service_password_file': "/etc/krb5.d/#{name}.stash.keyfile"
