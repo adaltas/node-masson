@@ -49,7 +49,7 @@ client instance.
           ctx.on 'end', close
           done()
       done = (err) ->
-        next err, ctx.PASS
+        next err, false
       admin()
 
 

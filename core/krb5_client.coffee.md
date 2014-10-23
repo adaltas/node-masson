@@ -116,8 +116,7 @@ The package "krb5-workstation" is installed.
     module.exports.push name: 'Krb5 Client # Install', timeout: -1, callback: (ctx, next) ->
       ctx.service
         name: 'krb5-workstation'
-      , (err, serviced) ->
-        next err, if serviced then ctx.OK else ctx.PASS
+      , next
 
 ## Configure
 
@@ -137,8 +136,7 @@ which create a Kerberos file with complementary information.
         content: safe_etc_krb5_conf etc_krb5_conf
         destination: '/etc/krb5.conf'
         stringify: misc.ini.stringify_square_then_curly
-      , (err, written) ->
-        return next err, if written then ctx.OK else ctx.PASS
+      , next
 
 ## Host Principal
 
@@ -177,7 +175,7 @@ Create a user principal for this host. The principal is named like
             modified = true if created
             next()
       .on 'both', (err) ->
-        next err, if modified then ctx.OK else ctx.PASS
+        next err, modified
 
 ## principals
 
@@ -203,7 +201,7 @@ Populate the Kerberos database with new principals.
           modified = true if created
           next()
       .on 'both', (err) ->
-        next err, if modified then ctx.OK else ctx.PASS
+        next err, modified
 
 ## Configure SSHD
 
@@ -214,26 +212,26 @@ configuration object. By default, we set the following properties to "yes": "Cha
 
     module.exports.push name: 'Krb5 Client # Configure SSHD', timeout: -1, callback: (ctx, next) ->
       {sshd} = ctx.config.krb5
-      return next null, ctx.DISABLED unless sshd
+      return next() unless sshd
       write = for k, v of sshd
         match: new RegExp "^#{k}.*$", 'mg'
         replace: "#{k} #{v}"
         append: true
-      return next null, ctx.DISABLED if write.length is 0
+      return next() if write.length is 0
       ctx.log 'Write /etc/ssh/sshd_config'
       ctx.write
         write: write
         destination: '/etc/ssh/sshd_config'
       , (err, written) ->
         return next err if err
-        return next null, ctx.PASS unless written
+        return next null, false unless written
         ctx.log 'Restart openssh'
         ctx.service
           name: 'openssh'
           srv_name: 'sshd'
           action: 'restart'
         , (err, restarted) ->
-          next err, ctx.OK
+          next err, true
 
 ## Usefull client commands
 

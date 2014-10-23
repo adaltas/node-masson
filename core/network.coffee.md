@@ -85,8 +85,7 @@ this file.
         write: write
         backup: true
         eof: true
-      , (err, written) ->
-        return next err, if written then ctx.OK else ctx.PASS
+      , next
 
 ## Network # Hostname
 
@@ -101,12 +100,10 @@ relevant file is "/etc/sysconfig/network".
         replace: "HOSTNAME=#{hostname}"
         destination: '/etc/sysconfig/network'
       , (err, replaced) ->
-        return next err if err
-        return next null, ctx.PASS unless replaced 
+        return next err, false if err or not replaced 
         ctx.execute
           cmd: "hostname #{ctx.config.host} && service network restart"
-        , (err, executed) ->
-          next err, ctx.OK
+        , next()
 
 ## Network # DNS resolv
 
@@ -120,7 +117,7 @@ configuration file is considered a trusted source of DNS information.
 
     module.exports.push name: 'Network # DNS Resolver', callback: (ctx, next) ->
       {resolv} = ctx.config.network
-      return next null, ctx.INAPPLICABLE unless resolv
+      return next() unless resolv
       # nameservers = []
       # re = /nameserver(.*)/g
       # while (match = re.exec resolv) isnt null
@@ -133,7 +130,6 @@ configuration file is considered a trusted source of DNS information.
           content: resolv
           destination: '/etc/resolv.conf'
           backup: true
-        , (err, replaced) ->
-          return next err, if replaced then ctx.OK else ctx.PASS
+        , next
 
 

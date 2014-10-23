@@ -62,8 +62,7 @@ The package "iptables" is installed.
         name: 'iptables'
         startup: startup
         action: action
-      , (err, serviced) ->
-        next err, if serviced then ctx.OK else ctx.PASS
+      , next
 
 ## Log
 
@@ -76,11 +75,10 @@ Redirect input logs in "/var/log/messages".
         rules: log_rules
         # if: action is 'start'
       , (err, configured) ->
-        return next err, ctx.PASS if err or not configured
+        return next err, false if err or not configured
         ctx.service
           srv_name: 'restart'
-        , (err) ->
-        next err, ctx.OK
+        , next
 
 ## Rules
 
@@ -93,6 +91,5 @@ Add user defined rules to IPTables.
       ctx.iptables
         rules: rules
         # if: action is 'start'
-      , (err, configured) ->
-        next err, if configured then ctx.OK else ctx.PASS
+      , next
 

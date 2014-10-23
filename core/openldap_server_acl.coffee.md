@@ -51,8 +51,7 @@ ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=co
             '* none'
           ]
         ]
-      , (err, modified) ->
-        next err, if modified then ctx.OK else ctx.PASS
+      , next
 
     module.exports.push name: 'OpenLDAP ACL # Insert User', callback: (ctx, next) ->
       {users_container_dn, groups_container_dn} = ctx.config.openldap_client_security
@@ -104,8 +103,7 @@ ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=co
       # objectClass: posixGroup
       # gidNumber: 1101
       # description: Test Group
-      """, (err, added) ->
-        next err, if added then ctx.OK else ctx.PASS
+      """, next
 
       
 

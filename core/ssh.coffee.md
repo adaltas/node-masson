@@ -99,7 +99,7 @@ defined inside "users.[].authorized_keys".
             modified = true if written
             next()
       .on 'both', (err) ->
-        next err, if modified then ctx.OK else ctx.PASS
+        next err, modified
 
 ## Configure
 
@@ -113,20 +113,17 @@ properties found in the "ssh.sshd_config" object.
         match: new RegExp "^#{k}.*$", 'mg'
         replace: "#{k} #{v}"
         append: true
-      ctx.log 'Write configuration in /etc/ssh/sshd_config'
       ctx.write
         write: write
         destination: '/etc/ssh/sshd_config'
       , (err, written) ->
         return next err if err
-        return next null, ctx.PASS unless written
-        ctx.log 'Restart sshd'
         ctx.service
-          name: 'openssh'
           srv_name: 'sshd'
           action: 'restart'
+          if: written
         , (err, restarted) ->
-          next err, ctx.OK
+          next err, true
 
 ## Public and Private Key
 
@@ -135,7 +132,7 @@ propery and is written in "~/.ssh/id\_rsa". The public key is defined by
 the "users.[].rsa\_pub" propery and is written in "~/.ssh/id\_rsa.pub".
 
     module.exports.push name: 'SSH # Public and Private Key', timeout: -1, callback: (ctx, next) ->
-      ok = false
+      modified = false
       users = for _, user of ctx.config.users then user
       each(users)
       .on 'item', (user, next) ->
@@ -143,27 +140,23 @@ the "users.[].rsa\_pub" propery and is written in "~/.ssh/id\_rsa.pub".
         return next new Error "Property rsa_pub required if rsa defined" if user.rsa and not user.rsa_pub
         return next new Error "Property rsa required if rsa_pub defined" if user.rsa_pub and not user.rsa
         return next() unless user.rsa
-        ctx.write
+        ctx.write [
           destination: "#{user.home or '/home/'+user.name}/.ssh/id_rsa"
           content: user.rsa
           uid: user.name
           gid: null
           mode: 0o600
-        , (err, written) ->
-          return next err if err
-          ok = true if written
-          ctx.write
-            destination: "#{user.home or '/home/'+user.name}/.ssh/id_rsa.pub"
-            content: user.rsa_pub
-            uid: user.name
-            gid: null
-            mode: 0o600
-          , (err, written) ->
-            return next err if err
-            ok = true if written
-            next()
+        ,
+          destination: "#{user.home or '/home/'+user.name}/.ssh/id_rsa.pub"
+          content: user.rsa_pub
+          uid: user.name
+          gid: null
+          mode: 0o600
+        ], (err, written) ->
+          modified = true if written
+          next err
       .on 'both', (err) ->
-        next err, if ok then ctx.OK else ctx.PASS
+        next err, modified
 
 # Banner
 
@@ -175,26 +168,22 @@ service will be restarted if this action had any effect.
     module.exports.push name: 'SSH # Banner', timeout: 100000, callback: (ctx, next) ->
       {banner} = ctx.config.ssh
       return next() unless banner
-      ctx.log 'Upload banner content'
       banner.content += '\n\n' if banner.content
-      ctx.write banner, (err, uploaded) ->
+      ctx.write [
+        destination: banner.destination
+        content: banner.content
+      ,
+        match: new RegExp "^Banner.*$", 'mg'
+        replace: "Banner #{banner.destination}"
+        append: true
+        destination: '/etc/ssh/sshd_config'
+      ], (err, written) ->
         return next err if err
-        ctx.log 'Write banner path to configuration'
-        ctx.write
-          match: new RegExp "^Banner.*$", 'mg'
-          replace: "Banner #{banner.destination}"
-          append: true
-          destination: '/etc/ssh/sshd_config'
-        , (err, written) ->
-          return next err if err
-          return next null, ctx.PASS if not written and not uploaded
-          ctx.log 'Restarting SSH'
-          ctx.service
-            name: 'openssh'
-            srv_name: 'sshd'
-            action: 'restart'
-          , (err, restarted) ->
-            next err, ctx.OK
+        ctx.service
+          srv_name: 'sshd'
+          action: 'restart'
+          if: written
+        , next
 
 
 

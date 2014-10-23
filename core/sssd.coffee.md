@@ -105,7 +105,7 @@ following service: "sssd", "sssd-client", "pam\_krb5", "pam\_ldap" and
           modified = true if serviced
           do_end()
       do_end = ->
-        next null, if modified then ctx.OK else ctx.PASS
+        next null, modified
       do_install()
 
 ## Certificates

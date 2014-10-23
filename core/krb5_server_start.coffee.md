@@ -8,12 +8,10 @@
       ctx.service
         srv_name: 'kadmin'
         action: 'start'
-      , (err, started) ->
-        next err, if started then ctx.OK else ctx.PASS
+      , next
 
     module.exports.push name: 'Kerberos Server # Start krb5kdc', callback: (ctx, next) ->
       ctx.service
         srv_name: 'krb5kdc'
         action: 'start'
-      , (err, started) ->
-        next err, if started then ctx.OK else ctx.PASS
+      , next

@@ -428,13 +428,12 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=adaltas,dc=com
           modified = true if written
           do_end()
       do_end = ->
-        return next null, ctx.PASS unless modified
         ctx.service
           name: 'openldap-servers'
           srv_name: 'slapd'
           action: 'restart'
-        , (err, restarted) ->
-          next err, ctx.OK
+          if: modified
+        , next
       do_upload()
 
     module.exports.push name: 'OpenLDAP TLS # Activate LDAPS', callback: (ctx, next) ->
@@ -443,14 +442,12 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=adaltas,dc=com
         replace: 'SLAPD_LDAPS=yes'
         destination: '/etc/sysconfig/ldap'
       , (err, written) ->
-        return next err, ctx.PASS  if err or not written
+        return next err if err
         ctx.service
-          name: 'openldap-servers'
           srv_name: 'slapd'
           action: 'restart'
-        , (err, restarted) ->
-          return next err if err
-          next null, ctx.OK
+          if: written
+        , next
 
     module.exports.push 'masson/core/openldap_client'
 
@@ -458,8 +455,7 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=adaltas,dc=com
       { suffix, root_dn, root_password } = ctx.config.openldap_server
       ctx.execute
         cmd: "ldapsearch -x -H ldaps://#{ctx.config.host} -b #{suffix} -D #{root_dn} -w #{root_password}"
-      , (err, executed) ->
-        next err, ctx.PASS
+      , next
 
 
 

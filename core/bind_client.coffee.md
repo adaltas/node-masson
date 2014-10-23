@@ -21,5 +21,4 @@ The package "bind-utils" is installed.
     module.exports.push name: 'Bind Client # Install', timeout: -1, callback: (ctx, next) ->
       ctx.service
         name: 'bind-utils'
-      , (err, serviced) ->
-        next err, if serviced then ctx.OK else ctx.PASS
+      , next

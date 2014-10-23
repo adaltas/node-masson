@@ -80,20 +80,19 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
           { chain: 'INPUT', jump: 'ACCEPT', dport: 636, protocol: 'tcp', state: 'NEW', comment: "LDAP (secured)" }
         ]
         if: ctx.config.iptables.action is 'start'
-      , (err, configured) ->
-        next err, if configured then ctx.OK else ctx.PASS
+      , next
 
     module.exports.push name: 'OpenLDAP Server # Install', timeout: -1, callback: (ctx, next) ->
       ctx.service [
         name: 'openldap-servers'
         chk_name: 'slapd'
         startup: true
+        action: 'start'
       ,
         name: 'openldap-clients'
       ,
         name: 'migrationtools'
-      ], (err, serviced) ->
-        next err, if serviced then ctx.OK else ctx.PASS
+      ], next
 
 ###
 Borrowed from
@@ -235,7 +234,7 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
           return next e if e
           finish err
       finish = (err) ->
-        next err, if modified then ctx.OK else ctx.PASS
+        next err, modified
       rsyslog()
 
     module.exports.push name: 'OpenLDAP Server # Users and Groups', timeout: -1, callback: (ctx, next) ->
@@ -263,8 +262,7 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
         EOF
         """
         code_skipped: 68
-      , (err, executed) ->
-        return next err, if executed then ctx.OK else ctx.PASS
+      , next
 
     module.exports.push name: 'OpenLDAP Server # SUDO schema', timeout: -1, callback: (ctx, next) ->
       # conf = '/tmp/sudo_schema/schema.conf'
@@ -294,8 +292,7 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
           uri: true
           log: ctx.log
           ssh: ctx.ssh
-        , (err, registered) ->
-          next err, if registered then ctx.OK else ctx.PASS
+        , next
       do_install()
 
     module.exports.push name: 'OpenLDAP Server # Delete ldif data', callback: (ctx, next) ->
@@ -322,7 +319,7 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
             , (err, removed) ->
               next err
       .on 'both', (err) ->
-        next err, if modified then ctx.OK else ctx.PASS
+        next err, modified
 
     module.exports.push name: 'OpenLDAP Server # Add ldif data', timeout: 100000, callback: (ctx, next) ->
       {root_dn, root_password, ldapadd} = ctx.config.openldap_server
@@ -342,6 +339,10 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
             code_skipped: 68
           , (err, executed, stdout, stderr) ->
             return next err if err
+            console.log stdout
+            console.log '-------------'
+            console.log stdout.match(/Already exists/g)?.length
+            console.log stdout.match(/adding new entry/g).length
             modified += 1 if stdout.match(/Already exists/g)?.length isnt stdout.match(/adding new entry/g).length
             ctx.log "Clean temp file: #{destination}"
             ctx.remove
@@ -349,7 +350,7 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
             , (err, removed) ->
               next err
       .on 'both', (err) ->
-        next err, if modified then ctx.OK else ctx.PASS
+        next err, modified
 
 ## Useful commands
 

@@ -9,5 +9,4 @@ layout: module
     module.exports.push name: 'Network # restart', timeout: -1, callback: (ctx, next) ->
       ctx.execute
         cmd: 'service network restart'
-      , (err) ->
-        next err, ctx.PASS
+      , next

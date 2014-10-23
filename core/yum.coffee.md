@@ -85,15 +85,12 @@ More information about configuring the proxy settings
 is available on [the centos website](http://www.centos.org/docs/5/html/yum/sn-yum-proxy-server.html)
 
     module.exports.push name: 'YUM # Configuration', callback: (ctx, next) ->
-      {config} = ctx.config.yum
-      ctx.log 'Update configuration'
       ctx.ini
-        content: config
+        content: ctx.config.yum.config
         destination: '/etc/yum.conf'
         merge: true
         backup: true
-      , (err, written) ->
-        next err, if written then ctx.OK else ctx.PASS
+      , next
 
 ## YUM # repositories
 
@@ -103,7 +100,7 @@ in "/etc/yum.repos.d"
 
     module.exports.push name: 'YUM # Repositories', timeout: -1, callback: (ctx, next) ->
       {copy, clean} = ctx.config.yum
-      return next null, ctx.DISABLED unless copy
+      return next() unless copy
       modified = false
       basenames = []
       do_upload = ->
@@ -146,12 +143,11 @@ in "/etc/yum.repos.d"
             modified = true
             do_update()
       do_update = ->
-        return next null, ctx.PASS unless modified
         ctx.log 'Clean metadata and update'
         ctx.execute
           cmd: 'yum clean metadata; yum -y update'
-        , (err, executed) ->
-          next err, ctx.OK
+          if: modified
+        , next
       do_upload()
 
     module.exports.push name: 'YUM # Update', timeout: -1, callback: (ctx, next) ->
@@ -160,14 +156,13 @@ in "/etc/yum.repos.d"
       ctx.execute
         cmd: 'yum -y update'
       , (err, executed, stdout, stderr) ->
-        next err, if /No Packages marked for Update/.test(stdout) then ctx.PASS else ctx.OK
+        next err, not /No Packages marked for Update/.test(stdout)
 
     module.exports.push name: 'YUM # Packages', timeout: -1, callback: (ctx, next) ->
       services = for name, active of ctx.config.yum.packages
         continue unless active
         name: name
-      ctx.service services, (err, serviced) ->
-        next err, if serviced then ctx.OK else ctx.PASS
+      ctx.service services, next
       # each(packages)
       # .on 'item', (service, active, next) ->
       #   return next() unless active

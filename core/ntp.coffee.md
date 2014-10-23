@@ -59,12 +59,12 @@ time when the `ntpd` daemon isnt yet started.
         startup: true
       , (err, serviced) ->
         return next err if err
-        return next null, ctx.PASS unless serviced
+        return next null, false unless serviced
         ctx.execute
           cmd: "ntpdate #{ctx.config.ntp.servers[0]}"
           if: ctx.config.ntp.servers[0] isnt ctx.config.host
         , (err) ->
-          next err, ctx.OK
+          next err, true
 
 ## Configure
 
@@ -88,13 +88,12 @@ change to this file is detected.
         backup: true
       , (err, written) ->
         return next err if err
-        return next null, ctx.PASS unless written
+        return next null, false unless written
         ctx.service
           name: 'ntp'
           srv_name: 'ntpd'
           action: 'restart'
-        , (err) ->
-          next err, ctx.OK
+        , next
 
 ## Start
 
@@ -103,11 +102,9 @@ Start the `ntpd` daemon if it isnt yet running.
     module.exports.push name: 'NTP # Start', timeout: -1, callback: (ctx, next) -> 
       ctx.log "Start the NTP service"
       ctx.service
-        name: 'ntp'
         srv_name: 'ntpd'
         action: 'start'
-      , (err, serviced) ->
-        next err, if serviced then ctx.OK else ctx.PASS
+      , next
 
 ## Check
 
@@ -129,7 +126,7 @@ synchronization the date and the `ntpd` daemon is finally restarted.
         return next err if err
         time = parseInt(stdout.trim(), 10) * 1000
         current_lag = Math.abs(new Date() - new Date(time))
-        return next null, ctx.PASS if current_lag < lag
+        return next null, false if current_lag < lag
         ctx.log "Lag greater than #{lag}ms: #{current_lag}"
         ctx.service
           name: 'ntp'
@@ -142,11 +139,9 @@ synchronization the date and the `ntpd` daemon is finally restarted.
           , (err) ->
             return next err if err
             ctx.service
-              name: 'ntp'
               srv_name: 'ntpd'
-              action: 'stop'
-            , (err, serviced) ->
-              next err, ctx.OK
+              action: 'start'
+            , next
 
 ## Note
 

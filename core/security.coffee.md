@@ -85,8 +85,7 @@ root       soft    nproc     unlimited
         destination: "/etc/security/limits.d/#{filename}"
         content: content
         backup: true
-      ctx.write writes, (err, written) ->
-        next err, if written then ctx.OK else ctx.PASS
+      ctx.write writes, next
 
 
 

@@ -21,5 +21,4 @@ The package "make" is installed upon execution.
     module.exports.push name: 'Make # Package', timeout: -1, callback: (ctx, next) ->
       ctx.service
         name: 'make'
-      , (err, serviced) ->
-        next err, if serviced then ctx.OK else ctx.PASS
+      , next

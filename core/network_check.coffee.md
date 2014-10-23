@@ -38,9 +38,9 @@ Dig isn't available by default on CentOS and is installed by the
           next err
         else unless ipRegex.test stdout.split(/\s+/).shift()
           ctx.log "Invalid IP #{stdout.trim()}"
-          next null, ctx.WARN
+          next null, 'WARNING'
         else
-         next null, ctx.PASS
+         next null, false
 
 ## Reverse Lookup
 
@@ -53,9 +53,9 @@ Dig isn't available by default on CentOS and is installed by the
           next err
         else if "#{ctx.config.host}." isnt stdout.trim()
           ctx.log "Invalid host #{stdout.trim()}"
-          next null, ctx.WARN
+          next null, 'WARNING'
         else
-         next null, ctx.PASS
+         next null, false
 
 ## Forward Lookup with getent
 
@@ -67,7 +67,7 @@ Dig isn't available by default on CentOS and is installed by the
         return next err if err
         return next null, ctx.WARN if not valid
         [ip, fqdn] = stdout.split(/\s+/).filter( (entry) -> entry)
-        next null, if ip is ctx.config.ip and fqdn is ctx.config.host then ctx.PASS else ctx.WARN
+        next null, if ip is ctx.config.ip and fqdn is ctx.config.host then false else 'WARNING'
 
 ## Reverse Lookup with getent
 
@@ -79,7 +79,7 @@ Dig isn't available by default on CentOS and is installed by the
         return next err if err
         return next null, ctx.WARN if not valid
         [ip, fqdn] = stdout.split(/\s+/).filter( (entry) -> entry)
-        next null, if ip is ctx.config.ip and fqdn is ctx.config.host then ctx.PASS else ctx.WARN
+        next null, if ip is ctx.config.ip and fqdn is ctx.config.host then false else 'WARNING'
 
 ## Hostname
 
@@ -88,7 +88,7 @@ Dig isn't available by default on CentOS and is installed by the
         cmd: "hostname"
       , (err, _, stdout) ->
         return next err if err
-        next null, if stdout.trim() is ctx.config.host then ctx.PASS else ctx.WARN
+        next null, if stdout.trim() is ctx.config.host then false else 'WARNING'
 
 
 

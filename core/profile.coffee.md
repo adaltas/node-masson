@@ -8,7 +8,7 @@ layout: module
     module.exports.push 'masson/bootstrap/'
 
     module.exports.push name: 'Profile', callback: (ctx, next) ->
-      ok = 0
+      modified = false
       ctx.config.profile ?= {}
       each(ctx.config.profile)
       .parallel(10)
@@ -17,7 +17,7 @@ layout: module
           destination: "/etc/profile.d/#{filename}"
           content: content
         , (err, written) ->
-          ok++ if written
+          modified = true if written
           next err
       .on 'both', (err) ->
-        next err, if ok then ctx.OK else ctx.PASS
+        next err, modified

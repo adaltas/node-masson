@@ -105,7 +105,7 @@ the user must have a `user.home` property.
         file = "#{user.home}/.curlrc"
         work user, file, next
       .on 'both', (err) ->
-        next err, if ok then ctx.OK else ctx.PASS
+        next err, ok
 
 ## Install
 
@@ -116,8 +116,7 @@ already installed.
       # On centOS, curl is already here
       ctx.service
         name: 'curl'
-      , (err, installed) ->
-        next err, if installed then ctx.OK else ctx.PASS
+      , next
 
 ## Check
 
@@ -133,6 +132,5 @@ connection.
       , (err, executed, stdout, stderr) ->
         return next err if err
         unless check_match.test stdout
-          msg = "#{if config.proxy then 'Proxy' else 'Connection'} not active"
-          return next new Error msg
-        next null, ctx.PASS
+          return next new Error "#{if config.proxy then 'Proxy' else 'Connection'} not active"
+        next null, true

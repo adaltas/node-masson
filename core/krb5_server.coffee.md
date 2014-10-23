@@ -217,14 +217,12 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
       ctx.iptables
         rules: rules
         if: ctx.config.iptables.action is 'start'
-      , (err, configured) ->
-        next err, if configured then ctx.OK else ctx.PASS
+      , next
 
     module.exports.push name: 'Krb5 Server # LDAP Install', timeout: -1, callback: (ctx, next) ->
       ctx.service
         name: 'krb5-server-ldap'
-      , (err, installed) ->
-        next err, if installed then ctx.OK else ctx.PASS
+      , next
 
     module.exports.push name: 'Krb5 Server # LDAP Configuration', timeout: 100000, callback: (ctx, next) ->
       {etc_krb5_conf} = ctx.config.krb5
@@ -233,9 +231,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
         destination: '/etc/krb5.conf'
         stringify: misc.ini.stringify_square_then_curly
         backup: true
-      , (err, written) ->
-        return next err if err
-        next err, if written then ctx.OK else ctx.PASS
+      , next
 
     module.exports.push name: 'Krb5 Server # Install', timeout: -1, callback: (ctx, next) ->
       ctx.log 'Install krb5kdc and kadmin services'
@@ -255,8 +251,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
         name: 'words'
       ,
         name: 'krb5-workstation'
-      ], (err, serviced) ->
-        next err, if serviced then ctx.OK else ctx.PASS
+      ], next
 
     module.exports.push name: 'Krb5 Server # Configure', timeout: 100000, callback: (ctx, next) ->
       {realm, etc_krb5_conf, kdc_conf} = ctx.config.krb5
@@ -317,10 +312,10 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
           do_end()
       do_end = (err) ->
         return next err if err
-        return next null, ctx.PASS unless modified
+        return next null, false unless modified
         # The first time, we dont restart because ldap conf is 
         # not there yet
-        return next null, ctx.OK unless exists
+        return next null, true unless exists
         ctx.log '(Re)start krb5kdc and kadmin services'
         ctx.service [
           name: 'krb5-server'
@@ -331,7 +326,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
           action: 'restart'
           srv_name: 'kadmin'
         ], (err, serviced) ->
-          next err, ctx.OK
+          next err, true
       do_exists()
 
     module.exports.push name: 'Krb5 Server # LDAP Insert Entries', timeout: -1, callback: (ctx, next) ->
@@ -367,7 +362,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
             next()
         do_wait()
       .on 'both', (err) ->
-        next err, if modified then ctx.OK else ctx.PASS
+        next err, modified
 
     module.exports.push name: 'Krb5 Server # LDAP Stash password', callback: (ctx, next) ->
       {kdc_conf} = ctx.config.krb5
@@ -420,7 +415,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
             next()
         do_read()
       .on 'both', (err) ->
-        next err, if modified then ctx.OK else ctx.PASS
+        next err, modified
 
     module.exports.push name: 'Krb5 Server # Log', timeout: 100000, callback: (ctx, next) ->
       modified = false
@@ -474,7 +469,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
           , (err, restarted) ->
             done err
       done = (err) ->
-        next err, if modified then ctx.OK else ctx.PASS
+        next err, modified
       touch()
 
     module.exports.push name: 'Krb5 Server # Admin principal', timeout: -1, callback: (ctx, next) ->
@@ -497,7 +492,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
           modified = true if created
           next()
       .on 'both', (err) ->
-        next err, if modified then ctx.OK else ctx.PASS
+        next err, modified
 
     # TODO: no time to work on this, the idea is to modified kadmin startup
     # script to handle multiple kadmin server. Note, for `killproc` to stop
@@ -525,8 +520,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
         name: 'krb5-server-ldap'
         action: 'start'
         srv_name: 'kadmin'
-      ], (err, serviced) ->
-        next err, if serviced then ctx.OK else ctx.PASS
+      ], next
 
 ## Krb5 Client
 

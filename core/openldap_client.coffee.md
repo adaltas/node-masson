@@ -93,8 +93,7 @@ Example:
     module.exports.push name: 'OpenLDAP Client # Install', timeout: -1, callback: (ctx, next) ->
       ctx.service
         name: 'openldap-clients'
-      , (err, installed) ->
-        next err, if installed then ctx.OK else ctx.PASS
+      , next
 
     module.exports.push name: 'OpenLDAP Client # Configure', timeout: -1, callback: (ctx, next) ->
       {config} = ctx.config.openldap_client
@@ -109,8 +108,7 @@ Example:
         write: write
         destination: '/etc/openldap/ldap.conf'
         eof: true # was 4 lines up in write.push
-      , (err, written) ->
-        next err, if written then ctx.OK else ctx.PASS
+      , next
 
 ## Upload certificate
 
@@ -152,7 +150,7 @@ the command `authconfig --update --ldaploadcacert={file}`.
               modified = true if uploaded
               next()
       .on 'both', (err) ->
-        next err, if modified then ctx.OK else ctx.PASS
+        next err, modified
 
     module.exports.push name: 'OpenLDAP Client # Check URI', timeout: -1, callback: (ctx, next) ->
       {config} = ctx.config.openldap_client
@@ -164,7 +162,7 @@ the command `authconfig --update --ldaploadcacert={file}`.
         uri.port ?= 636 if uri.protocol is 'ldaps:'
         ctx.waitIsOpen uri.hostname, uri.port, next
       .on 'both', (err) ->
-        next err, ctx.PASS
+        next err, true
 
     module.exports.push name: 'OpenLDAP Client # Check Search', callback: (ctx, next) ->
       {suffix, root_dn, root_password} = ctx.config.openldap_client
@@ -172,4 +170,4 @@ the command `authconfig --update --ldaploadcacert={file}`.
       ctx.execute
         cmd: "ldapsearch -x -D #{root_dn} -w #{root_password} -b '#{suffix}'"
       , (err, executed) ->
-        next err, ctx.PASS
+        next err, true

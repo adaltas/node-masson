@@ -88,7 +88,7 @@ profile initialization directory.
     module.exports.push name: 'Proxy # Profile', callback: (ctx, next) ->
       # There is no proxy to configure
       return next() unless ctx.config.proxy.http_proxy
-      return next null, ctx.DISABLED
+      return next null, 'TODO'
       # {system, http_proxy, https_proxy} = ctx.config.proxy
       # modified = 0
       # write = (file, callback) ->

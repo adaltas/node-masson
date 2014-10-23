@@ -51,8 +51,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
           { chain: 'INPUT', jump: 'ACCEPT', dport: 53, protocol: 'udp', state: 'NEW', comment: "Named" }
         ]
         if: ctx.config.iptables.action is 'start'
-      , (err, configured) ->
-        next err, if configured then ctx.OK else ctx.PASS
+      , next
 
 ## Install
 
@@ -62,8 +61,7 @@ The packages "bind" is installed as a startup item and not yet installed.
       ctx.service
         srv_name: 'named'
         startup: true
-      , (err, serviced) ->
-        next err, if serviced then ctx.OK else ctx.PASS
+      , next
 
 ## Configure
 
@@ -84,12 +82,11 @@ and setting "allow-query" to any. The "named" service is restarted if modified.
         ]
       , (err, written) ->
         return next err if err
-        return next null, ctx.PASS unless written
+        return next null, false unless written
         ctx.service
           srv_name: 'named'
           action: 'restart'
-        , (err, restarted) ->
-          next err, ctx.OK
+        , next
 
 ## Zones
 
@@ -128,7 +125,7 @@ Upload the zones definition files provided in the configuration file.
             return next err
         .on 'both', (err) ->
           return next err if err
-          return next null, ctx.PASS if not modified
+          return next null, false if not modified
           ctx.log 'Generates configuration files for rndc'
           ctx.execute
             cmd: 'rndc-confgen -a -r /dev/urandom -c /etc/rndc.key'
@@ -138,8 +135,7 @@ Upload the zones definition files provided in the configuration file.
             ctx.service
               srv_name: 'named'
               action: 'restart'
-            , (err, restarted) ->
-              next err, ctx.OK
+            , next
 
 ## Start
 
@@ -149,8 +145,7 @@ Now the service being configured, the "named" service is started.
       ctx.service
         srv_name: 'named'
         action: 'start'
-      , (err, serviced) ->
-        next err, if serviced then ctx.OK else ctx.PASS
+      , next
 
 ## resources
 

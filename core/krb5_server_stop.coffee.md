@@ -8,12 +8,10 @@
       ctx.service
         srv_name: 'kadmin'
         action: 'stop'
-      , (err, stoped) ->
-        next err, if stoped then ctx.OK else ctx.PASS
+      , next
 
     module.exports.push name: 'Kerberos Server # Stop krb5kdc', callback: (ctx, next) ->
       ctx.service
         srv_name: 'krb5kdc'
         action: 'stop'
-      , (err, stoped) ->
-        next err, if stoped then ctx.OK else ctx.PASS
+      , next

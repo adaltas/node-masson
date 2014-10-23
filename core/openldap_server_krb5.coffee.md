@@ -169,9 +169,7 @@ the command `ldapsearch  -D cn=admin,cn=config -w test -b "cn=config"`.
         name: "olcDatabase={2}bdb,cn=config"
         indexes:
           krbPrincipalName: 'sub,eq'
-      , (err, indexed) ->
-        next err, if indexed then ctx.OK else ctx.PASS
-
+      , next
 
 
 
