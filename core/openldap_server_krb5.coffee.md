@@ -5,6 +5,7 @@ layout: module
 
 # OpenLDAP Kerberos
 
+    {check_password} = require './openldap_server'
     misc = require 'mecano/lib/misc'
     module.exports = []
     module.exports.push 'masson/bootstrap/'
@@ -14,15 +15,22 @@ layout: module
 We make sure to set "ctx.ldap_admin" which isn't present in
 force mode.
 
-    module.exports.push (ctx, next) ->
-      openldap_server = require './openldap_server'
-      openldap_server.configure ctx
-      krb5_server = require './krb5_server'
-      krb5_server.configure ctx
-      # Configure openldap_krb5
-      {groups_container_dn, admin_group, users_container_dn, admin_user} = ctx.config.openldap_krb5
-      ctx.config.openldap_krb5.admin_user = misc.merge {},
-        cn: /^cn=(.*?),/.exec(users_container_dn)[1]
+    module.exports.push module.exports.configure = (ctx) ->
+      # Dependencies
+      require('./openldap_server').configure ctx
+      # require('./krb5_server').configure ctx
+      # Normalization
+      ctx.config.openldap_server_krb5 ?= {}
+      {openldap_server, openldap_server_krb5} = ctx.config
+      openldap_server_krb5.kerberos_dn ?= "ou=kerberos,#{openldap_server.suffix}"
+      # Configure openldap_server_krb5
+      # {admin_group, users_dn, groups_dn, admin_user} = openldap_server_krb5
+      # User for krbadmin
+      # Example: "dn: cn=krbadmin,ou=groups,dc=adaltas,dc=com"
+      openldap_server_krb5.krbadmin_user ?= {}
+      openldap_server_krb5.krbadmin_user = misc.merge {},
+        dn: "cn=krbadmin,#{openldap_server.users_dn}"
+        cn: 'krbadmin'
         objectClass: [
           'top', 'inetOrgPerson', 'organizationalPerson',
           'person', 'posixAccount'
@@ -36,19 +44,21 @@ force mode.
         homeDirectory: '/home/krbadmin'
         loginShell: '/bin/false'
         displayname: 'Kerberos Administrator'
-        userPassword: '{SSHA}uQcSsw5CySTkBXjOY/N0hcduA6yFiI0k' #test
-      , admin_user
-      ctx.config.openldap_krb5.admin_group = misc.merge {},
-        cn: /^cn=(.*?),/.exec(groups_container_dn)[1]
+        # userPassword: '{SSHA}uQcSsw5CySTkBXjOY/N0hcduA6yFiI0k' #test
+        userPassword: 'test' #test
+      , openldap_server_krb5.krbadmin_user
+      # Group for krbadmin
+      # Example: "dn: cn=krbadmin,ou=groups,dc=adaltas,dc=com"
+      openldap_server_krb5.krbadmin_group ?= {}
+      openldap_server_krb5.krbadmin_group = misc.merge {},
+        dn: "cn=krbadmin,#{openldap_server.groups_dn}"
+        cn: 'krbadmin'
         objectClass: [ 'top', 'posixGroup' ]
         gidNumber: '800'
         description: 'Kerberos administrator\'s group.'
-      , admin_group
-      # Create LDAP admin connection if not already present
-      require('./openldap_connection').configure ctx, next
+      , openldap_server_krb5.krbadmin_group
 
-Install schema
---------------
+## Install schema
 
 Prepare and deploy the kerberos schema. Upon installation, it
 is possible to check if the schema is installed by calling
@@ -80,50 +90,93 @@ the command `ldapsearch  -D cn=admin,cn=config -w test -b "cn=config"`.
           binddn: config_dn
           passwd: config_password
           log: ctx.log
-        , (err, registered) ->
-          next err, if registered then ctx.OK else ctx.PASS
+        , next
       install()
 
-    module.exports.push name: 'OpenLDAP Kerberos # Insert data', callback: (ctx, next) ->
-      {kerberos_container_dn, groups_container_dn, admin_group, users_container_dn, admin_user} = ctx.config.openldap_krb5
+## Insert Container
+
+Create the kerberos organisational unit, for example 
+"ou=kerberos,dc=adaltas,dc=com".
+
+    module.exports.push name: 'OpenLDAP Kerberos # Insert Container', callback: (ctx, next) ->
+      {kerberos_dn, krbadmin_user} = ctx.config.openldap_server_krb5
+      ctx.ldap_add ctx, """
+        dn: #{kerberos_dn}
+        objectClass: top
+        objectClass: organizationalUnit
+        ou: #{/^ou=(.*?),/.exec(kerberos_dn)[1]}
+        description: Kerberos OU to store Kerberos principals.
+        """
+      , next
+
+## Insert Group
+
+Create the kerberos administrator's group.
+
+    module.exports.push name: 'OpenLDAP Kerberos # Insert Group', callback: (ctx, next) ->
+      {krbadmin_group} = ctx.config.openldap_server_krb5
+      ldif = ''
+      for k, v of krbadmin_group
+        v = [v] unless Array.isArray v
+        for vv in v
+          ldif += "#{k}: #{vv}\n"
+      ctx.ldap_add ctx, ldif, next
+
+# Insert Admin User
+
+Create the kerberos administrator's user.
+
+    module.exports.push name: 'OpenLDAP Kerberos # Insert Admin User', callback: (ctx, next) ->
+      {kerberos_dn, krbadmin_user} = ctx.config.openldap_server_krb5
       modified = false
-      kbsou = ->
-        ctx.log 'Create the kerberos organisational unit'
-        ctx.ldap_admin.add kerberos_container_dn, 
-          ou: /^ou=(.*?),/.exec(kerberos_container_dn)[1]
-          objectClass: [ 'top', 'organizationalUnit' ]
-          description: 'Kerberos OU to store Kerberos principals.'
-        , (err, search) ->
-          return done err if err and err.name isnt 'EntryAlreadyExistsError'
-          modified = true unless err
-          kadmg()
-      kadmg = ->
-        ctx.log 'Create the kerberos administrator\'s group'
-        ctx.ldap_admin.add groups_container_dn, admin_group, (err, search) ->
-          return done err if err and err.name isnt 'EntryAlreadyExistsError'
-          modified = true unless err
-          kadmu()
-      kadmu = ->
-        ctx.log 'Create the kerberos administrator\'s user'
-        ctx.ldap_admin.add users_container_dn, admin_user, (err, search) ->
-          return done err if err and err.name isnt 'EntryAlreadyExistsError'
-          modified = true unless err
-          done()
-      done = (err) ->
-        next err, if modified then ctx.OK else ctx.PASS
-      kbsou()
+      do_krbadmin_user = ->
+        ldif = ''
+        for k, v of krbadmin_user
+          continue if k is 'userPassword'
+          v = [v] unless Array.isArray v
+          for vv in v
+            ldif += "#{k}: #{vv}\n"
+        ctx.ldap_add ctx, ldif, (err, added) ->
+          return next err if err
+          modified = true if added
+          do_krbadmin_user_password added
+      do_krbadmin_user_password = (force) ->
+        do_checkpass = ->
+          ctx.execute
+            cmd: """
+              ldapsearch -H ldapi:/// \
+                -D #{krbadmin_user.dn} -w #{krbadmin_user.userPassword} \
+                -b '#{kerberos_dn}'
+            """
+            code_skipped: 1
+          , (err, exists, stdout) ->
+            if err then do_ldappass() else do_end()
+        do_ldappass = ->
+          ctx.execute
+            cmd: """
+            ldappasswd -H ldapi:/// \
+              -D cn=Manager,dc=adaltas,dc=com -w test \
+              '#{krbadmin_user.dn}' \
+              -s #{krbadmin_user.userPassword}
+            """
+          , (err) ->
+            return next err if err
+            modified = true
+            do_end()
+        if force then do_ldappass() else do_checkpass()
+      do_end = (err) ->
+        next err, modified
+      do_krbadmin_user()
 
     module.exports.push name: 'OpenLDAP Kerberos # User permissions', callback: (ctx, next) ->
       # We used: http://itdavid.blogspot.fr/2012/05/howto-centos-62-kerberos-kdc-with.html
       # But this is also interesting: http://web.mit.edu/kerberos/krb5-current/doc/admin/conf_ldap.html
-      {kerberos_container_dn, users_container_dn} = ctx.config.openldap_krb5
+      {kerberos_dn, krbadmin_user} = ctx.config.openldap_server_krb5
       {suffix} = ctx.config.openldap_server
       ctx.ldap_acl [
-        ldap: ctx.ldap_config
-        log: ctx.log
-        name: "olcDatabase={2}bdb,cn=config"
+        suffix: suffix
         acls: [
-        #   before: "dn.subtree=\"#{kerberos_container_dn}\""
+        #   before: "dn.subtree=\"#{kerberos_dn}\""
         #   to: "attrs=userPassword,userPKCS12"
         #   by: [
         #     "dn.base=\"gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth\" manage "
@@ -133,23 +186,23 @@ the command `ldapsearch  -D cn=admin,cn=config -w test -b "cn=config"`.
         #   ]
         # ,
           before: "dn.subtree=\"#{suffix}\""
-          to: "dn.subtree=\"#{kerberos_container_dn}\""
+          to: "dn.subtree=\"#{kerberos_dn}\""
           by: [
-            "dn.exact=\"#{users_container_dn}\" write"
+            "dn.exact=\"#{krbadmin_user.dn}\" write"
             "dn.base=\"gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth\" read"
             "* none"
           ]
         ,
           to: "dn.subtree=\"#{suffix}\""
           by: [
-            "dn.exact=\"#{users_container_dn}\" write"
+            "dn.exact=\"#{krbadmin_user.dn}\" write"
           ]
         ]
       ], (err, modified) ->
         return next err if err
-        ctx.log "Check it returns the entire #{kerberos_container_dn} subtree"
+        ctx.log "Check it returns the entire #{kerberos_dn} subtree"
         ctx.execute
-          cmd: "ldapsearch -xLLLD #{users_container_dn} -w test -b #{kerberos_container_dn}"
+          cmd: "ldapsearch -xLLLD #{krbadmin_user.dn} -w #{krbadmin_user.userPassword} -b #{kerberos_dn}"
         , (err) ->
           # Nice but no garanty that a "nssproxy" user exists. I keep it
           # for now because it would be great to test permission
@@ -161,18 +214,21 @@ the command `ldapsearch  -D cn=admin,cn=config -w test -b "cn=config"`.
           #   code: 32
           # , (err) ->
           #   next err, if modified then ctx.OK else ctx.PASS
-          next err, if modified then ctx.OK else ctx.PASS
+          next err, modified
 
     module.exports.push name: 'OpenLDAP Kerberos # Index', callback: (ctx, next) ->
+      {suffix} = ctx.config.openldap_server
       ctx.ldap_index
-        ldap: ctx.ldap_config
-        name: "olcDatabase={2}bdb,cn=config"
+        suffix: suffix
         indexes:
           krbPrincipalName: 'sub,eq'
       , next
 
 
+## Resources
 
+*   [MIT Kerberos Documentation](http://web.mit.edu/kerberos/krb5-devel/doc/admin/conf_ldap.html)
+*   [Another I.T. blog](http://itdavid.blogspot.fr/2012/05/howto-centos-62-kerberos-kdc-with.html)
 
 
 

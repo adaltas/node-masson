@@ -9,12 +9,15 @@ layout: module
 
 # OpenLDAP ACL
 
-    module.exports.push (ctx, next) ->
+    module.exports.push (ctx) ->
       # Register "ctx.ldap_add" function
       require('./openldap_server').configure ctx
-      require('./openldap_client_security').configure ctx
+      {openldap_server} = ctx.config
+      # require('./openldap_client_security').configure ctx
       # Obtain an ldap connection
-      require('./openldap_connection').configure ctx, next
+      # require('./openldap_connection').configure ctx, next
+      throw Error 'Missing required "openldap_server.users_dn" property' unless openldap_server.users_dn
+      throw Error 'Missing required "openldap_server.groups_dn" property' unless openldap_server.groups_dn
 
 After this call, the follwing command should execute with success:
 
@@ -25,8 +28,7 @@ ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=co
     module.exports.push name: 'OpenLDAP ACL # Permissions for nssproxy', callback: (ctx, next) ->
       {suffix} = ctx.config.openldap_server
       ctx.ldap_acl
-        ldap: ctx.ldap_config
-        name: 'olcDatabase={2}bdb,cn=config'
+        suffix: suffix
         acls: [
           to: 'attrs=userPassword,userPKCS12'
           by: [
@@ -54,9 +56,9 @@ ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=co
       , next
 
     module.exports.push name: 'OpenLDAP ACL # Insert User', callback: (ctx, next) ->
-      {users_container_dn, groups_container_dn} = ctx.config.openldap_client_security
+      {users_dn, groups_dn} = ctx.config.openldap_server
       ctx.ldap_add ctx, """
-      dn: cn=nssproxy,#{users_container_dn}
+      dn: cn=nssproxy,#{users_dn}
       uid: nssproxy
       gecos: Network Service Switch Proxy User
       objectClass: top
@@ -73,7 +75,7 @@ ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=co
       gidNumber: 801
       homeDirectory: /home/nssproxy
 
-      # dn: cn=test,#{users_container_dn}
+      # dn: cn=test,#{users_dn}
       # uid: test
       # gecos: Test User
       # objectClass: top
@@ -90,14 +92,14 @@ ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=co
       # gidNumber: 1101
       # homeDirectory: /home/test
 
-      dn: cn=nssproxy,#{groups_container_dn}
+      dn: cn=nssproxy,#{groups_dn}
       cn: nssproxy
       objectClass: top
       objectClass: posixGroup
       gidNumber: 801
       description: Network Service Switch Proxy
 
-      # dn: cn=test,#{groups_container_dn}
+      # dn: cn=test,#{groups_dn}
       # cn: test.group
       # objectClass: top
       # objectClass: posixGroup
