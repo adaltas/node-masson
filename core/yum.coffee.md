@@ -5,14 +5,20 @@ layout: module
 
 # YUM
 
+Configure YUM for internet and intranet mode. The Epel repository is optionnaly
+deployed.
+
+Note, ntp is installed to encure correct date on the server or HTTPS will fail.
+
     each = require 'each'
     path = require 'path'
     misc = require 'mecano/lib/misc'
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/bootstrap'
     module.exports.push 'masson/core/profile' # In case yum make use of environmental variables
     module.exports.push 'masson/core/proxy'
     module.exports.push 'masson/core/network'
+    module.exports.push 'masson/core/ntp'
 
 ## Configuration
 
@@ -51,6 +57,8 @@ Examples
       ctx.config.yum.packages['yum-plugin-priorities'] ?= true
       ctx.config.yum.packages['man'] ?= true
       ctx.config.yum.packages['ksh'] ?= true
+      ctx.config.yum.epel ?= true
+      ctx.config.yum.epel_url = 'http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm'
       {http_proxy_no_auth, username, password} = ctx.config.proxy
       if ctx.config.yum.proxy
         ctx.config.yum.config.main.proxy = http_proxy_no_auth
@@ -58,23 +66,18 @@ Examples
         ctx.config.yum.config.main.proxy_password = password
 
     module.exports.push name: 'YUM # Check', callback: (ctx, next) ->
-      ctx.log 'Check if YUM is running'
-      pidfile = '/var/run/yum.pid'
-      opts = {}
-      # opts = 
-      #   stdout: ctx.log.out
-      #   stderr: ctx.log.err
-      misc.pidfileStatus ctx.ssh, pidfile, opts, (err, status) ->
+      misc.pidfileStatus ctx.ssh, '/var/run/yum.pid', {}, (err, status) ->
         return next err if err
-        if status is 0
-          ctx.log 'YUM is running, abort'
-          next new Error 'Yum is already running'
-        if status is 1
-          ctx.log 'YUM isnt running'
-          next null, ctx.PASS
-        if status is 2
-          ctx.log "YUM isnt running, removing invalid #{pidfile}"
-          next null, ctx.OK
+        switch status
+          when 0
+            ctx.log 'YUM is running, abort'
+            next new Error 'Yum is already running'
+          when 1
+            ctx.log 'YUM isnt running'
+            next null, false
+          when 2
+            ctx.log "YUM isnt running, removing invalid '/var/run/yum.pid'"
+            next null, true
 
 ## YUM # Configuration
 
@@ -149,6 +152,23 @@ in "/etc/yum.repos.d"
           if: modified
         , next
       do_upload()
+
+## Epel
+
+Install the Epel repository. This is by default activated and the repository is
+deployed by installing the "epel-release" package. It may also be installed from
+an url by defining the "yum.epel_url" property. To disable Epel, simply set the
+property "yum.epel" to false.
+
+    module.exports.push name: 'YUM # Epel', timeout: 100000, callback: (ctx, next) ->
+      {epel, epel_url} = ctx.config.yum
+      return next() unless epel
+      ctx.execute
+        cmd: if epel_url
+        then "rpm -Uvh #{epel_url}"
+        else 'yum install epel-release' 
+        not_if_exec: 'yum list installed | grep epel-release'
+      , next
 
     module.exports.push name: 'YUM # Update', timeout: -1, callback: (ctx, next) ->
       {update} = ctx.config.yum
