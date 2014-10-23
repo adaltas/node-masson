@@ -7,7 +7,7 @@ module.exports = (ctx, callback) ->
   {public_key, bootstrap} = ctx.config.connection
   return callback Error "Invalid public_key: #{JSON.stringify public_key}" unless Array.isArray public_key
   public_key = public_key.join '\n'
-  ctx.log "SSH login to #{bootstrap.username}@#{ctx.config.host}"
+  ctx.log "SSH login to #{bootstrap.username}@#{bootstrap.host}:{bootstrap.port}"
   connect bootstrap, (err, conn) ->
     return callback err if err
     conn.shell (err, stream) ->
@@ -25,32 +25,41 @@ module.exports = (ctx, callback) ->
       if bootstrap.username isnt 'root' then steps.push
         cmd: "#{bootstrap.cmd}\n"
         callback: (data, next) ->
-          if /^\[root[\@]/.test data
-            next()
-          else if /mot de passe/.test(data.toLowerCase()) or /password/.test(data.toLowerCase())
+          if /mot de passe/.test(data.toLowerCase()) or /password/.test(data.toLowerCase())
             stream.write "#{bootstrap.password}\n"
+          else
+            next()
+          # if /^\[root[\@]/.test data
+          #   next()
+          # else if /mot de passe/.test(data.toLowerCase()) or /password/.test(data.toLowerCase())
+          #   stream.write "#{bootstrap.password}\n"
       steps.push
         cmd: "sed -i.back 's/.*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config\n"
         callback: (data, next) ->
-          next() if /\[.+@.+ .+\]/.test data
+          next()
+          # next() if /\[.+@.+ .+\]/.test data
       steps.push
         cmd: "mkdir -p ~/.ssh; chmod 700 ~/.ssh\n"
         callback: (data, next) ->
-          next() if /\[.+@.+ .+\]/.test data
+          next()
+          # next() if /\[.+@.+ .+\]/.test data
       steps.push
         cmd: "echo '#{public_key}' >> ~/.ssh/authorized_keys\n"
         callback: (data, next) ->
-          next() if /\[.+@.+ .+\]/.test data
+          next()
+          # next() if /\[.+@.+ .+\]/.test data
       steps.push
         # There is a bug in CentOS 6 / SELinux that results in all client presented certificates to be ignored when SELinux is set to Enforcing.
-        cmd: "if grep ^SELINUX=enforcing /etc/selinux/config; then sed -i.back 's/^SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config; reboot; fi;\n" # reboot;
+        cmd: "if [ -f /etc/selinux/config ] && grep ^SELINUX=enforcing /etc/selinux/config; then sed -i.back 's/^SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config; reboot; fi;\n" # reboot;
         callback: (data, next) ->
-          next() if /\[.+@.+ .+\]/.test data
+          next()
+          # next() if /\[.+@.+ .+\]/.test data
       root_exit = if bootstrap.username isnt 'root' then 'exit\n' else ''
       steps.push
         cmd: "#{root_exit}exit\n"
         callback: (data, next) ->
-          next() if /\[.+@.+ .+\]/.test data
+          next()
+          # next() if /\[.+@.+ .+\]/.test data
       each(steps)
       .parallel(1)
       .on 'item', (step, i, next) ->
