@@ -27,40 +27,34 @@ module.exports = ->
   run(config, params)
   .on 'context', (ctx) ->
     ctx
-    .on 'action', (status) ->
-      return if ctx.action.hidden
-      status ?= ctx.DISABLED
-      if status is ctx.STARTED
-        times[ctx.config.host] = Date.now()
-      else
-        time = Date.now() - times[ctx.config.host]
+    .on 'action_start', () ->
+      return if multihost
+      return unless ctx.action.name?
+      times[ctx.config.host] = Date.now()
       line = ''
       line += "#{pad ctx.config.host, hostlength}"
       line += "#{pad ctx.action.name, 40}"
-      statusmsg = switch status
-        when ctx.PASS then "\x1b[36m#{ctx.PASS_MSG}\x1b[39m"
-        when ctx.OK then "\x1b[36m#{ctx.OK_MSG}\x1b[39m"
-        when ctx.FAILED then "\x1b[35m#{ctx.FAILED_MSG}\x1b[39m"
-        when ctx.DISABLED then "\x1b[36m#{ctx.DISABLED_MSG}\x1b[39m"
-        when ctx.TODO then "\x1b[36m#{ctx.TODO_MSG}\x1b[39m"
-        when ctx.PARTIAL then "\x1b[36m#{ctx.PARTIAL_MSG}\x1b[39m"
-        when ctx.STOP then "\x1b[35m#{ctx.STOP_MSG}\x1b[39m"
-        when ctx.TIMEOUT then "\x1b[35m#{ctx.TIMEOUT_MSG}\x1b[39m"
-        when ctx.WARN then "\x1b[33m#{ctx.WARN_MSG}\x1b[39m"
-        when ctx.STARTED then "\x1b[36m#{ctx.STARTED_MSG}\x1b[39m"
-        when ctx.INAPPLICABLE then "\x1b[36m#{ctx.INAPPLICABLE_MSG}\x1b[39m"
-        else (if typeof status is 'number' then "INVALID CODE" else "\x1b[36m#{status}\x1b[39m")
+      line += "#{pad 'STARTED', 20}"
+      rl.write line 
+    .on 'action_end', (err, status) ->
+      return unless ctx.action.name?
+      time = Date.now() - times[ctx.config.host]
+      line = ''
+      line += "#{pad ctx.config.host, hostlength}"
+      line += "#{pad ctx.action.name, 40}"
+      statusmsg = if err then "\x1b[35mERROR\x1b[39m"
+      else if status then "\x1b[36mMODIFIED\x1b[39m"
+      else "\x1b[36mOK\x1b[39m"
       line += "#{pad statusmsg, 20}"
-      line += "#{print_time time}" if time
-      if status is ctx.STARTED
-        rl.write line unless multihost
-      else
-        rl.cursor = 0
-        rl.line = ''
-        rl._refreshLine()
-        if status isnt ctx.DISABLED
-          rl.write line
-          rl.write '\n'
+      line += "#{print_time time}"
+      # rl.write line
+      # rl.write '\n'
+      rl.cursor = 0
+      rl.line = ''
+      rl._refreshLine()
+      if err or status?
+        rl.write line
+        rl.write '\n'
     .on 'wait', ->
       return if multihost
       statusmsg = "\x1b[36mWAIT\x1b[39m"

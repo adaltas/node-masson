@@ -58,15 +58,15 @@ preserve alphanumerical ordering of files.
             log.out.close()
             log.err.close()
           , 100
-        ctx.on 'action', (status) ->
-          if [ctx.PASS, ctx.OK, ctx.FAILED, ctx.DISABLED, ctx.STOP, ctx.TIMEOUT, ctx.WARN ].indexOf(status) isnt -1
-            return log.out.write ">>> END #{(new Date).toISOString()}\n"
-          return unless status is ctx.STARTED
+        ctx.on 'action_start', (status) ->
           date = (new Date).toISOString()
-          msg = "\n#{ctx.action.name}\n#{pad date.length+ctx.action.name.length, '', '-'}\n"
+          name = ctx.action.name || ctx.action.id
+          msg = "\n#{name}\n#{pad date.length+name.length, '', '-'}\n"
           log.out.write msg
-          log.out.write ">>> START #{(new Date).toISOString()}\n"
+          log.out.write ">>> START #{date}\n"
           log.err.write msg
+        ctx.on 'action_end', (err, status) ->
+          log.out.write ">>> END #{(new Date).toISOString()}\n"
         ctx.on 'end', ->
           log.out.write '\nFINISHED WITH SUCCESS\n'
           close()

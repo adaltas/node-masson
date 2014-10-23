@@ -67,21 +67,19 @@ Run = (config, params) ->
             return next() if action.skip
             # Action
             ctx.action = action
+            ctx.emit 'action_start'
             retry = if action.retry? then actions.retry else 2
             attempts = 0
             disregard_done = false
-            emit_action = (status) =>
-              ctx.emit 'action', status
-            emit_action ctx.STARTED
+            emit_action = (err, status) =>
+              ctx.emit 'action_end', err, status
             done = (err, statusOrMsg) =>
               return if disregard_done
               clearTimeout timeout if timeout
               if err and (retry is true or ++attempts < retry)
                 ctx.log? "Get error #{err.message}, retry #{attempts} of #{retry}"
                 return setTimeout(run, 1) 
-              if err
-              then emit_action ctx.FAILED
-              else emit_action statusOrMsg
+              emit_action err, statusOrMsg
               next err
             run = =>
               try
@@ -90,11 +88,11 @@ Run = (config, params) ->
                   merge action, action.callback.call ctx, ctx
                   process.nextTick ->
                     action.timeout = -1
-                    done null, ctx.DISABLED
+                    done()
                 # Asynchronous action
                 else
                   merge action, action.callback.call ctx, ctx, (err, statusOrMsg) =>
-                    actionRun.end() if statusOrMsg is ctx.STOP
+                    # actionRun.end() if statusOrMsg is ctx.STOP
                     done err, statusOrMsg
               catch e then done e
             # Timeout, default to 100s
