@@ -33,11 +33,10 @@ Example:
 }
 ```
 
-    module.exports.push (ctx, next) ->
+    module.exports.push (ctx) ->
       ctx.config.security ?= {}
       ctx.config.security.selinux ?= true
       ctx.config.security.limits ?= {}
-      next()
 
 ## SELinux
 
@@ -59,13 +58,11 @@ This action update the configuration file present in "/etc/selinux/config".
         match: /^SELINUX=.*/mg
         replace: "SELINUX=#{to}"
       , (err, executed) ->
-        return next err if err
-        return next null, ctx.PASS unless executed
-        ctx.log "SELINUX changed, server restarted"
+        return next err, false if err or not executed
         ctx.execute
           cmd: 'shutdown -r now'
         , (err, executed) ->
-          next err, ctx.STOP
+          next Error 'Server Reboot after SELINUX changes'
 
 # Limits
 
