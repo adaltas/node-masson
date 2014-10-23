@@ -21,9 +21,14 @@ developers on Solaris, Linux, Mac OS X or Windows.
 ```json
 {
   "java": {
-    "java_home": "/usr/java/default"
-    "open_jdk": false
+    "java_home": "/usr/java/default",
+    "jdk": {
+      "version": "1.7.0_60",
+      "location": "#{__dirname}/../shared/java/jdk-7u60-linux-x64.tar.gz"
+    },
+    "open_jdk": false,
     "oracle_jdk": "./java/jdk-6u45-linux-x64-rpm.bin"
+
   }
 }
 ```
@@ -48,9 +53,9 @@ developers on Solaris, Linux, Mac OS X or Windows.
       ctx.log "JCE not configured" unless ctx.config.java.jce_local_policy or ctx.config.java.jce_us_export_policy
         
 
-## OpenJDK
+## Install OpenJDK
 
-    module.exports.push name: 'Java # OpenJDK', callback: (ctx, next) ->
+    module.exports.push name: 'Java # Install OpenJDK', callback: (ctx, next) ->
       {openjdk} = ctx.config.java
       return next() unless openjdk
       ctx.service
@@ -69,22 +74,23 @@ come with the OpenJDK installed and to avoid any ambiguity, we simply remove the
         cmd: 'yum list installed | grep openjdk'
         code_skipped: 1
       , (err, installed, stdout, stderr) ->
-        return next err, ctx.PASS if err or not installed
+        return next err if err
         packages = for l in stdout.trim().split('\n') then /(.*?) .*$/.exec(l)?[1] or l
         ctx.execute
           cmd: "yum remove -y #{packages.join ' '}"
           if: installed
         , next
 
-## Install
+## Install Oracle JDK
 
 For licensing reason, the Oracle Java JDK is not available from a Yum repository. It is the
 phyla integrator responsibility to download the jdk manually and reference it 
 inside the configuration. The properties "jce\_local\_policy" and 
 "jce\_us\_export_policy" must be modified accordingly with an appropriate location.
 
-    module.exports.push name: 'Java # Install', timeout: -1, callback: (ctx, next) ->
+    module.exports.push name: 'Java # Install Oracle JDK', timeout: -1, callback: (ctx, next) ->
       {proxy, jdk} = ctx.config.java # location, version
+      return next() unless jdk
       ctx.log "Check if java is here and which version it is"
       ctx.execute
         cmd: 'ls -d /usr/java/jdk*'
