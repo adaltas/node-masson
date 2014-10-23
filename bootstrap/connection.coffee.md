@@ -68,22 +68,23 @@ Example:
 ```
 
     module.exports.push required: true, callback: module.exports.configure = (ctx) ->
-      ctx.config.connection ?= {}
-      ctx.config.connection.username ?= 'root'
-      ctx.config.connection.host ?= if ctx.config.ip then ctx.config.ip else ctx.config.host
-      ctx.config.connection.port ?= ctx.config.port or 22
-      ctx.config.connection.private_key ?= null
-      ctx.config.connection.private_key_location ?= '~/.ssh/id_rsa'
-      ctx.config.connection.public_key ?= []
-      ctx.config.connection.public_key = [ctx.config.connection.public_key] if typeof ctx.config.connection.public_key is 'string'
-      ctx.config.connection.retry = 3
-      ctx.config.connection.wait = 1000
-      ctx.config.connection.bootstrap ?= {}
-      ctx.config.connection.bootstrap.host ?= if ctx.config.ip then ctx.config.ip else ctx.config.host
-      ctx.config.connection.bootstrap.cmd ?= 'su -'
-      ctx.config.connection.bootstrap.username ?= null
-      ctx.config.connection.bootstrap.password ?= null
-      ctx.config.connection.bootstrap.retry = 3
+      connection = ctx.config.connection ?= {}
+      connection.username ?= 'root'
+      connection.host ?= connection.ip or ctx.config.ip or ctx.config.host
+      connection.port ?= ctx.config.port or 22
+      connection.private_key ?= null
+      connection.private_key_location ?= '~/.ssh/id_rsa'
+      connection.public_key ?= []
+      connection.public_key = [connection.public_key] if typeof connection.public_key is 'string'
+      connection.retry = 3
+      connection.wait = 1000
+      connection.bootstrap ?= {}
+      connection.bootstrap.host ?= connection.ip or connection.host
+      connection.bootstrap.port ?= connection.port
+      connection.bootstrap.cmd ?= 'su -'
+      connection.bootstrap.username ?= null
+      connection.bootstrap.password ?= null
+      connection.bootstrap.retry = 3
 
 ## Connection
 
@@ -95,8 +96,6 @@ existing key would be overwritten.
     module.exports.push name: 'Bootstrap # Connection', required: true, timeout: -1, callback: (ctx, next) ->
       {private_key, private_key_location} = ctx.config.connection
       close = -> ctx.ssh?.end()
-      # ctx.run.on 'error', close
-      # ctx.run.on 'end', close
       ctx.on 'error', close
       ctx.on 'end', close
       attempts = 0
