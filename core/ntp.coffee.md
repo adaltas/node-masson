@@ -132,7 +132,6 @@ synchronization the date and the `ntpd` daemon is finally restarted.
         return next null, false if current_lag < lag
         ctx.log "Lag greater than #{lag}ms: #{current_lag}"
         ctx.service
-          name: 'ntp'
           srv_name: 'ntpd'
           action: 'stop'
         , (err, serviced) ->
