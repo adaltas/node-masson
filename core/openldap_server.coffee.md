@@ -5,6 +5,7 @@ layout: module
 
 # OpenLDAP
 
+    crypto = require 'crypto'
     each = require 'each'
     ldap = require 'ldapjs'
     module.exports = []
@@ -30,10 +31,9 @@ and should correspond to "openldap_server.config_password".
       ctx.config.openldap_server ?= {}
       throw new Error "Missing \"openldap_server.suffix\" property" unless ctx.config.openldap_server.suffix
       throw new Error "Missing \"openldap_server.root_password\" property" unless ctx.config.openldap_server.root_password
-      throw new Error "Missing \"openldap_server.root_slappasswd\" property" unless ctx.config.openldap_server.root_slappasswd
+      # throw new Error "Missing \"openldap_server.root_slappasswd\" property" unless ctx.config.openldap_server.root_slappasswd
       throw new Error "Missing \"openldap_server.config_dn\" property" unless ctx.config.openldap_server.config_dn
       throw new Error "Missing \"openldap_server.config_password\" property" unless ctx.config.openldap_server.config_password
-      throw new Error "Missing \"openldap_server.config_slappasswd\" property" unless ctx.config.openldap_server.config_slappasswd
       {suffix} = ctx.config.openldap_server
       ctx.config.openldap_server.root_dn ?= "cn=Manager,#{ctx.config.openldap_server.suffix}"
       ctx.config.openldap_server.log_level ?= 256
@@ -42,20 +42,20 @@ and should correspond to "openldap_server.config_password".
       ctx.config.openldap_server.ldapadd ?= []
       ctx.config.openldap_server.ldapdelete ?= []
       ctx.config.openldap_server.tls ?= false
+      ctx.config.openldap_server.config_file ?= '/etc/openldap/slapd.d/cn=config/olcDatabase={0}config.ldif'
+      ctx.config.openldap_server.monitor_file ?= '/etc/openldap/slapd.d/cn=config/olcDatabase={1}monitor.ldif'
+      ctx.config.openldap_server.bdb_file ?= '/etc/openldap/slapd.d/cn=config/olcDatabase={2}bdb.ldif'
       ctx.ldap_add = (ctx, content, callback) ->
         {root_dn, root_password} = ctx.config.openldap_server
         tmp = "/tmp/ldapadd_#{Date.now()}_#{Math.round(Math.random()*1000)/1000}"
-        ctx.write
-          content: content
-          destination: tmp
-        , (err, uploaded) ->
+        ctx.fs.writeFile tmp, content, (err) ->
           return callback err if err
           ctx.execute
             cmd: "ldapadd -c -H ldapi:/// -D #{root_dn} -w #{root_password} -f #{tmp}"
             code_skipped: 68
           , (err, executed, stdout, stderr) ->
             return callback err if err
-            modified = true if stdout.match(/Already exists/g)?.length isnt stdout.match(/adding new entry/g).length
+            modified = stderr.match(/Already exists/g)?.length isnt stdout.match(/adding new entry/g).length
             ctx.remove
               destination: tmp
             , (err, removed) ->
@@ -102,72 +102,103 @@ http://itdavid.blogspot.ca/2012/05/howto-centos-6.html
 http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
 ###
 
-    module.exports.push name: 'OpenLDAP Server # Configure', timeout: -1, callback: (ctx, next) ->
-      {root_dn, root_slappasswd, suffix} = ctx.config.openldap_server
-      modified = 0
-      bdb = ->
-        ctx.log 'Database bdb: root DN, root PW, password protection'
-        ctx.write
-          destination: '/etc/openldap/slapd.d/cn=config/olcDatabase={2}bdb.ldif'
-          write: [
-            match: /^(.*)dc=my-domain,dc=com(.*)$/mg
-            replace: "$1#{suffix}$2"
-          ,
-            match: /^olcRootDN.*$/mg
-            replace: "olcRootDN: #{root_dn}"
-          ,
-            match: /^olcRootPW.*$/mg
-            replace: "olcRootPW: #{root_slappasswd}"
-            append: 'olcRootDN'
-          ]
-        , (err, written) ->
+    module.exports.push name: 'OpenLDAP Server # DB config', timeout: -1, callback: (ctx, next) ->
+      {config_file, config_dn, config_password, config_slappasswd} = ctx.config.openldap_server
+      do_compare_rootpw = ->
+        return do_write() if config_slappasswd
+        ctx.log "Extract password from #{config_file}"
+        ctx.fs.readFile config_file, 'ascii', (err, content) ->
           return next err if err
-          modified += written
-          monitor()
-      monitor = ->
-        ctx.log 'Database monitor: root DN'
-        ctx.write
-          destination: '/etc/openldap/slapd.d/cn=config/olcDatabase={1}monitor.ldif'
-          match: /^(.*)dc=my-domain,dc=com(.*)$/mg
-          replace: "$1#{suffix}$2"
-        , (err, written) ->
+          if match = /^olcRootPW: {SSHA}(.*)$/m.exec content
+            if check_password config_password, match[1]
+            then do_write()
+            else do_create_rootpw() # Password has changed
+          else # First installation, password not yet defined
+            do_create_rootpw()
+      do_create_rootpw = ->
+        ctx.execute
+          cmd: "slappasswd -s #{config_password}"
+        , (err, executed, stdout) ->
           return next err if err
-          modified += written
-          config()
-      config = ->
-        {config_dn, config_slappasswd} = ctx.config.openldap_server
+          config_slappasswd = stdout.trim()
+          do_write()
+      do_write = ->
         ctx.log 'Database config: root DN & PW'
-        ctx.write
-          destination: '/etc/openldap/slapd.d/cn=config/olcDatabase={0}config.ldif'
-          write: [
-            match: /^olcRootDN.*$/mg
-            replace: "olcRootDN: #{config_dn}"
-          ,
-            match: /^olcRootPW.*$/mg
+        write = [match: /^olcRootDN:.*$/mg, replace: "olcRootDN: #{config_dn}"]
+        if config_slappasswd
+          write.push
+            match: /^olcRootPW:.*$/mg
             replace: "olcRootPW: #{config_slappasswd}"
             append: 'olcRootDN'
-          ]
+        ctx.write
+          destination: config_file
+          write: write
         , (err, written) ->
+          return next err, false if err or not written
+          ctx.service
+            srv_name: 'slapd'
+            action: 'restart'
+          , next
+      do_compare_rootpw()
+
+    module.exports.push name: 'OpenLDAP Server # DB monitor', timeout: -1, callback: (ctx, next) ->
+      {suffix, monitor_file} = ctx.config.openldap_server
+      ctx.log 'Database monitor: root DN'
+      ctx.write
+        destination: monitor_file
+        match: /^(.*)dc=my-domain,dc=com(.*)$/mg
+        replace: "$1#{suffix}$2"
+      , next
+
+    module.exports.push name: 'OpenLDAP Server # DB bdb', timeout: -1, callback: (ctx, next) ->
+      {suffix, bdb_file, root_dn, root_password, root_slappasswd} = ctx.config.openldap_server
+      modified = 0
+      do_compare_rootpw = ->
+        return do_write() if root_slappasswd
+        ctx.log "Extract password from #{bdb_file}"
+        ctx.fs.readFile bdb_file, 'ascii', (err, content) ->
           return next err if err
-          modified += written
-          restart()
-      restart = ->
-        return next null, ctx.PASS unless modified
-        ctx.log 'Restart service'
-        ctx.service
-          name: 'openldap-servers'
-          srv_name: 'slapd'
-          action: 'restart'
-        , (err, restarted) ->
-          next err, ctx.OK
-      bdb()
+          if match = /^olcRootPW: {SSHA}(.*)$/m.exec content
+            if check_password root_password, match[1]
+            then do_write()
+            else do_create_rootpw() # Password has changed
+          else # First installation, password not yet defined
+            do_create_rootpw()
+      do_create_rootpw = ->
+        ctx.execute
+          cmd: "slappasswd -s #{root_password}"
+        , (err, executed, stdout) ->
+          return next err if err
+          root_slappasswd = stdout.trim()
+          do_write()
+      do_write = ->
+        ctx.log 'Database bdb: root DN, root PW, password protection'
+        write = [
+          {match: /^(.*)dc=my-domain,dc=com(.*)$/mg, replace: "$1#{suffix}$2"}
+          {match: /^olcRootDN:.*$/mg, replace: "olcRootDN: #{root_dn}"}
+        ]
+        if root_slappasswd
+          write.push
+            match: /^olcRootPW:.*$/mg
+            replace: "olcRootPW: #{root_slappasswd}"
+            append: 'olcRootDN'
+        ctx.write
+          destination: bdb_file
+          write: write
+        , (err, written) ->
+          return next err, false if err or not written
+          ctx.service
+            srv_name: 'slapd'
+            action: 'restart'
+          , next
+      do_compare_rootpw()
 
 ## Logging
 
 http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
 
     module.exports.push name: 'OpenLDAP Server # Logging', callback: (ctx, next) ->
-      {config_dn, config_password, log_level} = ctx.config.openldap_server
+      {config_dn, config_password, config_file, log_level} = ctx.config.openldap_server
       modified = false
       rsyslog = ->
         ctx.log 'Check rsyslog dependency'
@@ -192,47 +223,46 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
               modified = true
               slapdconf()
       slapdconf = ->
-        # TODO, seems like there is an error if we run this against an 
-        # already installed openldap but stop at the time. A possible
-        # solution would be to make sure the service is started:
-        #
-        #     ctx.service 
-        #       name: 'openldap-servers'
-        #       srv_name: 'slapd'
-        #       action: 'start'
-        #
-        ctx.log 'Open connection'
-        client = ldap.createClient url: "ldap://#{ctx.config.host}/"
-        ctx.log 'Bind connection'
-        client.bind "#{config_dn}", "#{config_password}", (err) ->
-          return finish err if err
-          ctx.log 'Search attribute olcLogLevel'
-          client.search 'cn=config', 
-            filter: 'cn=config'
-            scope: 'base'
-            attributes: ['olcLogLevel']
-          , (err, search) ->
-            return unbind client, err if err
-            olcLogLevel = null
-            search.on 'searchEntry', (entry) ->
-              ctx.log "Found #{JSON.stringify entry.object}"
-              olcLogLevel = entry.object.olcLogLevel
-            search.on 'end', ->
-              ctx.log "Attribute olcLogLevel is #{JSON.stringify olcLogLevel}"
-              return unbind client if "#{olcLogLevel}" is "#{log_level}"
-              ctx.log "Modify attribute olcLogLevel to #{JSON.stringify log_level}"
-              change = new ldap.Change
-                operation: 'replace'
-                modification: olcLogLevel: log_level
-              client.modify 'cn=config', change, (err) ->
-                return unbind client, err if err
-                modified = true
-                unbind client
-      unbind = (client, err) ->
-        ctx.log 'Unbind connection'
-        client.unbind (e) ->
-          return next e if e
+        ctx.write
+          destination: config_file
+          match: /^olcLogLevel:.*$/mg
+          replace: "olcLogLevel: #{log_level}"
+          before: 'olcRootDN'
+        , (err, written) ->
+          modified = true if written
           finish err
+        # ctx.log 'Open connection'
+        # client = ldap.createClient url: "ldap://#{ctx.config.host}/"
+        # ctx.log 'Bind connection'
+        # client.bind "#{config_dn}", "#{config_password}", (err) ->
+        #   return finish err if err
+        #   ctx.log 'Search attribute olcLogLevel'
+        #   client.search 'cn=config', 
+        #     filter: 'cn=config'
+        #     scope: 'base'
+        #     attributes: ['olcLogLevel']
+        #   , (err, search) ->
+        #     return unbind client, err if err
+        #     olcLogLevel = null
+        #     search.on 'searchEntry', (entry) ->
+        #       ctx.log "Found #{JSON.stringify entry.object}"
+        #       olcLogLevel = entry.object.olcLogLevel
+        #     search.on 'end', ->
+        #       ctx.log "Attribute olcLogLevel is #{JSON.stringify olcLogLevel}"
+        #       return unbind client if "#{olcLogLevel}" is "#{log_level}"
+        #       ctx.log "Modify attribute olcLogLevel to #{JSON.stringify log_level}"
+        #       change = new ldap.Change
+        #         operation: 'replace'
+        #         modification: olcLogLevel: log_level
+        #       client.modify 'cn=config', change, (err) ->
+        #         return unbind client, err if err
+        #         modified = true
+        #         unbind client
+        # unbind = (client, err) ->
+        #   ctx.log 'Unbind connection'
+        #   client.unbind (e) ->
+        #     return next e if e
+        #     finish err
       finish = (err) ->
         next err, modified
       rsyslog()
@@ -277,12 +307,29 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
           do_locate()
       do_locate = ->
         ctx.log 'Get schema location'
+        # ctx.execute
+        #   cmd: 'rpm -ql sudo | grep -i schema.openldap'
+        # , (err, executed, schema) ->
+        #   return next err if err
+        #   return next Error 'Sudo schema not found' if schema is ''
+        #   do_register schema.trim()
         ctx.execute
-          cmd: 'rpm -ql sudo | grep -i schema.openldap'
-        , (err, executed, schema) ->
+          cmd: """
+          schema=`rpm -ql sudo | grep -i schema.openldap`
+          if [ ! -f schema ]; then exit 2; fi
+          echo $schema
+          """
+          code_skipped: 2
+        , (err, installed, schema) ->
           return next err if err
-          return next Error 'Sudo schema not found' if schema is ''
-          do_register schema.trim()
+          # return next Error 'Sudo schema not found' if schema is ''
+          return do_register schema.trim() if installed
+          ctx.upload
+            source: "#{__dirname}/files/ldap.schema"
+            destination: '/tmp/ldap.schema'
+          , (err, uploaded) ->
+            return next err if err
+            do_register '/tmp/ldap.schema'
       do_register = (schema) ->
         ctx.ldap_schema
           name: 'sudo'
@@ -351,6 +398,18 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
               next err
       .on 'both', (err) ->
         next err, modified
+
+## Exported functions
+
+    module.exports.check_password = check_password = (password, shahash) ->
+      buf = new Buffer shahash, 'base64'
+      hash = buf.slice 0, 20
+      salt = buf.slice 20, 24
+      return hash.toString('base64') is crypto
+      .createHash('sha1')
+      .update(password)
+      .update(salt)
+      .digest('base64')
 
 ## Useful commands
 
