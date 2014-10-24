@@ -93,7 +93,9 @@ Run = (config, params) ->
                   merge action, action.callback.call ctx, ctx, (err, statusOrMsg) =>
                     # actionRun.end() if statusOrMsg is ctx.STOP
                     done err, statusOrMsg
-              catch e then done e
+              catch e
+                retry = false # Dont retry unhandled errors
+                done e
             # Timeout, default to 100s
             action.timeout ?= 100000
             if action.timeout > 0
