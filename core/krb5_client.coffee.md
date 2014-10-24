@@ -129,7 +129,7 @@ which create a Kerberos file with complementary information.
     module.exports.push name: 'Krb5 Client # Configure', timeout: -1, callback: (ctx, next) ->
       # Kerberos config is also managed by the kerberos server action.
       ctx.log 'Check who manage /etc/krb5.conf'
-      return next null, ctx.INAPPLICABLE if ctx.has_module 'masson/core/krb5_server'
+      return next() if ctx.has_module 'masson/core/krb5_server'
       {etc_krb5_conf} = ctx.config.krb5
       ctx.log 'Update /etc/krb5.conf'
       ctx.ini
