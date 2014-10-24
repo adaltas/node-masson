@@ -26,7 +26,6 @@ Run = (config, params) ->
   @config = config
   @params = params
   @tree = new Tree 
-  # @tree = new Tree 
   setImmediate =>
     # Work on each server
     contexts = {}
@@ -128,9 +127,10 @@ Run::actions = (host, command, options, callback) ->
   config = @config.servers[host]
   return callback new Error "Invalid host: #{host}" unless config
   # Check the run list
-  run = config.run[command]
+  # run = config.run[command]
+  options.command = command
+  run = config.modules
   return callback null unless run
-  # return callback new Error "Invalid run list: #{@params.command}" unless run
   @tree.actions run, options, (err, actions) =>
     return callback err if err
     callback null, actions
@@ -146,9 +146,10 @@ Run::modules = (host, command, options, callback) ->
   config = @config.servers[host]
   return callback new Error "Invalid host: #{host}" unless config
   # Check the run list
-  run = config.run[command]
+  # run = config.run[command]
+  options.command = command
+  run = config.modules
   return callback null unless run
-  # return callback new Error "Invalid run list: #{@params.command}" unless run
   @tree.modules run, options, (err, modules) =>
     return callback err if err
     callback null, modules

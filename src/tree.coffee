@@ -63,7 +63,7 @@ Tree::actions = (modules, options, callback) ->
     modules = [modules] unless Array.isArray modules
     modules = flatten modules
     # Buil a full tree
-    try tree = @load_tree modules
+    try tree = @load_tree modules, options.command
     catch err
       ev.emit 'error', err
       callback err
@@ -72,7 +72,7 @@ Tree::actions = (modules, options, callback) ->
     if options.modules.length
       modules = tree.map (leaf) -> leaf.module
       modules = multimatch modules, options.modules
-      tree = @load_tree modules
+      tree = @load_tree modules, options.command
       # Filter with the fast options
       tree = tree.filter( (leaf) =>
         return true if multimatch(leaf.module, options.modules).length
@@ -114,20 +114,25 @@ Return a array of objects with the module name and its associated actions.
     actions: [ [Object], [Object], [Object], [Object], [Object], [Object] ] } ]
 ```
 ###
-Tree::load_tree = (modules) ->
+Tree::load_tree = (modules, command) ->
   called = {}
   tree = []
-  build_tree = (module) =>
+  build_tree = (module, parent) =>
     return if called[module]
     called[module] = true
     leaf = module: module, actions: []
-    for action in @load_module module
+    for action in @load_module module, parent
       if typeof action is 'string'
         # Split the current module actions in two and
         # insert the dependency actions in between
         tree.push leaf if leaf.actions.length
         leaf = module: module, actions: []
         build_tree action
+      else if typeof action.callback is 'string'
+        continue if command and action.command and action.command isnt command
+        tree.push leaf if leaf.actions.length
+        leaf = module: module, actions: []
+        build_tree action.callback, module
       else
         leaf.actions.push action
     tree.push leaf
@@ -143,7 +148,7 @@ Module actions when defining a string dependency may be prefixed with:
 *   "!": Force this module to be loaded and executed, apply to "fast" mode.
 
 ###
-Tree::load_module = (module) ->
+Tree::load_module = (module, parent) ->
   @cache ?= {}
   return @cache[module] if @cache[module]
   # Load the module
@@ -153,11 +158,12 @@ Tree::load_module = (module) ->
     when '?' then # nothing yet
     when '!' then required = true
   # Load the module
-  actions = load module
+  actions = load module, parent
   actions = [actions] unless Array.isArray actions
   for callback, i in actions
     # Module dependencies
     continue if typeof callback is 'string'
+    throw Error "Module '#{module}' export an undefined action" unless callback?
     callback = actions[i] = callback: callback if typeof callback is 'function'
     # callback.hidden ?= true unless callback.name
     callback.id ?= "#{module}/#{i}"
