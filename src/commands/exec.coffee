@@ -9,15 +9,15 @@ params = require '../params'
 params = params.parse()
 
 module.exports = ->
-  util.print "Command distributed to #{config.servers.length} servers\n\n"
-  config.servers.forEach (server) ->
+  # util.print "Command distributed to #{config.servers.length} servers\n\n"
+  for _, server of config.servers
     return if params.hosts? and multimatch(server.host, params.hosts).indexOf(server.host) is -1
-    c = merge {}, config.connection,
-      username: 'root'
-      host: server.ip or server.host
-      port: 22
-      privateKey: config.connection.private_key
-    connect c, (err, ssh) ->
+    connection = merge {}, config.connection, server.connection
+    connection.username ?= 'root'
+    connection.host ?= connection.ip or server.host
+    connection.port ?= 22
+    connection.private_key_location ?= '~/.ssh/id_rsa'
+    connect connection, (err, ssh) ->
       return util.print "\x1b[31m#{err.message}\x1b[39m\n" if err
       exec ssh, params.subcommand, (err, stdout, stderr) ->
         if err
