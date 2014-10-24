@@ -71,7 +71,7 @@ Example:
       connection = ctx.config.connection ?= {}
       connection.username ?= 'root'
       connection.host ?= connection.ip or ctx.config.ip or ctx.config.host
-      connection.port ?= ctx.config.port or 22
+      connection.port ?= 22
       connection.private_key ?= null
       connection.private_key_location ?= '~/.ssh/id_rsa'
       connection.public_key ?= []
