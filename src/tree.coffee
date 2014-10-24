@@ -122,19 +122,22 @@ Tree::load_tree = (modules, command) ->
     called[module] = true
     leaf = module: module, actions: []
     for action in @load_module module, parent
-      if typeof action is 'string'
-        # Split the current module actions in two and
-        # insert the dependency actions in between
+      # Normalize
+      action = modules: action if typeof action is 'string'
+      action.modules ?= []
+      action.modules = [action.modules] unless Array.isArray action.modules
+      if typeof action.callback is 'string'
+        action.modules.push action.callback 
+        action.callback = null
+      # Filter
+      continue if command and action.command and action.command isnt command
+      # Discover
+      if action.modules.length
         tree.push leaf if leaf.actions.length
         leaf = module: module, actions: []
-        build_tree action
-      else if typeof action.callback is 'string'
-        continue if command and action.command and action.command isnt command
-        tree.push leaf if leaf.actions.length
-        leaf = module: module, actions: []
-        build_tree action.callback, module
-      else
-        leaf.actions.push action
+        for childmod in action.modules
+          build_tree childmod, module
+      leaf.actions.push action if action.callback
     tree.push leaf
   for module in modules then build_tree module
   tree
