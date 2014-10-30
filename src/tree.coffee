@@ -83,9 +83,9 @@ Tree::actions = (modules, options, callback) ->
     # Emit event and return actions
     actions = []
     for leaf in tree
-      ev.emit 'module', leaf.module
+      ev.emit 'module', leaf.module, leaf.actions
       for action in leaf.actions
-        ev.emit 'action', action
+        ev.emit 'action', action, leaf.module
         actions.push action
     ev.emit 'end', actions
     callback null, actions if callback
