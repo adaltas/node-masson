@@ -28,9 +28,9 @@ module.exports = ->
   .on 'context', (ctx) ->
     ctx
     .on 'action_start', () ->
-      return if multihost
       return unless ctx.action.name?
       times[ctx.config.host] = Date.now()
+      return if multihost
       line = ''
       line += "#{pad ctx.config.host, hostlength}"
       line += "#{pad ctx.action.name, 40}"
