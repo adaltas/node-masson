@@ -28,38 +28,44 @@ and should correspond to "openldap_server.config_password".
       require('./iptables').configure ctx
       # Todo: Generate '*_slappasswd' with command `slappasswd -s $password`, but only the first time, we
       # need a mechanism to store configuration properties before.
-      ctx.config.openldap_server ?= {}
-      throw new Error "Missing \"openldap_server.suffix\" property" unless ctx.config.openldap_server.suffix
-      throw new Error "Missing \"openldap_server.root_password\" property" unless ctx.config.openldap_server.root_password
-      # throw new Error "Missing \"openldap_server.root_slappasswd\" property" unless ctx.config.openldap_server.root_slappasswd
-      throw new Error "Missing \"openldap_server.config_dn\" property" unless ctx.config.openldap_server.config_dn
-      throw new Error "Missing \"openldap_server.config_password\" property" unless ctx.config.openldap_server.config_password
-      {suffix} = ctx.config.openldap_server
-      ctx.config.openldap_server.root_dn ?= "cn=Manager,#{ctx.config.openldap_server.suffix}"
-      ctx.config.openldap_server.log_level ?= 256
-      ctx.config.openldap_server.users_dn ?= "ou=users,#{suffix}"
-      ctx.config.openldap_server.groups_dn ?= "ou=groups,#{suffix}"
-      ctx.config.openldap_server.ldapadd ?= []
-      ctx.config.openldap_server.ldapdelete ?= []
-      ctx.config.openldap_server.tls ?= false
-      ctx.config.openldap_server.config_file ?= '/etc/openldap/slapd.d/cn=config/olcDatabase={0}config.ldif'
-      ctx.config.openldap_server.monitor_file ?= '/etc/openldap/slapd.d/cn=config/olcDatabase={1}monitor.ldif'
-      ctx.config.openldap_server.bdb_file ?= '/etc/openldap/slapd.d/cn=config/olcDatabase={2}bdb.ldif'
-      ctx.ldap_add = (ctx, content, callback) ->
-        {root_dn, root_password} = ctx.config.openldap_server
-        tmp = "/tmp/ldapadd_#{Date.now()}_#{Math.round(Math.random()*1000)/1000}"
-        ctx.fs.writeFile tmp, content, (err) ->
-          return callback err if err
-          ctx.execute
-            cmd: "ldapadd -c -H ldapi:/// -D #{root_dn} -w #{root_password} -f #{tmp}"
-            code_skipped: 68
-          , (err, executed, stdout, stderr) ->
-            return callback err if err
-            modified = stderr.match(/Already exists/g)?.length isnt stdout.match(/adding new entry/g).length
-            ctx.remove
-              destination: tmp
-            , (err, removed) ->
-              callback err, modified
+      openldap_server = ctx.config.openldap_server ?= {}
+      throw new Error "Missing \"openldap_server.suffix\" property" unless openldap_server.suffix
+      throw new Error "Missing \"openldap_server.root_password\" property" unless openldap_server.root_password
+      # throw new Error "Missing \"openldap_server.root_slappasswd\" property" unless openldap_server.root_slappasswd
+      throw new Error "Missing \"openldap_server.config_dn\" property" unless openldap_server.config_dn
+      throw new Error "Missing \"openldap_server.config_password\" property" unless openldap_server.config_password
+      {suffix} = openldap_server
+      openldap_server.root_dn ?= "cn=Manager,#{openldap_server.suffix}"
+      openldap_server.log_level ?= 256
+      openldap_server.users_dn ?= "ou=users,#{suffix}"
+      openldap_server.groups_dn ?= "ou=groups,#{suffix}"
+      openldap_server.ldapadd ?= []
+      openldap_server.ldapdelete ?= []
+      openldap_server.tls ?= false
+      openldap_server.config_file ?= '/etc/openldap/slapd.d/cn=config/olcDatabase={0}config.ldif'
+      openldap_server.monitor_file ?= '/etc/openldap/slapd.d/cn=config/olcDatabase={1}monitor.ldif'
+      openldap_server.bdb_file ?= '/etc/openldap/slapd.d/cn=config/olcDatabase={2}bdb.ldif'
+      if openldap_server.tls
+        throw Error 'TLS mode requires "tls_cert_file"' unless openldap_server.tls_cert_file
+        throw Error 'TLS mode requires "tls_key_file"' unless openldap_server.tls_key_file
+        openldap_server.url = "ldaps://#{ctx.config.host}"
+      else
+        openldap_server.url = "ldap://#{ctx.config.host}"
+      # ctx.ldap_add = (ctx, content, callback) ->
+      #   {root_dn, root_password} = openldap_server
+      #   tmp = "/tmp/ldapadd_#{Date.now()}_#{Math.round(Math.random()*1000)/1000}"
+      #   ctx.fs.writeFile tmp, content, (err) ->
+      #     return callback err if err
+      #     ctx.execute
+      #       cmd: "ldapadd -c -H ldapi:/// -D #{root_dn} -w #{root_password} -f #{tmp}"
+      #       code_skipped: 68
+      #     , (err, executed, stdout, stderr) ->
+      #       return callback err if err
+      #       modified = stderr.match(/Already exists/g)?.length isnt stdout.match(/adding new entry/g).length
+      #       ctx.remove
+      #         destination: tmp
+      #       , (err, removed) ->
+      #         callback err, modified
 
 ## IPTables
 

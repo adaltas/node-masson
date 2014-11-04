@@ -10,14 +10,29 @@ layout: module
 # OpenLDAP ACL
 
     module.exports.push (ctx) ->
-      # Register "ctx.ldap_add" function
       require('./openldap_server').configure ctx
       {openldap_server} = ctx.config
-      # require('./openldap_client_security').configure ctx
-      # Obtain an ldap connection
-      # require('./openldap_connection').configure ctx, next
       throw Error 'Missing required "openldap_server.users_dn" property' unless openldap_server.users_dn
       throw Error 'Missing required "openldap_server.groups_dn" property' unless openldap_server.groups_dn
+      openldap_server.proxy_user ?= {}
+      openldap_server.proxy_user.dn ?= "cn=nssproxy,#{openldap_server.users_dn}"
+      openldap_server.proxy_user.uid ?= 'nssproxy'
+      openldap_server.proxy_user.gecos ?= 'Network Service Switch Proxy User'
+      openldap_server.proxy_user.objectClass ?= ['top', 'account', 'posixAccount', 'shadowAccount']
+      openldap_server.proxy_user.userPassword ?= 'test'
+      openldap_server.proxy_user.shadowLastChange ?= '15140'
+      openldap_server.proxy_user.shadowMin ?= '0'
+      openldap_server.proxy_user.shadowMax ?= '99999'
+      openldap_server.proxy_user.shadowWarning ?= '7'
+      openldap_server.proxy_user.loginShell ?= '/bin/false'
+      openldap_server.proxy_user.uidNumber ?= '801'
+      openldap_server.proxy_user.gidNumber ?= '801'
+      openldap_server.proxy_user.homeDirectory ?= '/home/nssproxy'
+      openldap_server.proxy_group ?= {}
+      openldap_server.proxy_group.dn ?= "cn=nssproxy,#{openldap_server.groups_dn}"
+      openldap_server.proxy_group.objectClass ?= ['top', 'posixGroup']
+      openldap_server.proxy_group.gidNumber ?= '801'
+      openldap_server.proxy_group.description ?= 'Network Service Switch Proxy'
 
 After this call, the follwing command should execute with success:
 
@@ -56,56 +71,28 @@ ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=co
       , next
 
     module.exports.push name: 'OpenLDAP ACL # Insert User', callback: (ctx, next) ->
-      {users_dn, groups_dn} = ctx.config.openldap_server
-      ctx.ldap_add ctx, """
-      dn: cn=nssproxy,#{users_dn}
-      uid: nssproxy
-      gecos: Network Service Switch Proxy User
-      objectClass: top
-      objectClass: account
-      objectClass: posixAccount
-      objectClass: shadowAccount
-      userPassword: {SSHA}uQcSsw5CySTkBXjOY/N0hcduA6yFiI0k
-      shadowLastChange: 15140
-      shadowMin: 0
-      shadowMax: 99999
-      shadowWarning: 7
-      loginShell: /bin/false
-      uidNumber: 801
-      gidNumber: 801
-      homeDirectory: /home/nssproxy
+      # Keeping this as an example but we dont need it here since this module
+      # is always run next to the OpenLDAP server
+      # host = ctx.host_with_module 'masson/core/openldap_server'
+      # host_ctx = ctx.hosts[host]
+      # require('./openldap_server').configure host_ctx
+      # {url, root_dn, root_password, users_dn, groups_dn} = host_ctx.config.openldap_server
+      {url, root_dn, root_password, proxy_user} = ctx.config.openldap_server
+      ctx.ldap_user [
+        url: url,
+        binddn: root_dn,
+        passwd: root_password,
+        user: proxy_user
+      ], next
 
-      # dn: cn=test,#{users_dn}
-      # uid: test
-      # gecos: Test User
-      # objectClass: top
-      # objectClass: account
-      # objectClass: posixAccount
-      # objectClass: shadowAccount
-      # userPassword: {SSHA}uQcSsw5CySTkBXjOY/N0hcduA6yFiI0k
-      # shadowLastChange: 15140
-      # shadowMin: 0
-      # shadowMax: 99999
-      # shadowWarning: 7
-      # loginShell: /bin/bash
-      # uidNumber: 1101
-      # gidNumber: 1101
-      # homeDirectory: /home/test
-
-      dn: cn=nssproxy,#{groups_dn}
-      cn: nssproxy
-      objectClass: top
-      objectClass: posixGroup
-      gidNumber: 801
-      description: Network Service Switch Proxy
-
-      # dn: cn=test,#{groups_dn}
-      # cn: test.group
-      # objectClass: top
-      # objectClass: posixGroup
-      # gidNumber: 1101
-      # description: Test Group
-      """, next
+    module.exports.push name: 'OpenLDAP ACL # Insert Group', callback: (ctx, next) ->
+      {url, root_dn, root_password, proxy_group} = ctx.config.openldap_server
+      ctx.ldap_add [
+        url: url,
+        binddn: root_dn,
+        passwd: root_password,
+        entry: proxy_group
+      ], next
 
       
 

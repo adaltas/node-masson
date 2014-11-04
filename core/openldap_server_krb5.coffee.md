@@ -5,6 +5,7 @@ layout: module
 
 # OpenLDAP Kerberos
 
+    ssha = require 'ssha'
     {check_password} = require './openldap_server'
     misc = require 'mecano/lib/misc'
     module.exports = []
@@ -30,7 +31,7 @@ force mode.
       openldap_server_krb5.krbadmin_user ?= {}
       openldap_server_krb5.krbadmin_user = misc.merge {},
         dn: "cn=krbadmin,#{openldap_server.users_dn}"
-        cn: 'krbadmin'
+        # cn: 'krbadmin'
         objectClass: [
           'top', 'inetOrgPerson', 'organizationalPerson',
           'person', 'posixAccount'
@@ -52,7 +53,7 @@ force mode.
       openldap_server_krb5.krbadmin_group ?= {}
       openldap_server_krb5.krbadmin_group = misc.merge {},
         dn: "cn=krbadmin,#{openldap_server.groups_dn}"
-        cn: 'krbadmin'
+        # cn: 'krbadmin'
         objectClass: [ 'top', 'posixGroup' ]
         gidNumber: '800'
         description: 'Kerberos administrator\'s group.'
@@ -100,13 +101,15 @@ Create the kerberos organisational unit, for example
 
     module.exports.push name: 'OpenLDAP Kerberos # Insert Container', callback: (ctx, next) ->
       {kerberos_dn, krbadmin_user} = ctx.config.openldap_server_krb5
-      ctx.ldap_add ctx, """
-        dn: #{kerberos_dn}
-        objectClass: top
-        objectClass: organizationalUnit
-        ou: #{/^ou=(.*?),/.exec(kerberos_dn)[1]}
-        description: Kerberos OU to store Kerberos principals.
-        """
+      {url, root_dn, root_password} = ctx.config.openldap_server
+      ctx.ldap_add 
+        url: url,
+        binddn: root_dn,
+        passwd: root_password,
+        entry: 
+          dn: "#{kerberos_dn}"
+          objectClass: ['top', 'organizationalUnit']
+          description: 'Kerberos OU to store Kerberos principals.'
       , next
 
 ## Insert Group
@@ -115,58 +118,27 @@ Create the kerberos administrator's group.
 
     module.exports.push name: 'OpenLDAP Kerberos # Insert Group', callback: (ctx, next) ->
       {krbadmin_group} = ctx.config.openldap_server_krb5
-      ldif = ''
-      for k, v of krbadmin_group
-        v = [v] unless Array.isArray v
-        for vv in v
-          ldif += "#{k}: #{vv}\n"
-      ctx.ldap_add ctx, ldif, next
+      {url, root_dn, root_password} = ctx.config.openldap_server
+      ctx.ldap_add
+        url: url,
+        binddn: root_dn,
+        passwd: root_password,
+        entry: krbadmin_group
+      , next
 
 # Insert Admin User
 
 Create the kerberos administrator's user.
 
-    module.exports.push name: 'OpenLDAP Kerberos # Insert Admin User', callback: (ctx, next) ->
-      {kerberos_dn, krbadmin_user} = ctx.config.openldap_server_krb5
-      modified = false
-      do_krbadmin_user = ->
-        ldif = ''
-        for k, v of krbadmin_user
-          continue if k is 'userPassword'
-          v = [v] unless Array.isArray v
-          for vv in v
-            ldif += "#{k}: #{vv}\n"
-        ctx.ldap_add ctx, ldif, (err, added) ->
-          return next err if err
-          modified = true if added
-          do_krbadmin_user_password added
-      do_krbadmin_user_password = (force) ->
-        do_checkpass = ->
-          ctx.execute
-            cmd: """
-              ldapsearch -H ldapi:/// \
-                -D #{krbadmin_user.dn} -w #{krbadmin_user.userPassword} \
-                -b '#{kerberos_dn}'
-            """
-            code_skipped: 1
-          , (err, exists, stdout) ->
-            if err then do_ldappass() else do_end()
-        do_ldappass = ->
-          ctx.execute
-            cmd: """
-            ldappasswd -H ldapi:/// \
-              -D cn=Manager,dc=adaltas,dc=com -w test \
-              '#{krbadmin_user.dn}' \
-              -s #{krbadmin_user.userPassword}
-            """
-          , (err) ->
-            return next err if err
-            modified = true
-            do_end()
-        if force then do_ldappass() else do_checkpass()
-      do_end = (err) ->
-        next err, modified
-      do_krbadmin_user()
+    module.exports.push name: 'OpenLDAP Kerberos # Insert User', callback: (ctx, next) ->
+      {krbadmin_user} = ctx.config.openldap_server_krb5
+      {url, root_dn, root_password, users_dn, groups_dn} = ctx.config.openldap_server
+      ctx.ldap_user
+        url: url,
+        binddn: root_dn,
+        passwd: root_password,
+        user: krbadmin_user
+      , next
 
     module.exports.push name: 'OpenLDAP Kerberos # User permissions', callback: (ctx, next) ->
       # We used: http://itdavid.blogspot.fr/2012/05/howto-centos-62-kerberos-kdc-with.html
@@ -176,15 +148,6 @@ Create the kerberos administrator's user.
       ctx.ldap_acl [
         suffix: suffix
         acls: [
-        #   before: "dn.subtree=\"#{kerberos_dn}\""
-        #   to: "attrs=userPassword,userPKCS12"
-        #   by: [
-        #     "dn.base=\"gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth\" manage "
-        #     "self write  "
-        #     "anonymous auth "
-        #     "* none"
-        #   ]
-        # ,
           before: "dn.subtree=\"#{suffix}\""
           to: "dn.subtree=\"#{kerberos_dn}\""
           by: [
@@ -223,7 +186,6 @@ Create the kerberos administrator's user.
         indexes:
           krbPrincipalName: 'sub,eq'
       , next
-
 
 ## Resources
 
