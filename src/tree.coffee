@@ -68,10 +68,12 @@ Tree::actions = (modules, options, callback) ->
       ev.emit 'error', err
       callback err
       return
+    # tree = @load_tree modules, options.command
     # Filter with the modules options
     if options.modules.length
       modules = tree.map (leaf) -> leaf.module
       modules = multimatch modules, options.modules
+      # tree = @load_tree modules, options.command
       tree = @load_tree modules, options.command
       # Filter with the fast options
       tree = tree.filter( (leaf) =>
@@ -117,29 +119,41 @@ Return a array of objects with the module name and its associated actions.
 Tree::load_tree = (modules, command) ->
   called = {}
   tree = []
-  build_tree = (module, parent) =>
-    return if called[module]
-    called[module] = true
-    leaf = module: module, actions: []
-    for action in @load_module module, parent
+  normalize_action = (action) =>
+    # Normalize
+    action = modules: action if typeof action is 'string'
+    action.commands ?= []
+    action.commands = [action.commands] unless Array.isArray action.commands
+    action.commands.push command if command and not action.commands.length
+    action.modules ?= []
+    action.modules = [action.modules] unless Array.isArray action.modules
+    if typeof action.callback is 'string'
+      action.modules.push action.callback 
+      action.callback = null
+    action
+  build_module = (name, modules, filtering, parent) =>
+    return if called[name]
+    called[name] = true
+    modules = @load_module name, parent unless modules
+    leaf = module: name, actions: []
+    for action in modules
       # Normalize
-      action = modules: action if typeof action is 'string'
-      action.modules ?= []
-      action.modules = [action.modules] unless Array.isArray action.modules
-      if typeof action.callback is 'string'
-        action.modules.push action.callback 
-        action.callback = null
+      action = normalize_action action
       # Filter
-      continue if command and action.command and action.command isnt command
+      continue if (filtering and action.commands.length is 0 and command isnt null and command isnt 'install') or (command and action.commands.length and command not in action.commands)
       # Discover
       if action.modules.length
         tree.push leaf if leaf.actions.length
-        leaf = module: module, actions: []
+        leaf = module: name, actions: []
         for childmod in action.modules
-          build_tree childmod, module
+          f = if filtering is false then false else !action.commands.length
+          build_module childmod, null, f, module
       leaf.actions.push action if action.callback
-    tree.push leaf
-  for module in modules then build_tree module
+    # Push module into tree if actions or module is named and not already present
+    if leaf.actions.length or (leaf.module and not (tree.some (l) -> l.module is leaf.module))
+      tree.push leaf
+  build_module null, modules, null
+  # for module in modules then build_module module
   tree
 
 ###
