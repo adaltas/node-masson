@@ -154,6 +154,16 @@ ctx.waitIsOpen ["master1.hadoop", "master2.hadoop"], 8020, (err) ->
   # do something
 ```
 
+is equivalent to:
+
+```coffee
+ctx.waitIsOpen [
+  {host: "master1.hadoop", port: 8020}
+  {host: "master2.hadoop", port: 8020}
+], (err) ->
+  # do something
+```
+
       ctx.waitIsOpen = ->
         if typeof arguments[0] is 'string'
           if Array.isArray arguments[1]
