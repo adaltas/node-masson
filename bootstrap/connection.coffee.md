@@ -42,7 +42,7 @@ Options include:
     Command used to become the root user on the remote server, default to "su -".   
 *   `private_key` (string)   
     Private key for Ryba, optional, default to the value defined by
-    "bootstrap.privateKey_location".   
+    "bootstrap.private_key_location".   
 *   `private_key_location` (string)   
     Path where to read the private key for Ryba, default to "~/.ssh/id_rsa".   
 *   `public_key` (array|string)   
@@ -112,8 +112,7 @@ existing key would be overwritten.
             do_connect()
       do_connect = ->
         ctx.log "Connect with private key"
-        config = misc.merge {}, ctx.config.connection,
-          privateKey: ctx.config.connection.private_key
+        config = misc.merge {}, ctx.config.connection
         connect config, (err, connection) ->
           return do_bootstrap() if err
           ctx.log "SSH connected"
@@ -121,13 +120,12 @@ existing key would be overwritten.
           next null, ctx.PASS
       do_bootstrap = ->
         ctx.log "Connection failed, bootstrap"
-        bootstrap ctx, (err) ->
+        bootstrap ctx, (err, reboot) ->
           return next err if err
-          do_wait_reboot()
+          if reboot then do_wait_reboot() else do_connect_after_bootstrap()
       do_wait_reboot = ->
         ctx.log 'Wait for reboot'
         config = misc.merge {}, ctx.config.connection,
-          privateKey: ctx.config.connection.private_key
           retry: 3
         connect config, (err, conn) ->
           return do_connect_after_bootstrap() if err
@@ -137,7 +135,6 @@ existing key would be overwritten.
       do_connect_after_bootstrap = ->
         ctx.log 'Connect when rebooted'
         config = misc.merge {}, ctx.config.connection,
-          privateKey: ctx.config.connection.private_key
           retry: true
         connect config, (err, conn) ->
           return next err if err
