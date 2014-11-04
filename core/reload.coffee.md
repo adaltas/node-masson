@@ -5,10 +5,12 @@ layout: module
 ---
 
     module.exports = []
-    module.exports.push 'masson/core/network_restart'
-    module.exports.push 'masson/core/network'
-    module.exports.push 'masson/core/network_check'
-    module.exports.push 'masson/core/proxy'
-    module.exports.push 'masson/core/curl'
-    module.exports.push 'masson/core/yum'
-    module.exports.push 'masson/core/ntp'
+    module.exports.push commands: 'reload', modules: [
+      'masson/core/network_restart'
+      'masson/core/network'
+      'masson/core/network_check'
+      'masson/core/proxy'
+      'masson/core/curl'
+      'masson/core/yum'
+      'masson/core/ntp'
+    ]
