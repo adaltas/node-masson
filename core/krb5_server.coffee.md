@@ -11,6 +11,7 @@ authentication for client/server applications by using secret-key cryptography.
 The module install the free implementation of this protocol available from the
 Massachusetts Institute of Technology.
 
+    misc = require 'mecano/lib/misc'
     module.exports = []
 
 ## Configuration
@@ -58,7 +59,7 @@ Example:
 }
 ```
 
-    safe_etc_krb5_conf = module.exports.safe_etc_krb5_conf = (etc_krb5_conf) ->
+    module.exports.safe_etc_krb5_conf = (etc_krb5_conf) ->
       etc_krb5_conf = misc.merge {}, etc_krb5_conf
       for realm, config of etc_krb5_conf.realms
         delete config.kadmin_principal
@@ -70,7 +71,7 @@ Example:
         delete config.manager_password
       etc_krb5_conf
 
-    module.exports.push module.exports.configure = (ctx) ->
+    module.exports.configure = (ctx) ->
       require('./krb5_client').configure ctx
       require('./iptables').configure ctx
       {etc_krb5_conf} = ctx.config.krb5
