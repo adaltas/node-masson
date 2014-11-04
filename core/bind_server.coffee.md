@@ -59,6 +59,7 @@ The packages "bind" is installed as a startup item and not yet installed.
 
     module.exports.push name: 'Bind Server # Install', timeout: -1, callback: (ctx, next) ->
       ctx.service
+        name: 'bind'
         srv_name: 'named'
         startup: true
       , next
