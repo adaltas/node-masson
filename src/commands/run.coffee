@@ -24,6 +24,7 @@ module.exports = ->
   params = params.parse()
   multihost = params.hosts?.length isnt 1 and config.servers.length isnt 1
   times = {}
+  multihost = true
   run(config, params)
   .on 'context', (ctx) ->
     ctx
@@ -51,7 +52,7 @@ module.exports = ->
       # rl.write '\n'
       rl.cursor = 0
       rl.line = ''
-      rl._refreshLine()
+      rl._refreshLine() unless multihost
       if err or status?
         rl.write line
         rl.write '\n'
