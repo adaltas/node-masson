@@ -36,10 +36,10 @@ Run = (config, params) ->
       ctx = contexts[host] = context (merge {}, config, hconfig), params.command
       ctx.hosts = contexts
       ctx.shared = shared
-      @actions host, 'install', {}, (err, actions) =>
+      @actions host, null, {}, (err, actions) =>
         return next err if err
         ctx.actions = actions or []
-        @modules host, 'install', {}, (err, modules) =>
+        @modules host, null, {}, (err, modules) =>
           return next err if err
           ctx.modules = modules or []
           next()
@@ -67,7 +67,7 @@ Run = (config, params) ->
             # Action
             ctx.action = action
             ctx.emit 'action_start'
-            retry = if action.retry? then actions.retry else 2
+            retry = if action.retry? then action.retry else 2
             attempts = 0
             disregard_done = false
             emit_action = (err, status) =>
