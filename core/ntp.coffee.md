@@ -9,7 +9,6 @@ layout: module
 Network Time Protocol (NTP) is a networking protocol for clock synchronization 
 between computer systems over packet-switched, variable-latency data networks.
 
-    quote = require 'regexp-quote'
     module.exports = []
     module.exports.push 'masson/bootstrap/'
     module.exports.push 'masson/core/yum'
@@ -38,11 +37,12 @@ Example:
 ```
 
     module.exports.push (ctx) ->
-      ctx.config.ntp ?= {}
-      ctx.config.ntp.servers ?= []
-      ctx.config.ntp.servers = ctx.config.ntp.servers.split(',') if typeof ctx.config.ntp.servers is 'string'
-      ctx.config.ntp.lag ?= 2000
-
+      ntp = ctx.config.ntp ?= {}
+      ntp.servers ?= []
+      ntp.servers = ctx.config.ntp.servers.split(',') if typeof ctx.config.ntp.servers is 'string'
+      ntp.lag ?= 2000
+      ntp.fudge ?= false
+      # ntp.fudge = ctx.config.host if ntp.fudge is true
 
 ## Install
 
@@ -73,29 +73,83 @@ defined by the "ntp.servers" property. The "ntp" service is restarted if any
 change to this file is detected.
 
     module.exports.push name: 'NTP # Configure', callback: (ctx, next) ->
-      {servers} = ctx.config.ntp
+      {servers, fudge} = ctx.config.ntp
       return next() unless servers?.length
-      write = []
-      write.push
-        match: /^(server [\d]+.*$)/mg
-        replace: "#$1"
-      for server in servers
-        write.push
-          match: new RegExp "^server #{quote server}.*$", 'mg'
-          replace: "server #{server} iburst"
-          append: 'Please consider joining'
-      ctx.write
-        destination: '/etc/ntp.conf'
-        write: write
-        backup: true
-      , (err, written) ->
+      ctx.fs.readFile '/etc/ntp.conf', 'ascii', (err, content) ->
         return next err if err
-        return next null, false unless written
-        ctx.service
-          name: 'ntp'
-          srv_name: 'ntpd'
-          action: 'restart'
-        , next
+        lines = string.lines content
+        modified = false
+        position = 0
+        # local_server = null
+        servers.push '127.127.1.0' if fudge and '127.127.1.0' not in servers
+        found = []
+        found_fudge = null
+        for line, i in lines
+          if match = /^(#)?server\s+(\S+)(.*)$/.exec line
+            position = i
+            commented = match[1] is '#'
+            host = match[2]
+            opts = match[3]
+            found.push host
+            # if host is '127.127.1.0'
+            #   local_server = host
+            #   continue
+            if commented and host in servers
+              lines[i] = "server #{host}#{opts}"
+              modified = true
+            else if not commented and host not in servers
+              lines[i] = "#server #{host}#{opts}"
+              modified = true
+          else if match = /^(#)?fudge\s+(.*)$/.exec line
+            fudge_position = i
+            commented = match[1] is '#'
+            opts = match[2]
+            found_fudge = true
+            if commented and fudge
+              lines[i] = "fudge #{opts}"
+              modified = true
+            else if not commented and not fudge
+              lines[i] = "#fudge #{opts}"
+              modified = true
+        for server in servers
+          if server not in found
+            lines.splice position+1, 0, "server #{server} iburst"
+            position++
+            modified = true
+        if fudge and not found_fudge
+          console.log 'fudge', fudge, found_fudge
+          lines.splice position+1, 0, "fudge 127.127.1.0 stratum 10"
+          position++
+          modified = true
+        return next null, false unless modified
+        ctx.fs.writeFile '/etc/ntp.conf', lines.join('\n'), (err) ->
+          return next err if err
+          ctx.service
+            srv_name: 'ntpd'
+            action: 'restart'
+          , (err) ->
+            next err, true
+      # write = []
+      # write.push
+      #   match: /^(server [\d]+.*$)/mg
+      #   replace: "#$1"
+      # for server in servers
+      #   write.push
+      #     match: new RegExp "^server #{quote server}.*$", 'mg'
+      #     replace: "server #{server} iburst"
+      #     append: 'Please consider joining'
+      # ctx.write
+      #   destination: '/etc/ntp.conf'
+      #   write: write
+      #   backup: true
+      # , (err, written) ->
+      #   return next err if err
+      #   return next null, false unless written
+      #   ctx.service
+      #     name: 'ntp'
+      #     srv_name: 'ntpd'
+      #     action: 'restart'
+      #   , next
 
 ## Start
 
@@ -144,6 +198,23 @@ synchronization the date and the `ntpd` daemon is finally restarted.
               srv_name: 'ntpd'
               action: 'start'
             , next
+
+## Module Dependencies
+
+    quote = require 'regexp-quote'
+    string = require 'mecano/lib/misc/string'
+
+## Server configuration
+
+This isnt (yet) supported. Add the following lines manually to the NTP
+configuration file and restart the service.
+
+```
+server 127.127.1.0
+fudge 127.127.1.0 stratum 10
+restrict default nomodify nopeer notrap
+restrict 127.0.0.1 mask 255.0.0.0
+```
 
 ## Note
 
