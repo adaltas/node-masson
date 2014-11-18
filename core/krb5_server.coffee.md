@@ -11,6 +11,9 @@ authentication for client/server applications by using secret-key cryptography.
 The module install the free implementation of this protocol available from the
 Massachusetts Institute of Technology.
 
+The article [SSH Kerberos Authentication Using GSSAPI and SSPI][gss_sspi]
+provides a good description on how Kerberos is negotiated by GSSAPI and SSPI.
+
     misc = require 'mecano/lib/misc'
     module.exports = []
 
@@ -173,13 +176,15 @@ Example:
 
     module.exports.push commands: 'install', modules: 'masson/core/krb5_server_install'
 
+    module.exports.push commands: 'reload', modules: 'masson/core/krb5_server_install'
+
     module.exports.push commands: 'start', modules: 'masson/core/krb5_server_start'
 
     module.exports.push commands: 'status', modules: 'masson/core/krb5_server_status'
 
     module.exports.push commands: 'stop', modules: 'masson/core/krb5_server_stop'
 
-
+[gss_sspi]: http://www.drdobbs.com/ssh-kerberos-authentication-using-gssapi/184402071
 
 
 
