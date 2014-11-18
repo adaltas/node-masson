@@ -7,7 +7,7 @@ each = require 'each'
 {EventEmitter} = require 'events'
 {flatten, merge} = require './misc'
 context = require './context'
-{Tree} = require './tree'
+tree = require './tree'
 
 ###
 The execution is done in 2 passes.
@@ -25,7 +25,7 @@ Run = (config, params) ->
   @setMaxListeners 100
   @config = config
   @params = params
-  @tree = new Tree 
+  # @tree = new Tree 
   setImmediate =>
     # Work on each server
     contexts = {}
@@ -36,13 +36,10 @@ Run = (config, params) ->
       ctx = contexts[host] = context (merge {}, config, hconfig), params.command
       ctx.hosts = contexts
       ctx.shared = shared
-      @actions host, null, {}, (err, actions) =>
-        return next err if err
-        ctx.actions = actions or []
-        @modules host, null, {}, (err, modules) =>
-          return next err if err
-          ctx.modules = modules or []
-          next()
+      ctx.config.modules = ctx.config.modules.reverse() if params.command is 'stop'
+      ctx.tree = tree ctx.config.modules
+      ctx.modules = Object.keys ctx.tree.modules
+      next()
     .on 'error', (err) =>
       @emit 'error', err
     .on 'end', =>
@@ -58,9 +55,11 @@ Run = (config, params) ->
         ctx = contexts[host]
         ctx.run = @
         @emit 'context', ctx
-        @actions host, params.command, params, (err, actions) =>
+        ctx.tree.actions params, (err, actions) =>
+        # @actions host, params.command, params, (err, actions) =>
           # return next new Error "Invalid run list: #{@params.command}" unless actions?
           return next() unless actions?
+          # actions = actions.reverse() if params.command is 'stop'
           actionRun = each(actions)
           .on 'item', (action, next) =>
             return next() if action.skip
@@ -81,6 +80,7 @@ Run = (config, params) ->
               emit_action err, statusOrMsg
               next err
             run = =>
+              ctx.retry = attempts
               try
                 # Synchronous action
                 if action.callback.length is 1
@@ -118,43 +118,43 @@ Run = (config, params) ->
   @
 util.inherits Run, EventEmitter
 
-###
-Return all the actions for a given host and the current command 
-or null if the host didnt register any run list for this command.
-###
-Run::actions = (host, command, options, callback) ->
-  # Get the server config
-  # for server in @config.servers
-  #   config = server if server.host is host
-  config = @config.servers[host]
-  return callback new Error "Invalid host: #{host}" unless config
-  # Check the run list
-  # run = config.run[command]
-  options.command = command
-  run = config.modules
-  return callback null unless run
-  @tree.actions run, options, (err, actions) =>
-    return callback err if err
-    callback null, actions
+# ###
+# Return all the actions for a given host and the current command 
+# or null if the host didnt register any run list for this command.
+# ###
+# Run::actions = (host, command, options, callback) ->
+#   # Get the server config
+#   # for server in @config.servers
+#   #   config = server if server.host is host
+#   config = @config.servers[host]
+#   return callback new Error "Invalid host: #{host}" unless config
+#   # Check the run list
+#   # run = config.run[command]
+#   options.command = command
+#   run = config.modules
+#   return callback null unless run
+#   @tree.actions run, options, (err, actions) =>
+#     return callback err if err
+#     callback null, actions
 
-###
-Return all the modules for a given host and the current command 
-or null if the host didnt register any run list for this command.
-###
-Run::modules = (host, command, options, callback) ->
-  # Get the server config
-  # for server in @config.servers
-  #   config = server if server.host is host
-  config = @config.servers[host]
-  return callback new Error "Invalid host: #{host}" unless config
-  # Check the run list
-  # run = config.run[command]
-  options.command = command
-  run = config.modules
-  return callback null unless run
-  @tree.modules run, options, (err, modules) =>
-    return callback err if err
-    callback null, modules
+# ###
+# Return all the modules for a given host and the current command 
+# or null if the host didnt register any run list for this command.
+# ###
+# Run::modules = (host, command, options, callback) ->
+#   # Get the server config
+#   # for server in @config.servers
+#   #   config = server if server.host is host
+#   config = @config.servers[host]
+#   return callback new Error "Invalid host: #{host}" unless config
+#   # Check the run list
+#   # run = config.run[command]
+#   options.command = command
+#   run = config.modules
+#   return callback null unless run
+#   @tree.modules run, options, (err, modules) =>
+#     return callback err if err
+#     callback null, modules
 
 module.exports = (config, params) ->
   new Run config, params

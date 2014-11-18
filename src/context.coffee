@@ -51,10 +51,11 @@ class Context extends EventEmitter
       return false unless @has_module module
     return true
   has_any_modules: (modules...) ->
+    has_module = []
     modules = flatten modules
     for module in modules
-      return true if @has_module module
-    return false
+      has_module.push module if @has_module module
+    return if has_module.length then has_module else false
     
 
 module.exports = (config, command) ->

@@ -15,7 +15,6 @@ Build a tree with all the actions to execute from a list of modules.
 Action properties:
 
 -   `hidden`  Visibility of the action name
--   `retry`   Re-execute an action multiple times, default to 2 or infinite if true
 -   `name`    Name of the action
 -   `module`  Module where the action is defined
 -   `index`   Position of the action inside the module
@@ -38,7 +37,11 @@ Example using the EventEmitter API:
     .on 'error', (err) ->
       util.print err 
 ###
-Tree = (modules, options) ->
+Tree = (modules) ->
+  modules = [modules] unless Array.isArray modules
+  modules = flatten modules
+  @names = modules
+  @modules = @load_modules modules
   @
 util.inherits Tree, EventEmitter
 
@@ -47,114 +50,102 @@ Build a run list for the given modules.
 
 Options include:   
 
+-   `command` Filter modules for a particular command
 -   `modules` Only return this module and its dependencies   
--   `fast`    Skip dependencies   
--   `all`     Return the full list of actions, work with the `module` and `fast` options   
+-   `fast`    Skip dependencies    
 
 ###
-Tree::actions = (modules, options, callback) ->
+Tree::actions = (options, callback) ->
   if typeof options is 'function'
     callback = options
     options = {}
   options.modules = [options.modules] if typeof options.modules is 'string'
   options.modules = [] unless Array.isArray options.modules
-  ev = new EventEmitter
-  setImmediate =>
-    modules = [modules] unless Array.isArray modules
-    modules = flatten modules
-    # Buil a full tree
-    try tree = @load_tree modules, options.command
-    catch err
-      ev.emit 'error', err
-      callback err
-      return
-    # tree = @load_tree modules, options.command
-    # Filter with the modules options
-    if options.modules.length
-      modules = tree.map (leaf) -> leaf.module
-      modules = multimatch modules, options.modules
-      # tree = @load_tree modules, options.command
-      tree = @load_tree modules, options.command
-      # Filter with the fast options
-      tree = tree.filter( (leaf) =>
-        return true if multimatch(leaf.module, options.modules).length
-        leaf.actions = leaf.actions.filter (action) =>
-          action.required
-        leaf.actions.length
-      ) if options.fast
-    # Emit event and return actions
-    actions = []
-    for leaf in tree
-      ev.emit 'module', leaf.module, leaf.actions
-      for action in leaf.actions
-        ev.emit 'action', action, leaf.module
-        actions.push action
-    ev.emit 'end', actions
-    callback null, actions if callback
-  ev
+  modules = @modules
+  # Filter with the modules options
+  if options.command and options.command isnt 'install'
+    parentmodules = {}
+    childmodules = []
+    for name, module of modules
+      filteredhandlers = []
+      for handler in module
+        if options.command in handler.commands
+          filteredhandlers.push handler
+          for child in handler.modules
+            childmodules.push child
+          # break
+      if filteredhandlers.length
+        parentmodules[name] = filteredhandlers
+    childmodules = @load_modules childmodules
+    newmodules = {}
+    for name, module of parentmodules
+      newmodules[name] = module
+    for name, module of childmodules
+      newmodules[name] = module
+    modules = newmodules
+  else if options.command
+    modules = @load_modules_install @names
+    # for name in @names
+    #   module = modules[name]
+    #   for handler in module
+    #     if options.command in handler.commands or handler.commands.length is 0
 
-Tree::modules = (modules, options, callback) ->
-  mods = []
-  @actions(modules, options)
-  .on 'module', (module) ->
-    mods.push module
-  .on 'error', (err) ->
-    callback err
-  .on 'end', ->
-    callback null, mods
+    # console.log modules
+    # console.log Object.keys modules
+    # process.exit()
+  if options.modules.length
+    names = Object.keys modules
+    names = multimatch names, options.modules
+    newmodules = {}
+    for name in names
+      newmodules[name] = modules[name]
+    modules = newmodules
+  actions = @load_actions modules
+  if options.fast
+    actions = actions.filter (action) =>
+      return true if multimatch(action.module, options.modules).length
+      action.required
+  callback null, actions
 
-###
-Return a array of objects with the module name and its associated actions.
+Tree::load_modules = (names) ->
+  modules = {}
+  load_modules = (names) =>
+    for name in names
+      continue if modules[name]
+      modules[name] = @load_module name
+      for handler in modules[name]
+        load_modules handler.modules
+  load_modules names
+  modules
 
-```json
-[ { module: 'masson/bootstrap/cache_memory',
-    actions: [ [Object], [Object] ] },
-  { module: 'masson/bootstrap/mecano',
-    actions: [ [Object], [Object] ] },
-  { module: 'masson/bootstrap/', actions: [] },
-  { module: 'masson/commons/java',
-    actions: [ [Object], [Object], [Object], [Object], [Object], [Object] ] } ]
-```
-###
-Tree::load_tree = (modules, command) ->
+Tree::load_modules_install = (names) ->
+  modules = {}
+  load_modules = (names) =>
+    for name in names
+      continue if modules[name]?
+      newmodule = []
+      modules[name] = true
+      for handler in @load_module name
+        continue if handler.commands.length > 0 and 'install' not in handler.commands
+        load_modules handler.modules 
+        newmodule.push handler
+      modules[name] = newmodule
+  load_modules names
+  modules
+
+Tree::load_actions = (modules) ->
+  actions = []
   called = {}
-  tree = []
-  normalize_action = (action) =>
-    # Normalize
-    action = modules: action if typeof action is 'string'
-    action.commands ?= []
-    action.commands = [action.commands] unless Array.isArray action.commands
-    action.commands.push command if command and not action.commands.length
-    action.modules ?= []
-    action.modules = [action.modules] unless Array.isArray action.modules
-    if typeof action.callback is 'string'
-      action.modules.push action.callback 
-      action.callback = null
-    action
-  build_module = (name, modules, filtering, parent) =>
+  load_module = (name, handlers) =>
     return if called[name]
     called[name] = true
-    modules = @load_module name, parent unless modules
-    leaf = module: name, actions: []
-    for action in modules
-      # Normalize
-      action = normalize_action action
-      # Filter
-      continue if (filtering and action.commands.length is 0 and command isnt null and command isnt 'install') or (command and action.commands.length and command not in action.commands)
-      # Discover
-      if action.modules.length
-        tree.push leaf if leaf.actions.length
-        leaf = module: name, actions: []
-        for childmod in action.modules
-          f = if filtering is false then false else !action.commands.length
-          build_module childmod, null, f, module
-      leaf.actions.push action if action.callback
-    # Push module into tree if actions or module is named and not already present
-    if leaf.actions.length or (leaf.module and not (tree.some (l) -> l.module is leaf.module))
-      tree.push leaf
-  build_module null, modules, null
-  # for module in modules then build_module module
-  tree
+    for handler in handlers
+      for child in handler.modules
+        load_module child, modules[child] or @modules[child]
+      actions.push handler if handler.callback
+  for name, module of modules
+    load_module name, module
+  actions
 
 ###
 Load a module and return its actions.
@@ -179,10 +170,17 @@ Tree::load_module = (module, parent) ->
   actions = [actions] unless Array.isArray actions
   for callback, i in actions
     # Module dependencies
-    continue if typeof callback is 'string'
+    # continue if typeof callback is 'string'
     throw Error "Module '#{module}' export an undefined action" unless callback?
     callback = actions[i] = callback: callback if typeof callback is 'function'
-    # callback.hidden ?= true unless callback.name
+    callback = actions[i] = modules: callback if typeof callback is 'string'
+    callback.commands ?= []
+    callback.commands = [callback.commands] unless Array.isArray callback.commands
+    callback.modules ?= []
+    callback.modules = [callback.modules] unless Array.isArray callback.modules
+    if typeof callback.callback is 'string'
+      callback.modules.push callback.callback 
+      callback.callback = null
     callback.id ?= "#{module}/#{i}"
     callback.name ?= null
     callback.module ?= module
@@ -192,5 +190,5 @@ Tree::load_module = (module, parent) ->
   @cache[module] = actions
 
 module.exports = (modules, options, callback)->
-  (new Tree).actions modules, options, callback
+  new Tree modules
 module.exports.Tree = Tree
