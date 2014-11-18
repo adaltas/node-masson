@@ -22,17 +22,19 @@ Note, ntp is installed to encure correct date on the server or HTTPS will fail.
 
 ## Configuration
 
-*   `clean`
-*   `copy`
-    Deploy the YUM repository definitions files.
-*   `merge`
+*   `clean`   
+*   `copy`   
+    Deploy the YUM repository definitions files.   
+*   `merge`   
 *   `proxy`   
     Inject proxy configuration as declared in the proxy 
-    action, default is true
-*   `update`
-    Update packages on the system
-*   `packages` (array)
-    List of packages to be installed by YUM
+    action, default is true   
+*   `update`   
+    Update packages on the system   
+*   `packages` (object[string:boolean])   
+    List of packages to be installed by YUM. Set the name of the package as a
+    key and mark it activate with the value. Default installed packages are
+    "yum-plugin-priorities", "man" and "ksh".   
 
 Examples
 
