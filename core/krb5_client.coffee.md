@@ -69,13 +69,16 @@ Example:
         'default': 'SYSLOG:INFO:LOCAL1'
         'kdc': 'SYSLOG:NOTICE:LOCAL1'
         'admin_server': 'SYSLOG:WARNING:LOCAL1'
-      'libdefaults': 
-        # 'default_realm': "#{REALM}"
+      'libdefaults':
         'dns_lookup_realm': false
         'dns_lookup_kdc': false
         'ticket_lifetime': '24h'
         'renew_lifetime': '7d'
         'forwardable': true
+        'allow_weak_crypto': 'false'
+        'ticket_lifetime': '24h'
+        'clockskew': '300'
+        'rdns': 'false'
       'realms': {}
       'domain_realm': {}
       'appdefaults':
