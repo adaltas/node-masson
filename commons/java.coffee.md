@@ -24,11 +24,12 @@ developers on Solaris, Linux, Mac OS X or Windows.
     "java_home": "/usr/java/default",
     "jdk": {
       "version": "1.7.0_60",
-      "location": "#{__dirname}/../shared/java/jdk-7u60-linux-x64.tar.gz"
+      "location": "./resources/jdk-7u60-linux-x64.tar.gz"
     },
     "open_jdk": false,
-    "oracle_jdk": "./java/jdk-6u45-linux-x64-rpm.bin"
-
+    "oracle_jdk": "./resources/jdk-6u45-linux-x64-rpm.bin"
+    "jce_local_policy": "./resources/jce_policy-7/local_policy.jar"
+    "jce_us_export_policy": "./resources/jce_policy-7/US_export_policy.jar"
   }
 }
 ```
