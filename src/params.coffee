@@ -136,5 +136,18 @@ module.exports = parameters
       name: 'fast', shortcut: 'f', type: 'boolean'
       description: 'Fast mode without dependency resolution'
     ]
+  ,
+    name: 'backup'
+    description: 'Backup the server'
+    options: [
+      name: 'hosts', shortcut: 'h', type: 'array'
+      description: 'Limit to a list of server hostnames'
+    ,
+      name: 'modules', shortcut: 'm', type: 'array'
+      description: 'Limit to a list of modules'
+    , 
+      name: 'fast', shortcut: 'f', type: 'boolean'
+      description: 'Fast mode without dependency resolution'
+    ]
   ]
 
