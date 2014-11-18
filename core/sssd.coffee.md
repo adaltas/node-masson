@@ -9,8 +9,6 @@ layout: module
 The System Security Services Daemon (SSSD) provides access to different 
 identity and authentication providers.
 
-    crypto = require 'crypto'
-    each = require 'each'
     module.exports = []
     module.exports.push 'masson/bootstrap/'
     module.exports.push 'masson/core/yum'
@@ -76,7 +74,24 @@ Example:
       ctx.config.sssd ?= {}
       ctx.config.sssd.certificates ?= []
       ctx.config.sssd.merge ?= false
-      ctx.config.sssd.config ?= {}
+      ctx.config.sssd.config = merge
+        'sssd':
+          'config_file_version' : '2'
+          'reconnection_retries' : '3'
+          'sbus_timeout' : '30'
+          'services' : 'nss, pam'
+        'nss':
+          'filter_groups' : 'root'
+          'filter_users' : 'root'
+          'reconnection_retries' : '3'
+          'entry_cache_timeout' : '300'
+          'entry_cache_nowait_percentage' : '75'
+        'pam':
+          'reconnection_retries' : '3'
+          'offline_credentials_expiration' : '2'
+          'offline_failed_login_attempts' : '3'
+          'offline_failed_login_delay' : '5'
+      , ctx.config.sssd.config or {}
       ctx.config.sssd.services ?= ['sssd', 'sssd-client', 'pam_krb5', 'pam_ldap', 'authconfig'] #, 'sssd-tools'
       ctx.config.sssd.services = ctx.config.sssd.services.split ' ' if typeof ctx.config.sssd.services is 'string'
       ctx.config.sssd.test_user ?= null
@@ -98,7 +113,7 @@ following service: "sssd", "sssd-client", "pam\_krb5", "pam\_ldap" and
           do_startup()
       do_startup = ->
         ctx.service
-          name: 'sssd'
+          chk_name: 'sssd'
           startup: true
         , (err, serviced) ->
           return next err if err
@@ -185,6 +200,10 @@ default overwritten unless the "sssd.merge" is `true`.
           , (err, restarted) ->
             next err, if written then ctx.OK else ctx.PASS
 
+## Start SSSD
+
+    module.exports.push 'masson/core/sssd_start'
+
 ## Check NSS
 
 Check if NSS is correctly configured by executing the command `getent passwd 
@@ -217,7 +236,12 @@ user is defined by the "sssd.test_user" property.
         cmd: "su -l #{test_user} -c 'touch .masson_check_pam'"
       , (err, executed, stdout, stderr) ->
         return next err, if executed then ctx.OK else ctx.PASS
-        
+
+## Module Dependencies
+
+    crypto = require 'crypto'
+    {merge} = require 'mecano/lib/misc'
+    each = require 'each'  
       
       
 
