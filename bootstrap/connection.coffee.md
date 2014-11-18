@@ -45,8 +45,8 @@ Options include:
     "bootstrap.private_key_location".   
 *   `private_key_location` (string)   
     Path where to read the private key for Ryba, default to "~/.ssh/id_rsa".   
-*   `public_key` (array|string)   
-    List of public keys to be written on the remote root "authorized_keys" file.   
+*   `public_key` (string)   
+    Public key associated with the private key.   
 *   `password` (string)   
     Password of the user with super user permissions, required if current user 
     running masson doesnt yet have remote access as root.   
@@ -74,8 +74,8 @@ Example:
       connection.port ?= 22
       connection.private_key ?= null
       connection.private_key_location ?= '~/.ssh/id_rsa'
-      connection.public_key ?= []
-      connection.public_key = [connection.public_key] if typeof connection.public_key is 'string'
+      # connection.public_key ?= []
+      # connection.public_key = [connection.public_key] if typeof connection.public_key is 'string'
       connection.retry = 3
       connection.wait = 1000
       connection.bootstrap ?= {}
