@@ -26,6 +26,7 @@ Resources:
     module.exports.push 'masson/core/iptables'
     module.exports.push 'masson/core/yum'
     module.exports.push require('./krb5_server').configure
+    safe_etc_krb5_conf = require('./krb5_server').safe_etc_krb5_conf
 
 ## IPTables
 
@@ -93,12 +94,10 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
         name: 'krb5-server-ldap'
         startup: true
         chk_name: 'krb5kdc'
-        srv_name: 'krb5kdc'
       ,
         name: 'krb5-server-ldap'
         startup: true
         chk_name: 'kadmin'
-        srv_name: 'kadmin'
       ,
         name: 'words'
       ,
@@ -124,6 +123,8 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
           modified = true if written
           do_kadm5()
       do_kadm5 = ->
+        # Not sure this is a good idea,
+        # we end up with admin user from another realm
         writes = for realm of etc_krb5_conf.realms
           match: ///^\*/\w+@#{misc.regexp.escape realm}\s+\*///mg
           replace: "*/admin@#{realm}     *"
@@ -305,18 +306,16 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
       restart = ->
         ctx.log 'Restart krb5kdc and kadmin'
         ctx.service [
-          name: 'krb5-server'
           action: 'start'
           srv_name: 'krb5kdc'
         ,
-          name: 'krb5-server'
           action: 'start'
           srv_name: 'kadmin'
         ], (err, restarted) ->
           return done err if err
           ctx.log 'Restart rsyslog'
           ctx.service
-            name: 'rsyslog'
+            srv_name: 'rsyslog'
             action: 'restart'
           , (err, restarted) ->
             done err
