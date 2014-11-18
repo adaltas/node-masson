@@ -52,9 +52,6 @@ module.exports = parameters
       name: 'hosts', shortcut: 'h', type: 'array'
       description: 'Limit to a list of server hostnames'
     ,
-      name: 'roles', shortcut: 'r'
-      description: 'Limit to a list of roles'
-    ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
     , 
@@ -67,9 +64,6 @@ module.exports = parameters
     options: [
       name: 'hosts', shortcut: 'h', type: 'array'
       description: 'Limit to a list of server hostnames'
-    ,
-      name: 'roles', shortcut: 'r'
-      description: 'Limit to a list of roles'
     ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
@@ -84,9 +78,6 @@ module.exports = parameters
       name: 'hosts', shortcut: 'h', type: 'array'
       description: 'Limit to a list of server hostnames'
     ,
-      name: 'roles', shortcut: 'r'
-      description: 'Limit to a list of roles'
-    ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
     , 
@@ -99,9 +90,6 @@ module.exports = parameters
     options: [
       name: 'hosts', shortcut: 'h', type: 'array'
       description: 'Limit to a list of server hostnames'
-    ,
-      name: 'roles', shortcut: 'r'
-      description: 'Limit to a list of roles'
     ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
@@ -116,9 +104,6 @@ module.exports = parameters
       name: 'hosts', shortcut: 'h', type: 'array'
       description: 'Limit to a list of server hostnames'
     ,
-      name: 'roles', shortcut: 'r'
-      description: 'Limit to a list of roles'
-    ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
     , 
@@ -132,9 +117,6 @@ module.exports = parameters
       name: 'hosts', shortcut: 'h', type: 'array'
       description: 'Limit to a list of server hostnames'
     ,
-      name: 'roles', shortcut: 'r'
-      description: 'Limit to a list of roles'
-    ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
     , 
@@ -147,9 +129,6 @@ module.exports = parameters
     options: [
       name: 'hosts', shortcut: 'h', type: 'array'
       description: 'Limit to a list of server hostnames'
-    ,
-      name: 'roles', shortcut: 'r'
-      description: 'Limit to a list of roles'
     ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
