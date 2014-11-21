@@ -46,10 +46,9 @@ ctx.execute
           options
         functions = for k, v of mecano then k
         functions.forEach (action) ->
-          ctx[action] = (goptions, options, callback) ->
+          ctx[action] = (options, goptions, callback) ->
             if arguments.length is 2
-              callback = options
-              options = goptions
+              callback = goptions
               goptions = {parallel: 1}
             if action is 'mkdir' and typeof options is 'string'
               options = m action, destination: options
