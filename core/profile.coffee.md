@@ -12,7 +12,4 @@ layout: module
       writes = for filename, content of ctx.config.profile
         destination: "/etc/profile.d/#{filename}"
         content: content
-      ctx.write
-        destination: "/etc/profile.d/#{filename}"
-        content: content
-      , next
+      ctx.write writes, next
