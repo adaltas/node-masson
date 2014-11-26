@@ -11,7 +11,7 @@ Modify the various network related configuration files such as
 
     quote = require 'regexp-quote'
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/bootstrap'
 
 # Configuration
 

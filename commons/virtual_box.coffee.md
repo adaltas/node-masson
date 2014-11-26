@@ -6,7 +6,7 @@ layout: module
 # Virtual Box
 
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/bootstrap'
     module.exports.push 'masson/core/curl'
 
     module.exports.push name: 'VirtualBox # Guest Additions', timeout: -1, callback: (ctx, next) ->

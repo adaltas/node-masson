@@ -10,7 +10,7 @@ The System Security Services Daemon (SSSD) provides access to different
 identity and authentication providers.
 
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/bootstrap'
     module.exports.push 'masson/core/yum'
     module.exports.push 'masson/core/openldap_client'
 

@@ -10,7 +10,7 @@ Network Time Protocol (NTP) is a networking protocol for clock synchronization
 between computer systems over packet-switched, variable-latency data networks.
 
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/bootstrap'
     module.exports.push 'masson/core/yum'
 
 ## Configuration

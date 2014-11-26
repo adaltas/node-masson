@@ -8,7 +8,7 @@ layout: module
 Currently being written, not yet registered in any config.
 
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/bootstrap'
 
 ## Configuration
 

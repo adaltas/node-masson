@@ -6,7 +6,7 @@ layout: module
 # Tree
 
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/bootstrap'
 
     module.exports.push name: 'Tree', timeout: -1, callback: (ctx, next) ->
       ctx.service

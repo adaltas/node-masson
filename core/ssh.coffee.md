@@ -9,7 +9,7 @@ layout: module
     misc = require 'mecano/lib/misc'
     each = require 'each'
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/bootstrap'
     module.exports.push 'masson/core/users'
     module.exports.push 'masson/core/yum'
 

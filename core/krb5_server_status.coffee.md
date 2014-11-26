@@ -2,7 +2,7 @@
 # Kerberos Server Status
 
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/bootstrap'
 
     module.exports.push name: 'Kerberos Server # Status kadmin', callback: (ctx, next) ->
       ctx.execute

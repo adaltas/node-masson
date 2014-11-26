@@ -2,7 +2,7 @@
 # Bind server Install
 
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/bootstrap'
     module.exports.push 'masson/core/yum'
     module.exports.push 'masson/core/iptables'
     module.exports.push require('./index').confiugre

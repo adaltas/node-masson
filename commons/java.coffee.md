@@ -10,7 +10,7 @@ layout: module
     semver = require 'semver'
     url = require 'url'
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/bootstrap'
 
 Install the Oracle Java JRE and JDK. The Java Runtime Environment is the code 
 execution component of the Java platform. The Java Development Kit (JDK) is 

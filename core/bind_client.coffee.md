@@ -11,7 +11,7 @@ with BIND-9.9.3. The BIND package includes the client side programs
 nslookup, dig and host.
 
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/bootstrap'
     module.exports.push 'masson/core/yum'
 
 ## Install

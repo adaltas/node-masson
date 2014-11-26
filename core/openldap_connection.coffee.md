@@ -9,7 +9,7 @@ layout: module
 
     ldap = require 'ldapjs'
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/bootstrap'
 
 Connect
 -------

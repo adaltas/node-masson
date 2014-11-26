@@ -5,7 +5,7 @@ layout: module
 
     each = require 'each'
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/bootstrap'
 
     module.exports.push name: 'Profile', callback: (ctx, next) ->
       ctx.config.profile ?= {}

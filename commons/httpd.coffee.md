@@ -6,7 +6,7 @@ layout: module
 # HTTPD web server
 
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/bootstrap'
     module.exports.push 'masson/core/iptables'
 
 ## Configuration

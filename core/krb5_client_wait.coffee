@@ -4,7 +4,7 @@
 ## Preparation
 
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/bootstrap'
     module.exports.push require('./krb5_client').configure
 
 ## Wait

@@ -10,7 +10,7 @@ This package cover various security related configuration for an operating
 system.
 
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/bootstrap'
 
 ## Configuration
 

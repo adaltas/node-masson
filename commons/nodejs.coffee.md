@@ -17,7 +17,7 @@ home of each users.
     mecano = require 'mecano'
     misc = require 'mecano/lib/misc'
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/bootstrap'
     module.exports.push 'masson/commons/git'
     module.exports.push 'masson/core/users'
 

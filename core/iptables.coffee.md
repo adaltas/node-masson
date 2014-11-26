@@ -9,7 +9,7 @@ layout: module
 Administration tool for IPv4 packet filtering and NAT.
 
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/bootstrap'
 
 ## Configuration
 

@@ -8,7 +8,7 @@ layout: module
     each = require 'each'
     escape = (text) -> text.replace(/[\\"]/g, "\\$&")
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/bootstrap'
     module.exports.push 'masson/core/iptables'
     module.exports.push 'masson/commons/mysql_client' # Install the mysql driver
 

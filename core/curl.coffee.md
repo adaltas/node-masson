@@ -13,7 +13,7 @@ command is designed to work without user interaction.
 
     each = require 'each'
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/bootstrap'
     module.exports.push 'masson/core/users'
     module.exports.push 'masson/core/yum'
     module.exports.push 'masson/core/proxy'

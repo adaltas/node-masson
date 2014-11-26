@@ -10,7 +10,7 @@ installation, the web application will be accessible at the following URL:
 "http://localhost/ldap".
 
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/bootstrap'
     module.exports.push 'masson/core/yum'
     module.exports.push 'masson/commons/httpd'
 

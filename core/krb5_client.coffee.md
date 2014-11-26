@@ -17,7 +17,7 @@ Institute of Technology](http://web.mit.edu).
     misc = require 'mecano/lib/misc'
     krb5_server = require './krb5_server'
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/bootstrap'
     module.exports.push 'masson/bootstrap/utils'
     module.exports.push 'masson/core/yum'
     module.exports.push 'masson/core/ssh'

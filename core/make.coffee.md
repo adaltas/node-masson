@@ -11,7 +11,7 @@ Install the GNU make utility to maintain groups of programs.
 This action does not use any configuration.
 
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/bootstrap'
     module.exports.push 'masson/core/yum'
 
 ## Package

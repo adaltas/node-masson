@@ -7,7 +7,7 @@ layout: module
 
     url = require 'url'
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/bootstrap'
 
     module.exports.push (ctx) ->
       require('../core/proxy').configure ctx

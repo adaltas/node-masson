@@ -9,7 +9,7 @@ layout: module
 GNU project C and C++ compiler.
 
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/bootstrap'
     module.exports.push 'masson/core/yum'
 
 ## Install

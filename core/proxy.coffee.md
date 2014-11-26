@@ -5,7 +5,7 @@ layout: module
 
     path = require 'path'
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/bootstrap'
     module.exports.push 'masson/core/users'
 
 # Proxy

@@ -13,7 +13,7 @@ in "/etc/gitconfig" will not be created or modified.
     each = require 'each'
     misc = require 'mecano/lib/misc'
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/bootstrap'
     module.exports.push 'masson/core/users'
 
 Configuration
