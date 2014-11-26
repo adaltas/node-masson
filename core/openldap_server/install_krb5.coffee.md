@@ -6,10 +6,10 @@ layout: module
 # OpenLDAP Kerberos
 
     ssha = require 'ssha'
-    {check_password} = require './openldap_server'
+    {check_password} = require './index'
     misc = require 'mecano/lib/misc'
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/bootstrap'
 
 ## Configuration
 

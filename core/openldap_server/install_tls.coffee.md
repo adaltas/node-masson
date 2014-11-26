@@ -5,8 +5,8 @@ layout: module
 
     path = require 'path'
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
-    module.exports.push 'masson/core/openldap_server'
+    module.exports.push 'masson/bootstrap'
+    module.exports.push 'masson/core/openldap_server/install'
     # We cant require openldap_client here, since it will deploy 
     # and test a secure connection on a server not yet configured
 

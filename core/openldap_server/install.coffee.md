@@ -1,15 +1,10 @@
----
-title: 
-layout: module
----
 
-# OpenLDAP
+# OpenLDAP Server Install
 
     crypto = require 'crypto'
     each = require 'each'
-    ldap = require 'ldapjs'
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
+    module.exports.push 'masson/bootstrap'
     module.exports.push 'masson/core/yum'
     module.exports.push 'masson/core/iptables'
 
@@ -17,55 +12,6 @@ The default ports used by OpenLdap server are 389 and 636.
 
 todo: add migrationtools
 
-
-Configuration
--------------
-
-The property "openldap_server.config_slappasswd" may be generated with the command `slappasswd` 
-and should correspond to "openldap_server.config_password".
-
-    module.exports.push module.exports.configure = (ctx) ->
-      require('./iptables').configure ctx
-      # Todo: Generate '*_slappasswd' with command `slappasswd -s $password`, but only the first time, we
-      # need a mechanism to store configuration properties before.
-      openldap_server = ctx.config.openldap_server ?= {}
-      throw new Error "Missing \"openldap_server.suffix\" property" unless openldap_server.suffix
-      throw new Error "Missing \"openldap_server.root_password\" property" unless openldap_server.root_password
-      # throw new Error "Missing \"openldap_server.root_slappasswd\" property" unless openldap_server.root_slappasswd
-      throw new Error "Missing \"openldap_server.config_dn\" property" unless openldap_server.config_dn
-      throw new Error "Missing \"openldap_server.config_password\" property" unless openldap_server.config_password
-      {suffix} = openldap_server
-      openldap_server.root_dn ?= "cn=Manager,#{openldap_server.suffix}"
-      openldap_server.log_level ?= 256
-      openldap_server.users_dn ?= "ou=users,#{suffix}"
-      openldap_server.groups_dn ?= "ou=groups,#{suffix}"
-      openldap_server.ldapadd ?= []
-      openldap_server.ldapdelete ?= []
-      openldap_server.tls ?= false
-      openldap_server.config_file ?= '/etc/openldap/slapd.d/cn=config/olcDatabase={0}config.ldif'
-      openldap_server.monitor_file ?= '/etc/openldap/slapd.d/cn=config/olcDatabase={1}monitor.ldif'
-      openldap_server.bdb_file ?= '/etc/openldap/slapd.d/cn=config/olcDatabase={2}bdb.ldif'
-      if openldap_server.tls
-        throw Error 'TLS mode requires "tls_cert_file"' unless openldap_server.tls_cert_file
-        throw Error 'TLS mode requires "tls_key_file"' unless openldap_server.tls_key_file
-        openldap_server.url = "ldaps://#{ctx.config.host}"
-      else
-        openldap_server.url = "ldap://#{ctx.config.host}"
-      # ctx.ldap_add = (ctx, content, callback) ->
-      #   {root_dn, root_password} = openldap_server
-      #   tmp = "/tmp/ldapadd_#{Date.now()}_#{Math.round(Math.random()*1000)/1000}"
-      #   ctx.fs.writeFile tmp, content, (err) ->
-      #     return callback err if err
-      #     ctx.execute
-      #       cmd: "ldapadd -c -H ldapi:/// -D #{root_dn} -w #{root_password} -f #{tmp}"
-      #       code_skipped: 68
-      #     , (err, executed, stdout, stderr) ->
-      #       return callback err if err
-      #       modified = stderr.match(/Already exists/g)?.length isnt stdout.match(/adding new entry/g).length
-      #       ctx.remove
-      #         destination: tmp
-      #       , (err, removed) ->
-      #         callback err, modified
 
 ## IPTables
 
@@ -237,38 +183,6 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
         , (err, written) ->
           modified = true if written
           finish err
-        # ctx.log 'Open connection'
-        # client = ldap.createClient url: "ldap://#{ctx.config.host}/"
-        # ctx.log 'Bind connection'
-        # client.bind "#{config_dn}", "#{config_password}", (err) ->
-        #   return finish err if err
-        #   ctx.log 'Search attribute olcLogLevel'
-        #   client.search 'cn=config', 
-        #     filter: 'cn=config'
-        #     scope: 'base'
-        #     attributes: ['olcLogLevel']
-        #   , (err, search) ->
-        #     return unbind client, err if err
-        #     olcLogLevel = null
-        #     search.on 'searchEntry', (entry) ->
-        #       ctx.log "Found #{JSON.stringify entry.object}"
-        #       olcLogLevel = entry.object.olcLogLevel
-        #     search.on 'end', ->
-        #       ctx.log "Attribute olcLogLevel is #{JSON.stringify olcLogLevel}"
-        #       return unbind client if "#{olcLogLevel}" is "#{log_level}"
-        #       ctx.log "Modify attribute olcLogLevel to #{JSON.stringify log_level}"
-        #       change = new ldap.Change
-        #         operation: 'replace'
-        #         modification: olcLogLevel: log_level
-        #       client.modify 'cn=config', change, (err) ->
-        #         return unbind client, err if err
-        #         modified = true
-        #         unbind client
-        # unbind = (client, err) ->
-        #   ctx.log 'Unbind connection'
-        #   client.unbind (e) ->
-        #     return next e if e
-        #     finish err
       finish = (err) ->
         next err, modified
       rsyslog()
@@ -301,8 +215,6 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
       , next
 
     module.exports.push name: 'OpenLDAP Server # SUDO schema', timeout: -1, callback: (ctx, next) ->
-      # conf = '/tmp/sudo_schema/schema.conf'
-      # ldif = '/tmp/sudo_schema/ldif'
       {config_dn, config_password} = ctx.config.openldap_server
       do_install = ->
         ctx.log 'Install Sudo schema'
@@ -313,12 +225,6 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
           do_locate()
       do_locate = ->
         ctx.log 'Get schema location'
-        # ctx.execute
-        #   cmd: 'rpm -ql sudo | grep -i schema.openldap'
-        # , (err, executed, schema) ->
-        #   return next err if err
-        #   return next Error 'Sudo schema not found' if schema is ''
-        #   do_register schema.trim()
         ctx.execute
           cmd: """
           schema=`rpm -ql sudo | grep -i schema.openldap`

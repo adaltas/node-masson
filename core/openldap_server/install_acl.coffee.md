@@ -4,8 +4,8 @@ layout: module
 ---
 
     module.exports = []
-    module.exports.push 'masson/bootstrap/'
-    module.exports.push 'masson/core/openldap_server'
+    module.exports.push 'masson/bootstrap'
+    module.exports.push 'masson/core/openldap_server/install'
 
 # OpenLDAP ACL
 
