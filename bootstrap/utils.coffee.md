@@ -67,7 +67,7 @@ Emitted event:
 
 Options include:   
 
-*   `cmd`   
+*   `cmd` (string|array)   
     The command to be executed.    
 *   `interval`   
     Time interval between which we should wait before re-executing the command, default to 2s.   
@@ -85,47 +85,43 @@ ctx.waitForExecution cmd: "test -f /tmp/sth", (err) ->
 ``` 
 
       ctx.waitForExecution = () ->
-        if typeof arguments[0] is 'string'
-          # cmd, [options], callback
-          cmd = arguments[0]
+        if typeof arguments[0] is 'string' or Array.isArray arguments[0]
+          # cmds, [options], callback
+          cmds = arguments[0]
           options = arguments[1]
           callback = arguments[2]
         else if typeof arguments[0] is 'object'
           # options, callback
           options = arguments[0]
           callback = arguments[1]
-          cmd = options.cmd
+          cmds = options.cmd
         if typeof options is 'function'
           callback = options
           options = {}
+        cmds = [cmds] unless Array.isArray cmds
         options.interval ?= 2000
         options.code_skipped ?= 1
         ctx.log "Start wait for execution"
         ctx.emit 'wait'
         count = 0
-        # running = false
-        run = ->
-          # return if running
-          # running = true
-          ctx.log "Attempt #{++count}"
-          ctx.execute
-            cmd: cmd
-            code: options.code or 0
-            code_skipped: options.code_skipped
-          , (err, ready, stdout, stderr) ->
-            if not err and not ready
-              setTimeout run, options.interval
-              return
-            return callback err if err
-            # clearInterval clear if clear
-            ctx.log "Finish wait for execution"
-            ctx.emit 'waited'
-            callback err, stdout, stderr
-        # clear = setInterval ->
-        #   run()
-        # , options.interval
-        run()
-      inc = 0
+        each(cmds)
+        .on 'item', (cmd, next) ->
+          run = ->
+            ctx.log "Attempt #{++count}"
+            ctx.execute
+              cmd: cmd
+              code: options.code or 0
+              code_skipped: options.code_skipped
+            , (err, ready, stdout, stderr) ->
+              if not err and not ready
+                setTimeout run, options.interval
+                return
+              return next err if err
+              ctx.log "Finish wait for execution"
+              ctx.emit 'waited'
+              next err, stdout, stderr
+          run()
+        .on 'both', callback
 
 ## Wait for an open port
 
@@ -164,6 +160,7 @@ ctx.waitIsOpen [
   # do something
 ```
 
+      inc = 0
       ctx.waitIsOpen = ->
         if typeof arguments[0] is 'string'
           if Array.isArray arguments[1]
