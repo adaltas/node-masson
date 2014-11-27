@@ -25,8 +25,8 @@ Resources:
     module.exports.push 'masson/core/openldap_client'
     module.exports.push 'masson/core/iptables'
     module.exports.push 'masson/core/yum'
-    module.exports.push require('./krb5_server').configure
-    safe_etc_krb5_conf = require('./krb5_server').safe_etc_krb5_conf
+    module.exports.push require('./index').configure
+    safe_etc_krb5_conf = require('./index').safe_etc_krb5_conf
 
 ## IPTables
 

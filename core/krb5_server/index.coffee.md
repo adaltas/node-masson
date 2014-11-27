@@ -14,7 +14,6 @@ Massachusetts Institute of Technology.
 The article [SSH Kerberos Authentication Using GSSAPI and SSPI][gss_sspi]
 provides a good description on how Kerberos is negotiated by GSSAPI and SSPI.
 
-    misc = require 'mecano/lib/misc'
     module.exports = []
 
 ## Configuration
@@ -75,20 +74,20 @@ Example:
       etc_krb5_conf
 
     module.exports.configure = (ctx) ->
-      require('./krb5_client').configure ctx
-      require('./iptables').configure ctx
+      require('../krb5_client').configure ctx
+      require('../iptables').configure ctx
       {etc_krb5_conf} = ctx.config.krb5
-      openldap_hosts = ctx.hosts_with_module 'masson/core/openldap_server_krb5'
-      throw new Error "Expect at least one server with action \"masson/core/openldap_server_krb5\"" if openldap_hosts.length is 0
+      openldap_hosts = ctx.hosts_with_module 'masson/core/openldap_server/install_krb5'
+      throw new Error "Expect at least one server with action \"masson/core/openldap_server/install_krb5\"" if openldap_hosts.length is 0
       # Prepare configuration for "kdc.conf"
       kdc_conf = ctx.config.krb5.kdc_conf ?= {}
       # Generate dynamic "krb5.dbmodules" object
       for host in openldap_hosts
         ctx_krb5 = ctx.hosts[host]
-        require('./openldap_server_krb5').configure ctx_krb5
+        require('../openldap_server/install_krb5').configure ctx_krb5
         {kerberos_dn, krbadmin_user, manager_dn, manager_password} = ctx_krb5.config.openldap_server_krb5
         name = "openldap_#{host.split('.')[0]}"
-        scheme = if ctx.hosts[host].has_module 'masson/core/openldap_server_tls' then "ldap://" else "ldaps://"
+        scheme = if ctx.hosts[host].has_module 'masson/core/openldap_server/install_tls' then "ldap://" else "ldaps://"
         ldap_server =  "#{scheme}#{host}"
         kdc_conf.dbmodules[name] = misc.merge
           'db_library': 'kldap'
@@ -174,15 +173,19 @@ Example:
 
     # module.exports.push commands: 'check', modules: 'masson/core/krb5_server_check'
 
-    module.exports.push commands: 'install', modules: 'masson/core/krb5_server_install'
+    module.exports.push commands: 'install', modules: 'masson/core/krb5_server/install'
 
-    module.exports.push commands: 'reload', modules: 'masson/core/krb5_server_install'
+    module.exports.push commands: 'reload', modules: 'masson/core/krb5_server/install'
 
-    module.exports.push commands: 'start', modules: 'masson/core/krb5_server_start'
+    module.exports.push commands: 'start', modules: 'masson/core/krb5_server/start'
 
-    module.exports.push commands: 'status', modules: 'masson/core/krb5_server_status'
+    module.exports.push commands: 'status', modules: 'masson/core/krb5_server/status'
 
-    module.exports.push commands: 'stop', modules: 'masson/core/krb5_server_stop'
+    module.exports.push commands: 'stop', modules: 'masson/core/krb5_server/stop'
+
+## Module Dependencies
+
+    misc = require 'mecano/lib/misc'
 
 [gss_sspi]: http://www.drdobbs.com/ssh-kerberos-authentication-using-gssapi/184402071
 
