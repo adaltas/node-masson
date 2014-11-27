@@ -9,8 +9,13 @@ rom ISC.
 
 ## Configuration
 
+*   `bind_server.user` (string|object)   
+    The Unix user name or a user object (see Mecano User documentation).   
+*   `bind_server.group` (string|object)   
+    The Unix group name or a group object (see Mecano User documentation).   
 *   `bind_server.zones` (string|array)   
-    A list of zone definition files to be uploaded and registered to the named server.   
+    A list of zone definition files to be uploaded and registered to the named
+    server.   
 
 See the the "resources section" for additional information.
 

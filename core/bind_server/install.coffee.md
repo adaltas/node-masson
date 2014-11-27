@@ -18,7 +18,7 @@ cat /etc/group | grep named
 named:x:25:
 ```
 
-    module.exports.push name: 'Ganglia Collector # Users & Groups', callback: (ctx, next) ->
+    module.exports.push name: 'Bind Server # Users & Groups', callback: (ctx, next) ->
       {group, user} = ctx.config.bind_server
       ctx.group group, (err, gmodified) ->
         return next err if err
