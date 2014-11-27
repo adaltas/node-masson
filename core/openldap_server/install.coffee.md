@@ -1,8 +1,6 @@
 
 # OpenLDAP Server Install
 
-    crypto = require 'crypto'
-    each = require 'each'
     module.exports = []
     module.exports.push 'masson/bootstrap'
     module.exports.push 'masson/core/yum'
@@ -237,7 +235,7 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
           # return next Error 'Sudo schema not found' if schema is ''
           return do_register schema.trim() if installed
           ctx.upload
-            source: "#{__dirname}/files/ldap.schema"
+            source: "#{__dirname}/../files/ldap.schema"
             destination: '/tmp/ldap.schema'
           , (err, uploaded) ->
             return next err if err
@@ -322,6 +320,11 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
       .update(password)
       .update(salt)
       .digest('base64')
+
+## Module Dependencies
+
+    crypto = require 'crypto'
+    each = require 'each'
 
 ## Useful commands
 

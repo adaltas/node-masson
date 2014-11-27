@@ -3,7 +3,6 @@ title:
 layout: module
 ---
 
-    path = require 'path'
     module.exports = []
     module.exports.push 'masson/bootstrap'
     module.exports.push 'masson/core/openldap_server/install'
@@ -455,6 +454,9 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=adaltas,dc=com
         cmd: "ldapsearch -x -H ldaps://#{ctx.config.host} -b #{suffix} -D #{root_dn} -w #{root_password}"
       , next
 
+## Module Dependencies
+
+    path = require 'path'
 
 
 

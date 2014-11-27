@@ -9,7 +9,7 @@ The property "openldap_server.config_slappasswd" may be generated with the comma
 and should correspond to "openldap_server.config_password".
 
     module.exports.configure = (ctx) ->
-      require('./iptables').configure ctx
+      require('../iptables').configure ctx
       # Todo: Generate '*_slappasswd' with command `slappasswd -s $password`, but only the first time, we
       # need a mechanism to store configuration properties before.
       openldap_server = ctx.config.openldap_server ?= {}

@@ -57,14 +57,14 @@ Example:
       if openldap_servers.length isnt 1
         openldap_servers = openldap_servers.filter (server) -> server is ctx.config.host
       openldap_server = if openldap_servers.length is 1 then openldap_servers[0] else null
-      openldap_servers_secured = ctx.hosts_with_module 'masson/core/openldap_server_tls'
+      openldap_servers_secured = ctx.hosts_with_module 'masson/core/openldap_server/install_tls'
       uris = {}
       for server in openldap_servers then uris[server] = "ldap://#{server}"
       for server in openldap_servers_secured then uris[server] = "ldaps://#{server}"
       uris = for _, uri of uris then uri
       if openldap_server
         ctx_server = ctx.hosts[openldap_server]
-        require('./openldap_server').configure ctx_server
+        require('../openldap_server').configure ctx_server
         config.config['BASE'] ?= ctx_server.config.openldap_server.suffix
         config.suffix ?= ctx_server.config.openldap_server.suffix
         config.root_dn ?= ctx_server.config.openldap_server.root_dn

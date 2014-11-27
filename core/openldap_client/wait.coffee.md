@@ -18,3 +18,8 @@
         ctx.waitIsOpen uri.hostname, uri.port, next
       .on 'both', (err) ->
         next err, true
+
+## Module Dependencies
+
+    each = require 'each'
+    url = require 'url'

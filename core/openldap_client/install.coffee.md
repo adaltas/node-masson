@@ -6,9 +6,6 @@ file "/etc/openldap/ldap.conf" is configured by the "openldap_client.config"
 object property. The property "openldap\_client.ca\_cert" may reference a 
 certificate to upload.
 
-    url = require 'url'
-    each = require 'each'
-    crypto = require 'crypto'
     module.exports = []
     module.exports.push 'masson/bootstrap'
     module.exports.push 'masson/bootstrap/utils'
@@ -77,3 +74,7 @@ the command `authconfig --update --ldaploadcacert={file}`.
       .on 'both', (err) ->
         next err, modified
 
+## Module Dependencies
+
+    each = require 'each'
+    crypto = require 'crypto'

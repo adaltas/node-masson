@@ -5,9 +5,6 @@ layout: module
 
 # OpenLDAP Kerberos
 
-    ssha = require 'ssha'
-    {check_password} = require './index'
-    misc = require 'mecano/lib/misc'
     module.exports = []
     module.exports.push 'masson/bootstrap'
 
@@ -18,7 +15,7 @@ force mode.
 
     module.exports.push module.exports.configure = (ctx) ->
       # Dependencies
-      require('./openldap_server').configure ctx
+      require('./index').configure ctx
       # require('./krb5_server').configure ctx
       # Normalization
       ctx.config.openldap_server_krb5 ?= {}
@@ -186,6 +183,12 @@ Create the kerberos administrator's user.
         indexes:
           krbPrincipalName: 'sub,eq'
       , next
+
+## Module Dependencies
+
+    ssha = require 'ssha'
+    {check_password} = require './index'
+    misc = require 'mecano/lib/misc'
 
 ## Resources
 

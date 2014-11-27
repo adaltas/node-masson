@@ -10,7 +10,7 @@ layout: module
 # OpenLDAP ACL
 
     module.exports.push (ctx) ->
-      require('./openldap_server').configure ctx
+      require('./index').configure ctx
       {openldap_server} = ctx.config
       throw Error 'Missing required "openldap_server.users_dn" property' unless openldap_server.users_dn
       throw Error 'Missing required "openldap_server.groups_dn" property' unless openldap_server.groups_dn
