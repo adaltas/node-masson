@@ -5,7 +5,25 @@
     module.exports.push 'masson/bootstrap'
     module.exports.push 'masson/core/yum'
     module.exports.push 'masson/core/iptables'
-    module.exports.push require('./index').confiugre
+    module.exports.push require('./index').configure
+
+## Users & Groups
+
+By default, the "bind" package create the following entries:
+
+```bash
+cat /etc/passwd | grep named
+named:x:25:25:Named:/var/named:/sbin/nologin
+cat /etc/group | grep named
+named:x:25:
+```
+
+    module.exports.push name: 'Ganglia Collector # Users & Groups', callback: (ctx, next) ->
+      {group, user} = ctx.config.bind_server
+      ctx.group group, (err, gmodified) ->
+        return next err if err
+        ctx.user user, (err, umodified) ->
+          next err, gmodified or umodified
 
 ## IPTables
 
@@ -18,8 +36,6 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
 "start" (default value).
 
     module.exports.push name: 'Bind Server # IPTables', callback: (ctx, next) ->
-      {etc_krb5_conf, kdc_conf} = ctx.config.krb5
-      rules = []
       ctx.iptables
         rules: [
           { chain: 'INPUT', jump: 'ACCEPT', dport: 53, protocol: 'tcp', state: 'NEW', comment: "Named" }
@@ -66,7 +82,7 @@ and setting "allow-query" to any. The "named" service is restarted if modified.
 
 ## Zones
 
-Upload the zones definition files provided in the configuration file.
+Upload the zones definition files provided in the configuration file.   
 
     module.exports.push name: 'Bind Server # Zones', callback: (ctx, next) ->
       modified = false
@@ -92,7 +108,6 @@ Upload the zones definition files provided in the configuration file.
         modified = true if written
         each(zones)
         .on 'item', (zone, next) ->
-          ctx.log "Upload #{zone}"
           zone =
             source: zone
             destination: "/var/named/#{path.basename zone}"
@@ -100,18 +115,29 @@ Upload the zones definition files provided in the configuration file.
             modified = true if uploaded
             return next err
         .on 'both', (err) ->
+          return next err, modified
+
+## rndc Key
+
+Generates configuration files for rndc.   
+
+    module.exports.push name: 'Bind Server # rndc Key', callback: (ctx, next) ->
+      {group, user} = ctx.config.bind_server
+      ctx.execute
+        cmd: 'rndc-confgen -a -r /dev/urandom -c /etc/rndc.key'
+        not_if_exists: '/etc/rndc.key'
+      , (err, created) ->
+        return next err, false if err or not created
+        ctx.chown
+          destination: '/etc/rndc.key'
+          uid: user.name
+          gid: group.name
+        , (err) ->
           return next err if err
-          return next null, false if not modified
-          ctx.log 'Generates configuration files for rndc'
-          ctx.execute
-            cmd: 'rndc-confgen -a -r /dev/urandom -c /etc/rndc.key'
-            not_if_exists: '/etc/rndc.key'
-          , (err, executed) ->
-            ctx.log 'Restart named service'
-            ctx.service
-              srv_name: 'named'
-              action: 'restart'
-            , next
+          ctx.service
+            srv_name: 'named'
+            action: 'restart'
+          , next
 
 ## Module Dependencies
 
