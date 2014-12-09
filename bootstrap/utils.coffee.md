@@ -187,7 +187,14 @@ ctx.waitIsOpen [
         if typeof options is 'function'
           callback = options
           options = {}
-        each(servers)
+        servers_flatten = []
+        # Normalize
+        for server in servers
+          if Array.isArray server.port
+            for port in server.port then servers_flatten.push host: server.host, port: port
+          else
+            servers_flatten.push host: server.host, port: server.port
+        each(servers_flatten)
         .parallel(true)
         .on 'item', (server, next) ->
           if options.timeout
