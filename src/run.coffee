@@ -53,7 +53,7 @@ Run = (config, params) ->
         # Filter by hosts
         return next() if params.hosts? and multimatch(host, params.hosts).indexOf(host) is -1
         ctx = contexts[host]
-        ctx.run = @
+        # ctx.run = @
         @emit 'context', ctx
         ctx.tree.actions params, (err, actions) =>
         # @actions host, params.command, params, (err, actions) =>
@@ -117,44 +117,6 @@ Run = (config, params) ->
         @emit 'end'
   @
 util.inherits Run, EventEmitter
-
-# ###
-# Return all the actions for a given host and the current command 
-# or null if the host didnt register any run list for this command.
-# ###
-# Run::actions = (host, command, options, callback) ->
-#   # Get the server config
-#   # for server in @config.servers
-#   #   config = server if server.host is host
-#   config = @config.servers[host]
-#   return callback new Error "Invalid host: #{host}" unless config
-#   # Check the run list
-#   # run = config.run[command]
-#   options.command = command
-#   run = config.modules
-#   return callback null unless run
-#   @tree.actions run, options, (err, actions) =>
-#     return callback err if err
-#     callback null, actions
-
-# ###
-# Return all the modules for a given host and the current command 
-# or null if the host didnt register any run list for this command.
-# ###
-# Run::modules = (host, command, options, callback) ->
-#   # Get the server config
-#   # for server in @config.servers
-#   #   config = server if server.host is host
-#   config = @config.servers[host]
-#   return callback new Error "Invalid host: #{host}" unless config
-#   # Check the run list
-#   # run = config.run[command]
-#   options.command = command
-#   run = config.modules
-#   return callback null unless run
-#   @tree.modules run, options, (err, modules) =>
-#     return callback err if err
-#     callback null, modules
 
 module.exports = (config, params) ->
   new Run config, params
