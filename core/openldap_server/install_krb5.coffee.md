@@ -23,12 +23,11 @@ force mode.
       openldap_server_krb5.kerberos_dn ?= "ou=kerberos,#{openldap_server.suffix}"
       # Configure openldap_server_krb5
       # {admin_group, users_dn, groups_dn, admin_user} = openldap_server_krb5
-      # User for krbadmin
+      # User for kdc
       # Example: "dn: cn=krbadmin,ou=groups,dc=adaltas,dc=com"
-      openldap_server_krb5.krbadmin_user ?= {}
-      openldap_server_krb5.krbadmin_user = misc.merge {},
+      openldap_server_krb5.kdc_user ?= {}
+      openldap_server_krb5.kdc_user = misc.merge {},
         dn: "cn=krbadmin,#{openldap_server.users_dn}"
-        # cn: 'krbadmin'
         objectClass: [
           'top', 'inetOrgPerson', 'organizationalPerson',
           'person', 'posixAccount'
@@ -42,8 +41,27 @@ force mode.
         homeDirectory: '/home/krbadmin'
         loginShell: '/bin/false'
         displayname: 'Kerberos Administrator'
-        # userPassword: '{SSHA}uQcSsw5CySTkBXjOY/N0hcduA6yFiI0k' #test
-        userPassword: 'test' #test
+        userPassword: 'test'
+      , openldap_server_krb5.kdc_user
+      # User for krbadmin
+      # Example: "dn: cn=krbadmin,ou=groups,dc=adaltas,dc=com"
+      openldap_server_krb5.krbadmin_user ?= {}
+      openldap_server_krb5.krbadmin_user = misc.merge {},
+        dn: "cn=krbadmin,#{openldap_server.users_dn}"
+        objectClass: [
+          'top', 'inetOrgPerson', 'organizationalPerson',
+          'person', 'posixAccount'
+        ]
+        givenName: 'Kerberos Administrator'
+        mail: 'kerberos.admin@company.com'
+        sn: 'krbadmin'
+        uid: 'krbadmin'
+        uidNumber: '800'
+        gidNumber: '800'
+        homeDirectory: '/home/krbadmin'
+        loginShell: '/bin/false'
+        displayname: 'Kerberos Administrator'
+        userPassword: 'test'
       , openldap_server_krb5.krbadmin_user
       # Group for krbadmin
       # Example: "dn: cn=krbadmin,ou=groups,dc=adaltas,dc=com"

@@ -5,6 +5,7 @@
     module.exports.push 'masson/bootstrap'
     module.exports.push 'masson/core/yum'
     module.exports.push 'masson/core/iptables'
+    module.exports.push require('./index').configure
 
 The default ports used by OpenLdap server are 389 and 636.
 

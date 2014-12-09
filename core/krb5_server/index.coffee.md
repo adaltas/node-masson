@@ -71,6 +71,8 @@ Example:
         delete config.kdc_master_key
         delete config.manager_dn
         delete config.manager_password
+        delete config.ldap_kdc_password
+        delete config.ldap_kadmind_password
       etc_krb5_conf
 
     module.exports.configure = (ctx) ->
@@ -85,17 +87,19 @@ Example:
       for host in openldap_hosts
         ctx_krb5 = ctx.hosts[host]
         require('../openldap_server/install_krb5').configure ctx_krb5
-        {kerberos_dn, krbadmin_user, manager_dn, manager_password} = ctx_krb5.config.openldap_server_krb5
+        {kerberos_dn, kdc_user, krbadmin_user, manager_dn, manager_password} = ctx_krb5.config.openldap_server_krb5
         name = "openldap_#{host.split('.')[0]}"
         scheme = if ctx.hosts[host].has_module 'masson/core/openldap_server/install_tls' then "ldap://" else "ldaps://"
         ldap_server =  "#{scheme}#{host}"
         kdc_conf.dbmodules[name] = misc.merge
           'db_library': 'kldap'
           'ldap_kerberos_container_dn': kerberos_dn
-          'ldap_kdc_dn': krbadmin_user.dn
+          'ldap_kdc_dn': kdc_user.dn
+          'ldap_kdc_password': kdc_user.userPassword
            # this object needs to have read rights on
            # the realm container, principal container and realm sub-trees
           'ldap_kadmind_dn': krbadmin_user.dn
+          'ldap_kadmind_password': krbadmin_user.userPassword
            # this object needs to have read and write rights on
            # the realm container, principal container and realm sub-trees
           'ldap_service_password_file': "/etc/krb5.d/#{name}.stash.keyfile"

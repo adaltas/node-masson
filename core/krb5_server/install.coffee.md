@@ -234,11 +234,11 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
             do_stash()
         do_mkdir = ->
           ctx.log 'Create directory "/etc/krb5.d"'
-          ctx.mkdir '/etc/krb5.d', (err, created) ->
+          ctx.mkdir path.dirname(ldap_service_password_file), (err, created) ->
             return next err if err
             do_stash()
         do_stash = ->
-          ctx.log 'Stash password into local file'
+          ctx.log 'Stash password into local file for kadmin dn'
           ctx.ssh.shell (err, stream) ->
             return next err if err
             cmd = "kdb5_ldap_util -D \"#{manager_dn}\" -w #{manager_password} stashsrvpw -f #{ldap_service_password_file} #{ldap_kadmind_dn}"
@@ -383,6 +383,7 @@ each Kerberos servers.
 
 ## Module Dependencies
 
+    path = require 'path'
     each = require 'each'
     misc = require 'mecano/lib/misc'
 
