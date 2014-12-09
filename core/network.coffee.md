@@ -122,9 +122,11 @@ configuration file is considered a trusted source of DNS information.
       # re = /nameserver(.*)/g
       # while (match = re.exec resolv) isnt null
       #   nameservers.push match[1].trim()
-      nameservers = ctx.hosts_with_module 'bind_server'
-      # console.log nameservers, 53
-      ctx.waitIsOpen nameservers, 53, (err) ->
+      bind_server_hosts = ctx.hosts_with_module 'masson/core/bind_server'
+      bind_server_hosts = for host in bind_server_hosts
+        continue if host is ctx.config.host
+        ctx.hosts[host].config.ip or host
+      ctx.waitIsOpen bind_server_hosts, 53, (err) ->
         return next err if err
         ctx.write
           content: resolv
