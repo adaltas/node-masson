@@ -12,8 +12,10 @@ Wait for
 ## Wait
 
     module.exports.push name: 'Krb5 Client # Wait', timeout: -1, callback: (ctx, next) ->
-      # {etc_krb5_conf} = ctx.config.krb5
-      cmds = for realm, config of ctx.config.krb5.etc_krb5_conf.realms
+      {etc_krb5_conf} = ctx.config.krb5
+      default_realm = etc_krb5_conf.libdefaults.default_realm
+      cmds = for realm, config of etc_krb5_conf.realms
+        continue if default_realm isnt realm
         {kadmin_principal, kadmin_password, admin_server} = config
         misc.kadmin
           realm: realm

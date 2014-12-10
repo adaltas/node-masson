@@ -63,7 +63,7 @@ Create a user principal for this host. The principal is named like
       modified = false
       each(etc_krb5_conf.realms)
       .on 'item', (realm, config, next) ->
-        return next() unless default_realm is realm or not config.create_hosts
+        return next() if default_realm isnt realm or not config.create_hosts
         {kadmin_principal, kadmin_password, admin_server} = config
         cmd = misc.kadmin
           realm: realm
