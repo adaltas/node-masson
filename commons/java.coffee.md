@@ -44,14 +44,14 @@ developers on Solaris, Linux, Mac OS X or Windows.
       # ctx.config.java.java_home ?= '/usr/java/default'
       # Shared
       java.java_home ?= '/usr/lib/jvm/java'
-      java.proxy = ctx.config.proxy.http_proxy if typeof ctx.config.java is 'undefined'
+      java.proxy = ctx.config.proxy.http_proxy if typeof ctx.config.java.proxy is 'undefined'
       # OpenJDK
       java.openjdk ?= true
-      # throw new Error "Configuration property 'java.location' is required." unless ctx.config.java.location
-      # throw new Error "Configuration property 'java.version' is required." unless ctx.config.java.version
-      # ctx.config.java.version ?= (/\w+-([\w\d]+)-/.exec path.basename ctx.config.java.location)[0]
+      # throw new Error "Configuration property 'java.location' is required." unless java.location
+      # throw new Error "Configuration property 'java.version' is required." unless java.version
+      # java.version ?= (/\w+-([\w\d]+)-/.exec path.basename java.location)[0]
       # JCE
-      ctx.log "JCE not configured" unless ctx.config.java.jce_local_policy or ctx.config.java.jce_us_export_policy
+      ctx.log? "JCE not configured" unless java.jce_local_policy or java.jce_us_export_policy
         
 
 ## Install OpenJDK
