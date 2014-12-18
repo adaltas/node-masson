@@ -19,6 +19,7 @@
     "parameters": "latest",
     "regexp-quote": "latest",
     "semver": "latest",
+    "ssha": "latest",
     "ssh2-connect": "latest",
     "ssh2-exec": "latest",
     "ssh2-fs": "latest"
