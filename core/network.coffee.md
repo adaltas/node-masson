@@ -115,23 +115,24 @@ is a set of routines in the C library that provide
 access to the Internet Domain Name System (DNS). The
 configuration file is considered a trusted source of DNS information.
 
-    module.exports.push name: 'Network # DNS Resolver', callback: (ctx, next) ->
+    module.exports.push name: 'Network # DNS Resolver', timeout: -1, callback: (ctx, next) ->
       {resolv} = ctx.config.network
       return next() unless resolv
       # nameservers = []
       # re = /nameserver(.*)/g
       # while (match = re.exec resolv) isnt null
       #   nameservers.push match[1].trim()
-      bind_server_hosts = ctx.hosts_with_module 'masson/core/bind_server'
-      bind_server_hosts = for host in bind_server_hosts
-        continue if host is ctx.config.host
-        ctx.hosts[host].config.ip or host
-      ctx.waitIsOpen bind_server_hosts, 53, (err) ->
+      ctx.write
+        content: resolv
+        destination: '/etc/resolv.conf'
+        backup: true
+      , (err, written) ->
         return next err if err
-        ctx.write
-          content: resolv
-          destination: '/etc/resolv.conf'
-          backup: true
-        , next
+        bind_server_hosts = ctx.hosts_with_module 'masson/core/bind_server'
+        bind_server_hosts = for host in bind_server_hosts
+          continue if host is ctx.config.host
+          ctx.hosts[host].config.ip or host
+        ctx.waitIsOpen bind_server_hosts, 53, (err) ->
+          next err, written
 
 
