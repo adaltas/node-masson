@@ -44,6 +44,7 @@ module.exports = ->
       line += "#{pad ctx.config.host, hostlength}"
       line += "#{pad ctx.action.name, 40}"
       statusmsg = if err then "\x1b[35m#{ctx.action.label_error || 'ERROR'}\x1b[39m"
+      else if typeof status is 'string' then status 
       else if status then "\x1b[36m#{ctx.action.label_true || 'MODIFIED'}\x1b[39m"
       else "\x1b[36m#{ctx.action.label_false || 'OK'}\x1b[39m"
       line += "#{pad statusmsg, 20}"
