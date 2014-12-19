@@ -14,7 +14,7 @@ module.exports = ->
     return if params.hosts? and multimatch(server.host, params.hosts).indexOf(server.host) is -1
     connection = merge {}, config.connection, server.connection
     connection.username ?= 'root'
-    connection.host ?= connection.ip or server.host
+    connection.host ?= connection.ip or server.ip or server.host
     connection.port ?= 22
     connection.private_key_location ?= '~/.ssh/id_rsa'
     connect connection, (err, ssh) ->
