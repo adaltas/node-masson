@@ -1,4 +1,4 @@
-
+  
 # OpenLDAP Server Install
 
     module.exports = []
@@ -227,13 +227,14 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
         ctx.execute
           cmd: """
           schema=`rpm -ql sudo | grep -i schema.openldap`
-          if [ ! -f schema ]; then exit 2; fi
+          if [ ! -f $schema ]; then exit 2; fi
           echo $schema
           """
           code_skipped: 2
         , (err, installed, schema) ->
           return next err if err
           # return next Error 'Sudo schema not found' if schema is ''
+          console.log 'installed', installed
           return do_register schema.trim() if installed
           ctx.upload
             source: "#{__dirname}/../files/ldap.schema"
