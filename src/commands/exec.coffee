@@ -22,12 +22,9 @@ module.exports = ->
     connect connection, (err, ssh) ->
       return util.print "\x1b[31m#{err.message}\x1b[39m\n" if err
       exec ssh, params.subcommand, (err, stdout, stderr) ->
-        if err
-          util.print "\x1b[31m#{server.host} (exit code #{err.code})\x1b[39m\n"
-          # util.print "\n"
-          # util.print "\x1b[31m#{err.stack or err.message}\x1b[39m"
-        else
-          util.print "\x1b[32m#{server.host}\x1b[39m\n"
+        util.print if err
+        then "\x1b[31m#{server.host} (exit code #{err.code})\x1b[39m\n"
+        else "\x1b[32m#{server.host}\x1b[39m\n"
         util.print "\n" if stdout.length or stderr.length
         util.print "\x1b[36m#{stdout.trim()}\x1b[39m\n" if stdout.length
         util.print "\x1b[35m#{stderr.trim()}\x1b[39m\n" if stderr.length
