@@ -1,5 +1,6 @@
 
 util = require 'util'
+each = require 'each'
 multimatch = require 'multimatch'
 connect = require 'ssh2-connect'
 exec = require 'ssh2-exec'
@@ -9,9 +10,10 @@ params = require '../params'
 params = params.parse()
 
 module.exports = ->
-  # util.print "Command distributed to #{config.servers.length} servers\n\n"
-  for _, server of config.servers
-    return if params.hosts? and multimatch(server.host, params.hosts).indexOf(server.host) is -1
+  each config.servers
+  .parallel true
+  .on 'item', (server, next) ->
+    return next() if params.hosts? and multimatch(server.host, params.hosts).indexOf(server.host) is -1
     connection = merge {}, config.connection, server.connection
     connection.username ?= 'root'
     connection.host ?= connection.ip or server.ip or server.host
@@ -31,3 +33,5 @@ module.exports = ->
         util.print "\x1b[35m#{stderr.trim()}\x1b[39m\n" if stderr.length
         util.print "\n"
         ssh.end()
+  .on 'both', (err) ->
+    # Done
