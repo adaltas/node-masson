@@ -67,6 +67,7 @@ Run = (config, params) ->
             ctx.action = action
             ctx.emit 'action_start'
             retry = if action.retry? then action.retry else 2
+            action.wait ?= 1
             attempts = 0
             disregard_done = false
             emit_action = (err, status) =>
@@ -76,7 +77,7 @@ Run = (config, params) ->
               clearTimeout timeout if timeout
               if err and (retry is true or ++attempts < retry)
                 ctx.log? "Get error #{err.message}, retry #{attempts} of #{retry}"
-                return setTimeout(run, 1) 
+                return setTimeout run, action.wait
               emit_action err, statusOrMsg
               next err
             run = =>
