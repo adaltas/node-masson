@@ -91,9 +91,11 @@ Create a user principal for this host. The principal is named like
 
 ## principals
 
-Populate the Kerberos database with new principals.
+Populate the Kerberos database with new principals. The "wait" property is
+set to 10s because multiple instance of this handler may try to create the same
+principals and generate concurrency errors.
 
-    module.exports.push name: 'Krb5 Client # Principals', callback: (ctx, next) ->
+    module.exports.push name: 'Krb5 Client # Principals', wait: 10000, callback: (ctx, next) ->
       {etc_krb5_conf} = ctx.config.krb5
       modified = false
       utils = require 'util'

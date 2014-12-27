@@ -364,22 +364,12 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
 
     module.exports.push name: 'Krb5 Server # Start', timeout: 100000, callback: (ctx, next) ->
       ctx.service [
-        name: 'krb5-server-ldap'
-        action: 'start'
         srv_name: 'krb5kdc'
-      ,
-        name: 'krb5-server-ldap'
         action: 'start'
+      ,
         srv_name: 'kadmin'
+        action: 'start'
       ], next
-
-## Krb5 Client
-
-Call the "masson/core/krb5_client" dependency which will register this host to
-each Kerberos servers.
-
-    # module.exports.push '!masson/core/krb5_client'
-    module.exports.push 'masson/core/krb5_client'
 
 ## Module Dependencies
 

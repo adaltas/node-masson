@@ -59,6 +59,7 @@ Example:
         etc_krb5_conf.domain_realm["#{realm.toLowerCase()}"] ?= realm
 
     module.exports.push commands: 'install', modules: [
+      'masson/core/krb5_server/wait'
       'masson/core/krb5_client/install'
       'masson/core/krb5_client/wait'
     ]

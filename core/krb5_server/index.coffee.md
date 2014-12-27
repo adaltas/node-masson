@@ -41,21 +41,35 @@ Example:
 ```json
 {
   "krb5": {
-    "ADALTAS.COM": {
-      "kdc": "master3.hadoop",
-      "kadmin_server": "master3.hadoop",
-      "kadmin_principal": "wdavidw/admin@ADALTAS.COM",
-      "kadmin_password": "test",
-      "ldap\_kerberos\_container_dn": "ou=kerberos,dc=adaltas,dc=com",
-      "ldap\_kdc\_dn": "cn=krbadmin,ou=users,dc=adaltas,dc=com",
-      "ldap\_kadmind\_dn": "cn=krbadmin,ou=users,dc=adaltas,dc=com",
-      "ldap_servers": [
-        "ldaps://master3.hadoop",
-      ],
-      "principals": [
-        "principal": "wdavidw@ADALTAS.COM",
-        "password": "test"
-      ]
+    "etc_krb5_conf": {
+      "libdefaults": {
+        "default_realm": "HADOOP.RYBA"
+      },
+      "realms": {
+        "HADOOP.RYBA": {
+          "default_domain": "ryba",
+          "kadmin_principal": "wdavidw/admin@HADOOP.RYBA",
+          "kadmin_password": "test",
+          "principals": [{
+            "principal": "wdavidw@HADOOP.RYBA",
+            "password": "test"
+          },{
+            "principal": "krbtgt/HADOOP.RYBA@USERS.RYBA",
+            "password": "test"
+          }]
+        }
+      }
+      "domain_realm": {
+        ".ryba": "HADOOP.RYBA",
+        "ryba": "HADOOP.RYBA"
+      },
+    },
+    "kdc_conf": {
+      "dbmodules": {
+        "openldap_master3": {
+          "kdc_master_key": "test"
+        }
+      }
     }
   }
 }
@@ -177,9 +191,12 @@ Example:
 
     # module.exports.push commands: 'check', modules: 'masson/core/krb5_server_check'
 
-    module.exports.push commands: 'install', modules: 'masson/core/krb5_server/install'
+    module.exports.push commands: 'install', modules: [
+      'masson/core/krb5_server/install'
+      'masson/core/krb5_server/start'
+    ]
 
-    module.exports.push commands: 'reload', modules: 'masson/core/krb5_server/install'
+    # module.exports.push commands: 'reload', modules: 'masson/core/krb5_server/install'
 
     module.exports.push commands: 'start', modules: 'masson/core/krb5_server/start'
 
