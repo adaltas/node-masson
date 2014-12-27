@@ -22,21 +22,21 @@ TODO: look at https://github.com/trentm/node-bunyan
 *   `basedir`   
     Directory where log files will be stored, default to "./logs".   
 *   `filename_stdout`   
-    Name of the file to redirect stdout, default to "{{logs.host_reversed}}.stdout.log".   
+    Name of the file to redirect stdout, default to "{{shortname}}.stdout.log".   
 *   `filename_stderr`   
-    Name of the file to redirect stderr, default to "{{logs.host_reversed}}.stderr.log".   
+    Name of the file to redirect stderr, default to "{{shortname}}.stderr.log".   
 
 All properties are optional and are integrated with the moustache templating
 engine. All properties from the configuration are exposed to moustache with the
-additionnal "logs.host_reversed" property used in the default filename to
+additionnal "logs.fqdn_reversed" property used in the default filename to
 preserve alphanumerical ordering of files.
 
     module.exports.push required: true, callback: (ctx) ->
       logs = ctx.config.logs ?= {}
       logs.basedir ?= './logs'
-      logs.host_reversed = ctx.config.host.split('.').reverse().join('.')
-      logs.filename_stdout ?= '{{logs.host_reversed}}.stdout.log'
-      logs.filename_stderr ?= '{{logs.host_reversed}}.stderr.log'
+      logs.fqdn_reversed = ctx.config.host.split('.').reverse().join('.')
+      logs.filename_stdout ?= '{{shortname}}.stdout.log'
+      logs.filename_stderr ?= '{{shortname}}.stderr.log'
       # Rendering
       logs.basedir = mustache.render logs.basedir, ctx.config
       logs.filename_stdout = mustache.render logs.filename_stdout, ctx.config
