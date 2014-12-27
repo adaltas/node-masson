@@ -117,7 +117,6 @@ change to this file is detected.
             position++
             modified = true
         if fudge and not found_fudge
-          console.log 'fudge', fudge, found_fudge
           lines.splice position+1, 0, "fudge 127.127.1.0 stratum 10"
           position++
           modified = true
