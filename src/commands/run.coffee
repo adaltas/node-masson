@@ -28,6 +28,14 @@ module.exports = ->
   run(config, params)
   .on 'context', (ctx) ->
     ctx
+    .on 'action_skip', () ->
+      return unless ctx.action.name?
+      line = ''
+      line += "#{pad ctx.config.host, hostlength}"
+      line += "#{pad ctx.action.name, 40}"
+      line += "\x1b[35m#{pad 'SKIPPED', 20}\x1b[39m"
+      rl.write line
+      rl.write '\n'
     .on 'action_start', () ->
       return unless ctx.action.name?
       times[ctx.config.host] = Date.now()

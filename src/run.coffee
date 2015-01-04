@@ -62,14 +62,16 @@ Run = (config, params) ->
           # actions = actions.reverse() if params.command is 'stop'
           actionRun = each(actions)
           .on 'item', (action, next) =>
-            return next() if action.skip
             # Action
             ctx.action = action
-            ctx.emit 'action_start'
             retry = if action.retry? then action.retry else 2
             action.wait ?= 1
             attempts = 0
             disregard_done = false
+            if action.skip
+              ctx.emit 'action_skip'
+              return next()
+            ctx.emit 'action_start'
             emit_action = (err, status) =>
               ctx.emit 'action_end', err, status
             done = (err, statusOrMsg) =>
