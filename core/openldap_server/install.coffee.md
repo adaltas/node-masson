@@ -234,7 +234,6 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
         , (err, installed, schema) ->
           return next err if err
           # return next Error 'Sudo schema not found' if schema is ''
-          console.log 'installed', installed
           return do_register schema.trim() if installed
           ctx.upload
             source: "#{__dirname}/../files/ldap.schema"
