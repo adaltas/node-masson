@@ -1,38 +1,9 @@
----
-title: 
-layout: module
----
 
-# HTTPD web server
+# HTTPD Web Server Install
 
     module.exports = []
     module.exports.push 'masson/bootstrap'
     module.exports.push 'masson/core/iptables'
-
-## Configuration
-
-Configure the HTTPD server.
-
-    module.exports.push (ctx) ->
-      require('../core/iptables').configure ctx
-      ctx.config.httpd ?= {}
-      # Service
-      ctx.config.httpd.startup ?= '235'
-      ctx.config.httpd.action ?= 'start'
-      # User
-      ctx.config.httpd.user = name: ctx.config.httpd.user if typeof ctx.config.httpd.user is 'string'
-      ctx.config.httpd.user ?= {}
-      ctx.config.httpd.user.name ?= 'apache'
-      ctx.config.httpd.user.system ?= true
-      ctx.config.httpd.user.gid ?= 'apache'
-      ctx.config.httpd.user.comment ?= 'Apache HTTPD User'
-      ctx.config.httpd.user.home ?= '/var/www'
-      ctx.config.httpd.user.shell ?= false
-      # Group
-      ctx.config.httpd.group = name: ctx.config.httpd.group if typeof ctx.config.httpd.group is 'string'
-      ctx.config.httpd.group ?= {}
-      ctx.config.httpd.group.name ?= 'apache'
-      ctx.config.httpd.group.system ?= true
 
 ## IPTables
 
@@ -82,5 +53,3 @@ Install the HTTPD service and declare it as a startup service.
         startup: startup
         action: action
       , next
-
-
