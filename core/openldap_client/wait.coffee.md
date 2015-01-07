@@ -7,7 +7,7 @@
 
 ## Wait
 
-    module.exports.push name: 'OpenLDAP Client # Wait', timeout: -1, callback: (ctx, next) ->
+    module.exports.push name: 'OpenLDAP Client # Wait', timeout: -1, label_true: 'READY', callback: (ctx, next) ->
       {config} = ctx.config.openldap_client
       each(config['URI'].split ' ')
       .on 'item', (uri, next) ->
