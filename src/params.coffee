@@ -112,7 +112,20 @@ module.exports = parameters
     ]
   ,
     name: 'check',
-    description: 'Check the server',
+    description: 'Check the servers',
+    options: [
+      name: 'hosts', shortcut: 'h', type: 'array'
+      description: 'Limit to a list of server hostnames'
+    ,
+      name: 'modules', shortcut: 'm', type: 'array'
+      description: 'Limit to a list of modules'
+    , 
+      name: 'fast', shortcut: 'f', type: 'boolean'
+      description: 'Fast mode without dependency resolution'
+    ]
+  ,
+    name: 'info',
+    description: 'Print servers information',
     options: [
       name: 'hosts', shortcut: 'h', type: 'array'
       description: 'Limit to a list of server hostnames'
