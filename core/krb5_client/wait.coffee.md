@@ -11,7 +11,7 @@ Wait for all the Kerberos servers referenced by the client configuration.
 
 ## Wait TCP
 
-    module.exports.push name: 'Krb5 Client # Wait TCP', timeout: -1, callback: (ctx, next) ->
+    module.exports.push name: 'Krb5 Client # Wait TCP', timeout: -1, label_true: 'READY', callback: (ctx, next) ->
       {etc_krb5_conf} = ctx.config.krb5
       default_realm = etc_krb5_conf.libdefaults.default_realm
       servers = for realm, config of etc_krb5_conf.realms
@@ -20,9 +20,11 @@ Wait for all the Kerberos servers referenced by the client configuration.
         host: host, port: port or 749
       ctx.waitIsOpen servers, (err) -> next err
 
-## Wait `listprincs`
+## Wait Admin
 
-    module.exports.push name: 'Krb5 Client # Wait `listprincs`', timeout: -1, callback: (ctx, next) ->
+Wait for the admin interface to be ready by issuing the command `listprincs`.
+
+    module.exports.push name: 'Krb5 Client # Wait Admin', timeout: -1, label_true: 'READY', callback: (ctx, next) ->
       {etc_krb5_conf} = ctx.config.krb5
       default_realm = etc_krb5_conf.libdefaults.default_realm
       cmds = for realm, config of etc_krb5_conf.realms
