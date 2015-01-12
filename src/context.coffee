@@ -27,16 +27,16 @@ class Context extends EventEmitter
     @INAPPLICABLE_MSG = 'SKIPPED'
     @toto = 'toto'
     @tmp = {}
-  run: (module) ->
+  run: (ctx, module) ->
     if typeof module is 'function'
-      module.call @, @
+      module.call ctx, @
     else
       throw new Error 'Only accept functions for now'
   context: (host, modules=[]) ->
     host_ctx = @hosts[host]
     modules = [modules] unless Array.isArray modules
     for module in modules
-      host_ctx.run module
+      host_ctx.run host_ctx, module
     host_ctx
   contexts: (query={}, modules=[]) ->
     query = modules: query if typeof query is 'string' or Array.isArray query
