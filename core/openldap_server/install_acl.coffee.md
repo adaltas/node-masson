@@ -6,11 +6,11 @@ layout: module
     module.exports = []
     module.exports.push 'masson/bootstrap'
     module.exports.push 'masson/core/openldap_server/install'
+    module.exports.push require('./index').configure
 
 # OpenLDAP ACL
 
     module.exports.push (ctx) ->
-      require('./index').configure ctx
       {openldap_server} = ctx.config
       throw Error 'Missing required "openldap_server.users_dn" property' unless openldap_server.users_dn
       throw Error 'Missing required "openldap_server.groups_dn" property' unless openldap_server.groups_dn
