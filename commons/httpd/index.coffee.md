@@ -2,13 +2,13 @@
 # HTTPD Web Server
 
     module.exports = []
+    module.exports.push require('../../core/iptables').configure
 
 ## Configuration
 
 Configure the HTTPD server.
 
     module.exports.push (ctx) ->
-      require('../../core/iptables').configure ctx
       ctx.config.httpd ?= {}
       # Service
       ctx.config.httpd.startup ?= '235'
