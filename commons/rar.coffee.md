@@ -8,9 +8,9 @@ layout: module
     url = require 'url'
     module.exports = []
     module.exports.push 'masson/bootstrap'
+    module.exports.push require('../core/proxy').configure
 
     module.exports.push (ctx) ->
-      require('../core/proxy').configure ctx
       ctx.config.rar ?= {}
       ctx.config.rar.proxy = ctx.config.proxy.http_proxy if typeof ctx.config.rar.proxy is 'undefined'
       ctx.config.rar ?= {}
