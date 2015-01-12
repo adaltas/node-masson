@@ -86,7 +86,7 @@ Run = (config, params) ->
               ctx.retry = attempts
               try
                 # Synchronous action
-                if action.callback.length is 1
+                if action.callback.length is 0 or action.callback.length is 1
                   merge action, action.callback.call ctx, ctx
                   process.nextTick ->
                     action.timeout = -1
