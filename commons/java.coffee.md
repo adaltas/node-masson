@@ -11,6 +11,7 @@ layout: module
     url = require 'url'
     module.exports = []
     module.exports.push 'masson/bootstrap'
+    module.exports.push require('../core/proxy').configure
 
 Install the Oracle Java JRE and JDK. The Java Runtime Environment is the code 
 execution component of the Java platform. The Java Development Kit (JDK) is 
@@ -38,7 +39,6 @@ developers on Solaris, Linux, Mac OS X or Windows.
 [Oracle JDK 7]: http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html
 
     module.exports.push module.exports.configure = (ctx) ->
-      require('../core/proxy').configure ctx
       java = ctx.config.java ?= {}
       # ctx.config.java['openjdk-1.7.0'] ?= true
       # ctx.config.java.java_home ?= '/usr/java/default'
