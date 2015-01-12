@@ -20,7 +20,7 @@ The module accept the following properties:
 *   `hostname` (boolean)   
     The server hostname as return by the command "hostname" and defined by the 
     property "HOSTNAME" inside the "/etc/sysconfig/network" file, must not be 
-    configure globally, default to the "host" property. 
+    configure globally, default to the "host" property.   
 *   `network.hostname_disabled` (boolean)   
     Do not update the "/etc/sysconfig/network" file, disable the effect of the
     "hostname" property (which itself default to "host"), 
@@ -32,7 +32,7 @@ The module accept the following properties:
     Enrich the "/etc/hosts" file with custom adresses, the keys represent the 
     IPs and the value the hostnames, optional.   
 *   `network.resolv` (string)   
-    Content of the '/etc/resolv.conf' file, optional.
+    Content of the '/etc/resolv.conf' file, optional.   
 
 Example:
 
