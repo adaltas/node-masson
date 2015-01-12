@@ -1,8 +1,3 @@
----
-title: Make
-module: masson/core/make
-layout: module
----
 
 # Make
 

@@ -1,8 +1,3 @@
----
-title: GCC
-module: masson/core/gcc
-layout: module
----
 
 # GCC
 

@@ -1,8 +1,3 @@
----
-title: 
-layout: module
----
----
 title: 
 layout: module
 ---

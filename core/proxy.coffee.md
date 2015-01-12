@@ -1,7 +1,3 @@
----
-title: 
-layout: module
----
 
     path = require 'path'
     module.exports = []

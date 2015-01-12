@@ -1,8 +1,3 @@
----
-title: Java
-module: masson/commons/java
-layout: module
----
 
 # Java
 

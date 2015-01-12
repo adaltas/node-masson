@@ -1,8 +1,3 @@
----
-title: CURL
-module: masson/core/curl
-layout: module
----
 
 # CURL
 

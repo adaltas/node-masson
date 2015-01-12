@@ -1,8 +1,3 @@
----
-title: SSSD
-module: masson/core/sssd
-layout: module
----
 
 # SSSD
 

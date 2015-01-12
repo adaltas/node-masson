@@ -1,8 +1,3 @@
----
-title: Security
-module: masson/core/security
-layout: module
----
 
 # Security
 

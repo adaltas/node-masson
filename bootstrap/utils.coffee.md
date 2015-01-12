@@ -1,8 +1,3 @@
----
-title: Utils
-module: masson/bootstrap/utils
-layout: module
----
 
 # Bootstrap Utils
 

@@ -1,8 +1,3 @@
----
-title: 
-module: masson/commons/cloud9
-layout: module
----
 
 # Cloud9
 

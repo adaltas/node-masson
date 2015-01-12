@@ -1,8 +1,3 @@
----
-title: DNS
-module: masson/core/network_check
-layout: module
----
 
 # DNS
 

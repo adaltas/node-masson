@@ -1,8 +1,3 @@
----
-title: NTP
-module: masson/core/ntp
-layout: module
----
 
 # NTP
 

@@ -1,7 +1,3 @@
----
-title: 
-layout: module
----
 
     module.exports = []
     module.exports.push 'masson/bootstrap'

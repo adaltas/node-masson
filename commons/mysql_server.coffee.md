@@ -1,7 +1,3 @@
----
-title: 
-layout: module
----
 
 # Mysql Server
 

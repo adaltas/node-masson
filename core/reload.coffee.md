@@ -1,8 +1,3 @@
----
-title: Reload
-module: masson/core/reload
-layout: module
----
 
     module.exports = []
     module.exports.push commands: 'reload', modules: [

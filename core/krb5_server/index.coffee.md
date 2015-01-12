@@ -1,8 +1,3 @@
----
-title: Kerberos with OpenLDAP Back-End
-module: masson/core/krb5_server
-layout: module
----
 
 ## Kerberos Server
 

@@ -1,8 +1,3 @@
----
-title: NodeJs
-module: phyla/hadoop/nodejs
-layout: module
----
 
 # NodeJs
 

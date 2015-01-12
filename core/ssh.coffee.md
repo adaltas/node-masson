@@ -1,8 +1,3 @@
----
-title: SSH
-module: masson/core/ssh
-layout: module
----
 
 # SSH
 

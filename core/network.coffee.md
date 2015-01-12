@@ -1,8 +1,3 @@
----
-title: Network
-module: masson/core/network
-layout: module
----
 
 # Network
 

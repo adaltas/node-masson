@@ -1,8 +1,3 @@
----
-title: Bind Client
-module: masson/core/bind_client
-layout: module
----
 
 # Bind Client
 

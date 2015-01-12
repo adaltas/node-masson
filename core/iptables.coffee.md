@@ -1,8 +1,3 @@
----
-title: Iptables
-module: masson/core/iptables
-layout: module
----
 
 # Iptables
 

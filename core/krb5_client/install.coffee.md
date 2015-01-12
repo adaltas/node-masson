@@ -1,8 +1,3 @@
----
-title: Kerberos Client
-module: masson/core/krb5_client
-layout: module
----
 
 # Kerberos Client
 

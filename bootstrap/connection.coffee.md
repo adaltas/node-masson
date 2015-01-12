@@ -1,8 +1,3 @@
----
-title: Connection
-module: masson/bootstrap/connection
-layout: module
----
 
 # Bootstrap Connection
 
