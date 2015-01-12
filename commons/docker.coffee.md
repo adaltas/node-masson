@@ -2,11 +2,11 @@
 
 # Docker Server
 
-    module.exports = []
-    module.exports.push 'masson/bootstrap'
-    module.exports.push 'masson/core/yum'
+    exports = module.exports = []
+    exports.push 'masson/bootstrap'
+    exports.push 'masson/core/yum'
 
-    module.exports.push (ctx) ->
+    exports.push (ctx) ->
       ctx.config.docker ?= {}
       ctx.config.docker.nsenter ?= true
 
@@ -15,7 +15,7 @@
 Install the `docker-io` package and configure it as a startup and started
 service.
 
-    module.exports.push name: 'Docker # Service', callback: (ctx, next) ->
+    exports.push name: 'Docker # Service', callback: (ctx, next) ->
       ctx.service
         name: 'docker'
         yum_name: 'docker-io'
@@ -27,7 +27,7 @@ service.
 
 Get the PID of a docker container by name or ID.
 
-    module.exports.push name: 'Docker # Install docker-pid', callback: (ctx, next) ->
+    exports.push name: 'Docker # Install docker-pid', callback: (ctx, next) ->
       ctx.write
         content: """
         #!/bin/sh
@@ -41,7 +41,7 @@ Get the PID of a docker container by name or ID.
 
 Get the ip address of a container by name or ID.
 
-    module.exports.push name: 'Docker # Install docker-ip', callback: (ctx, next) ->
+    exports.push name: 'Docker # Install docker-ip', callback: (ctx, next) ->
       ctx.write
         content: """
         #!/bin/sh
@@ -59,7 +59,7 @@ recipe to build nsenter easily and install it in your system. Check
 
 The recipe also install the `docker-enter` command.
 
-    module.exports.push name: 'Docker # Install nsenter', callback: (ctx, next) ->
+    exports.push name: 'Docker # Install nsenter', callback: (ctx, next) ->
       ctx.execute
         cmd: """
         docker run -v /usr/local/bin:/target jpetazzo/nsenter

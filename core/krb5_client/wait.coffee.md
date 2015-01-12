@@ -5,13 +5,13 @@ Wait for all the Kerberos servers referenced by the client configuration.
 
 ## Preparation
 
-    module.exports = []
-    module.exports.push 'masson/bootstrap'
-    module.exports.push require('./index').configure
+    exports = module.exports = []
+    exports.push 'masson/bootstrap'
+    exports.push require('./index').configure
 
 ## Wait TCP
 
-    module.exports.push name: 'Krb5 Client # Wait TCP', timeout: -1, label_true: 'READY', callback: (ctx, next) ->
+    exports.push name: 'Krb5 Client # Wait TCP', timeout: -1, label_true: 'READY', callback: (ctx, next) ->
       {etc_krb5_conf} = ctx.config.krb5
       default_realm = etc_krb5_conf.libdefaults.default_realm
       servers = for realm, config of etc_krb5_conf.realms
@@ -24,7 +24,7 @@ Wait for all the Kerberos servers referenced by the client configuration.
 
 Wait for the admin interface to be ready by issuing the command `listprincs`.
 
-    module.exports.push name: 'Krb5 Client # Wait Admin', timeout: -1, label_true: 'READY', callback: (ctx, next) ->
+    exports.push name: 'Krb5 Client # Wait Admin', timeout: -1, label_true: 'READY', callback: (ctx, next) ->
       {etc_krb5_conf} = ctx.config.krb5
       default_realm = etc_krb5_conf.libdefaults.default_realm
       cmds = for realm, config of etc_krb5_conf.realms

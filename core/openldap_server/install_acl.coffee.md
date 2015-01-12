@@ -1,12 +1,12 @@
 
-    module.exports = []
-    module.exports.push 'masson/bootstrap'
-    module.exports.push 'masson/core/openldap_server/install'
-    module.exports.push require('./index').configure
+    exports = module.exports = []
+    exports.push 'masson/bootstrap'
+    exports.push 'masson/core/openldap_server/install'
+    exports.push require('./index').configure
 
 # OpenLDAP ACL
 
-    module.exports.push (ctx) ->
+    exports.push (ctx) ->
       {openldap_server} = ctx.config
       throw Error 'Missing required "openldap_server.users_dn" property' unless openldap_server.users_dn
       throw Error 'Missing required "openldap_server.groups_dn" property' unless openldap_server.groups_dn
@@ -36,7 +36,7 @@ After this call, the follwing command should execute with success:
 ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=com -w test
 ```
 
-    module.exports.push name: 'OpenLDAP ACL # Permissions for nssproxy', callback: (ctx, next) ->
+    exports.push name: 'OpenLDAP ACL # Permissions for nssproxy', callback: (ctx, next) ->
       {suffix} = ctx.config.openldap_server
       ctx.ldap_acl
         suffix: suffix
@@ -66,7 +66,7 @@ ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=co
         ]
       , next
 
-    module.exports.push name: 'OpenLDAP ACL # Insert User', callback: (ctx, next) ->
+    exports.push name: 'OpenLDAP ACL # Insert User', callback: (ctx, next) ->
       # Keeping this as an example but we dont need it here since this module
       # is always run next to the OpenLDAP server
       # host = ctx.host_with_module 'masson/core/openldap_server'
@@ -81,7 +81,7 @@ ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=co
         user: proxy_user
       ], next
 
-    module.exports.push name: 'OpenLDAP ACL # Insert Group', callback: (ctx, next) ->
+    exports.push name: 'OpenLDAP ACL # Insert Group', callback: (ctx, next) ->
       {url, root_dn, root_password, proxy_group} = ctx.config.openldap_server
       ctx.ldap_add [
         url: url,

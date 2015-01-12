@@ -1,13 +1,13 @@
 
 # OpenLDAP Client Wait
 
-    module.exports = []
-    module.exports.push 'masson/bootstrap'
-    module.exports.push require('./index').configure
+    exports = module.exports = []
+    exports.push 'masson/bootstrap'
+    exports.push require('./index').configure
 
 ## Wait
 
-    module.exports.push name: 'OpenLDAP Client # Wait', timeout: -1, label_true: 'READY', callback: (ctx, next) ->
+    exports.push name: 'OpenLDAP Client # Wait', timeout: -1, label_true: 'READY', callback: (ctx, next) ->
       {config} = ctx.config.openldap_client
       each(config['URI'].split ' ')
       .on 'item', (uri, next) ->

@@ -1,7 +1,7 @@
 
 # OpenLDAP Client
 
-    module.exports = []
+    exports = module.exports = []
 
 ## Configuration
 
@@ -75,13 +75,13 @@ Example:
       config.config['TIMELIMIT'] ?= '15'
       config.config['TIMEOUT'] ?= '20'
 
-    module.exports.push commands: 'install', modules: [
+    exports.push commands: 'install', modules: [
       'masson/core/openldap_client/install'
       'masson/core/openldap_client/wait'
       'masson/core/openldap_client/check'
     ]
 
-    module.exports.push commands: 'check', modules: [
+    exports.push commands: 'check', modules: [
       'masson/core/openldap_client/wait'
       'masson/core/openldap_client/check'
     ]

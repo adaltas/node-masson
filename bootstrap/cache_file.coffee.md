@@ -5,14 +5,14 @@
     each = require 'each'
     misc = require 'mecano/lib/misc'
     mecano = require 'mecano'
-    module.exports = []
+    exports = module.exports = []
 
-    module.exports.push (ctx) ->
+    exports.push (ctx) ->
       ctx.config.bootstrap ?= {}
       ctx.config.bootstrap.cache ?= {}
       ctx.config.bootstrap.cache.location ?= "#{process.cwd()}/tmp"
 
-    module.exports.push name: 'Bootstrap # File Cache', required: true, callback: (ctx, next) ->
+    exports.push name: 'Bootstrap # File Cache', required: true, callback: (ctx, next) ->
       ctx.config.bootstrap.cache ?= {}
       {location} = ctx.config.bootstrap.cache
       location = "#{location}/#{ctx.config.host}"

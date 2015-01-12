@@ -10,8 +10,8 @@ TODO: look at https://github.com/trentm/node-bunyan
     path = require 'path'
     mustache = require 'mustache'
     mecano = require 'mecano'
-    module.exports = []
-    module.exports.push 'masson/bootstrap/mecano'
+    exports = module.exports = []
+    exports.push 'masson/bootstrap/mecano'
 
 ## Configure
 
@@ -27,7 +27,7 @@ engine. All properties from the configuration are exposed to moustache with the
 additionnal "logs.fqdn_reversed" property used in the default filename to
 preserve alphanumerical ordering of files.
 
-    module.exports.push required: true, callback: (ctx) ->
+    exports.push required: true, callback: (ctx) ->
       logs = ctx.config.logs ?= {}
       logs.basedir ?= './logs'
       logs.fqdn_reversed = ctx.config.host.split('.').reverse().join('.')
@@ -38,7 +38,7 @@ preserve alphanumerical ordering of files.
       logs.filename_stdout = mustache.render logs.filename_stdout, ctx.config
       logs.filename_stderr = mustache.render logs.filename_stderr, ctx.config
 
-    module.exports.push name: 'Bootstrap # Log', required: true, callback: (ctx, next) ->
+    exports.push name: 'Bootstrap # Log', required: true, callback: (ctx, next) ->
       {basedir, filename_stdout, filename_stderr} = ctx.config.logs
       mecano.mkdir
         destination: "#{basedir}"

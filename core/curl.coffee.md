@@ -7,13 +7,13 @@ LDAPS, POP3, POP3S, RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP). The
 command is designed to work without user interaction. 
 
     each = require 'each'
-    module.exports = []
-    module.exports.push 'masson/bootstrap'
-    module.exports.push 'masson/core/users'
-    module.exports.push 'masson/core/yum'
-    module.exports.push 'masson/core/proxy'
-    module.exports.push require('./users').configure
-    module.exports.push require('./proxy').configure
+    exports = module.exports = []
+    exports.push 'masson/bootstrap'
+    exports.push 'masson/core/users'
+    exports.push 'masson/core/yum'
+    exports.push 'masson/core/proxy'
+    exports.push require('./users').configure
+    exports.push require('./proxy').configure
 
 ## Configuration
 
@@ -59,7 +59,7 @@ command is designed to work without user interaction.
 }
 ```
 
-    module.exports.push (ctx) ->
+    exports.push (ctx) ->
       ctx.config.curl ?= {}
       {curl} = ctx.config
       curl.merge ?= true
@@ -78,7 +78,7 @@ Deploy the "~/.curlrc" file to each users. Set the property `curl.users` to
 false to disable this action to run. For the configuration file to be uploaded, 
 the user must have a `user.home` property.
 
-    module.exports.push name: 'Curl # User Configuration', callback: (ctx, next) ->
+    exports.push name: 'Curl # User Configuration', callback: (ctx, next) ->
       ok = false
       {merge, users, config} = ctx.config.curl
       return next() unless users
@@ -107,7 +107,7 @@ the user must have a `user.home` property.
 Install the "curl" package. Note, on some plateform like CentOS, `curl` is 
 already installed.
 
-    module.exports.push name: 'Curl # Install', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Curl # Install', timeout: -1, callback: (ctx, next) ->
       # On centOS, curl is already here
       ctx.service
         name: 'curl'
@@ -118,7 +118,7 @@ already installed.
 Check a remote call. This action is commonly activated to validate the Internet
 connection.
 
-    module.exports.push name: 'Curl # Connection Check', callback: (ctx, next) ->
+    exports.push name: 'Curl # Connection Check', callback: (ctx, next) ->
       {check, check_match, config} = ctx.config.curl
       return next null, ctx.INAPPLICABLE unless check
       ctx.execute

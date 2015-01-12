@@ -5,12 +5,12 @@ Wait for all the Kerberos servers deployed by Masson.
 
 ## Preparation
 
-    module.exports = []
-    module.exports.push 'masson/bootstrap'
+    exports = module.exports = []
+    exports.push 'masson/bootstrap'
 
 ## Wait TCP
 
-    module.exports.push name: 'Krb5 Server # Wait TCP', timeout: -1, label_true: 'READY', callback: (ctx, next) ->
+    exports.push name: 'Krb5 Server # Wait TCP', timeout: -1, label_true: 'READY', callback: (ctx, next) ->
       contexts = ctx.contexts modules: 'masson/core/krb5_server', require('./index').configure
       servers = []
       for context in contexts

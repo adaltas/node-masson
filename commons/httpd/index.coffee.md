@@ -1,14 +1,14 @@
 
 # HTTPD Web Server
 
-    module.exports = []
-    module.exports.push require('../../core/iptables').configure
+    exports = module.exports = []
+    exports.push require('../../core/iptables').configure
 
 ## Configuration
 
 Configure the HTTPD server.
 
-    module.exports.push (ctx) ->
+    exports.push (ctx) ->
       ctx.config.httpd ?= {}
       # Service
       ctx.config.httpd.startup ?= '235'
@@ -28,20 +28,20 @@ Configure the HTTPD server.
       ctx.config.httpd.group.name ?= 'apache'
       ctx.config.httpd.group.system ?= true
 
-    module.exports.push commands: 'check', modules: 'masson/commons/httpd/check'
+    exports.push commands: 'check', modules: 'masson/commons/httpd/check'
 
-    module.exports.push commands: 'install', modules: [
+    exports.push commands: 'install', modules: [
       'masson/commons/httpd/install'
       'masson/commons/httpd/start'
     ]
 
-    # module.exports.push commands: 'reload', modules: 'masson/commons/httpd/install'
+    # exports.push commands: 'reload', modules: 'masson/commons/httpd/install'
 
-    module.exports.push commands: 'start', modules: 'masson/commons/httpd/start'
+    exports.push commands: 'start', modules: 'masson/commons/httpd/start'
 
-    module.exports.push commands: 'status', modules: 'masson/commons/httpd/status'
+    exports.push commands: 'status', modules: 'masson/commons/httpd/status'
 
-    module.exports.push commands: 'stop', modules: 'masson/commons/httpd/stop'
+    exports.push commands: 'stop', modules: 'masson/commons/httpd/stop'
 
 
 

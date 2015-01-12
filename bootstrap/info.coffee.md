@@ -4,9 +4,9 @@
 Gather various information relative to the targeted system.
 
     mecano = require 'mecano'
-    module.exports = []
-    module.exports.push 'masson/bootstrap/connection'
-    module.exports.push 'masson/bootstrap/log'
+    exports = module.exports = []
+    exports.push 'masson/bootstrap/connection'
+    exports.push 'masson/bootstrap/log'
 
 ## Server Info
 
@@ -14,7 +14,7 @@ Expose system information. On execution, the context is enriched with the
 properties "kernel\_name", "nodename", "kernel\_release", "kernel\_version", 
 "processor" and "operating_system".
 
-    module.exports.push name: 'Bootstrap # Server Info', required: true, callback: (ctx, next) ->
+    exports.push name: 'Bootstrap # Server Info', required: true, callback: (ctx, next) ->
       mecano.execute
         ssh: ctx.ssh
         cmd: 'uname -snrvmo'
@@ -69,7 +69,7 @@ It will output:
 ]
 ```
 
-    module.exports.push name: 'Bootstrap # CPU Info', required: true, callback: (ctx, next) ->
+    exports.push name: 'Bootstrap # CPU Info', required: true, callback: (ctx, next) ->
       mecano.execute
         ssh: ctx.ssh
         cmd: 'cat /proc/cpuinfo'
@@ -121,7 +121,7 @@ It will output:
   "Hugepagesize":2048000,"DirectMap4k":8128000,"DirectMap2M":1040384000}
 ```
 
-    module.exports.push name: 'Bootstrap # Mem Info', required: true, callback: (ctx, next) ->
+    exports.push name: 'Bootstrap # Mem Info', required: true, callback: (ctx, next) ->
       mecano.execute
         ssh: ctx.ssh
         cmd: 'cat /proc/meminfo'

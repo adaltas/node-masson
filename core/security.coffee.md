@@ -4,8 +4,8 @@
 This package cover various security related configuration for an operating
 system.
 
-    module.exports = []
-    module.exports.push 'masson/bootstrap'
+    exports = module.exports = []
+    exports.push 'masson/bootstrap'
 
 ## Configuration
 
@@ -28,7 +28,7 @@ Example:
 }
 ```
 
-    module.exports.push (ctx) ->
+    exports.push (ctx) ->
       ctx.config.security ?= {}
       ctx.config.security.selinux ?= true
       ctx.config.security.limits ?= {}
@@ -40,7 +40,7 @@ mechanism implemented in the kernel.
 
 This action update the configuration file present in "/etc/selinux/config".
 
-    module.exports.push name: 'Security # SELinux', callback: (ctx, next) ->
+    exports.push name: 'Security # SELinux', callback: (ctx, next) ->
       {selinux} = ctx.config.security
       if selinux
         from = 'disabled'
@@ -71,7 +71,7 @@ cat /etc/security/limits.d/90-nproc.conf
 root       soft    nproc     unlimited
 ```
 
-    module.exports.push name: 'Security # Limits', callback: (ctx, next) ->
+    exports.push name: 'Security # Limits', callback: (ctx, next) ->
       {limits} = ctx.config.security
       writes = for filename, content of limits
         destination: "/etc/security/limits.d/#{filename}"

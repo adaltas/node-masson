@@ -1,7 +1,7 @@
 
-    module.exports = []
-    module.exports.push 'masson/bootstrap'
-    module.exports.push 'masson/core/openldap_server/install'
+    exports = module.exports = []
+    exports.push 'masson/bootstrap'
+    exports.push 'masson/core/openldap_server/install'
     # We cant require openldap_client here, since it will deploy 
     # and test a secure connection on a server not yet configured
 
@@ -362,10 +362,10 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=adaltas,dc=com
 
 ###
 
-    module.exports.push (ctx) ->
+    exports.push (ctx) ->
       ctx.config.openldap_server ?= {}
 
-    module.exports.push name: 'OpenLDAP Server # TLS Deploy', callback: (ctx, next) ->
+    exports.push name: 'OpenLDAP Server # TLS Deploy', callback: (ctx, next) ->
       { tls, tls_ca_cert_file, tls_cert_file, tls_key_file } = ctx.config.openldap_server
       return next null, ctx.DISABLED unless tls
       tls_ca_cert_filename = path.basename tls_ca_cert_file
@@ -429,7 +429,7 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=adaltas,dc=com
         , next
       do_upload()
 
-    module.exports.push name: 'OpenLDAP TLS # Activate LDAPS', callback: (ctx, next) ->
+    exports.push name: 'OpenLDAP TLS # Activate LDAPS', callback: (ctx, next) ->
       ctx.write
         match: /^SLAPD_LDAPS.*/mg
         replace: 'SLAPD_LDAPS=yes'
@@ -442,9 +442,9 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=adaltas,dc=com
           if: written
         , next
 
-    module.exports.push 'masson/core/openldap_client'
+    exports.push 'masson/core/openldap_client'
 
-    module.exports.push name: 'OpenLDAP Server # TLS Check', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'OpenLDAP Server # TLS Check', timeout: -1, callback: (ctx, next) ->
       { suffix, root_dn, root_password } = ctx.config.openldap_server
       ctx.execute
         cmd: "ldapsearch -x -H ldaps://#{ctx.config.host} -b #{suffix} -D #{root_dn} -w #{root_password}"

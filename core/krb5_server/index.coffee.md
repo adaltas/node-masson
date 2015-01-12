@@ -9,9 +9,9 @@ Massachusetts Institute of Technology.
 The article [SSH Kerberos Authentication Using GSSAPI and SSPI][gss_sspi]
 provides a good description on how Kerberos is negotiated by GSSAPI and SSPI.
 
-    module.exports = []
-    module.exports.push require('../krb5_client').configure
-    module.exports.push require('../iptables').configure
+    exports = module.exports = []
+    exports.push require('../krb5_client').configure
+    exports.push require('../iptables').configure
 
 ## Configuration
 
@@ -182,22 +182,22 @@ Example:
         throw new Error "Kerberos property `krb5.dbmodules.#{name}.ldap_kdc_dn` is required" unless config.ldap_kdc_dn
         throw new Error "Kerberos property `krb5.dbmodules.#{name}.ldap_kadmind_dn` is required" unless config.ldap_kadmind_dn
 
-    # module.exports.push commands: 'backup', modules: 'masson/core/krb5_server_backup'
+    # exports.push commands: 'backup', modules: 'masson/core/krb5_server_backup'
 
-    # module.exports.push commands: 'check', modules: 'masson/core/krb5_server_check'
+    # exports.push commands: 'check', modules: 'masson/core/krb5_server_check'
 
-    module.exports.push commands: 'install', modules: [
+    exports.push commands: 'install', modules: [
       'masson/core/krb5_server/install'
       'masson/core/krb5_server/start'
     ]
 
-    # module.exports.push commands: 'reload', modules: 'masson/core/krb5_server/install'
+    # exports.push commands: 'reload', modules: 'masson/core/krb5_server/install'
 
-    module.exports.push commands: 'start', modules: 'masson/core/krb5_server/start'
+    exports.push commands: 'start', modules: 'masson/core/krb5_server/start'
 
-    module.exports.push commands: 'status', modules: 'masson/core/krb5_server/status'
+    exports.push commands: 'status', modules: 'masson/core/krb5_server/status'
 
-    module.exports.push commands: 'stop', modules: 'masson/core/krb5_server/stop'
+    exports.push commands: 'stop', modules: 'masson/core/krb5_server/stop'
 
 ## Module Dependencies
 

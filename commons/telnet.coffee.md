@@ -1,10 +1,10 @@
 
 # Telnet
 
-    module.exports = []
-    module.exports.push 'masson/bootstrap'
+    exports = module.exports = []
+    exports.push 'masson/bootstrap'
 
-    module.exports.push name: 'Telnet', callback: (ctx, next) ->
+    exports.push name: 'Telnet', callback: (ctx, next) ->
       ctx.service
         name: 'telnet'
       , (err, serviced) ->

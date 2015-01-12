@@ -5,9 +5,9 @@ Predefined Mecano functions with context related information.
 
     mecano = require 'mecano'
     fs = require 'ssh2-fs'
-    module.exports = []
-    module.exports.push 'masson/bootstrap/log'
-    module.exports.push 'masson/bootstrap/cache_memory'
+    exports = module.exports = []
+    exports.push 'masson/bootstrap/log'
+    exports.push 'masson/bootstrap/cache_memory'
 
 For example, this:
 
@@ -30,7 +30,7 @@ ctx.execute
   ...
 ```
 
-    module.exports.push name: 'Bootstrap # Mecano', required: true, timeout: -1, callback:  (ctx, next) ->
+    exports.push name: 'Bootstrap # Mecano', required: true, timeout: -1, callback:  (ctx, next) ->
       ctx.cache.get ['mecano:installed', 'mecano:updates'], (err, cache) ->
         m = (action, options) ->
           options.ssh = ctx.ssh if typeof options.ssh is 'undefined'
@@ -69,7 +69,7 @@ ctx.execute
               mecano[action].call null, options, goptions, callback
         next null, ctx.PASS
 
-    module.exports.push name: 'Bootstrap # FS', required: true, timeout: -1, callback:  (ctx) ->
+    exports.push name: 'Bootstrap # FS', required: true, timeout: -1, callback:  (ctx) ->
       ctx.fs ?= {}
       [ 'rename', 'chown', 'chmod', 'stat', 'lstat', 'unlink', 'symlink', 
         'readlink', 'unlink', 'mkdir', 'readdir', 'readFile', 'writeFile', 

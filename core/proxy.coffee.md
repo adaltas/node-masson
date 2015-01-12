@@ -1,8 +1,8 @@
 
     path = require 'path'
-    module.exports = []
-    module.exports.push 'masson/bootstrap'
-    module.exports.push 'masson/core/users'
+    exports = module.exports = []
+    exports.push 'masson/bootstrap'
+    exports.push 'masson/core/users'
 
 # Proxy
 
@@ -42,7 +42,7 @@ configuration will be enriched with the `http_proxy`, the
 `https_proxy`, the `http_proxy_no_auth` and the 
 `https_proxy_no_auth` urls properties.
 
-    module.exports.push module.exports.configure = (ctx) ->
+    exports.push module.exports.configure = (ctx) ->
       ctx.config.proxy ?= {}
       ctx.config.proxy.system ?= false
       ctx.config.proxy.system_file ?= "phyla_proxy.sh"
@@ -81,7 +81,7 @@ Declare the http_proxy and "https_proxy" environment
 variables by declaring a shell script inside the 
 profile initialization directory.
 
-    module.exports.push name: 'Proxy # Profile', callback: (ctx, next) ->
+    exports.push name: 'Proxy # Profile', callback: (ctx, next) ->
       # There is no proxy to configure
       return next() unless ctx.config.proxy.http_proxy
       return next null, 'TODO'

@@ -11,11 +11,11 @@ home of each users.
     each = require 'each'
     mecano = require 'mecano'
     misc = require 'mecano/lib/misc'
-    module.exports = []
-    module.exports.push 'masson/bootstrap'
-    module.exports.push 'masson/commons/git'
-    module.exports.push 'masson/core/users'
-    module.exports.push require('../core/proxy').configure
+    exports = module.exports = []
+    exports.push 'masson/bootstrap'
+    exports.push 'masson/commons/git'
+    exports.push 'masson/core/users'
+    exports.push require('../core/proxy').configure
 
 ## Configuration
 
@@ -47,7 +47,7 @@ Example:
 }
 ```
 
-    module.exports.push (ctx, next) ->
+    exports.push (ctx, next) ->
       ctx.config.nodejs ?= {}
       ctx.config.nodejs.version ?= 'stable'
       ctx.config.nodejs.merge ?= true
@@ -62,7 +62,7 @@ Example:
 
 N is a Node.js binary management system, similar to nvm and nave.
 
-    module.exports.push name: 'Node.js # N', timeout: 100000, callback: (ctx, next) ->
+    exports.push name: 'Node.js # N', timeout: 100000, callback: (ctx, next) ->
       # Accoring to current test, proxy env var arent used by ssh exec
       {method, http_proxy, https_proxy} = ctx.config.nodejs
       return next() unless method is 'n'
@@ -87,7 +87,7 @@ N is a Node.js binary management system, similar to nvm and nave.
 
 Multiple installation of Node.js may coexist with N.
 
-    module.exports.push name: 'Node.js # installation', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Node.js # installation', timeout: -1, callback: (ctx, next) ->
       if method is 'n'
         ctx.execute
           cmd: "n #{ctx.config.nodejs.version}"
@@ -102,7 +102,7 @@ Multiple installation of Node.js may coexist with N.
 Write the "~/.npmrc" file for each user defined by the "masson/core/users" 
 module.
 
-    module.exports.push name: 'Node.js # Npm Configuration', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Node.js # Npm Configuration', timeout: -1, callback: (ctx, next) ->
       {merge, config} = ctx.config.nodejs
       modified = false
       each(ctx.config.users)

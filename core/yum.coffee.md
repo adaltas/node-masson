@@ -9,13 +9,13 @@ Note, ntp is installed to encure correct date on the server or HTTPS will fail.
     each = require 'each'
     path = require 'path'
     misc = require 'mecano/lib/misc'
-    module.exports = []
-    module.exports.push 'masson/bootstrap'
-    module.exports.push 'masson/core/profile' # In case yum make use of environmental variables
-    module.exports.push 'masson/core/proxy'
-    module.exports.push 'masson/core/network'
-    module.exports.push require('./proxy').configure
-    # module.exports.push 'masson/core/ntp' # NTP require yum to install its services
+    exports = module.exports = []
+    exports.push 'masson/bootstrap'
+    exports.push 'masson/core/profile' # In case yum make use of environmental variables
+    exports.push 'masson/core/proxy'
+    exports.push 'masson/core/network'
+    exports.push require('./proxy').configure
+    # exports.push 'masson/core/ntp' # NTP require yum to install its services
 
 ## Configuration
 
@@ -46,7 +46,7 @@ Examples
 }
 ```
 
-    module.exports.push module.exports.configure = (ctx) ->
+    exports.push module.exports.configure = (ctx) ->
       ctx.config.yum ?= {}
       ctx.config.yum.clean ?= false
       ctx.config.yum.copy ?= null
@@ -68,7 +68,7 @@ Examples
         ctx.config.yum.config.main.proxy_username = username
         ctx.config.yum.config.main.proxy_password = password
 
-    module.exports.push name: 'YUM # Check', callback: (ctx, next) ->
+    exports.push name: 'YUM # Check', callback: (ctx, next) ->
       misc.pidfileStatus ctx.ssh, '/var/run/yum.pid', {}, (err, status) ->
         return next err if err
         switch status
@@ -90,7 +90,7 @@ merge server configuration and write the content back.
 More information about configuring the proxy settings 
 is available on [the centos website](http://www.centos.org/docs/5/html/yum/sn-yum-proxy-server.html)
 
-    module.exports.push name: 'YUM # Configuration', callback: (ctx, next) ->
+    exports.push name: 'YUM # Configuration', callback: (ctx, next) ->
       ctx.ini
         content: ctx.config.yum.config
         destination: '/etc/yum.conf'
@@ -104,7 +104,7 @@ Upload the YUM repository definitions files present in
 "ctx.config.yum.copy" to the yum repository directory 
 in "/etc/yum.repos.d"
 
-    module.exports.push name: 'YUM # Repositories', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'YUM # Repositories', timeout: -1, callback: (ctx, next) ->
       {copy, clean} = ctx.config.yum
       return next() unless copy
       modified = false
@@ -163,7 +163,7 @@ deployed by installing the "epel-release" package. It may also be installed from
 an url by defining the "yum.epel_url" property. To disable Epel, simply set the
 property "yum.epel" to false.
 
-    module.exports.push name: 'YUM # Epel', timeout: 100000, callback: (ctx, next) ->
+    exports.push name: 'YUM # Epel', timeout: 100000, callback: (ctx, next) ->
       {epel, epel_url} = ctx.config.yum
       return next() unless epel
       ctx.execute
@@ -173,7 +173,7 @@ property "yum.epel" to false.
         not_if_exec: 'yum list installed | grep epel-release'
       , next
 
-    module.exports.push name: 'YUM # Update', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'YUM # Update', timeout: -1, callback: (ctx, next) ->
       {update} = ctx.config.yum
       return next null, ctx.DISABLED unless update
       ctx.execute
@@ -181,7 +181,7 @@ property "yum.epel" to false.
       , (err, executed, stdout, stderr) ->
         next err, not /No Packages marked for Update/.test(stdout)
 
-    module.exports.push name: 'YUM # Packages', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'YUM # Packages', timeout: -1, callback: (ctx, next) ->
       services = for name, active of ctx.config.yum.packages
         continue unless active
         name: name

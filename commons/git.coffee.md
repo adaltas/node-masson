@@ -8,10 +8,10 @@ in "/etc/gitconfig" will not be created or modified.
 
     each = require 'each'
     misc = require 'mecano/lib/misc'
-    module.exports = []
-    module.exports.push 'masson/bootstrap'
-    module.exports.push 'masson/core/users'
-    module.exports.push require('../core/proxy').configure
+    exports = module.exports = []
+    exports.push 'masson/bootstrap'
+    exports.push 'masson/core/users'
+    exports.push require('../core/proxy').configure
 
 Configuration
 -------------
@@ -59,7 +59,7 @@ any settings from the proxy action.
 }
 ```
 
-    module.exports.push (ctx) ->
+    exports.push (ctx) ->
       {http_proxy} = ctx.config.proxy
       ctx.config.git ?= {}
       ctx.config.git.merge ?= true
@@ -74,7 +74,7 @@ any settings from the proxy action.
 
 Install the git package.
 
-    module.exports.push name: 'Git # Package', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Git # Package', timeout: -1, callback: (ctx, next) ->
       ctx.service
         name: 'git'
       , next
@@ -83,7 +83,7 @@ Install the git package.
 
 Deploy the git configuration.
 
-    module.exports.push name: 'Git # Config', callback: (ctx, next) ->
+    exports.push name: 'Git # Config', callback: (ctx, next) ->
       modified = false
       {merge, properties, global} = ctx.config.git
       work = (user, file, config, callback)->

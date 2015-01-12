@@ -7,8 +7,8 @@ The `utils` module enriches the bootstraping process with commonly used function
     each = require 'each'
     misc = require 'mecano/lib/misc'
     connect = require 'ssh2-connect'
-    module.exports = []
-    module.exports.push name: 'Bootstrap # Utils', required: true, callback: (ctx) ->
+    exports = module.exports = []
+    exports.push name: 'Bootstrap # Utils', required: true, callback: (ctx) ->
 
 ## Reboot
 

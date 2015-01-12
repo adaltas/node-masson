@@ -6,18 +6,18 @@ file "/etc/openldap/ldap.conf" is configured by the "openldap_client.config"
 object property. The property "openldap\_client.ca\_cert" may reference a 
 certificate to upload.
 
-    module.exports = []
-    module.exports.push 'masson/bootstrap'
-    module.exports.push 'masson/bootstrap/utils'
-    module.exports.push 'masson/core/yum'
-    module.exports.push require('./index').configure
+    exports = module.exports = []
+    exports.push 'masson/bootstrap'
+    exports.push 'masson/bootstrap/utils'
+    exports.push 'masson/core/yum'
+    exports.push require('./index').configure
 
-    module.exports.push name: 'OpenLDAP Client # Install', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'OpenLDAP Client # Install', timeout: -1, callback: (ctx, next) ->
       ctx.service
         name: 'openldap-clients'
       , next
 
-    module.exports.push name: 'OpenLDAP Client # Configure', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'OpenLDAP Client # Configure', timeout: -1, callback: (ctx, next) ->
       {config} = ctx.config.openldap_client
       write = []
       for k, v of config
@@ -48,7 +48,7 @@ mv cert.pem /etc/openldap/cacerts/$hash.0
 Certificates are temporarily uploaded to the "/tmp" folder and registered with
 the command `authconfig --update --ldaploadcacert={file}`.
 
-    module.exports.push name: 'OpenLDAP Client # Certificate', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'OpenLDAP Client # Certificate', timeout: -1, callback: (ctx, next) ->
       {certificates, config} = ctx.config.openldap_client
       modified = false
       each(certificates)

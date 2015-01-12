@@ -1,9 +1,9 @@
 
 # HTTPD Web Server Install
 
-    module.exports = []
-    module.exports.push 'masson/bootstrap'
-    module.exports.push 'masson/core/iptables'
+    exports = module.exports = []
+    exports.push 'masson/bootstrap'
+    exports.push 'masson/core/iptables'
 
 ## IPTables
 
@@ -14,7 +14,7 @@
 IPTables rules are only inserted if the parameter "iptables.action" is set to 
 "start" (default value).
 
-    module.exports.push name: 'HTTPD # IPTables', callback: (ctx, next) ->
+    exports.push name: 'HTTPD # IPTables', callback: (ctx, next) ->
       {etc_krb5_conf, kdc_conf} = ctx.config.krb5
       rules = []
       ctx.iptables
@@ -35,7 +35,7 @@ cat /etc/group | grep hadoop
 apache:x:48:
 ```
 
-    module.exports.push name: 'HTTPD # Users & Groups', callback: (ctx, next) ->
+    exports.push name: 'HTTPD # Users & Groups', callback: (ctx, next) ->
       {group, user} = ctx.config.httpd
       ctx.group group, (err, gmodified) ->
         return next err if err
@@ -46,7 +46,7 @@ apache:x:48:
 
 Install the HTTPD service and declare it as a startup service.
 
-    module.exports.push name: 'HTTPD # Install', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'HTTPD # Install', timeout: -1, callback: (ctx, next) ->
       {startup, action} = ctx.config.httpd
       ctx.service
         name: 'httpd'

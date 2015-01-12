@@ -3,8 +3,8 @@
 
 Administration tool for IPv4 packet filtering and NAT.
 
-    module.exports = []
-    module.exports.push 'masson/bootstrap'
+    exports = module.exports = []
+    exports.push 'masson/bootstrap'
 
 ## Configuration
 
@@ -38,7 +38,7 @@ Example:
 }
 ```
 
-    module.exports.push module.exports.configure = (ctx) ->
+    exports.push module.exports.configure = (ctx) ->
       iptables = ctx.config.iptables ?= {}
       iptables.action ?= 'start'
       # Service supports chkconfig, but is not referenced in any runlevel
@@ -58,7 +58,7 @@ Example:
 
 The package "iptables" is installed.
 
-    module.exports.push name: 'Iptables # Package', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Iptables # Package', timeout: -1, callback: (ctx, next) ->
       {action, startup} = ctx.config.iptables
       ctx.service
         name: 'iptables'
@@ -70,7 +70,7 @@ The package "iptables" is installed.
 
 Redirect input logs in "/var/log/messages".
 
-    module.exports.push name: 'Iptables # Log', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Iptables # Log', timeout: -1, callback: (ctx, next) ->
       {action, log, log_rules} = ctx.config.iptables
       return next() if action isnt 'start' or log is false
       ctx.iptables
@@ -86,7 +86,7 @@ Redirect input logs in "/var/log/messages".
 
 Add user defined rules to IPTables.
 
-    module.exports.push name: 'Iptables # Rules', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Iptables # Rules', timeout: -1, callback: (ctx, next) ->
       {rules, action} = ctx.config.iptables
       return next() unless action is 'start'
       return next null, ctx.PASS unless rules.length

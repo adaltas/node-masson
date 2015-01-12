@@ -1,6 +1,6 @@
 
-    module.exports = []
-    module.exports.push 'masson/bootstrap'
+    exports = module.exports = []
+    exports.push 'masson/bootstrap'
 
 # Users
 
@@ -8,7 +8,7 @@ A module to create and manage unix users and groups.
 
 ## Configuration
 
-    module.exports.push module.exports.configure = (ctx) ->
+    exports.push module.exports.configure = (ctx) ->
       ctx.config.users ?= {}
       ctx.config.groups ?= {}
       for name, user of ctx.config.users
@@ -22,7 +22,7 @@ A module to create and manage unix users and groups.
 Create the users defined inside the "hdp.groups" configuration. See the
 [mecano "group" documentation][mecano_group] for additionnal information.
 
-    module.exports.push name: 'Groups', callback: (ctx, next) ->
+    exports.push name: 'Groups', callback: (ctx, next) ->
       groups = for _, group in ctx.config.groups then group
       ctx.user groups, next
 
@@ -31,7 +31,7 @@ Create the users defined inside the "hdp.groups" configuration. See the
 Create the users defined inside the "hdp.users" configuration. See the
 [mecano "user" documentation][mecano_user] for additionnal information.
 
-    module.exports.push name: 'Users', callback: (ctx, next) ->
+    exports.push name: 'Users', callback: (ctx, next) ->
       users = for _, user in ctx.config.users then user
       ctx.user users, next
 

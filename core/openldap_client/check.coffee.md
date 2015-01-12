@@ -1,11 +1,11 @@
 
 # OpenLDAP Client
 
-    module.exports = []
-    module.exports.push 'masson/bootstrap'
-    module.exports.push require('./index').configure
+    exports = module.exports = []
+    exports.push 'masson/bootstrap'
+    exports.push require('./index').configure
 
-    module.exports.push name: 'OpenLDAP Client # Check Search', callback: (ctx, next) ->
+    exports.push name: 'OpenLDAP Client # Check Search', callback: (ctx, next) ->
       {suffix, root_dn, root_password} = ctx.config.openldap_client
       return next() unless suffix
       ctx.execute

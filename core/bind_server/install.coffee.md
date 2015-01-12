@@ -1,11 +1,11 @@
 
 # Bind server Install
 
-    module.exports = []
-    module.exports.push 'masson/bootstrap'
-    module.exports.push 'masson/core/yum'
-    module.exports.push 'masson/core/iptables'
-    module.exports.push require('./index').configure
+    exports = module.exports = []
+    exports.push 'masson/bootstrap'
+    exports.push 'masson/core/yum'
+    exports.push 'masson/core/iptables'
+    exports.push require('./index').configure
 
 ## Users & Groups
 
@@ -18,7 +18,7 @@ cat /etc/group | grep named
 named:x:25:
 ```
 
-    module.exports.push name: 'Bind Server # Users & Groups', callback: (ctx, next) ->
+    exports.push name: 'Bind Server # Users & Groups', callback: (ctx, next) ->
       {group, user} = ctx.config.bind_server
       ctx.group group, (err, gmodified) ->
         return next err if err
@@ -35,7 +35,7 @@ named:x:25:
 IPTables rules are only inserted if the parameter "iptables.action" is set to 
 "start" (default value).
 
-    module.exports.push name: 'Bind Server # IPTables', callback: (ctx, next) ->
+    exports.push name: 'Bind Server # IPTables', callback: (ctx, next) ->
       ctx.iptables
         rules: [
           { chain: 'INPUT', jump: 'ACCEPT', dport: 53, protocol: 'tcp', state: 'NEW', comment: "Named" }
@@ -48,7 +48,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
 
 The packages "bind" is installed as a startup item and not yet installed.
 
-    module.exports.push name: 'Bind Server # Install', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Bind Server # Install', timeout: -1, callback: (ctx, next) ->
       ctx.service
         name: 'bind'
         srv_name: 'named'
@@ -60,7 +60,7 @@ The packages "bind" is installed as a startup item and not yet installed.
 Update the "/etc/named.conf" file by modifying the commenting the listen-on port
 and setting "allow-query" to any. The "named" service is restarted if modified.
 
-    module.exports.push name: 'Bind Server # Configure', callback: (ctx, next) ->
+    exports.push name: 'Bind Server # Configure', callback: (ctx, next) ->
       ctx.write
         destination: '/etc/named.conf'
         write: [
@@ -84,7 +84,7 @@ and setting "allow-query" to any. The "named" service is restarted if modified.
 
 Upload the zones definition files provided in the configuration file.   
 
-    module.exports.push name: 'Bind Server # Zones', callback: (ctx, next) ->
+    exports.push name: 'Bind Server # Zones', callback: (ctx, next) ->
       modified = false
       {zones} = ctx.config.bind_server
       writes = []
@@ -121,7 +121,7 @@ Upload the zones definition files provided in the configuration file.
 
 Generates configuration files for rndc.   
 
-    module.exports.push name: 'Bind Server # rndc Key', callback: (ctx, next) ->
+    exports.push name: 'Bind Server # rndc Key', callback: (ctx, next) ->
       {group, user} = ctx.config.bind_server
       ctx.execute
         cmd: 'rndc-confgen -a -r /dev/urandom -c /etc/rndc.key'

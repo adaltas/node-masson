@@ -1,15 +1,15 @@
 
 # Bootstrap Report
 
-    module.exports = []
+    exports = module.exports = []
 
-    module.exports.push required: true, callback: (ctx) ->
+    exports.push required: true, callback: (ctx) ->
       report = ctx.config.report ?= {}
       report.writer ?= {}
       report.writer.write ?= (data) ->
         process.stdout.write data
 
-    module.exports.push name: 'Bootstrap # Report Console', required: true, callback: (ctx, next) ->
+    exports.push name: 'Bootstrap # Report Console', required: true, callback: (ctx, next) ->
       {writer} = ctx.config.report
       reports = {}
       ctx.report = (k, v) ->

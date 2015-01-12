@@ -5,8 +5,8 @@ Install and configure [named](http://linux.die.net/man/8/named), a
 Domain Name System (DNS) server, part of the BIND 9 distribution f
 rom ISC.
 
-    module.exports = []
-    module.exports.push require('../iptables').configure
+    exports = module.exports = []
+    exports.push require('../iptables').configure
 
 ## Configuration
 
@@ -41,13 +41,13 @@ See the the "resources section" for additional information.
       if typeof ctx.config.bind_server.zones is 'string'
         ctx.config.bind_server.zones = [ctx.config.bind_server.zones]
 
-    module.exports.push commands: 'install', modules: [
+    exports.push commands: 'install', modules: [
       'masson/core/bind_server/install'
       'masson/core/bind_server/start'
     ]
 
-    module.exports.push commands: 'start', modules: 'masson/core/bind_server/start'
+    exports.push commands: 'start', modules: 'masson/core/bind_server/start'
 
-    module.exports.push commands: 'stop', modules: 'masson/core/bind_server/stop'
+    exports.push commands: 'stop', modules: 'masson/core/bind_server/stop'
 
 

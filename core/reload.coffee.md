@@ -1,6 +1,6 @@
 
-    module.exports = []
-    module.exports.push commands: 'reload', modules: [
+    exports = module.exports = []
+    exports.push commands: 'reload', modules: [
       'masson/core/network_restart'
       'masson/core/network'
       'masson/core/network_check'

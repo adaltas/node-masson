@@ -4,9 +4,9 @@
     path = require 'path'
     semver = require 'semver'
     url = require 'url'
-    module.exports = []
-    module.exports.push 'masson/bootstrap'
-    module.exports.push require('../core/proxy').configure
+    exports = module.exports = []
+    exports.push 'masson/bootstrap'
+    exports.push require('../core/proxy').configure
 
 Install the Oracle Java JRE and JDK. The Java Runtime Environment is the code 
 execution component of the Java platform. The Java Development Kit (JDK) is 
@@ -33,7 +33,7 @@ developers on Solaris, Linux, Mac OS X or Windows.
 [Oracle JDK 6]: http://www.oracle.com/technetwork/java/javasebusiness/downloads/java-archive-downloads-javase6-419409.html#jdk-6u45-oth-JPR
 [Oracle JDK 7]: http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html
 
-    module.exports.push module.exports.configure = (ctx) ->
+    exports.push module.exports.configure = (ctx) ->
       java = ctx.config.java ?= {}
       # ctx.config.java['openjdk-1.7.0'] ?= true
       # ctx.config.java.java_home ?= '/usr/java/default'
@@ -51,7 +51,7 @@ developers on Solaris, Linux, Mac OS X or Windows.
 
 ## Install OpenJDK
 
-    module.exports.push name: 'Java # Install OpenJDK', callback: (ctx, next) ->
+    exports.push name: 'Java # Install OpenJDK', callback: (ctx, next) ->
       {openjdk} = ctx.config.java
       return next() unless openjdk
       ctx.service
@@ -63,7 +63,7 @@ developers on Solaris, Linux, Mac OS X or Windows.
 At this time, it is recommanded to run Hadoop against the Oracle Java JDK. Since RHEL and CentOS 
 come with the OpenJDK installed and to avoid any ambiguity, we simply remove the OpenJDK.
 
-    module.exports.push name: 'Java # Remove OpenJDK', callback: (ctx, next) ->
+    exports.push name: 'Java # Remove OpenJDK', callback: (ctx, next) ->
       {openjdk} = ctx.config.java
       return next() if openjdk
       ctx.execute
@@ -84,7 +84,7 @@ phyla integrator responsibility to download the jdk manually and reference it
 inside the configuration. The properties "jce\_local\_policy" and 
 "jce\_us\_export_policy" must be modified accordingly with an appropriate location.
 
-    module.exports.push name: 'Java # Install Oracle JDK', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Java # Install Oracle JDK', timeout: -1, callback: (ctx, next) ->
       {proxy, jdk} = ctx.config.java # location, version
       return next() unless jdk
       ctx.log "Check if java is here and which version it is"
@@ -140,7 +140,7 @@ repository. It is the phyla integrator responsibility to download the jdk manual
 reference it inside the configuration. The properties "jce\_local\_policy" and 
 "jce\_us\_export_policy" must be modified accordingly with an appropriate location.
 
-    module.exports.push name: 'Java # Java JCE', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Java # Java JCE', timeout: -1, callback: (ctx, next) ->
       {jdk, jce_local_policy, jce_us_export_policy} = ctx.config.java
       return next() unless jce_local_policy or jce_us_export_policy
       return next() unless jdk
@@ -158,7 +158,7 @@ reference it inside the configuration. The properties "jce\_local\_policy" and
         sha1: true
       ], next
 
-    module.exports.push name: 'Java # Env', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Java # Env', timeout: -1, callback: (ctx, next) ->
       {java_home} = ctx.config.java
       ctx.write
         destination: '/etc/profile.d/java.sh'

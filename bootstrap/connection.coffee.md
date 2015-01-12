@@ -13,8 +13,8 @@ continue as soon as an SSH connection is again available.
     connect = require 'ssh2-connect'
     collect = require './lib/collect'
     bootstrap = require './lib/bootstrap'
-    module.exports = []
-    module.exports.push 'masson/bootstrap/log'
+    exports = module.exports = []
+    exports.push 'masson/bootstrap/log'
 
 ## Configuration
 
@@ -62,7 +62,7 @@ Example:
 }
 ```
 
-    module.exports.push required: true, callback: module.exports.configure = (ctx) ->
+    exports.push required: true, callback: module.exports.configure = (ctx) ->
       connection = ctx.config.connection ?= {}
       connection.username ?= 'root'
       connection.host ?= connection.ip or ctx.config.ip or ctx.config.host
@@ -88,7 +88,7 @@ its own private key by declaring the "bootstrap.private_key" option.
 However, it is important in such circumstances that we guarantee no
 existing key would be overwritten.
 
-    module.exports.push name: 'Bootstrap # Connection', required: true, timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Bootstrap # Connection', required: true, timeout: -1, callback: (ctx, next) ->
       {private_key, private_key_location} = ctx.config.connection
       close = -> ctx.ssh?.end()
       ctx.on 'error', close

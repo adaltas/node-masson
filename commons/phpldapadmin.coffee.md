@@ -5,12 +5,12 @@ Install the phpLDAPadmin and register it to the Apache HTTPD server. Upon
 installation, the web application will be accessible at the following URL:
 "http://localhost/ldap".
 
-    module.exports = []
-    module.exports.push 'masson/bootstrap'
-    module.exports.push 'masson/core/yum'
-    module.exports.push 'masson/commons/httpd'
+    exports = module.exports = []
+    exports.push 'masson/bootstrap'
+    exports.push 'masson/core/yum'
+    exports.push 'masson/commons/httpd'
 
-    module.exports.push (ctx) ->
+    exports.push (ctx) ->
       ctx.config.phpldapadmin ?= {}
       ctx.config.phpldapadmin.config_path ?= '/etc/phpldapadmin/config.php'
       ctx.config.phpldapadmin.config_httpd_path ?= '/etc/httpd/conf.d/phpldapadmin.conf'
@@ -19,7 +19,7 @@ installation, the web application will be accessible at the following URL:
 
 Install the "phpldapadmin" package.
 
-    module.exports.push name: 'phpLDAPadmin # Install', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'phpLDAPadmin # Install', timeout: -1, callback: (ctx, next) ->
       ctx.service
         name: 'phpldapadmin'
       , (err, serviced) ->
@@ -30,7 +30,7 @@ Install the "phpldapadmin" package.
 Configure the application. The configuration file is defined by the
 "phpldapadmin.config_path" property (default to "/etc/phpldapadmin/config.php").
 
-    module.exports.push name: 'phpLDAPadmin # Configure', callback: (ctx, next) ->
+    exports.push name: 'phpLDAPadmin # Configure', callback: (ctx, next) ->
       ctx.write
         write: [
           {match: /^(\/\/)(.*'login','attr','dn'.*)$/m, replace: '$2'}
@@ -53,7 +53,7 @@ by the "phpldapadmin.config_httpd_path" property (default to
 "/etc/httpd/conf.d/phpldapadmin.conf") and made the application visible under
 the "http://{host}/ldapadmin" URL path.
 
-    module.exports.push name: 'phpLDAPadmin # HTTPD', callback: (ctx, next) ->
+    exports.push name: 'phpLDAPadmin # HTTPD', callback: (ctx, next) ->
       ctx.write
         destination: ctx.config.phpldapadmin.config_httpd_path
         write: [

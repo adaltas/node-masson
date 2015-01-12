@@ -1,10 +1,10 @@
 
 # SSSD Start
 
-    module.exports = []
-    module.exports.push 'masson/bootstrap'
+    exports = module.exports = []
+    exports.push 'masson/bootstrap'
 
-    module.exports.push name: 'SSSD # Start', callback: (ctx, next) ->
+    exports.push name: 'SSSD # Start', callback: (ctx, next) ->
       ctx.service
         srv_name: 'sssd'
         action: 'start'

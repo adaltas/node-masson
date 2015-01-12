@@ -1,11 +1,11 @@
   
 # OpenLDAP Server Install
 
-    module.exports = []
-    module.exports.push 'masson/bootstrap'
-    module.exports.push 'masson/core/yum'
-    module.exports.push 'masson/core/iptables'
-    module.exports.push require('./index').configure
+    exports = module.exports = []
+    exports.push 'masson/bootstrap'
+    exports.push 'masson/core/yum'
+    exports.push 'masson/core/iptables'
+    exports.push require('./index').configure
 
 The default ports used by OpenLdap server are 389 and 636.
 
@@ -22,7 +22,7 @@ todo: add migrationtools
 IPTables rules are only inserted if the parameter "iptables.action" is set to 
 "start" (default value).
 
-    module.exports.push name: 'OpenLDAP Server # IPTables', callback: (ctx, next) ->
+    exports.push name: 'OpenLDAP Server # IPTables', callback: (ctx, next) ->
       {etc_krb5_conf, kdc_conf} = ctx.config.krb5
       rules = []
       ctx.iptables
@@ -33,7 +33,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
         if: ctx.config.iptables.action is 'start'
       , next
 
-    module.exports.push name: 'OpenLDAP Server # Install', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'OpenLDAP Server # Install', timeout: -1, callback: (ctx, next) ->
       ctx.service [
         name: 'openldap-servers'
         chk_name: 'slapd'
@@ -53,7 +53,7 @@ http://itdavid.blogspot.ca/2012/05/howto-centos-6.html
 http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
 ###
 
-    module.exports.push name: 'OpenLDAP Server # DB config', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'OpenLDAP Server # DB config', timeout: -1, callback: (ctx, next) ->
       {config_file, config_dn, config_password, config_slappasswd} = ctx.config.openldap_server
       do_compare_rootpw = ->
         return do_write() if config_slappasswd
@@ -92,7 +92,7 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
           , next
       do_compare_rootpw()
 
-    module.exports.push name: 'OpenLDAP Server # DB monitor', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'OpenLDAP Server # DB monitor', timeout: -1, callback: (ctx, next) ->
       {suffix, monitor_file} = ctx.config.openldap_server
       ctx.log 'Database monitor: root DN'
       ctx.write
@@ -101,7 +101,7 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
         replace: "$1#{suffix}$2"
       , next
 
-    module.exports.push name: 'OpenLDAP Server # DB bdb', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'OpenLDAP Server # DB bdb', timeout: -1, callback: (ctx, next) ->
       {suffix, bdb_file, root_dn, root_password, root_slappasswd} = ctx.config.openldap_server
       modified = 0
       do_compare_rootpw = ->
@@ -148,7 +148,7 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
 
 http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
 
-    module.exports.push name: 'OpenLDAP Server # Logging', callback: (ctx, next) ->
+    exports.push name: 'OpenLDAP Server # Logging', callback: (ctx, next) ->
       {config_dn, config_password, config_file, log_level} = ctx.config.openldap_server
       modified = false
       rsyslog = ->
@@ -186,7 +186,7 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
         next err, modified
       rsyslog()
 
-    module.exports.push name: 'OpenLDAP Server # Users and Groups', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'OpenLDAP Server # Users and Groups', timeout: -1, callback: (ctx, next) ->
       {root_dn, root_password, suffix, users_dn, groups_dn} = ctx.config.openldap_server
       [_, suffix_k, suffix_v] = /(\w+)=([^,]+)/.exec suffix
       ctx.execute
@@ -213,7 +213,7 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
         code_skipped: 68
       , next
 
-    module.exports.push name: 'OpenLDAP Server # SUDO schema', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'OpenLDAP Server # SUDO schema', timeout: -1, callback: (ctx, next) ->
       {config_dn, config_password} = ctx.config.openldap_server
       do_install = ->
         ctx.log 'Install Sudo schema'
@@ -253,7 +253,7 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
         , next
       do_install()
 
-    module.exports.push name: 'OpenLDAP Server # Delete ldif data', callback: (ctx, next) ->
+    exports.push name: 'OpenLDAP Server # Delete ldif data', callback: (ctx, next) ->
       {root_dn, root_password, ldapdelete} = ctx.config.openldap_server
       return next() unless ldapdelete.length
       modified = 0
@@ -279,7 +279,7 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
       .on 'both', (err) ->
         next err, modified
 
-    module.exports.push name: 'OpenLDAP Server # Add ldif data', timeout: 100000, callback: (ctx, next) ->
+    exports.push name: 'OpenLDAP Server # Add ldif data', timeout: 100000, callback: (ctx, next) ->
       {root_dn, root_password, ldapadd} = ctx.config.openldap_server
       return next() unless ldapadd.length
       modified = 0

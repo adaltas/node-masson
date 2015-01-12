@@ -15,12 +15,12 @@ Resources:
 *   [Replication](http://tldp.org/HOWTO/Kerberos-Infrastructure-HOWTO/server-replication.html)
 *   [Kerberos with LDAP backend on ubuntu](http://labs.opinsys.com/blog/2010/02/05/setting-up-openldap-kerberos-on-ubuntu-10-04-lucid/)
 
-    module.exports = []
-    module.exports.push 'masson/bootstrap'
-    module.exports.push 'masson/core/openldap_client'
-    module.exports.push 'masson/core/iptables'
-    module.exports.push 'masson/core/yum'
-    module.exports.push require('./index').configure
+    exports = module.exports = []
+    exports.push 'masson/bootstrap'
+    exports.push 'masson/core/openldap_client'
+    exports.push 'masson/core/iptables'
+    exports.push 'masson/core/yum'
+    exports.push require('./index').configure
     safe_etc_krb5_conf = require('./index').safe_etc_krb5_conf
 
 ## IPTables
@@ -34,7 +34,7 @@ Resources:
 IPTables rules are only inserted if the parameter "iptables.action" is set to 
 "start" (default value).
 
-    module.exports.push name: 'Krb5 Server # IPTables', callback: (ctx, next) ->
+    exports.push name: 'Krb5 Server # IPTables', callback: (ctx, next) ->
       {kdc_conf} = ctx.config.krb5
       rules = []
       add_default_kadmind_port = false
@@ -67,12 +67,12 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
         if: ctx.config.iptables.action is 'start'
       , next
 
-    module.exports.push name: 'Krb5 Server # LDAP Install', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Krb5 Server # LDAP Install', timeout: -1, callback: (ctx, next) ->
       ctx.service
         name: 'krb5-server-ldap'
       , next
 
-    module.exports.push name: 'Krb5 Server # LDAP Configuration', timeout: 100000, callback: (ctx, next) ->
+    exports.push name: 'Krb5 Server # LDAP Configuration', timeout: 100000, callback: (ctx, next) ->
       {etc_krb5_conf} = ctx.config.krb5
       ctx.ini
         content: safe_etc_krb5_conf etc_krb5_conf
@@ -81,7 +81,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
         backup: true
       , next
 
-    module.exports.push name: 'Krb5 Server # Install', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Krb5 Server # Install', timeout: -1, callback: (ctx, next) ->
       ctx.log 'Install krb5kdc and kadmin services'
       ctx.service [
         name: 'krb5-pkinit-openssl'
@@ -99,7 +99,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
         name: 'krb5-workstation'
       ], next
 
-    module.exports.push name: 'Krb5 Server # Configure', timeout: 100000, callback: (ctx, next) ->
+    exports.push name: 'Krb5 Server # Configure', timeout: 100000, callback: (ctx, next) ->
       {realm, etc_krb5_conf, kdc_conf} = ctx.config.krb5
       modified = false
       exists = false
@@ -177,7 +177,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
           next err, true
       do_exists()
 
-    module.exports.push name: 'Krb5 Server # LDAP Insert Entries', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Krb5 Server # LDAP Insert Entries', timeout: -1, callback: (ctx, next) ->
       {kdc_conf} = ctx.config.krb5
       modified = false
       each(kdc_conf.realms)
@@ -212,7 +212,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
       .on 'both', (err) ->
         next err, modified
 
-    module.exports.push name: 'Krb5 Server # LDAP Stash password', callback: (ctx, next) ->
+    exports.push name: 'Krb5 Server # LDAP Stash password', callback: (ctx, next) ->
       {kdc_conf} = ctx.config.krb5
       modified = false
       each(kdc_conf.dbmodules)
@@ -265,7 +265,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
       .on 'both', (err) ->
         next err, modified
 
-    module.exports.push name: 'Krb5 Server # Log', timeout: 100000, callback: (ctx, next) ->
+    exports.push name: 'Krb5 Server # Log', timeout: 100000, callback: (ctx, next) ->
       modified = false
       touch = ->
         ctx.log 'Touch "/etc/logrotate.d/krb5kdc" and "/etc/logrotate.d/kadmind"'
@@ -318,7 +318,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
         next err, modified
       touch()
 
-    module.exports.push name: 'Krb5 Server # Admin principal', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Krb5 Server # Admin principal', timeout: -1, callback: (ctx, next) ->
       {etc_krb5_conf, kdc_conf} = ctx.config.krb5
       modified = false
       each(etc_krb5_conf.realms)
@@ -344,7 +344,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
     # script to handle multiple kadmin server. Note, for `killproc` to stop
     # all instances, it seems that we need to set multiple pid files, here
     # a exemple: `/usr/sbin/kadmind -r USERS.ADALTAS.COM -P /var/run/kadmind1.pid`
-    # module.exports.push name: 'Krb5 Server # Startup', timeout: 100000, callback: (ctx, next) ->
+    # exports.push name: 'Krb5 Server # Startup', timeout: 100000, callback: (ctx, next) ->
     #   {kdc_conf} = ctx.config.krb5
     #   write = []
     #   write.push match: /^(\s+)(daemon\s+.*)/mg, replace: "$1#$2"
@@ -357,7 +357,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
     #   , (err, modified) ->
     #     next err, if modified then ctx.OK else ctx.PASS
 
-    module.exports.push name: 'Krb5 Server # Start', timeout: 100000, callback: (ctx, next) ->
+    exports.push name: 'Krb5 Server # Start', timeout: 100000, callback: (ctx, next) ->
       ctx.service [
         srv_name: 'krb5kdc'
         action: 'start'

@@ -1,11 +1,11 @@
 
 # Virtual Box
 
-    module.exports = []
-    module.exports.push 'masson/bootstrap'
-    module.exports.push 'masson/core/curl'
+    exports = module.exports = []
+    exports.push 'masson/bootstrap'
+    exports.push 'masson/core/curl'
 
-    module.exports.push name: 'VirtualBox # Guest Additions', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'VirtualBox # Guest Additions', timeout: -1, callback: (ctx, next) ->
       ctx.execute
         ssh: false
         cmd: 'VBoxManage -v'

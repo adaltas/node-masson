@@ -1,7 +1,7 @@
 
 # OpenLDAP Server
 
-    module.exports = []
+    exports = module.exports = []
 
 ## Configuration
 
@@ -36,13 +36,13 @@ and should correspond to "openldap_server.config_password".
       else
         openldap_server.url = "ldap://#{ctx.config.host}"
 
-    module.exports.push commands: 'install', modules: [
+    exports.push commands: 'install', modules: [
       'masson/core/openldap_server/install'
       'masson/core/openldap_server/start'
     ]
 
-    module.exports.push commands: 'start', modules: 'masson/core/openldap_server/start'
+    exports.push commands: 'start', modules: 'masson/core/openldap_server/start'
 
-    module.exports.push commands: 'stop', modules: 'masson/core/openldap_server/stop'
+    exports.push commands: 'stop', modules: 'masson/core/openldap_server/stop'
 
 
