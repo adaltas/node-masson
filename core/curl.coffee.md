@@ -17,6 +17,8 @@ command is designed to work without user interaction.
     module.exports.push 'masson/core/users'
     module.exports.push 'masson/core/yum'
     module.exports.push 'masson/core/proxy'
+    module.exports.push require('./users').configure
+    module.exports.push require('./proxy').configure
 
 ## Configuration
 
@@ -63,8 +65,6 @@ command is designed to work without user interaction.
 ```
 
     module.exports.push (ctx) ->
-      require('./users').configure ctx
-      require('./proxy').configure ctx
       ctx.config.curl ?= {}
       {curl} = ctx.config
       curl.merge ?= true
