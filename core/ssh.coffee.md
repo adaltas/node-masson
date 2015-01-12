@@ -12,6 +12,7 @@ layout: module
     module.exports.push 'masson/bootstrap'
     module.exports.push 'masson/core/users'
     module.exports.push 'masson/core/yum'
+    module.exports.push require('./users').configure
 
 ## Configuration
 
@@ -58,7 +59,6 @@ two new properties "sshd\_config" and "banner".
 ```
 
     module.exports.push (ctx) ->
-      require('./users').configure ctx
       ctx.config.ssh ?= {}
       ctx.config.ssh.sshd_config ?= null
       for _, user of ctx.config.users
