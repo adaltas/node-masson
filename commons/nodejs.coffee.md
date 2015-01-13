@@ -15,7 +15,6 @@ home of each users.
     exports.push 'masson/bootstrap'
     exports.push 'masson/commons/git'
     exports.push 'masson/core/users'
-    exports.push require('../core/proxy').configure
 
 ## Configuration
 
@@ -48,6 +47,7 @@ Example:
 ```
 
     exports.push (ctx, next) ->
+      require('../core/proxy').configure ctx
       ctx.config.nodejs ?= {}
       ctx.config.nodejs.version ?= 'stable'
       ctx.config.nodejs.merge ?= true

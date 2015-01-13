@@ -4,9 +4,9 @@
     url = require 'url'
     exports = module.exports = []
     exports.push 'masson/bootstrap'
-    exports.push require('../core/proxy').configure
 
     exports.push (ctx) ->
+      require('../core/proxy').configure ctx
       ctx.config.rar ?= {}
       ctx.config.rar.proxy = ctx.config.proxy.http_proxy if typeof ctx.config.rar.proxy is 'undefined'
       ctx.config.rar ?= {}

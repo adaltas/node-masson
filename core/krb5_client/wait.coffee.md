@@ -18,7 +18,7 @@ Wait for all the Kerberos servers referenced by the client configuration.
         # continue if default_realm isnt realm
         [host, port] = config.admin_server.split ':'
         host: host, port: port or 749
-      ctx.waitIsOpen servers, (err) -> next err
+      ctx.waitIsOpen servers, next
 
 ## Wait Admin
 
@@ -36,7 +36,7 @@ Wait for the admin interface to be ready by issuing the command `listprincs`.
           kadmin_password: kadmin_password
           kadmin_server: admin_server
         , 'listprincs'
-      ctx.waitForExecution cmds, (err) -> next err
+      ctx.waitForExecution cmds, next
 
 ## Module Dependencies
 

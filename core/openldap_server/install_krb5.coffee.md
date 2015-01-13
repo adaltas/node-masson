@@ -3,7 +3,6 @@
 
     exports = module.exports = []
     exports.push 'masson/bootstrap'
-    exports.push require('./index').configure
 
 ## Configuration
 
@@ -11,9 +10,10 @@ We make sure to set "ldap_admin" which isn't present in
 force mode.
 
     exports.push module.exports.configure = (ctx) ->
+      require('./index').configure ctx
       # Normalization
-      @config.openldap_server_krb5 ?= {}
-      {openldap_server, openldap_server_krb5} = @config
+      ctx.config.openldap_server_krb5 ?= {}
+      {openldap_server, openldap_server_krb5} = ctx.config
       openldap_server_krb5.kerberos_dn ?= "ou=kerberos,#{openldap_server.suffix}"
       # Configure openldap_server_krb5
       # {admin_group, users_dn, groups_dn, admin_user} = openldap_server_krb5

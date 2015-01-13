@@ -7,7 +7,6 @@
     exports.push 'masson/bootstrap'
     exports.push 'masson/core/iptables'
     exports.push 'masson/commons/mysql_client' # Install the mysql driver
-    exports.push require('../core/iptables').configure
 
 ## Configure
 
@@ -40,6 +39,7 @@ Default configuration:
 ```
 
     exports.push module.exports.configure = (ctx) ->
+      require('../core/iptables').configure ctx
       ctx.config.mysql_server ?= {}
       # User SQL
       ctx.config.mysql_server.sql_on_install ?= []

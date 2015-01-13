@@ -6,7 +6,6 @@ Domain Name System (DNS) server, part of the BIND 9 distribution f
 rom ISC.
 
     exports = module.exports = []
-    exports.push require('../iptables').configure
 
 ## Configuration
 
@@ -21,6 +20,7 @@ rom ISC.
 See the the "resources section" for additional information.
 
     module.exports.configure = (ctx) ->
+      require('../iptables').configure ctx
       ctx.config.bind_server ?= {}
       # User
       ctx.config.bind_server.user = name: ctx.config.bind_server.user if typeof ctx.config.bind_server.user is 'string'

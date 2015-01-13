@@ -14,7 +14,6 @@ Note, ntp is installed to encure correct date on the server or HTTPS will fail.
     exports.push 'masson/core/profile' # In case yum make use of environmental variables
     exports.push 'masson/core/proxy'
     exports.push 'masson/core/network'
-    exports.push require('./proxy').configure
     # exports.push 'masson/core/ntp' # NTP require yum to install its services
 
 ## Configuration
@@ -47,6 +46,7 @@ Examples
 ```
 
     exports.push module.exports.configure = (ctx) ->
+      require('./proxy').configure ctx
       ctx.config.yum ?= {}
       ctx.config.yum.clean ?= false
       ctx.config.yum.copy ?= null

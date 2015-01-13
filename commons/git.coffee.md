@@ -11,7 +11,6 @@ in "/etc/gitconfig" will not be created or modified.
     exports = module.exports = []
     exports.push 'masson/bootstrap'
     exports.push 'masson/core/users'
-    exports.push require('../core/proxy').configure
 
 Configuration
 -------------
@@ -60,6 +59,7 @@ any settings from the proxy action.
 ```
 
     exports.push (ctx) ->
+      require('../core/proxy').configure ctx
       {http_proxy} = ctx.config.proxy
       ctx.config.git ?= {}
       ctx.config.git.merge ?= true

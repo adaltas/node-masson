@@ -10,8 +10,6 @@ The article [SSH Kerberos Authentication Using GSSAPI and SSPI][gss_sspi]
 provides a good description on how Kerberos is negotiated by GSSAPI and SSPI.
 
     exports = module.exports = []
-    exports.push require('../krb5_client').configure
-    exports.push require('../iptables').configure
 
 ## Configuration
 
@@ -87,6 +85,8 @@ Example:
       etc_krb5_conf
 
     module.exports.configure = (ctx) ->
+      require('../krb5_client').configure ctx
+      require('../iptables').configure ctx
       {etc_krb5_conf} = ctx.config.krb5
       openldap_hosts = ctx.hosts_with_module 'masson/core/openldap_server/install_krb5'
       throw new Error "Expect at least one server with action \"masson/core/openldap_server/install_krb5\"" if openldap_hosts.length is 0
