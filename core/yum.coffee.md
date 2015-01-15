@@ -106,10 +106,11 @@ in "/etc/yum.repos.d"
 
     exports.push name: 'YUM # Repositories', timeout: -1, callback: (ctx, next) ->
       {copy, clean} = ctx.config.yum
-      return next() unless copy
+      return next() unless copy and clean
       modified = false
       basenames = []
       do_upload = ->
+        return do_clean() unless copy
         each()
         .files(copy)
         .parallel(1)
