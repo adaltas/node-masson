@@ -189,6 +189,7 @@ ctx.waitIsOpen [
             for port in server.port then servers_flatten.push host: server.host, port: port
           else
             servers_flatten.push host: server.host, port: server.port
+        return callback() unless servers_flatten.length
         each(servers_flatten)
         .parallel(true)
         .on 'item', (server, next) ->

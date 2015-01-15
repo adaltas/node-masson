@@ -2,6 +2,7 @@
 # HTTPD Web Server Status
 
     exports = module.exports = []
+    exports.push 'masson/bootstrap'
 
 ## Status
 

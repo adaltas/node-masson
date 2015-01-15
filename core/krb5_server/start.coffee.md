@@ -3,6 +3,7 @@
 
     exports = module.exports = []
     exports.push 'masson/bootstrap'
+    exports.push 'masson/core/openldap_server/wait'
 
     exports.push name: 'Kerberos Server # Start kadmin', callback: (ctx, next) ->
       ctx.service
