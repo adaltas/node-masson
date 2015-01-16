@@ -18,5 +18,9 @@
         reports = {}
       ctx.on 'middleware_stop', (err) ->
         for k, v of reports
-          writer.write if arguments.length > 1 then "#{k}: #{v}\n" else "#{k}\n"
+          writer.write if arguments.length > 1 then "#{colors.green.dim k}: #{colors.green v}\n" else "#{k}\n"
       next null, ctx.PASS
+
+# Dependencies
+
+    colors = require 'colors/safe'
