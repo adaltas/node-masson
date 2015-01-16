@@ -1,7 +1,6 @@
 
 {EventEmitter} = require 'events'
 {flatten, merge} = require './misc'
-tree = require './tree'
 
 class Context extends EventEmitter
   constructor: (@config, @command)->
