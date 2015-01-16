@@ -10,6 +10,7 @@
     "url": "git://github.com/wdavidw/node-masson.git"
   },
   "dependencies": {
+    "colors": "latest",
     "each": "latest",
     "ldapjs": "latest",
     "mecano": "latest",

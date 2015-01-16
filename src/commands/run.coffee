@@ -1,7 +1,8 @@
 
 readline = require 'readline'
 
-pad = require 'pad'
+colors = require 'colors/safe'
+pad = require 'pad/lib/colors'
 params = require '../params'
 config = require '../config'
 run = require '../run'
@@ -25,15 +26,31 @@ module.exports = ->
   multihost = params.hosts?.length isnt 1 and config.servers.length isnt 1
   times = {}
   multihost = true
+  styles =
+    fqdn: colors.cyan.dim
+    label: colors.cyan.dim
+    status_start: colors.cyan
+    status_true: colors.cyan
+    status_false: colors.cyan
+    status_skip: colors.yellow
+    status_wait: colors.cyan
+    status_error: colors.magenta
+    time: colors.cyan.dim
+    host_status_error: colors.red
+    host_status_success: colors.blue
+    final_status_error: colors.red
+    final_status_success: colors.blue
+  for k, v of config.styles
+    styles[k] = if typeof v is 'string' then colors[v] else v
   run(config, params)
   .on 'context', (ctx) ->
     ctx
     .on 'middleware_skip', () ->
       return unless ctx.middleware.name?
       line = ''
-      line += "#{pad ctx.config.host, hostlength}"
-      line += "#{pad ctx.middleware.name, 40}"
-      line += "\x1b[35m#{pad 'SKIPPED', 20}\x1b[39m"
+      line += pad "#{styles.fqdn ctx.config.host}", hostlength
+      line += pad "#{styles.label ctx.middleware.name}", 40
+      line += pad "#{styles.status_skip 'SKIPPED'}", 20
       rl.write line
       rl.write '\n'
     .on 'middleware_start', () ->
@@ -41,24 +58,22 @@ module.exports = ->
       times[ctx.config.host] = Date.now()
       return if multihost
       line = ''
-      line += "#{pad ctx.config.host, hostlength}"
-      line += "#{pad ctx.middleware.name, 40}"
-      line += "#{pad 'STARTED', 20}"
+      line += pad "#{styles.fqdn ctx.config.host}", hostlength
+      line += pad "#{styles.label ctx.middleware.name}", 40
+      line += pad "#{styles.status_start 'WORKING'}", 20
       rl.write line 
     .on 'middleware_stop', (err, status) ->
       return unless ctx.middleware.name?
       time = Date.now() - times[ctx.config.host]
       line = ''
-      line += "#{pad ctx.config.host, hostlength}"
-      line += "#{pad ctx.middleware.name, 40}"
-      statusmsg = if err then "\x1b[35m#{ctx.middleware.label_error || 'ERROR'}\x1b[39m"
+      line += pad "#{styles.fqdn ctx.config.host}", hostlength
+      line += pad "#{styles.label ctx.middleware.name}", 40
+      statusmsg = if err then "#{styles.status_error ctx.middleware.label_error or 'ERROR'}"
       else if typeof status is 'string' then status 
-      else if status then "\x1b[36m#{ctx.middleware.label_true || 'MODIFIED'}\x1b[39m"
-      else "\x1b[36m#{ctx.middleware.label_false || 'OK'}\x1b[39m"
-      line += "#{pad statusmsg, 20}"
-      line += "#{print_time time}"
-      # rl.write line
-      # rl.write '\n'
+      else if status then "#{styles.status_true ctx.middleware.label_true or 'MODIFIED'}"
+      else "#{styles.status_false ctx.middleware.label_false or 'OK'}"
+      line += pad "#{statusmsg}", 20
+      line += "#{styles.time print_time time}"
       rl.cursor = 0
       rl.line = ''
       rl._refreshLine() unless multihost
@@ -67,42 +82,37 @@ module.exports = ->
         rl.write '\n'
     .on 'wait', ->
       return if multihost
-      statusmsg = "\x1b[36mWAIT\x1b[39m"
       line = ''
-      line += "#{pad ctx.config.host, hostlength}"
-      line += "#{pad ctx.middleware.name, 40}"
-      line += "#{pad statusmsg, 20}"
+      line += pad "#{styles.fqdn ctx.config.host}", hostlength
+      line += pad "#{styles.label ctx.middleware.name}", 40
+      line += pad "#{styles.status_wait 'WAIT'}", 20
       rl.cursor = 0
       rl.line = ''
       rl._refreshLine()
       rl.write line
     .on 'waited', ->
       return if multihost
-      statusmsg = "\x1b[36m#{ctx.STARTED_MSG}\x1b[39m"
       line = ''
-      line += "#{pad ctx.config.host, hostlength}"
-      line += "#{pad ctx.middleware.name, 40}"
-      line += "#{pad statusmsg, 20}"
+      line += pad "#{ctx.config.host}", hostlength
+      line += pad "#{ctx.middleware.name}", 40
+      line += pad "#{styles.status_start 'WORKING'}", 20
       rl.cursor = 0
       rl.line = ''
       rl._refreshLine()
       rl.write line
-  .on 'server', (ctx, status) ->
+  .on 'server', (ctx, err) ->
     return unless config.servers.length
     line = ''
-    line += "#{pad ctx.config.host, hostlength+40}"
-    line += switch status
-      when ctx.OK then "\x1b[36m#{ctx.OK_MSG}\x1b[39m"
-      when ctx.FAILED then "\x1b[36m#{ctx.FAILED_MSG}\x1b[39m"
-      else "INVALID CODE"
+    line += pad "#{ctx.config.host}", hostlength + 40
+    line += if err then "#{styles.host_status_error 'FAILURE'}" else "#{styles.host_status_success 'SUCCESS'}"
     rl.write line
     rl.write '\n'
   .on 'end', ->
-    rl.write "\x1b[32mInstallation is finished\x1b[39m\n"
+    rl.write "#{styles.final_status_success 'Installation is finished'}\n"
     rl.close()
   .on 'error', (err) ->
     rl.write '\n'
-    rl.write "\x1b[31m#{err.stack or err.message}\x1b[39m"
+    rl.write "{styles.final_status_error err.stack or err.message}"
     rl.close()
 
 
