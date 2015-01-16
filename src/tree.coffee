@@ -10,30 +10,30 @@ load = require './load'
 Tree
 ====
 
-Build a tree with all the actions to execute from a list of modules.
+Build a tree with all the middlewares to execute from a list of modules.
 
-Action properties:
+Middleware properties:
 
--   `hidden`  Visibility of the action name
--   `name`    Name of the action
--   `module`  Module where the action is defined
--   `index`   Position of the action inside the module
+-   `hidden`  Visibility of the middleware name
+-   `name`    Name of the middleware
+-   `module`  Module where the middleware is defined
+-   `index`   Position of the middleware inside the module
 
 Example using a callback
 
     tree = require './tree'
-    tree modules, (err, actions) ->
-      util.print actions
+    tree modules, (err, middlewares) ->
+      util.print middlewares
 
 Example using the EventEmitter API:
 
-    tree.actions(modules, options)
+    tree.middlewares(modules, options)
     .on 'module', (location) ->
       util.print 'module', location
-    .on 'action', (action) ->
-      util.print 'action', action
-    .on 'end', (actions) ->
-      util.print actions
+    .on 'action', (middleware) ->
+      util.print 'middleware', middleware
+    .on 'end', (middlewares) ->
+      util.print middlewares
     .on 'error', (err) ->
       util.print err 
 ###
@@ -55,7 +55,7 @@ Options include:
 -   `fast`    Skip dependencies    
 
 ###
-Tree::actions = (options, callback) ->
+Tree::middlewares = (options, callback) ->
   if typeof options is 'function'
     callback = options
     options = {}
@@ -100,12 +100,12 @@ Tree::actions = (options, callback) ->
     for name in names
       newmodules[name] = modules[name]
     modules = newmodules
-  actions = @load_actions modules
+  middlewares = @load_middlewares modules
   if options.fast
-    actions = actions.filter (action) =>
-      return true if multimatch(action.module, options.modules).length
-      action.required
-  callback null, actions
+    middlewares = middlewares.filter (middleware) =>
+      return true if multimatch(middleware.module, options.modules).length
+      middleware.required
+  callback null, middlewares
 
 Tree::load_modules = (names) ->
   modules = {}
@@ -133,8 +133,8 @@ Tree::load_modules_install = (names) ->
   load_modules names
   modules
 
-Tree::load_actions = (modules) ->
-  actions = []
+Tree::load_middlewares = (modules) ->
+  middlewares = []
   called = {}
   load_module = (name, handlers) =>
     return if called[name]
@@ -142,15 +142,15 @@ Tree::load_actions = (modules) ->
     for handler in handlers
       for child in handler.modules
         load_module child, modules[child] or @modules[child]
-      actions.push handler if handler.callback
+      middlewares.push handler if handler.callback
   for name, module of modules
     load_module name, module
-  actions
+  middlewares
 
 ###
-Load a module and return its actions.
+Load a module and return its middlewares.
 
-Module actions when defining a string dependency may be prefixed with:  
+Module middlewares when defining a string dependency may be prefixed with:  
 
 *   "?": Load this module only if it is defined by the user in the run list.
 *   "!": Force this module to be loaded and executed, apply to "fast" mode.
@@ -166,29 +166,47 @@ Tree::load_module = (module, parent) ->
     when '?' then # nothing yet
     when '!' then required = true
   # Load the module
-  actions = load module, parent
-  actions = [actions] unless Array.isArray actions
-  for callback, i in actions
+  middlewares = load module, parent
+  middlewares = [middlewares] unless Array.isArray middlewares
+  for middleware, i in middlewares
     # Module dependencies
-    # continue if typeof callback is 'string'
-    throw Error "Module '#{module}' export an undefined action" unless callback?
-    callback = actions[i] = callback: callback if typeof callback is 'function'
-    callback = actions[i] = modules: callback if typeof callback is 'string'
-    callback.commands ?= []
-    callback.commands = [callback.commands] unless Array.isArray callback.commands
-    callback.modules ?= []
-    callback.modules = [callback.modules] unless Array.isArray callback.modules
-    if typeof callback.callback is 'string'
-      callback.modules.push callback.callback 
-      callback.callback = null
-    callback.id ?= "#{module}/#{i}"
-    callback.name ?= null
-    callback.module ?= module
-    callback.index ?= i
-    callback.skip ?= false
-    callback.required = true if required
-  @cache[module] = actions
+    # continue if typeof middleware is 'string'
+    throw Error "Module '#{module}' export an undefined middleware" unless middleware?
+    middleware = middlewares[i] = callback: middleware if typeof middleware is 'function'
+    middleware = middlewares[i] = modules: middleware if typeof middleware is 'string'
+    middleware.commands ?= []
+    middleware.commands = [middleware.commands] unless Array.isArray middleware.commands
+    middleware.modules ?= []
+    middleware.modules = [middleware.modules] unless Array.isArray middleware.modules
+    if typeof middleware.callback is 'string'
+      middleware.modules.push middleware.callback 
+      middleware.callback = null
+    middleware.id ?= "#{module}/#{i}"
+    middleware.name ?= null
+    middleware.module ?= module
+    middleware.index ?= i
+    middleware.skip ?= false
+    middleware.required = true if required
+  @cache[module] = middlewares
 
-module.exports = (modules, options, callback)->
+###
+
+Retrieve all modules:
+
+```coffee
+tree = require('tree')
+tree(modules, options).modules options, (err, modules) ->
+  console.log modules
+```
+
+Retrieve all middlewares:
+
+```coffee
+tree = require('tree')
+tree(modules, options).middlewares command: 'install', (err, modules, middlewares) ->
+  console.log modules, middlewares
+```
+###
+module.exports = (modules, options) ->
   new Tree modules
 module.exports.Tree = Tree

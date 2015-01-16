@@ -13,12 +13,12 @@ tree = require './tree'
 The execution is done in 2 passes.
 
 On the first pass, a context object is build for each server. A context is the 
-same object inject to a callback action as first argument. In a context, other 
+same object inject to a middleware as first argument. In a context, other 
 server contexts are available through the `hosts` object where keys are the 
-server name. A context object is enriched with the "actions" and "modules" 
-properties which are respectively a list of "actions" and a list of modules.
+server name. A context object is enriched with the "middlewares" and "modules" 
+properties which are respectively a list of "middlewares" and a list of modules.
 
-On the second pass, the action are executed.
+On the second pass, the middewares are executed.
 ###
 Run = (config, params) ->
   EventEmitter.call @
@@ -55,58 +55,56 @@ Run = (config, params) ->
         ctx = contexts[host]
         # ctx.run = @
         @emit 'context', ctx
-        ctx.tree.actions params, (err, actions) =>
-        # @actions host, params.command, params, (err, actions) =>
-          # return next new Error "Invalid run list: #{@params.command}" unless actions?
-          return next() unless actions?
-          # actions = actions.reverse() if params.command is 'stop'
-          actionRun = each(actions)
-          .on 'item', (action, next) =>
-            # Action
-            ctx.action = action
-            retry = if action.retry? then action.retry else 2
-            action.wait ?= 1
+        ctx.tree.middlewares params, (err, middlewares) =>
+        # @middlewares host, params.command, params, (err, middlewares) =>
+          # return next new Error "Invalid run list: #{@params.command}" unless middlewares?
+          return next() unless middlewares?
+          # middlewares = middlewares.reverse() if params.command is 'stop'
+          middlewareRun = each(middlewares)
+          .on 'item', (middleware, next) =>
+            ctx.middleware = middleware
+            retry = if middleware.retry? then middleware.retry else 2
+            middleware.wait ?= 1
             attempts = 0
             disregard_done = false
-            if action.skip
-              ctx.emit 'action_skip'
+            if middleware.skip
+              ctx.emit 'middleware_skip'
               return next()
-            ctx.emit 'action_start'
-            emit_action = (err, status) =>
-              ctx.emit 'action_end', err, status
+            ctx.emit 'middleware_start'
+            emit_middleware = (err, status) =>
+              ctx.emit 'middleware_stop', err, status
             done = (err, statusOrMsg) =>
               return if disregard_done
               clearTimeout timeout if timeout
               if err and (retry is true or ++attempts < retry)
                 ctx.log? "Get error #{err.message}, retry #{attempts} of #{retry}"
-                return setTimeout run, action.wait
-              emit_action err, statusOrMsg
+                return setTimeout run, middleware.wait
+              emit_middleware err, statusOrMsg
               next err
             run = =>
               ctx.retry = attempts
               try
-                # Synchronous action
-                if action.callback.length is 0 or action.callback.length is 1
-                  merge action, action.callback.call ctx, ctx
+                # Synchronous middleware
+                if middleware.callback.length is 0 or middleware.callback.length is 1
+                  merge middleware, middleware.callback.call ctx, ctx
                   process.nextTick ->
-                    action.timeout = -1
+                    middleware.timeout = -1
                     done()
-                # Asynchronous action
+                # Asynchronous middleware
                 else
-                  merge action, action.callback.call ctx, ctx, (err, statusOrMsg) =>
-                    # actionRun.end() if statusOrMsg is ctx.STOP
+                  merge middleware, middleware.callback.call ctx, ctx, (err, statusOrMsg) =>
                     done err, statusOrMsg
               catch e
                 retry = false # Dont retry unhandled errors
                 done e
             # Timeout, default to 100s
-            action.timeout ?= 100000
-            if action.timeout > 0
+            middleware.timeout ?= 100000
+            if middleware.timeout > 0
               timeout = setTimeout ->
                 retry = 0 # Dont retry on timeout or we risk to get the callback called multiple times
                 done new Error 'TIMEOUT'
                 disregard_done = true
-              , action.timeout
+              , middleware.timeout
             run()
           .on 'both', (err) =>
             @emit 'server', ctx, if err then ctx.FAILED else ctx.OK

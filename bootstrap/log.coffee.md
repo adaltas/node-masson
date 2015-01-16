@@ -54,14 +54,14 @@ preserve alphanumerical ordering of files.
             log.out.close()
             log.err.close()
           , 100
-        ctx.on 'action_start', (status) ->
+        ctx.on 'middleware_start', (status) ->
           date = (new Date).toISOString()
-          name = ctx.action.name || ctx.action.id
+          name = ctx.middleware.name || ctx.middleware.id
           msg = "\n#{name}\n#{pad date.length+name.length, '', '-'}\n"
           log.out.write msg
           log.out.write ">>> START #{date}\n"
           log.err.write msg
-        ctx.on 'action_end', (err, status) ->
+        ctx.on 'middleware_stop', (err, status) ->
           log.out.write ">>> END #{(new Date).toISOString()}\n"
         ctx.on 'end', ->
           log.out.write '\nFINISHED WITH SUCCESS\n'

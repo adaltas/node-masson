@@ -28,33 +28,33 @@ module.exports = ->
   run(config, params)
   .on 'context', (ctx) ->
     ctx
-    .on 'action_skip', () ->
-      return unless ctx.action.name?
+    .on 'middleware_skip', () ->
+      return unless ctx.middleware.name?
       line = ''
       line += "#{pad ctx.config.host, hostlength}"
-      line += "#{pad ctx.action.name, 40}"
+      line += "#{pad ctx.middleware.name, 40}"
       line += "\x1b[35m#{pad 'SKIPPED', 20}\x1b[39m"
       rl.write line
       rl.write '\n'
-    .on 'action_start', () ->
-      return unless ctx.action.name?
+    .on 'middleware_start', () ->
+      return unless ctx.middleware.name?
       times[ctx.config.host] = Date.now()
       return if multihost
       line = ''
       line += "#{pad ctx.config.host, hostlength}"
-      line += "#{pad ctx.action.name, 40}"
+      line += "#{pad ctx.middleware.name, 40}"
       line += "#{pad 'STARTED', 20}"
       rl.write line 
-    .on 'action_end', (err, status) ->
-      return unless ctx.action.name?
+    .on 'middleware_stop', (err, status) ->
+      return unless ctx.middleware.name?
       time = Date.now() - times[ctx.config.host]
       line = ''
       line += "#{pad ctx.config.host, hostlength}"
-      line += "#{pad ctx.action.name, 40}"
-      statusmsg = if err then "\x1b[35m#{ctx.action.label_error || 'ERROR'}\x1b[39m"
+      line += "#{pad ctx.middleware.name, 40}"
+      statusmsg = if err then "\x1b[35m#{ctx.middleware.label_error || 'ERROR'}\x1b[39m"
       else if typeof status is 'string' then status 
-      else if status then "\x1b[36m#{ctx.action.label_true || 'MODIFIED'}\x1b[39m"
-      else "\x1b[36m#{ctx.action.label_false || 'OK'}\x1b[39m"
+      else if status then "\x1b[36m#{ctx.middleware.label_true || 'MODIFIED'}\x1b[39m"
+      else "\x1b[36m#{ctx.middleware.label_false || 'OK'}\x1b[39m"
       line += "#{pad statusmsg, 20}"
       line += "#{print_time time}"
       # rl.write line
@@ -70,7 +70,7 @@ module.exports = ->
       statusmsg = "\x1b[36mWAIT\x1b[39m"
       line = ''
       line += "#{pad ctx.config.host, hostlength}"
-      line += "#{pad ctx.action.name, 40}"
+      line += "#{pad ctx.middleware.name, 40}"
       line += "#{pad statusmsg, 20}"
       rl.cursor = 0
       rl.line = ''
@@ -81,7 +81,7 @@ module.exports = ->
       statusmsg = "\x1b[36m#{ctx.STARTED_MSG}\x1b[39m"
       line = ''
       line += "#{pad ctx.config.host, hostlength}"
-      line += "#{pad ctx.action.name, 40}"
+      line += "#{pad ctx.middleware.name, 40}"
       line += "#{pad statusmsg, 20}"
       rl.cursor = 0
       rl.line = ''

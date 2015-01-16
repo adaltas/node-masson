@@ -14,9 +14,9 @@
       reports = {}
       ctx.report = (k, v) ->
         reports[k] = v
-      ctx.on 'action_start', (status) ->
+      ctx.on 'middleware_start', (status) ->
         reports = {}
-      ctx.on 'action_end', (err) ->
+      ctx.on 'middleware_stop', (err) ->
         for k, v of reports
           writer.write if arguments.length > 1 then "#{k}: #{v}\n" else "#{k}\n"
       next null, ctx.PASS
