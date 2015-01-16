@@ -14,8 +14,7 @@ Install the Mysql client.
     exports.push name: 'Mysql Client # Package', handler: (ctx, next) ->
       ctx.service
         name: 'mysql'
-      , (err, serviced) ->
-        next err, if serviced then ctx.OK else ctx.PASS
+      , next
 
 ## Connector
 
@@ -24,8 +23,7 @@ Install the Mysql JDBC driver.
     exports.push name: 'Mysql Client # Connector', timeout: -1, handler: (ctx, next) ->
       ctx.service
         name: 'mysql-connector-java'
-      , (err, serviced) ->
-        next err, if serviced then ctx.OK else ctx.PASS
+      , next
 
 
 

@@ -80,8 +80,7 @@ N is a Node.js binary management system, similar to nvm and nave.
         make install
         """
         not_if_exists: '/usr/local/bin/n'
-      , (err, executed) ->
-        next err, if executed then ctx.OK else ctx.PASS
+      , next
 
 ## Node.js Installation
 
@@ -91,10 +90,8 @@ Multiple installation of Node.js may coexist with N.
       if method is 'n'
         ctx.execute
           cmd: "n #{ctx.config.nodejs.version}"
-        , (err, executed) ->
-          next err, if executed is 0 then ctx.OK else ctx.PASS
-      else
-        console.log 'not ready'
+        , next
+      else next Error 'Method not handled'
 
 
 ## NPM configuration
@@ -118,7 +115,7 @@ module.
           modified = true if written
           next err
       .on 'both', (err) ->
-        next err, if modified then ctx.OK else ctx.PASS
+        next err, modified
 
 [nodejs]: http://www.nodejs.org
 [n]: https://github.com/visionmedia/n

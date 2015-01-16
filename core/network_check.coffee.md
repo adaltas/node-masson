@@ -60,7 +60,7 @@ Dig isn't available by default on CentOS and is installed by the
         code_skipped: 2
       , (err, valid, stdout, stderr) ->
         return next err if err
-        return next null, ctx.WARN if not valid
+        return next null, 'WARNING' if not valid
         [ip, fqdn] = stdout.split(/\s+/).filter( (entry) -> entry)
         next null, if ip is ctx.config.ip and fqdn is ctx.config.host then false else 'WARNING'
 
@@ -72,7 +72,7 @@ Dig isn't available by default on CentOS and is installed by the
         code_skipped: 2
       , (err, valid, stdout) ->
         return next err if err
-        return next null, ctx.WARN if not valid
+        return next null, 'WARNING' if not valid
         [ip, fqdn] = stdout.split(/\s+/).filter( (entry) -> entry)
         next null, if ip is ctx.config.ip and fqdn is ctx.config.host then false else 'WARNING'
 

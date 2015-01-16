@@ -185,7 +185,7 @@ Create the kerberos administrator's user.
           #   cmd: "ldapsearch -xLLLD cn=nssproxy,ou=users,dc=adaltas,dc=com -w test -bou=kerberos,ou=services,dc=adaltas,dc=com dn"
           #   code: 32
           # , (err) ->
-          #   next err, if modified then ctx.OK else ctx.PASS
+          #   next err, modified
           next err, modified
 
     exports.push name: 'OpenLDAP Kerberos # Index', handler: (ctx, next) ->

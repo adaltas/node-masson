@@ -22,8 +22,7 @@ Install the "phpldapadmin" package.
     exports.push name: 'phpLDAPadmin # Install', timeout: -1, handler: (ctx, next) ->
       ctx.service
         name: 'phpldapadmin'
-      , (err, serviced) ->
-        next err, if serviced then ctx.OK else ctx.PASS
+      , next
 
 ## Configure
 
@@ -39,12 +38,12 @@ Configure the application. The configuration file is defined by the
         destination: ctx.config.phpldapadmin.config_path
         backup: true
       , (err, written) ->
-        return next err, ctx.PASS if err or not written
+        return next err,false if err or not written
         ctx.service
           name: 'httpd'
           action: 'restart'
         , (err, serviced) ->
-          next err, ctx.OK
+          next err, true
 
 ## HTTPD
 
@@ -83,9 +82,9 @@ the "http://{host}/ldapadmin" URL path.
         backup: true
       , (err, written) ->
         return next err if err
-        return next null, ctx.PASS unless written
+        return next null, false unless written
         ctx.service
           name: 'httpd'
           action: 'restart'
         , (err, serviced) ->
-          next err, ctx.OK
+          next err, true

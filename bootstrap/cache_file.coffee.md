@@ -59,4 +59,4 @@
               if s
               then callback null, data
               else callback null, data[keys[0]]
-        next null, ctx.PASS
+        next null, false

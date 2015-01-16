@@ -89,7 +89,7 @@ Add user defined rules to IPTables.
     exports.push name: 'Iptables # Rules', timeout: -1, handler: (ctx, next) ->
       {rules, action} = ctx.config.iptables
       return next() unless action is 'start'
-      return next null, ctx.PASS unless rules.length
+      return next null, false unless rules.length
       ctx.iptables
         rules: rules
         # if: action is 'start'

@@ -176,7 +176,7 @@ property "yum.epel" to false.
 
     exports.push name: 'YUM # Update', timeout: -1, handler: (ctx, next) ->
       {update} = ctx.config.yum
-      return next null, ctx.DISABLED unless update
+      return next() unless update
       ctx.execute
         cmd: 'yum -y update'
       , (err, executed, stdout, stderr) ->
@@ -195,7 +195,7 @@ property "yum.epel" to false.
       #     serviced += s
       #     next err
       # .on 'both', (err) ->
-      #   next err, if serviced then ctx.OK else ctx.PASS
+      #   next err, serviced
 
 
 

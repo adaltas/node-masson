@@ -7,5 +7,4 @@
     exports.push name: 'Tree', timeout: -1, handler: (ctx, next) ->
       ctx.service
         name: 'tree'
-      , (err, serviced) ->
-        next err, if serviced then ctx.OK else ctx.PASS
+      , next

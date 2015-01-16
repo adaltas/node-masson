@@ -354,8 +354,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
     #   ctx.write
     #     destination: '/etc/init.d/kadmin'
     #     write: write
-    #   , (err, modified) ->
-    #     next err, if modified then ctx.OK else ctx.PASS
+    #   , next
 
     exports.push name: 'Krb5 Server # Start', timeout: 100000, handler: (ctx, next) ->
       ctx.service [

@@ -18,7 +18,7 @@
           code_skipped: 1
         , (err, executed, stdout) ->
           return next err if err
-          return next null, ctx.PASS if executed and /\d+\.\d+\.\d+/.exec(stdout)[0] is version
+          return next null, false if executed and /\d+\.\d+\.\d+/.exec(stdout)[0] is version
           ctx.log "Install latest Guest Additions #{version}"
           source = "http://download.virtualbox.org/virtualbox/#{version}/VBoxGuestAdditions_#{version}.iso"
           destination = "/tmp/VBoxGuestAdditions_#{version}.iso"
@@ -38,7 +38,7 @@
           , (err, executed, stdout, stderr) ->
             return next err if err
             ctx.reboot (err) ->
-              next err, ctx.OK
+              next err, true
         
 
 

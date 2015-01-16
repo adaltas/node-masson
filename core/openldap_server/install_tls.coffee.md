@@ -367,7 +367,7 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=adaltas,dc=com
 
     exports.push name: 'OpenLDAP Server # TLS Deploy', handler: (ctx, next) ->
       { tls, tls_ca_cert_file, tls_cert_file, tls_key_file } = ctx.config.openldap_server
-      return next null, ctx.DISABLED unless tls
+      return next() unless tls
       tls_ca_cert_filename = path.basename tls_ca_cert_file
       tls_cert_filename = path.basename tls_cert_file
       tls_key_filename = path.basename tls_key_file

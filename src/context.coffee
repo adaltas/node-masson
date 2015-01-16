@@ -4,28 +4,6 @@
 
 class Context extends EventEmitter
   constructor: (@config, @command)->
-    @PASS = 0
-    @PASS_MSG = 'STABLE' #STABLE
-    @OK = 1
-    @OK_MSG = 'OK' #SUCCESS
-    @FAILED = 2
-    @FAILED_MSG = 'ERROR' #ERROR
-    @DISABLED = 3
-    @DISABLED_MSG = 'DISABLED'
-    @TODO = 4
-    @TODO_MSG = 'TODO'
-    @STARTED = 5
-    @STARTED_MSG = 'RUNNING' #START
-    @STOP = 6
-    @STOP_MSG = 'STOPPED' # CANCELED
-    @TIMEOUT = 7
-    @TIMEOUT_MSG = 'TIMEOUT'
-    @WARN = 8
-    @WARN_MSG = 'WARNING'
-    @INAPPLICABLE = 9
-    @INAPPLICABLE_MSG = 'SKIPPED'
-    @toto = 'toto'
-    @tmp = {}
   run: (ctx, module) ->
     if typeof module is 'function'
       module.call ctx, @

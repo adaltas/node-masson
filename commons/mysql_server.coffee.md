@@ -72,8 +72,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
           { chain: 'INPUT', jump: 'ACCEPT', dport: 3306, protocol: 'tcp', state: 'NEW', comment: "MySQL" }
         ]
         if: ctx.config.iptables.action is 'start'
-      , (err, configured) ->
-        next err, if configured then ctx.OK else ctx.PASS
+      , next
 
 ## Package
 
@@ -110,7 +109,7 @@ Install the Mysql database server. Secure the temporary directory.
             modified = true if updated
             do_end()
       do_end = ->
-        next null, if modified then ctx.OK else ctx.PASS
+        next null, modified
       do_install()
 
     exports.push name: 'Mysql Server # Start', handler: (ctx, next) ->
@@ -141,7 +140,7 @@ Install the Mysql database server. Secure the temporary directory.
             modified = true if started
             do_end()
       do_end = ->
-        next null, if modified then ctx.OK else ctx.PASS
+        next null, modified
       do_start()
 
     exports.push name: 'Mysql Server # Populate', handler: (ctx, next) ->
@@ -158,7 +157,7 @@ Install the Mysql database server. Secure the temporary directory.
           modified = true if executed
           next()
       .on 'both', (err) ->
-        next err, ctx.PASS
+        next err, false
 
 ## Secure Installation
 
@@ -219,7 +218,7 @@ Remove test database and access to it? [Y/n] y
               exit = true
         stream.on 'exit', ->
           return next error if error
-          if disallow_remote_root_login then return next null, if modified then ctx.OK else ctx.PASS
+          if disallow_remote_root_login then return next null, modified
           # Note, "WITH GRANT OPTION" is required for root
           sql = """
           USE mysql;
@@ -228,8 +227,7 @@ Remove test database and access to it? [Y/n] y
           """
           ctx.execute
             cmd: "mysql -uroot -p#{password} -e \"#{escape sql}\""
-          , (err, executed) ->
-            next err, if modified then ctx.OK else ctx.PASS
+          , next
 
   
 

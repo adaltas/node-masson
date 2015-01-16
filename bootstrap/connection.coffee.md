@@ -112,7 +112,7 @@ existing key would be overwritten.
           return do_bootstrap() if err
           ctx.log "SSH connected"
           ctx.ssh = connection
-          next null, ctx.PASS
+          next null, false
       do_bootstrap = ->
         ctx.log "Connection failed, bootstrap"
         bootstrap ctx, (err, reboot) ->
@@ -135,7 +135,7 @@ existing key would be overwritten.
           return next err if err
           ctx.log "SSH connected"
           ctx.ssh = conn
-          next null, ctx.OK
+          next null, true
       do_private_key()
 
 

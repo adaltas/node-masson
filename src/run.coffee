@@ -107,7 +107,7 @@ Run = (config, params) ->
               , middleware.timeout
             run()
           .on 'both', (err) =>
-            @emit 'server', ctx, if err then ctx.FAILED else ctx.OK
+            @emit 'server', ctx, err
             if err 
             then (ctx.emit 'error', err if ctx.listeners('error').length)
             else ctx.emit 'end'

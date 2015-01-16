@@ -147,7 +147,7 @@ the command `authconfig --update --ldaploadcacert={file}`.
               modified = true if uploaded
               next()
       .on 'both', (err) ->
-        next err, if modified then ctx.OK else ctx.PASS
+        next err, modified
 
 ## Configure
 
@@ -164,7 +164,7 @@ default overwritten unless the "sssd.merge" is `true`.
         mode: 0o600
         backup: true
       , (err, written) ->
-        # return next err, ctx.PASS unless written
+        # return next err, false unless written
         options =
           # Configures the password, shadow, group, and netgroups services maps to use the SSSD module
           # https://access.redhat.com/site/documentation/en-US/Red_Hat_Enterprise_Linux/6/html/Deployment_Guide/Configuration_Options-NSS_Configuration_Options.html
@@ -193,7 +193,7 @@ default overwritten unless the "sssd.merge" is `true`.
             name: 'sssd'
             action: 'restart'
           , (err, restarted) ->
-            next err, if written then ctx.OK else ctx.PASS
+            next err, written
 
 ## Start SSSD
 
@@ -216,7 +216,7 @@ $user`. The command is only executed if a test user is defined by the
           ctx.touch
             destination: '/var/db/masson/sssd_getent_passwd'
           , (err, written) ->
-            next err, ctx.OK
+            next err, true
 
 ## Check PAM
 
@@ -230,7 +230,7 @@ user is defined by the "sssd.test_user" property.
       ctx.execute
         cmd: "su -l #{test_user} -c 'touch .masson_check_pam'"
       , (err, executed, stdout, stderr) ->
-        return next err, if executed then ctx.OK else ctx.PASS
+        return next err, executed
 
 ## Module Dependencies
 

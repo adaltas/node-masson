@@ -120,7 +120,7 @@ connection.
 
     exports.push name: 'Curl # Connection Check', handler: (ctx, next) ->
       {check, check_match, config} = ctx.config.curl
-      return next null, ctx.INAPPLICABLE unless check
+      return next() unless check
       ctx.execute
         cmd: "curl -s #{check}"
         stdout: null

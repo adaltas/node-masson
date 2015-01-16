@@ -110,7 +110,7 @@ profile initialization directory.
       #     file = path.resolve user.home, '.bash_profile'
       #     write file, next
       #   .on 'both', (err) ->
-      #     next err, if modified then ctx.OK else ctx.PASS
+      #     next err, modified
 
 
 

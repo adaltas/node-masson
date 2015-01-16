@@ -20,7 +20,7 @@
         code_skipped: 1
       , (err, installed) ->
         return next err if err
-        return next null, ctx.PASS if installed
+        return next null, false if installed
         u = url.parse rar_url
         ctx[if u.protocol is 'http:' then 'download' else 'upload']
           source: rar_url
@@ -34,7 +34,7 @@
           , (err, executed) ->
             return next err if err
             ctx.remove destination: '/tmp/rar.rpm', (err, removed) ->
-              next null, ctx.OK
+              next null, true
 
     exports.push name: 'Rar # install unrar', handler: (ctx, next) ->
       {proxy, unrar_url} = ctx.config.rar
@@ -57,4 +57,4 @@
           , (err, executed) ->
             return next err if err
             ctx.remove destination: '/tmp/unrar.rpm', (err, removed) ->
-              next null, ctx.OK
+              next null, true
