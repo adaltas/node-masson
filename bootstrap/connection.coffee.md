@@ -62,7 +62,7 @@ Example:
 }
 ```
 
-    exports.push required: true, callback: module.exports.configure = (ctx) ->
+    exports.push required: true, handler: module.exports.configure = (ctx) ->
       connection = ctx.config.connection ?= {}
       connection.username ?= 'root'
       connection.host ?= connection.ip or ctx.config.ip or ctx.config.host
@@ -88,7 +88,7 @@ its own private key by declaring the "bootstrap.private_key" option.
 However, it is important in such circumstances that we guarantee no
 existing key would be overwritten.
 
-    exports.push name: 'Bootstrap # Connection', required: true, timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Bootstrap # Connection', required: true, timeout: -1, handler: (ctx, next) ->
       {private_key, private_key_location} = ctx.config.connection
       close = -> ctx.ssh?.end()
       ctx.on 'error', close

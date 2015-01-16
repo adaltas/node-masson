@@ -74,7 +74,7 @@ any settings from the proxy action.
 
 Install the git package.
 
-    exports.push name: 'Git # Package', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Git # Package', timeout: -1, handler: (ctx, next) ->
       ctx.service
         name: 'git'
       , next
@@ -83,7 +83,7 @@ Install the git package.
 
 Deploy the git configuration.
 
-    exports.push name: 'Git # Config', callback: (ctx, next) ->
+    exports.push name: 'Git # Config', handler: (ctx, next) ->
       modified = false
       {merge, properties, global} = ctx.config.git
       work = (user, file, config, callback)->

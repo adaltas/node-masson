@@ -70,7 +70,7 @@ module.exports = (ctx, callback) ->
   #     steps = []
   #     if bootstrap.username isnt 'root' then steps.push
   #       cmd: "#{bootstrap.cmd}\n"
-  #       callback: (data, next) ->
+  #       handler: (data, next) ->
   #         stream.write "#{bootstrap.password}\n"
   #         next()
   #         # console.log data
@@ -84,29 +84,29 @@ module.exports = (ctx, callback) ->
   #         #   stream.write "#{bootstrap.password}\n"
   #     steps.push
   #       cmd: "sed -i.back 's/.*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config\n"
-  #       callback: (data, next) ->
+  #       handler: (data, next) ->
   #         next()
   #         # next() if /\[.+@.+ .+\]/.test data
   #     steps.push
   #       cmd: "mkdir -p ~/.ssh; chmod 700 ~/.ssh\n"
-  #       callback: (data, next) ->
+  #       handler: (data, next) ->
   #         next()
   #         # next() if /\[.+@.+ .+\]/.test data
   #     steps.push
   #       cmd: "echo '#{public_key}' >> ~/.ssh/authorized_keys\n"
-  #       callback: (data, next) ->
+  #       handler: (data, next) ->
   #         next()
   #         # next() if /\[.+@.+ .+\]/.test data
   #     steps.push
   #       # There is a bug in CentOS 6 / SELinux that results in all client presented certificates to be ignored when SELinux is set to Enforcing.
   #       cmd: "if [ -f /etc/selinux/config ] && grep ^SELINUX=enforcing /etc/selinux/config; then sed -i.back 's/^SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config; reboot; fi;\n" # reboot;
-  #       callback: (data, next) ->
+  #       handler: (data, next) ->
   #         next()
   #         # next() if /\[.+@.+ .+\]/.test data
   #     root_exit = if bootstrap.username isnt 'root' then 'exit\n' else ''
   #     steps.push
   #       cmd: "#{root_exit}\n"
-  #       callback: (data, next) ->
+  #       handler: (data, next) ->
   #         next()
   #         # next() if /\[.+@.+ .+\]/.test data
   #     each(steps)

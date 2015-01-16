@@ -19,15 +19,15 @@ Middleware properties:
 -   `module`  Module where the middleware is defined
 -   `index`   Position of the middleware inside the module
 
-Example using a callback
+Example returning middlewares
 
     tree = require './tree'
-    tree modules, (err, middlewares) ->
+    tree(modules).middlewares, (err, middlewares) ->
       util.print middlewares
 
 Example using the EventEmitter API:
 
-    tree.middlewares(modules, options)
+    tree(modules).middlewares(command, options)
     .on 'module', (location) ->
       util.print 'module', location
     .on 'action', (middleware) ->
@@ -142,7 +142,7 @@ Tree::load_middlewares = (modules) ->
     for handler in handlers
       for child in handler.modules
         load_module child, modules[child] or @modules[child]
-      middlewares.push handler if handler.callback
+      middlewares.push handler if handler.handler
   for name, module of modules
     load_module name, module
   middlewares
@@ -172,15 +172,15 @@ Tree::load_module = (module, parent) ->
     # Module dependencies
     # continue if typeof middleware is 'string'
     throw Error "Module '#{module}' export an undefined middleware" unless middleware?
-    middleware = middlewares[i] = callback: middleware if typeof middleware is 'function'
+    middleware = middlewares[i] = handler: middleware if typeof middleware is 'function'
     middleware = middlewares[i] = modules: middleware if typeof middleware is 'string'
     middleware.commands ?= []
     middleware.commands = [middleware.commands] unless Array.isArray middleware.commands
     middleware.modules ?= []
     middleware.modules = [middleware.modules] unless Array.isArray middleware.modules
-    if typeof middleware.callback is 'string'
-      middleware.modules.push middleware.callback 
-      middleware.callback = null
+    if typeof middleware.handler is 'string'
+      middleware.modules.push middleware.handler 
+      middleware.handler = null
     middleware.id ?= "#{module}/#{i}"
     middleware.name ?= null
     middleware.module ?= module

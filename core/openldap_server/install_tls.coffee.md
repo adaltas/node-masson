@@ -365,7 +365,7 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=adaltas,dc=com
     exports.push (ctx) ->
       ctx.config.openldap_server ?= {}
 
-    exports.push name: 'OpenLDAP Server # TLS Deploy', callback: (ctx, next) ->
+    exports.push name: 'OpenLDAP Server # TLS Deploy', handler: (ctx, next) ->
       { tls, tls_ca_cert_file, tls_cert_file, tls_key_file } = ctx.config.openldap_server
       return next null, ctx.DISABLED unless tls
       tls_ca_cert_filename = path.basename tls_ca_cert_file
@@ -429,7 +429,7 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=adaltas,dc=com
         , next
       do_upload()
 
-    exports.push name: 'OpenLDAP TLS # Activate LDAPS', callback: (ctx, next) ->
+    exports.push name: 'OpenLDAP TLS # Activate LDAPS', handler: (ctx, next) ->
       ctx.write
         match: /^SLAPD_LDAPS.*/mg
         replace: 'SLAPD_LDAPS=yes'
@@ -444,7 +444,7 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=adaltas,dc=com
 
     exports.push 'masson/core/openldap_client'
 
-    exports.push name: 'OpenLDAP Server # TLS Check', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'OpenLDAP Server # TLS Check', timeout: -1, handler: (ctx, next) ->
       { suffix, root_dn, root_password } = ctx.config.openldap_server
       ctx.execute
         cmd: "ldapsearch -x -H ldaps://#{ctx.config.host} -b #{suffix} -D #{root_dn} -w #{root_password}"

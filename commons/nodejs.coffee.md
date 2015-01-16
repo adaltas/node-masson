@@ -62,7 +62,7 @@ Example:
 
 N is a Node.js binary management system, similar to nvm and nave.
 
-    exports.push name: 'Node.js # N', timeout: 100000, callback: (ctx, next) ->
+    exports.push name: 'Node.js # N', timeout: 100000, handler: (ctx, next) ->
       # Accoring to current test, proxy env var arent used by ssh exec
       {method, http_proxy, https_proxy} = ctx.config.nodejs
       return next() unless method is 'n'
@@ -87,7 +87,7 @@ N is a Node.js binary management system, similar to nvm and nave.
 
 Multiple installation of Node.js may coexist with N.
 
-    exports.push name: 'Node.js # installation', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Node.js # installation', timeout: -1, handler: (ctx, next) ->
       if method is 'n'
         ctx.execute
           cmd: "n #{ctx.config.nodejs.version}"
@@ -102,7 +102,7 @@ Multiple installation of Node.js may coexist with N.
 Write the "~/.npmrc" file for each user defined by the "masson/core/users" 
 module.
 
-    exports.push name: 'Node.js # Npm Configuration', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Node.js # Npm Configuration', timeout: -1, handler: (ctx, next) ->
       {merge, config} = ctx.config.nodejs
       modified = false
       each(ctx.config.users)

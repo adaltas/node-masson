@@ -12,12 +12,12 @@ certificate to upload.
     exports.push 'masson/core/yum'
     exports.push require('./index').configure
 
-    exports.push name: 'OpenLDAP Client # Install', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'OpenLDAP Client # Install', timeout: -1, handler: (ctx, next) ->
       ctx.service
         name: 'openldap-clients'
       , next
 
-    exports.push name: 'OpenLDAP Client # Configure', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'OpenLDAP Client # Configure', timeout: -1, handler: (ctx, next) ->
       {config} = ctx.config.openldap_client
       write = []
       for k, v of config
@@ -48,7 +48,7 @@ mv cert.pem /etc/openldap/cacerts/$hash.0
 Certificates are temporarily uploaded to the "/tmp" folder and registered with
 the command `authconfig --update --ldaploadcacert={file}`.
 
-    exports.push name: 'OpenLDAP Client # Certificate', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'OpenLDAP Client # Certificate', timeout: -1, handler: (ctx, next) ->
       {certificates, config} = ctx.config.openldap_client
       modified = false
       each(certificates)

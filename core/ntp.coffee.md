@@ -45,7 +45,7 @@ The installation respect the procedure published on [cyberciti][cyberciti]. The
 "ntp" server is installed as a startup service and `ntpdate` is run a first 
 time when the `ntpd` daemon isnt yet started.
 
-    exports.push name: 'NTP # Install', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'NTP # Install', timeout: -1, handler: (ctx, next) ->
       {servers} = ctx.config.ntp
       ctx.service
         name: 'ntp'
@@ -67,7 +67,7 @@ The configuration file "/etc/ntp.conf" is updated with the list of servers
 defined by the "ntp.servers" property. The "ntp" service is restarted if any
 change to this file is detected.
 
-    exports.push name: 'NTP # Configure', callback: (ctx, next) ->
+    exports.push name: 'NTP # Configure', handler: (ctx, next) ->
       {servers, fudge} = ctx.config.ntp
       return next() unless servers?.length
       ctx.fs.readFile '/etc/ntp.conf', 'ascii', (err, content) ->
@@ -149,7 +149,7 @@ change to this file is detected.
 
 Start the `ntpd` daemon if it isnt yet running.
 
-    exports.push name: 'NTP # Start', timeout: -1, callback: (ctx, next) -> 
+    exports.push name: 'NTP # Start', timeout: -1, handler: (ctx, next) -> 
       ctx.log "Start the NTP service"
       ctx.service
         srv_name: 'ntpd'
@@ -163,7 +163,7 @@ being exectued. If the gap is greater than the one defined by the "ntp.lag"
 property, the `ntpd` daemon is stop, the `ntpdate` command is used to 
 synchronization the date and the `ntpd` daemon is finally restarted.
 
-    exports.push name: 'NTP # Check', callback: (ctx, next) ->
+    exports.push name: 'NTP # Check', handler: (ctx, next) ->
       # Here's good place to compare the date, maybe with the host maching:
       # if gap is greather than threehold, stop ntpd, ntpdate, start ntpd
       return next() if ctx.config.ntp.servers[0] is ctx.config.host

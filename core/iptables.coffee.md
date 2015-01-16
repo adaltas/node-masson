@@ -58,7 +58,7 @@ Example:
 
 The package "iptables" is installed.
 
-    exports.push name: 'Iptables # Package', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Iptables # Package', timeout: -1, handler: (ctx, next) ->
       {action, startup} = ctx.config.iptables
       ctx.service
         name: 'iptables'
@@ -70,7 +70,7 @@ The package "iptables" is installed.
 
 Redirect input logs in "/var/log/messages".
 
-    exports.push name: 'Iptables # Log', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Iptables # Log', timeout: -1, handler: (ctx, next) ->
       {action, log, log_rules} = ctx.config.iptables
       return next() if action isnt 'start' or log is false
       ctx.iptables
@@ -86,7 +86,7 @@ Redirect input logs in "/var/log/messages".
 
 Add user defined rules to IPTables.
 
-    exports.push name: 'Iptables # Rules', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Iptables # Rules', timeout: -1, handler: (ctx, next) ->
       {rules, action} = ctx.config.iptables
       return next() unless action is 'start'
       return next null, ctx.PASS unless rules.length

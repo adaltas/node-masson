@@ -40,7 +40,7 @@ mechanism implemented in the kernel.
 
 This action update the configuration file present in "/etc/selinux/config".
 
-    exports.push name: 'Security # SELinux', callback: (ctx, next) ->
+    exports.push name: 'Security # SELinux', handler: (ctx, next) ->
       {selinux} = ctx.config.security
       if selinux
         from = 'disabled'
@@ -71,7 +71,7 @@ cat /etc/security/limits.d/90-nproc.conf
 root       soft    nproc     unlimited
 ```
 
-    exports.push name: 'Security # Limits', callback: (ctx, next) ->
+    exports.push name: 'Security # Limits', handler: (ctx, next) ->
       {limits} = ctx.config.security
       writes = for filename, content of limits
         destination: "/etc/security/limits.d/#{filename}"

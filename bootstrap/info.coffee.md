@@ -14,7 +14,7 @@ Expose system information. On execution, the context is enriched with the
 properties "kernel\_name", "nodename", "kernel\_release", "kernel\_version", 
 "processor" and "operating_system".
 
-    exports.push name: 'Bootstrap # Server Info', required: true, callback: (ctx, next) ->
+    exports.push name: 'Bootstrap # Server Info', required: true, handler: (ctx, next) ->
       mecano.execute
         ssh: ctx.ssh
         cmd: 'uname -snrvmo'
@@ -41,7 +41,7 @@ result of "/proc/cpuinfo".
 Here's how to use it inside a module:
 
 ```coffee
-module.export = name: 'My Module', callback: (ctx) ->
+module.export = name: 'My Module', handler: (ctx) ->
   console.log ctx.cpuinfo
 ```
 
@@ -69,7 +69,7 @@ It will output:
 ]
 ```
 
-    exports.push name: 'Bootstrap # CPU Info', required: true, callback: (ctx, next) ->
+    exports.push name: 'Bootstrap # CPU Info', required: true, handler: (ctx, next) ->
       mecano.execute
         ssh: ctx.ssh
         cmd: 'cat /proc/cpuinfo'
@@ -99,7 +99,7 @@ result of "/proc/meminfo". All the values are in bytes.
 Here's how to use it inside a module:
 
 ```coffee
-module.export = name: 'My Module', callback: (ctx) ->
+module.export = name: 'My Module', handler: (ctx) ->
   console.log JSON.stringify ctx.meminfo
 ```
 
@@ -121,7 +121,7 @@ It will output:
   "Hugepagesize":2048000,"DirectMap4k":8128000,"DirectMap2M":1040384000}
 ```
 
-    exports.push name: 'Bootstrap # Mem Info', required: true, callback: (ctx, next) ->
+    exports.push name: 'Bootstrap # Mem Info', required: true, handler: (ctx, next) ->
       mecano.execute
         ssh: ctx.ssh
         cmd: 'cat /proc/meminfo'

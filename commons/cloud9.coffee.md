@@ -13,21 +13,21 @@
       ctx.config.cloud9.github ?= 'https://github.com/ajaxorg/cloud9.git'
       ctx.config.cloud9.proxy ?= ctx.config.proxy
 
-    exports.push name: 'Cloud9 # libxml2', callback: (ctx, next) ->
+    exports.push name: 'Cloud9 # libxml2', handler: (ctx, next) ->
       {proxy} = ctx.config.cloud9
       return next() if proxy
       ctx.service
         name: 'libxml2-devel'
       , next
 
-    exports.push name: 'Cloud9 # SM', callback: (ctx, next) ->
+    exports.push name: 'Cloud9 # SM', handler: (ctx, next) ->
       {proxy} = ctx.config.cloud9
       return next() if proxy
       ctx.execute
         cmd: 'npm install -g sm'
       , next
 
-    exports.push name: 'Cloud9 # Git', callback: (ctx, next) ->
+    exports.push name: 'Cloud9 # Git', handler: (ctx, next) ->
       {proxy, path, github} = ctx.config.cloud9
       return next() if proxy
       ctx.git
@@ -35,7 +35,7 @@
         destination: "/usr/lib/#{path}"
       , next
 
-    exports.push name: 'Cloud9 # Install', callback: (ctx, next) ->
+    exports.push name: 'Cloud9 # Install', handler: (ctx, next) ->
       {proxy} = ctx.config.cloud9
       return next() if proxy
       # TODO: detect previous install of sm

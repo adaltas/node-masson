@@ -11,7 +11,7 @@ Install the MySQL command-line tool.
 
 Install the Mysql client.
 
-    exports.push name: 'Mysql Client # Package', callback: (ctx, next) ->
+    exports.push name: 'Mysql Client # Package', handler: (ctx, next) ->
       ctx.service
         name: 'mysql'
       , (err, serviced) ->
@@ -21,7 +21,7 @@ Install the Mysql client.
 
 Install the Mysql JDBC driver.
 
-    exports.push name: 'Mysql Client # Connector', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Mysql Client # Connector', timeout: -1, handler: (ctx, next) ->
       ctx.service
         name: 'mysql-connector-java'
       , (err, serviced) ->

@@ -19,7 +19,7 @@ installation, the web application will be accessible at the following URL:
 
 Install the "phpldapadmin" package.
 
-    exports.push name: 'phpLDAPadmin # Install', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'phpLDAPadmin # Install', timeout: -1, handler: (ctx, next) ->
       ctx.service
         name: 'phpldapadmin'
       , (err, serviced) ->
@@ -30,7 +30,7 @@ Install the "phpldapadmin" package.
 Configure the application. The configuration file is defined by the
 "phpldapadmin.config_path" property (default to "/etc/phpldapadmin/config.php").
 
-    exports.push name: 'phpLDAPadmin # Configure', callback: (ctx, next) ->
+    exports.push name: 'phpLDAPadmin # Configure', handler: (ctx, next) ->
       ctx.write
         write: [
           {match: /^(\/\/)(.*'login','attr','dn'.*)$/m, replace: '$2'}
@@ -53,7 +53,7 @@ by the "phpldapadmin.config_httpd_path" property (default to
 "/etc/httpd/conf.d/phpldapadmin.conf") and made the application visible under
 the "http://{host}/ldapadmin" URL path.
 
-    exports.push name: 'phpLDAPadmin # HTTPD', callback: (ctx, next) ->
+    exports.push name: 'phpLDAPadmin # HTTPD', handler: (ctx, next) ->
       ctx.write
         destination: ctx.config.phpldapadmin.config_httpd_path
         write: [

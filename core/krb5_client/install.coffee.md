@@ -21,7 +21,7 @@ Institute of Technology](http://web.mit.edu).
 
 The package "krb5-workstation" is installed.
 
-    exports.push name: 'Krb5 Client # Install', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Krb5 Client # Install', timeout: -1, handler: (ctx, next) ->
       ctx.service
         name: 'krb5-workstation'
       , next
@@ -34,7 +34,7 @@ This is to avoid any conflict where both modules would try to write
 their own configuration one. We give the priority to the server module 
 which create a Kerberos file with complementary information.
 
-    exports.push name: 'Krb5 Client # Configure', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Krb5 Client # Configure', timeout: -1, handler: (ctx, next) ->
       # Kerberos config is also managed by the kerberos server action.
       ctx.log 'Check who manage /etc/krb5.conf'
       return next() if ctx.has_module 'masson/core/krb5_server'
@@ -52,7 +52,7 @@ Create a user principal for this host. The principal is named like
 ("krb5.etc\_krb5\_conf.libdefaults.default_realm") unless the property
 "etc_krb5_conf[realm].create\_hosts" is set.
 
-    exports.push name: 'Krb5 Client # Host Principal', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Krb5 Client # Host Principal', timeout: -1, handler: (ctx, next) ->
       {etc_krb5_conf} = ctx.config.krb5
       default_realm = etc_krb5_conf.libdefaults.default_realm
       modified = false
@@ -90,7 +90,7 @@ Populate the Kerberos database with new principals. The "wait" property is
 set to 10s because multiple instance of this handler may try to create the same
 principals and generate concurrency errors.
 
-    exports.push name: 'Krb5 Client # Principals', wait: 10000, callback: (ctx, next) ->
+    exports.push name: 'Krb5 Client # Principals', wait: 10000, handler: (ctx, next) ->
       {etc_krb5_conf} = ctx.config.krb5
       modified = false
       utils = require 'util'
@@ -119,7 +119,7 @@ configuration object. By default, we set the following properties to "yes": "Cha
 "KerberosAuthentication", "KerberosOrLocalPasswd", "KerberosTicketCleanup", "GSSAPIAuthentication", 
 "GSSAPICleanupCredentials". The "sshd" service will be restarted if a change to the configuration is detected.
 
-    exports.push name: 'Krb5 Client # Configure SSHD', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Krb5 Client # Configure SSHD', timeout: -1, handler: (ctx, next) ->
       {sshd} = ctx.config.krb5
       return next() unless sshd
       write = for k, v of sshd

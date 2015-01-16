@@ -58,7 +58,7 @@ enriched with the cluster hostname if the property "network.hosts_auto" is
 set. Set the "network.hosts_disabled" to "true" if you dont wish to overwrite
 this file.
 
-    exports.push name: 'Network # Hosts', callback: (ctx, next) ->
+    exports.push name: 'Network # Hosts', handler: (ctx, next) ->
       {hosts, hosts_auto} = ctx.config.network
       # content = ''
       write = []
@@ -87,7 +87,7 @@ this file.
 Declare the server hostname. On CentOs like system, the 
 relevant file is "/etc/sysconfig/network".
 
-    exports.push name: 'Network # Hostname', callback: (ctx, next) ->
+    exports.push name: 'Network # Hostname', handler: (ctx, next) ->
       {hostname, network} = ctx.config
       return next() if network.hostname_disabled
       ctx.write
@@ -110,7 +110,7 @@ is a set of routines in the C library that provide
 access to the Internet Domain Name System (DNS). The
 configuration file is considered a trusted source of DNS information.
 
-    exports.push name: 'Network # DNS Resolver', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Network # DNS Resolver', timeout: -1, handler: (ctx, next) ->
       {resolv} = ctx.config.network
       return next() unless resolv
       # nameservers = []

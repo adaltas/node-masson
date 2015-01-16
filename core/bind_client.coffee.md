@@ -13,7 +13,7 @@ nslookup, dig and host.
 
 The package "bind-utils" is installed.
 
-    exports.push name: 'Bind Client # Install', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Bind Client # Install', timeout: -1, handler: (ctx, next) ->
       ctx.service
         name: 'bind-utils'
       , next

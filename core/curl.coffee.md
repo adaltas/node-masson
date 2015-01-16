@@ -78,7 +78,7 @@ Deploy the "~/.curlrc" file to each users. Set the property `curl.users` to
 false to disable this action to run. For the configuration file to be uploaded, 
 the user must have a `user.home` property.
 
-    exports.push name: 'Curl # User Configuration', callback: (ctx, next) ->
+    exports.push name: 'Curl # User Configuration', handler: (ctx, next) ->
       ok = false
       {merge, users, config} = ctx.config.curl
       return next() unless users
@@ -107,7 +107,7 @@ the user must have a `user.home` property.
 Install the "curl" package. Note, on some plateform like CentOS, `curl` is 
 already installed.
 
-    exports.push name: 'Curl # Install', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Curl # Install', timeout: -1, handler: (ctx, next) ->
       # On centOS, curl is already here
       ctx.service
         name: 'curl'
@@ -118,7 +118,7 @@ already installed.
 Check a remote call. This action is commonly activated to validate the Internet
 connection.
 
-    exports.push name: 'Curl # Connection Check', callback: (ctx, next) ->
+    exports.push name: 'Curl # Connection Check', handler: (ctx, next) ->
       {check, check_match, config} = ctx.config.curl
       return next null, ctx.INAPPLICABLE unless check
       ctx.execute

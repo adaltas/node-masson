@@ -15,7 +15,7 @@
 Install the `docker-io` package and configure it as a startup and started
 service.
 
-    exports.push name: 'Docker # Service', callback: (ctx, next) ->
+    exports.push name: 'Docker # Service', handler: (ctx, next) ->
       ctx.service
         name: 'docker'
         yum_name: 'docker-io'
@@ -27,7 +27,7 @@ service.
 
 Get the PID of a docker container by name or ID.
 
-    exports.push name: 'Docker # Install docker-pid', callback: (ctx, next) ->
+    exports.push name: 'Docker # Install docker-pid', handler: (ctx, next) ->
       ctx.write
         content: """
         #!/bin/sh
@@ -41,7 +41,7 @@ Get the PID of a docker container by name or ID.
 
 Get the ip address of a container by name or ID.
 
-    exports.push name: 'Docker # Install docker-ip', callback: (ctx, next) ->
+    exports.push name: 'Docker # Install docker-ip', handler: (ctx, next) ->
       ctx.write
         content: """
         #!/bin/sh
@@ -59,7 +59,7 @@ recipe to build nsenter easily and install it in your system. Check
 
 The recipe also install the `docker-enter` command.
 
-    exports.push name: 'Docker # Install nsenter', callback: (ctx, next) ->
+    exports.push name: 'Docker # Install nsenter', handler: (ctx, next) ->
       ctx.execute
         cmd: """
         docker run -v /usr/local/bin:/target jpetazzo/nsenter

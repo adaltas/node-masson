@@ -66,7 +66,7 @@ Default configuration:
 IPTables rules are only inserted if the parameter "iptables.action" is set to 
 "start" (default value).
 
-    exports.push name: 'Mysql Server # IPTables', callback: (ctx, next) ->
+    exports.push name: 'Mysql Server # IPTables', handler: (ctx, next) ->
       ctx.iptables
         rules: [
           { chain: 'INPUT', jump: 'ACCEPT', dport: 3306, protocol: 'tcp', state: 'NEW', comment: "MySQL" }
@@ -79,7 +79,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
 
 Install the Mysql database server. Secure the temporary directory.
 
-    exports.push name: 'Mysql Server # Package', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'Mysql Server # Package', timeout: -1, handler: (ctx, next) ->
       {my_cnf} = ctx.config.mysql_server
       modified = false
       do_install = ->
@@ -113,7 +113,7 @@ Install the Mysql database server. Secure the temporary directory.
         next null, if modified then ctx.OK else ctx.PASS
       do_install()
 
-    exports.push name: 'Mysql Server # Start', callback: (ctx, next) ->
+    exports.push name: 'Mysql Server # Start', handler: (ctx, next) ->
       modified = false
       do_start = ->
         ctx.service
@@ -144,7 +144,7 @@ Install the Mysql database server. Secure the temporary directory.
         next null, if modified then ctx.OK else ctx.PASS
       do_start()
 
-    exports.push name: 'Mysql Server # Populate', callback: (ctx, next) ->
+    exports.push name: 'Mysql Server # Populate', handler: (ctx, next) ->
       {sql_on_install} = ctx.config.mysql_server
       each(sql_on_install)
       .on 'item', (sql, next) ->
@@ -170,7 +170,7 @@ Remove anonymous users? [Y/n] y
 Disallow root login remotely? [Y/n] n
 Remove test database and access to it? [Y/n] y
 
-    exports.push name: 'Mysql Server # Secure', callback: (ctx, next) ->
+    exports.push name: 'Mysql Server # Secure', handler: (ctx, next) ->
       {current_password, password, remove_anonymous, disallow_remote_root_login, remove_test_db, reload_privileges} = ctx.config.mysql_server
       test_password = true
       modified = false

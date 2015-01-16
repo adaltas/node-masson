@@ -85,14 +85,14 @@ Run = (config, params) ->
               ctx.retry = attempts
               try
                 # Synchronous middleware
-                if middleware.callback.length is 0 or middleware.callback.length is 1
-                  merge middleware, middleware.callback.call ctx, ctx
+                if middleware.handler.length is 0 or middleware.handler.length is 1
+                  merge middleware, middleware.handler.call ctx, ctx
                   process.nextTick ->
                     middleware.timeout = -1
                     done()
                 # Asynchronous middleware
                 else
-                  merge middleware, middleware.callback.call ctx, ctx, (err, statusOrMsg) =>
+                  merge middleware, middleware.handler.call ctx, ctx, (err, statusOrMsg) =>
                     done err, statusOrMsg
               catch e
                 retry = false # Dont retry unhandled errors
@@ -101,7 +101,7 @@ Run = (config, params) ->
             middleware.timeout ?= 100000
             if middleware.timeout > 0
               timeout = setTimeout ->
-                retry = 0 # Dont retry on timeout or we risk to get the callback called multiple times
+                retry = 0 # Dont retry on timeout or we risk to get the handler called multiple times
                 done new Error 'TIMEOUT'
                 disregard_done = true
               , middleware.timeout

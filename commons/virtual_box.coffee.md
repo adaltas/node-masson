@@ -5,7 +5,7 @@
     exports.push 'masson/bootstrap'
     exports.push 'masson/core/curl'
 
-    exports.push name: 'VirtualBox # Guest Additions', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'VirtualBox # Guest Additions', timeout: -1, handler: (ctx, next) ->
       ctx.execute
         ssh: false
         cmd: 'VBoxManage -v'

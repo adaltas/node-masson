@@ -31,7 +31,7 @@ Example:
 
 Upload all the configured scripts.
 
-    exports.push name: 'Profile # Upload', callback: (ctx, next) ->
+    exports.push name: 'Profile # Upload', handler: (ctx, next) ->
       writes = for filename, content of ctx.config.profile
         destination: "/etc/profile.d/#{filename}"
         content: content

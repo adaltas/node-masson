@@ -11,7 +11,7 @@ GNU project C and C++ compiler.
 
 The package "gcc-c++" is installed.
 
-    exports.push name: 'GCC # Install', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'GCC # Install', timeout: -1, handler: (ctx, next) ->
       ctx.service
         name: 'gcc-c++'
       , next

@@ -3,13 +3,13 @@
 
     exports = module.exports = []
 
-    exports.push required: true, callback: (ctx) ->
+    exports.push required: true, handler: (ctx) ->
       report = ctx.config.report ?= {}
       report.writer ?= {}
       report.writer.write ?= (data) ->
         process.stdout.write data
 
-    exports.push name: 'Bootstrap # Report Console', required: true, callback: (ctx, next) ->
+    exports.push name: 'Bootstrap # Report Console', required: true, handler: (ctx, next) ->
       {writer} = ctx.config.report
       reports = {}
       ctx.report = (k, v) ->

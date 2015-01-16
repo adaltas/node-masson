@@ -36,7 +36,7 @@ After this call, the follwing command should execute with success:
 ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=com -w test
 ```
 
-    exports.push name: 'OpenLDAP ACL # Permissions for nssproxy', callback: (ctx, next) ->
+    exports.push name: 'OpenLDAP ACL # Permissions for nssproxy', handler: (ctx, next) ->
       {suffix} = ctx.config.openldap_server
       ctx.ldap_acl
         suffix: suffix
@@ -66,7 +66,7 @@ ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=co
         ]
       , next
 
-    exports.push name: 'OpenLDAP ACL # Insert User', callback: (ctx, next) ->
+    exports.push name: 'OpenLDAP ACL # Insert User', handler: (ctx, next) ->
       # Keeping this as an example but we dont need it here since this module
       # is always run next to the OpenLDAP server
       # host = ctx.host_with_module 'masson/core/openldap_server'
@@ -81,7 +81,7 @@ ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=co
         user: proxy_user
       ], next
 
-    exports.push name: 'OpenLDAP ACL # Insert Group', callback: (ctx, next) ->
+    exports.push name: 'OpenLDAP ACL # Insert Group', handler: (ctx, next) ->
       {url, root_dn, root_password, proxy_group} = ctx.config.openldap_server
       ctx.ldap_add [
         url: url,

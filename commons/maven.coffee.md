@@ -14,7 +14,7 @@ Currently being written, not yet registered in any config.
 
 ## Installation
 
-    exports.push name: 'Maven # Installation', callback: (ctx, next) ->
+    exports.push name: 'Maven # Installation', handler: (ctx, next) ->
       ctx.download
         source: ctx.config.maven.source
         destination: '/tmp/maven.tar.gz'

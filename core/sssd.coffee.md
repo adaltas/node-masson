@@ -97,7 +97,7 @@ Install the services defined by the "sssd.services" property. By default, the
 following service: "sssd", "sssd-client", "pam\_krb5", "pam\_ldap" and 
 "sssd-tools". It also ensures SSSD is marked as a startup service.
 
-    exports.push name: 'SSSD # Install', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'SSSD # Install', timeout: -1, handler: (ctx, next) ->
       {services} = ctx.config.sssd
       services = for name in services then name: name
       modified = true
@@ -123,7 +123,7 @@ following service: "sssd", "sssd-client", "pam\_krb5", "pam\_ldap" and
 Certificates are temporarily uploaded to the "/tmp" folder and registered with
 the command `authconfig --update --ldaploadcacert={file}`.
 
-    exports.push name: 'SSSD # Certificates', callback: (ctx, next) ->
+    exports.push name: 'SSSD # Certificates', handler: (ctx, next) ->
       {certificates} = ctx.config.sssd
       modified = false
       each(certificates)
@@ -155,7 +155,7 @@ Update the SSSD configuration file present in "/etc/sssd/sssd.conf" with the
 values defined in the "sssd.config" property. The destination file is by 
 default overwritten unless the "sssd.merge" is `true`.
 
-    exports.push name: 'SSSD # Configure', timeout: -1, callback: (ctx, next) ->
+    exports.push name: 'SSSD # Configure', timeout: -1, handler: (ctx, next) ->
       {merge, config} = ctx.config.sssd
       ctx.ini
         content: config
@@ -205,7 +205,7 @@ Check if NSS is correctly configured by executing the command `getent passwd
 $user`. The command is only executed if a test user is defined by the 
 "sssd.test_user" property.
 
-    exports.push name: 'SSSD # Check NSS', callback: (ctx, next) ->
+    exports.push name: 'SSSD # Check NSS', handler: (ctx, next) ->
       {test_user} = ctx.config.sssd
       return next() unless test_user
       ctx.fs.exists '/var/db/masson/sssd_getent_passwd', (err, exists) ->
@@ -224,7 +224,7 @@ Check if PAM is correctly configured by executing the command
 `sh -l $user -c 'touch .masson_check_pam'`. This is only executed if a test 
 user is defined by the "sssd.test_user" property.
 
-    exports.push name: 'SSSD # Check PAM', callback: (ctx, next) ->
+    exports.push name: 'SSSD # Check PAM', handler: (ctx, next) ->
       {test_user} = ctx.config.sssd
       return next() unless test_user
       ctx.execute

@@ -21,7 +21,7 @@ Dig isn't available by default on CentOS and is installed by the
 
 ## Forward Lookup
 
-    exports.push name: 'DNS # `dig` Forward Lookup', callback: (ctx, next) ->
+    exports.push name: 'DNS # `dig` Forward Lookup', handler: (ctx, next) ->
       # I didnt find how to restrict dig to return only A records like it
       # does for CNAME records if you append "cname" at the end of the command.
       # I assume the A record to always be printed on the last line.
@@ -39,7 +39,7 @@ Dig isn't available by default on CentOS and is installed by the
 
 ## Reverse Lookup
 
-    exports.push name: 'DNS # `dig` Reverse Lookup', callback: (ctx, next) ->
+    exports.push name: 'DNS # `dig` Reverse Lookup', handler: (ctx, next) ->
       ctx.execute
         cmd: "dig -x #{ctx.config.ip} +short"
         code_skipped: 1
@@ -54,7 +54,7 @@ Dig isn't available by default on CentOS and is installed by the
 
 ## Forward Lookup with getent
 
-    exports.push name: 'DNS # `getent` Forward Lookup', callback: (ctx, next) ->
+    exports.push name: 'DNS # `getent` Forward Lookup', handler: (ctx, next) ->
       ctx.execute
         cmd: "getent hosts #{ctx.config.host}"
         code_skipped: 2
@@ -66,7 +66,7 @@ Dig isn't available by default on CentOS and is installed by the
 
 ## Reverse Lookup with getent
 
-    exports.push name: 'DNS # `getent` Reverse Lookup', callback: (ctx, next) ->
+    exports.push name: 'DNS # `getent` Reverse Lookup', handler: (ctx, next) ->
       ctx.execute
         cmd: "getent hosts #{ctx.config.ip}"
         code_skipped: 2
@@ -78,7 +78,7 @@ Dig isn't available by default on CentOS and is installed by the
 
 ## Hostname
 
-    exports.push name: 'DNS # Hostname', callback: (ctx, next) ->
+    exports.push name: 'DNS # Hostname', handler: (ctx, next) ->
       ctx.execute
         cmd: "hostname"
       , (err, _, stdout) ->

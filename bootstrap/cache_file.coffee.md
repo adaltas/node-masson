@@ -12,7 +12,7 @@
       ctx.config.bootstrap.cache ?= {}
       ctx.config.bootstrap.cache.location ?= "#{process.cwd()}/tmp"
 
-    exports.push name: 'Bootstrap # File Cache', required: true, callback: (ctx, next) ->
+    exports.push name: 'Bootstrap # File Cache', required: true, handler: (ctx, next) ->
       ctx.config.bootstrap.cache ?= {}
       {location} = ctx.config.bootstrap.cache
       location = "#{location}/#{ctx.config.host}"

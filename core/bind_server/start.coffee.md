@@ -8,7 +8,7 @@
 
 Now the service being configured, the "named" service is started.
 
-    exports.push name: 'Bind Server # Start', callback: (ctx, next) ->
+    exports.push name: 'Bind Server # Start', handler: (ctx, next) ->
       ctx.service
         srv_name: 'named'
         action: 'start'

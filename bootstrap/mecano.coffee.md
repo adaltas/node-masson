@@ -30,7 +30,7 @@ ctx.execute
   ...
 ```
 
-    exports.push name: 'Bootstrap # Mecano', required: true, timeout: -1, callback:  (ctx, next) ->
+    exports.push name: 'Bootstrap # Mecano', required: true, timeout: -1, handler:  (ctx, next) ->
       ctx.cache.get ['mecano:installed', 'mecano:updates'], (err, cache) ->
         m = (action, options) ->
           options.ssh = ctx.ssh if typeof options.ssh is 'undefined'
@@ -69,7 +69,7 @@ ctx.execute
               mecano[action].call null, options, goptions, callback
         next null, ctx.PASS
 
-    exports.push name: 'Bootstrap # FS', required: true, timeout: -1, callback:  (ctx) ->
+    exports.push name: 'Bootstrap # FS', required: true, timeout: -1, handler:  (ctx) ->
       ctx.fs ?= {}
       [ 'rename', 'chown', 'chmod', 'stat', 'lstat', 'unlink', 'symlink', 
         'readlink', 'unlink', 'mkdir', 'readdir', 'readFile', 'writeFile', 
