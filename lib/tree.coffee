@@ -166,14 +166,15 @@ Tree::load_module = (module, parent) ->
     when '?' then # nothing yet
     when '!' then required = true
   # Load the module
-  middlewares = load module, parent
-  middlewares = [middlewares] unless Array.isArray middlewares
-  for middleware, i in middlewares
+  m = load module, parent
+  m.exports = [m.exports] unless Array.isArray m.exports
+  for middleware, i in m.exports
     # Module dependencies
     # continue if typeof middleware is 'string'
     throw Error "Module '#{module}' export an undefined middleware" unless middleware?
-    middleware = middlewares[i] = handler: middleware if typeof middleware is 'function'
-    middleware = middlewares[i] = modules: middleware if typeof middleware is 'string'
+    middleware = m.exports[i] = handler: middleware if typeof middleware is 'function'
+    middleware = m.exports[i] = modules: middleware if typeof middleware is 'string'
+    middleware.filename = m.filename
     middleware.commands ?= []
     middleware.commands = [middleware.commands] unless Array.isArray middleware.commands
     middleware.modules ?= []
@@ -187,7 +188,7 @@ Tree::load_module = (module, parent) ->
     middleware.index ?= i
     middleware.skip ?= false
     middleware.required = true if required
-  @cache[module] = middlewares
+  @cache[module] = m.exports
 
 ###
 

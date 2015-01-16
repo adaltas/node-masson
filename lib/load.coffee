@@ -10,15 +10,17 @@ module.exports = (filename) ->
   start = filename.substring 0, 2
   if start isnt './' and start isnt '..'
     m.paths = Module._nodeModulePaths path.resolve '.'
-    absfilename = Module._findPath filename, m.paths
-    unless absfilename
-      err = new Error "Cannot find module '#{filename}'"
-      err.code = 'MODULE_NOT_FOUND'
-      throw err
-  else
-    absfilename = path.resolve '.', filename
+    # absfilename = Module._findPath filename, m.paths
+    # unless absfilename
+    #   err = new Error "Cannot find module '#{filename}'"
+    #   err.code = 'MODULE_NOT_FOUND'
+    #   throw err
+  # else
+  #   absfilename = path.resolve '.', filename
+  filename = Module._resolveFilename filename, m
   try
-    m.require absfilename
+    m.require filename
+    Module._cache[filename]
   catch e
     if e instanceof SyntaxError and e.location
       location = path.relative process.cwd(), e.filename
