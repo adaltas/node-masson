@@ -19,7 +19,7 @@ module.exports = ->
   modules = server.modules
   params.command = params.run
   return util.print "\x1b[31mInvalid run list \"#{server.run}\"\x1b[39m\n" unless modules
-  tree(modules).actions params, (err, actions) ->
+  tree(modules).middlewares params, (err, actions) ->
     module = null
     for action in actions
       if action.module isnt module
