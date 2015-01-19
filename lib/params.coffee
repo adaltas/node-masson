@@ -124,7 +124,7 @@ module.exports = parameters
       description: 'Fast mode without dependency resolution'
     ]
   ,
-    name: 'info',
+    name: 'report',
     description: 'Print servers information',
     options: [
       name: 'hosts', shortcut: 'h', type: 'array'
