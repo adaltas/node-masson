@@ -5,6 +5,7 @@ util = require 'util'
 multimatch = require 'multimatch'
 load = require './load'
 {flatten} = require './misc'
+Module = require 'module'
 
 ###
 Tree
@@ -61,38 +62,27 @@ Tree::middlewares = (options, callback) ->
     options = {}
   options.modules = [options.modules] if typeof options.modules is 'string'
   options.modules = [] unless Array.isArray options.modules
-  modules = @modules
   # Filter with the modules options
   if options.command and options.command isnt 'install'
-    parentmodules = {}
-    childmodules = []
-    for name, module of modules
-      filteredhandlers = []
-      for handler in module
-        if options.command in handler.commands
-          filteredhandlers.push handler
-          for child in handler.modules
-            childmodules.push child
-          # break
-      if filteredhandlers.length
-        parentmodules[name] = filteredhandlers
-    childmodules = @load_modules childmodules
-    newmodules = {}
-    for name, module of parentmodules
-      newmodules[name] = module
-    for name, module of childmodules
-      newmodules[name] = module
-    modules = newmodules
-  else if options.command
-    modules = @load_modules_install @names
-    # for name in @names
-    #   module = modules[name]
-    #   for handler in module
-    #     if options.command in handler.commands or handler.commands.length is 0
-
-    # console.log modules
-    # console.log Object.keys modules
-    # process.exit()
+    # All the modules declaring the command
+    modules = []
+    for name, filename of @cache
+      module = Module._cache[filename]
+      for middleware in module.exports
+        if options.command in middleware.commands
+          modules.push module
+          break
+    # Commented, filter might be good but we should modify the module itself but
+    # a copy of it
+    # # Filter middlewares with the command
+    # for module, i in modules
+    #   middlewares = []
+    #   for middleware in module.exports
+    #     if options.command in middleware.commands
+    #       middlewares.push middleware
+    #   modules[i].exports = middlewares
+    names = modules.map (m) -> m.name
+  modules = @load_modules_install @names, options.command
   if options.modules.length
     names = Object.keys modules
     names = multimatch names, options.modules
@@ -109,26 +99,27 @@ Tree::middlewares = (options, callback) ->
 
 Tree::load_modules = (names) ->
   modules = {}
-  load_modules = (names) =>
+  load_modules = (names, parent) =>
     for name in names
       continue if modules[name]
-      modules[name] = @load_module name
-      for handler in modules[name]
-        load_modules handler.modules
+      # console.log parent
+      modules[name] = @load_module name, parent
+      for middleware in modules[name]
+        load_modules middleware.modules, middleware.module
   load_modules names
   modules
 
-Tree::load_modules_install = (names) ->
+Tree::load_modules_install = (names, command) ->
   modules = {}
   load_modules = (names) =>
     for name in names
       continue if modules[name]?
       newmodule = []
       modules[name] = true
-      for handler in @load_module name
-        continue if handler.commands.length > 0 and 'install' not in handler.commands
-        load_modules handler.modules 
-        newmodule.push handler
+      for middleware in @load_module name
+        continue if command and middleware.commands.length > 0 and command not in middleware.commands
+        load_modules middleware.modules 
+        newmodule.push middleware
       modules[name] = newmodule
   load_modules names
   modules
@@ -136,13 +127,13 @@ Tree::load_modules_install = (names) ->
 Tree::load_middlewares = (modules) ->
   middlewares = []
   called = {}
-  load_module = (name, handlers) =>
+  load_module = (name, handers) =>
     return if called[name]
     called[name] = true
-    for handler in handlers
-      for child in handler.modules
+    for middleware in handers
+      for child in middleware.modules
         load_module child, modules[child] or @modules[child]
-      middlewares.push handler if handler.handler
+      middlewares.push middleware if middleware.handler
   for name, module of modules
     load_module name, module
   middlewares
@@ -158,7 +149,7 @@ Module middlewares when defining a string dependency may be prefixed with:
 ###
 Tree::load_module = (module, parent) ->
   @cache ?= {}
-  return @cache[module] if @cache[module]
+  return Module._cache[@cache[module]].exports if @cache[module]
   # Load the module
   required = false
   [_, meta, module] = /([\!\?]?)(.*)/.exec module
@@ -167,14 +158,19 @@ Tree::load_module = (module, parent) ->
     when '!' then required = true
   # Load the module
   m = load module, parent
+  m.name = module
+  m.parents ?= []
+  m.parents.push parent
   m.exports = [m.exports] unless Array.isArray m.exports
   for middleware, i in m.exports
-    # Module dependencies
-    # continue if typeof middleware is 'string'
     throw Error "Module '#{module}' export an undefined middleware" unless middleware?
     middleware = m.exports[i] = handler: middleware if typeof middleware is 'function'
     middleware = m.exports[i] = modules: middleware if typeof middleware is 'string'
-    middleware.filename = m.filename
+    middleware.filename ?= m.filename
+    middleware.module ?= module
+    middleware.id ?= "#{module}/#{i}"
+    middleware.name ?= null
+    middleware.index ?= i
     middleware.commands ?= []
     middleware.commands = [middleware.commands] unless Array.isArray middleware.commands
     middleware.modules ?= []
@@ -182,13 +178,11 @@ Tree::load_module = (module, parent) ->
     if typeof middleware.handler is 'string'
       middleware.modules.push middleware.handler 
       middleware.handler = null
-    middleware.id ?= "#{module}/#{i}"
-    middleware.name ?= null
-    middleware.module ?= module
-    middleware.index ?= i
     middleware.skip ?= false
     middleware.required = true if required
-  @cache[module] = m.exports
+    middleware.module = module
+  @cache[module] = m.filename
+  m.exports
 
 ###
 
