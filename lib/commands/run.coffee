@@ -111,8 +111,13 @@ module.exports = ->
     rl.write "#{styles.final_status_success 'Installation is finished'}\n"
     rl.close()
   .on 'error', (err) ->
-    rl.write '\n'
-    rl.write "{styles.final_status_error err.stack or err.message}"
+    if err.errors
+      rl.write '\n'
+      rl.write "#{err.message}\n"
+      for err in err.errors
+        rl.write "#{styles.final_status_error err.stack.trim() or err.message}\n"
+    else
+      rl.write "#{styles.final_status_error err.stack.trim() or err.message}\n"
     rl.close()
 
 
