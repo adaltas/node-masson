@@ -74,7 +74,7 @@ Tree::middlewares = (options, callback) ->
           break
     # Commented, filter might be good but we should modify the module itself but
     # a copy of it
-    # # Filter middlewares with the command
+    # Filter middlewares with the command
     # for module, i in modules
     #   middlewares = []
     #   for middleware in module.exports
@@ -82,7 +82,9 @@ Tree::middlewares = (options, callback) ->
     #       middlewares.push middleware
     #   modules[i].exports = middlewares
     names = modules.map (m) -> m.name
-  modules = @load_modules_install @names, options.command
+  else
+    names = @names
+  modules = @load_modules_install names, options.command
   if options.modules.length
     names = Object.keys modules
     names = multimatch names, options.modules
@@ -102,7 +104,6 @@ Tree::load_modules = (names) ->
   load_modules = (names, parent) =>
     for name in names
       continue if modules[name]
-      # console.log parent
       modules[name] = @load_module name, parent
       for middleware in modules[name]
         load_modules middleware.modules, middleware.module
