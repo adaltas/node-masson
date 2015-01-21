@@ -115,9 +115,9 @@ module.exports = ->
       rl.write '\n'
       rl.write "#{err.message}\n"
       for err in err.errors
-        rl.write "#{styles.final_status_error err.stack.trim() or err.message}\n"
+        rl.write "#{styles.final_status_error err.stack?.trim() or err.message}\n"
     else
-      rl.write "#{styles.final_status_error err.stack.trim() or err.message}\n"
+      rl.write "#{styles.final_status_error err.stack?.trim() or err.message}\n"
     rl.close()
 
 
