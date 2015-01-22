@@ -97,6 +97,12 @@ Tree::middlewares = (options, callback) ->
     middlewares = middlewares.filter (middleware) =>
       return true if multimatch(middleware.module, options.modules).length
       middleware.required
+  # only
+  required_middlewares_count = 0
+  only_middlewares = middlewares.filter (middleware) =>
+    required_middlewares_count++ if middleware.required 
+    middleware.required or middleware.only
+  middlewares = only_middlewares if only_middlewares.length > required_middlewares_count
   callback null, middlewares
 
 Tree::load_modules = (names) ->
