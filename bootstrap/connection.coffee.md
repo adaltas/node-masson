@@ -101,7 +101,7 @@ existing key would be overwritten.
         ctx.log "Read private key file: #{private_key_location}"
         misc.path.normalize private_key_location, (location) ->
           fs.readFile location, 'ascii', (err, content) ->
-            return next Error "Private key doesnt exists: #{JSON.encode location}" if err and err.code is 'ENOENT'
+            return next Error "Private key doesnt exists: #{JSON.stringify location}" if err and err.code is 'ENOENT'
             return next err if err
             ctx.config.connection.private_key = content
             do_connect()
