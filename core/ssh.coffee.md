@@ -71,6 +71,7 @@ defined inside "users.[].authorized_keys".
       each(users)
       .on 'item', (user, next) ->
         return next() unless user.home
+	return next() unless user.authorized_keys.length
         ctx.mkdir 
           destination: "#{user.home or '/home/'+user.name}/.ssh"
           uid: user.name
