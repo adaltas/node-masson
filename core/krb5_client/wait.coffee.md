@@ -30,6 +30,7 @@ Wait for the admin interface to be ready by issuing the command `listprincs`.
       cmds = for realm, config of etc_krb5_conf.realms
         # continue if default_realm isnt realm
         {kadmin_principal, kadmin_password, admin_server} = config
+        continue unless kadmin_principal
         misc.kadmin
           realm: realm
           kadmin_principal: kadmin_principal
