@@ -12,7 +12,6 @@
   "dependencies": {
     "colors": "latest",
     "each": "latest",
-    "ldapjs": "latest",
     "mecano": "latest",
     "multimatch": "latest",
     "mustache": "latest",
