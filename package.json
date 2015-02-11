@@ -29,8 +29,11 @@
     "mocha": "latest",
     "should": "latest"
   },
+  "main": "./lib",
   "bin" : {
     "masson" : "./bin/masson"
   },
-  "main": "./lib"
+  "scripts" : {
+    "test" : "NODE_ENV=test ./node_modules/.bin/mocha --compilers coffee:coffee-script/register --reporter dot"
+  }
 }
