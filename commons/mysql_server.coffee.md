@@ -24,7 +24,8 @@
 Default configuration:
 
 ```
-{ "mysql_server": {
+{ "mysql": {
+  "server": {
     "sql_on_install": [],
     "current_password": "",
     "password": "",
@@ -35,27 +36,37 @@ Default configuration:
     "my_cnf": {
       "mysqld": {
         "tmpdir": "/tmp/mysql"
-} } } }
+      }
+    } 
+  }
+}
 ```
 
     exports.push module.exports.configure = (ctx) ->
       require('../core/iptables').configure ctx
-      ctx.config.mysql_server ?= {}
-      # User SQL
-      ctx.config.mysql_server.sql_on_install ?= []
-      ctx.config.mysql_server.sql_on_install = [ctx.config.mysql_server.sql_on_install] if typeof ctx.config.mysql_server.sql_on_install is 'string'
-      # Secure Installation
-      ctx.config.mysql_server.current_password ?= ''
-      ctx.config.mysql_server.password ?= ''
-      ctx.config.mysql_server.remove_anonymous ?= true
-      ctx.config.mysql_server.disallow_remote_root_login ?= false
-      ctx.config.mysql_server.remove_test_db ?= true
-      ctx.config.mysql_server.reload_privileges ?= true
-      # Service Configuration
-      ctx.config.mysql_server.my_cnf ?= {}
-      ctx.config.mysql_server.my_cnf['mysqld'] ?= {}
-      ctx.config.mysql_server.my_cnf['mysqld']['tmpdir'] ?= '/tmp/mysql'
+      mysql = ctx.config.mysql ?= {}
 
+      mysql.server ?= {}
+      # User SQL
+      mysql.server.sql_on_install ?= []
+      mysql.server.sql_on_install = [mysql.server.sql_on_install] if typeof mysql.server.sql_on_install is 'string'
+      # Secure Installation
+      mysql.server.current_password ?= ''
+      mysql.server.password ?= ''
+      mysql.server.remove_anonymous ?= true
+      mysql.server.disallow_remote_root_login ?= false
+      mysql.server.remove_test_db ?= true
+      mysql.server.reload_privileges ?= true
+      # Service Configuration
+      mysql.server.my_cnf ?= {}
+      mysql.server.my_cnf['mysqld'] ?= {}
+      mysql.server.my_cnf['mysqld']['tmpdir'] ?= '/tmp/mysql'
+
+      mysql.user ?= name: 'mysql'
+      mysql.user = name: mysql.user if typeof mysql.user is 'string' 
+      mysql.group ?= name: 'mysql'
+      mysql.group = name: mysql.group if typeof mysql.group is 'string' 
+      
 ## IPTables
 
 | Service    | Port | Proto | Parameter |
@@ -79,7 +90,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
 Install the Mysql database server. Secure the temporary directory.
 
     exports.push name: 'Mysql Server # Package', timeout: -1, handler: (ctx, next) ->
-      {my_cnf} = ctx.config.mysql_server
+      {user, group, server} = ctx.config.mysql
       modified = false
       do_install = ->
         ctx.service
@@ -93,15 +104,15 @@ Install the Mysql database server. Secure the temporary directory.
       do_tmp = ->
         ctx.mkdir
           destination: '/tmp/mysql'
-          uid: 'mysql'
-          gid: 'mysql'
+          uid: user.name
+          gid: group.name
           mode: '0744'
         , (err, created) ->
           return next err if err
           modified = true if created
           ctx.ini
             destination: '/etc/my.cnf'
-            content: my_cnf
+            content: server.my_cnf
             merge: true
             backup: true
           , (err, updated) ->
@@ -144,7 +155,7 @@ Install the Mysql database server. Secure the temporary directory.
       do_start()
 
     exports.push name: 'Mysql Server # Populate', handler: (ctx, next) ->
-      {sql_on_install} = ctx.config.mysql_server
+      {sql_on_install} = ctx.config.mysql.server
       each(sql_on_install)
       .on 'item', (sql, next) ->
         cmd = "mysql -uroot -e \"#{escape sql}\""
@@ -170,7 +181,7 @@ Disallow root login remotely? [Y/n] n
 Remove test database and access to it? [Y/n] y
 
     exports.push name: 'Mysql Server # Secure', handler: (ctx, next) ->
-      {current_password, password, remove_anonymous, disallow_remote_root_login, remove_test_db, reload_privileges} = ctx.config.mysql_server
+      {current_password, password, remove_anonymous, disallow_remote_root_login, remove_test_db, reload_privileges} = ctx.config.mysql.server
       test_password = true
       modified = false
       ctx.ssh.shell (err, stream) ->
