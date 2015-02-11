@@ -25,7 +25,6 @@ Run = (config, params) ->
   @setMaxListeners 100
   @config = config
   @params = params
-  # @tree = new Tree 
   setImmediate =>
     # Work on each server
     contexts = {}
