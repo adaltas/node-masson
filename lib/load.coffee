@@ -1,22 +1,17 @@
 
 Module = require 'module'
 path = require 'path'
+path.isAbsolute ?= (filename) -> filename[0] is '/'
 
-# Need to look at the function "exports.eval" 
-# in "coffee-script/src/coffee-script.coffee"
+relative_paths = Module._nodeModulePaths path.resolve '.'
 
-module.exports = (filename) ->
+module.exports = (filename, parent) ->
   m = new Module filename
   start = filename.substring 0, 2
-  if start isnt './' and start isnt '..'
-    m.paths = Module._nodeModulePaths path.resolve '.'
-    # absfilename = Module._findPath filename, m.paths
-    # unless absfilename
-    #   err = new Error "Cannot find module '#{filename}'"
-    #   err.code = 'MODULE_NOT_FOUND'
-    #   throw err
-  # else
-  #   absfilename = path.resolve '.', filename
+  if start isnt './' and start isnt '..' and not path.isAbsolute filename
+    m.paths = if parent then Module._nodeModulePaths parent else []
+    for p in relative_paths
+      m.paths.push p
   filename = Module._resolveFilename filename, m
   try
     m.require filename
