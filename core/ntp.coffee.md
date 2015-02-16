@@ -66,6 +66,9 @@ time when the `ntpd` daemon isnt yet started.
 The configuration file "/etc/ntp.conf" is updated with the list of servers 
 defined by the "ntp.servers" property. The "ntp" service is restarted if any
 change to this file is detected.
+The "fudge" property is used when a server should trust its own BIOS clock.
+It should only be used in a pure offline configuration,
+and when only ONE ntp server is configured
 
     exports.push name: 'NTP # Configure', handler: (ctx, next) ->
       {servers, fudge} = ctx.config.ntp
@@ -76,9 +79,13 @@ change to this file is detected.
         modified = false
         position = 0
         # local_server = null
+
+The fudge property is only appliable on NTP servers
+
+        fudge = fudge and ctx.config.host in servers
         servers.push '127.127.1.0' if fudge and '127.127.1.0' not in servers
         found = []
-        found_fudge = null
+        found_fudge = false
         for line, i in lines
           if match = /^(#)?server\s+(\S+)(.*)$/.exec line
             position = i
