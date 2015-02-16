@@ -297,10 +297,6 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
             code_skipped: 68
           , (err, executed, stdout, stderr) ->
             return next err if err
-            console.log stdout
-            console.log '-------------'
-            console.log stdout.match(/Already exists/g)?.length
-            console.log stdout.match(/adding new entry/g).length
             modified += 1 if stdout.match(/Already exists/g)?.length isnt stdout.match(/adding new entry/g).length
             ctx.log "Clean temp file: #{destination}"
             ctx.remove
