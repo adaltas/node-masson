@@ -15,11 +15,13 @@ TODO: look at https://github.com/trentm/node-bunyan
 
 ## Configure
 
-*   `basedir`   
-    Directory where log files will be stored, default to "./logs".   
-*   `filename_stdout`   
+*   `basedir` (string)   
+    Directory where log files will be stored, default to "./log".   
+*   `disabled` (boolean)   
+    Disabled any log reporting, default to "true".   
+*   `filename_stdout` (string)   
     Name of the file to redirect stdout, default to "{{shortname}}.stdout.log".   
-*   `filename_stderr`   
+*   `filename_stderr` (string)   
     Name of the file to redirect stderr, default to "{{shortname}}.stderr.log".   
 
 All properties are optional and are integrated with the moustache templating
@@ -28,18 +30,22 @@ additionnal "logs.fqdn_reversed" property used in the default filename to
 preserve alphanumerical ordering of files.
 
     exports.push required: true, handler: (ctx) ->
-      logs = ctx.config.logs ?= {}
-      logs.basedir ?= './logs'
-      logs.fqdn_reversed = ctx.config.host.split('.').reverse().join('.')
-      logs.filename_stdout ?= '{{shortname}}.stdout.log'
-      logs.filename_stderr ?= '{{shortname}}.stderr.log'
+      log = ctx.config.log ?= {}
+      log.disabled ?= false
+      log.basedir ?= './log'
+      log.fqdn_reversed = ctx.config.host.split('.').reverse().join('.')
+      log.filename_stdout ?= '{{shortname}}.stdout.log'
+      log.filename_stderr ?= '{{shortname}}.stderr.log'
       # Rendering
-      logs.basedir = mustache.render logs.basedir, ctx.config
-      logs.filename_stdout = mustache.render logs.filename_stdout, ctx.config
-      logs.filename_stderr = mustache.render logs.filename_stderr, ctx.config
+      log.basedir = mustache.render log.basedir, ctx.config
+      log.filename_stdout = mustache.render log.filename_stdout, ctx.config
+      log.filename_stderr = mustache.render log.filename_stderr, ctx.config
 
     exports.push name: 'Bootstrap # Log', required: true, handler: (ctx, next) ->
-      {basedir, filename_stdout, filename_stderr} = ctx.config.logs
+      {disabled, basedir, filename_stdout, filename_stderr} = ctx.config.log
+      if disabled
+        ctx.log = -> # Dummy function
+        return next()
       mecano.mkdir
         destination: "#{basedir}"
       , (err, created) ->
