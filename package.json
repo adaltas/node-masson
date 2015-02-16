@@ -12,6 +12,7 @@
   "dependencies": {
     "colors": "latest",
     "each": "latest",
+    "glob": "latest",
     "mecano": "latest",
     "multimatch": "latest",
     "mustache": "latest",

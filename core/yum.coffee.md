@@ -106,56 +106,43 @@ in "/etc/yum.repos.d"
 
     exports.push name: 'YUM # Repositories', timeout: -1, handler: (ctx, next) ->
       {copy, clean} = ctx.config.yum
-      return next() unless copy and clean
+      return next() unless copy
       modified = false
       basenames = []
-      do_upload = ->
-        return do_clean() unless copy
-        each()
-        .files(copy)
-        .parallel(1)
-        .on 'item', (filename, next) ->
-          basename = path.basename filename
-          return next() if basename.indexOf('.') is 0
-          basenames.push basename
-          ctx.log "Upload /etc/yum.repos.d/#{path.basename filename}"
-          ctx.upload
-            source: filename
-            destination: "/etc/yum.repos.d/#{path.basename filename}"
-          , (err, uploaded) ->
-            return next err if err
-            modified = true if uploaded
-            next()
-        .on 'error', (err) ->
-          next err
-        .on 'end', ->
-          do_clean()
-      do_clean = ->
-        return do_update() unless clean
-        ctx.log "Clean /etc/yum.repos.d/*"
-        ctx.fs.readdir '/etc/yum.repos.d', (err, remote_basenames) ->
+      do_search = ->
+        glob copy, (err, files) ->
+          local_files = for file in files
+            continue if /^\./.test path.basename file
+            file
+          ctx.fs.readdir '/etc/yum.repos.d/', (err, files) ->
+            remote_files = for file in files
+              continue if /^\./.test path.basename file
+              "/etc/yum.repos.d/#{file}"
+            do_clean local_files, remote_files
+      do_clean = (local_files, remote_files) ->
+        return do_upload local_files unless clean
+        local_filenames = local_files.map (file) -> path.basename file
+        removes = for file in remote_files
+          continue if path.basename(file) in local_filenames
+          destination: file
+        ctx.remove removes, (err, removed) ->
           return next err if err
-          remove_basenames = []
-          for rfn in remote_basenames
-            continue if rfn.indexOf('.') is 0
-            # Add to the stack if remote filename isnt in source
-            remove_basenames.push rfn if basenames.indexOf(rfn) is -1
-          return do_update() if remove_basenames.length is 0
-          each(remove_basenames)
-          .on 'item', (filename, next) ->
-            ctx.fs.unlink "/etc/yum.repos.d/#{filename}", next
-          .on 'error', (err) ->
-            next err
-          .on 'end', ->
-            modified = true
-            do_update()
+          modified = true if removed
+          do_upload local_files
+      do_upload = (local_files) ->
+        uploads = for file in local_files
+          source: file
+          destination: "/etc/yum.repos.d/#{path.basename file}"
+        ctx.upload uploads, (err, uploaded) ->
+          return next err if err
+          modified = true if uploaded
+          do_update()
       do_update = ->
-        ctx.log 'Clean metadata and update'
         ctx.execute
           cmd: 'yum clean metadata; yum -y update'
           if: modified
         , next
-      do_upload()
+      do_search()
 
 ## Epel
 
@@ -187,16 +174,9 @@ property "yum.epel" to false.
         continue unless active
         name: name
       ctx.service services, next
-      # each(packages)
-      # .on 'item', (service, active, next) ->
-      #   return next() unless active
-      #   service = name: service if typeof service is 'string'
-      #   ctx.service service, (err, s) ->
-      #     serviced += s
-      #     next err
-      # .on 'both', (err) ->
-      #   next err, serviced
 
+## Dependencies
 
+    glob = require 'glob'
 
 
