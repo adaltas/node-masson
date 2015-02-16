@@ -72,7 +72,8 @@ Example:
       # connection.public_key ?= []
       # connection.public_key = [connection.public_key] if typeof connection.public_key is 'string'
       connection.retry = 3
-      connection.wait = 1000
+      connection.end ?= true # End the connection when the run is finish
+      connection.wait ?= 1000
       connection.bootstrap ?= {}
       connection.bootstrap.host ?= connection.ip or connection.host
       connection.bootstrap.port ?= connection.port
@@ -89,8 +90,8 @@ However, it is important in such circumstances that we guarantee no
 existing key would be overwritten.
 
     exports.push name: 'Bootstrap # Connection', required: true, timeout: -1, handler: (ctx, next) ->
-      {private_key, private_key_location} = ctx.config.connection
-      close = -> ctx.ssh?.end()
+      {private_key, private_key_location, end} = ctx.config.connection
+      close = -> ctx.ssh?.end() if end
       ctx.on 'error', close
       ctx.on 'end', close
       attempts = 0
