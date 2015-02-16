@@ -3,7 +3,6 @@
 
 Gather various information relative to the targeted system.
 
-    mecano = require 'mecano'
     exports = module.exports = []
     exports.push 'masson/bootstrap/connection'
     exports.push 'masson/bootstrap/log'
@@ -33,6 +32,57 @@ properties "kernel\_name", "nodename", "kernel\_release", "kernel\_version",
         ctx.operating_system = match[6]
         next null, ctx.PASS
 
+## Disk Info
+
+Expose disk information to the property "diskinfo" of the context. Parse the
+result of the "df" command. The properties "total", "used" and "available" are
+converted to bytes.
+
+Here's how to use it inside a module:
+
+```coffee
+module.export = name: 'My Module', modules: 'masson/bootstrap/info', handler: (ctx) ->
+  console.log ctx.diskinfo
+```
+
+It will output:
+
+```json
+[ { filesystem: '/dev/sda1',
+    total: '8255928',
+    used: '1683700',
+    available: '6152852',
+    available_pourcent: '22%',
+    mountpoint: '/' },
+  { filesystem: 'tmpfs',
+    total: '961240',
+    used: '0',
+    available: '961240',
+    available_pourcent: '0%',
+    mountpoint: '/dev/shm' } ]
+```
+
+    exports.push name: 'Bootstrap # Disk Info', required: true, handler: (ctx, next) ->
+      properties = ['filesystem', 'total', 'used', 'available', 'available_pourcent', 'mountpoint']
+      mecano.execute
+        ssh: ctx.ssh
+        cmd: 'df'
+      , (err, executed, stdout) ->
+        return next err if err
+        ctx.diskinfo = []
+        for line, i in string.lines stdout
+          continue if i is 0
+          continue if /^\s*$/.test line
+          line = line.split /\s+/
+          disk = {}
+          for property, i in properties
+            disk[property] = line[i]
+          disk.total *= 1024
+          disk.used *= 1024
+          disk.available *= 1024
+          ctx.diskinfo.push disk
+        next null, false
+
 ## CPU Info
 
 Expose cpu information to the propery "cpuinfo" of the context. Parse the 
@@ -41,7 +91,7 @@ result of "/proc/cpuinfo".
 Here's how to use it inside a module:
 
 ```coffee
-module.export = name: 'My Module', handler: (ctx) ->
+module.export = name: 'My Module', modules: 'masson/bootstrap/info', handler: (ctx) ->
   console.log ctx.cpuinfo
 ```
 
@@ -73,14 +123,11 @@ It will output:
       mecano.execute
         ssh: ctx.ssh
         cmd: 'cat /proc/cpuinfo'
-        # too verbose
-        # stdout: ctx.log.out
-        # stderr: ctx.log.err
       , (err, executed, stdout, stderr) ->
         return next err if err
         ctx.cpuinfo = []
         cpu = {}
-        for line in stdout.split /\r\n|[\n\r\u0085\u2028\u2029]/g
+        for line in string.lines stdout
           line = line.trim()
           if line is ''
             ctx.cpuinfo.push cpu if Object.keys(cpu).length
@@ -89,7 +136,7 @@ It will output:
           [key, value] = line.split ':'
           cpu[key.trim()] = value.trim()
         ctx.cpuinfo.push cpu if Object.keys(cpu).length
-        next null, ctx.PASS
+        next null, false
 
 ## Mem Info
 
@@ -99,7 +146,7 @@ result of "/proc/meminfo". All the values are in bytes.
 Here's how to use it inside a module:
 
 ```coffee
-module.export = name: 'My Module', handler: (ctx) ->
+module.export = name: 'My Module', modules: 'masson/bootstrap/info', handler: (ctx) ->
   console.log JSON.stringify ctx.meminfo
 ```
 
@@ -131,19 +178,22 @@ It will output:
       , (err, executed, stdout, stderr) ->
         return next err if err
         ctx.meminfo = {}
-        for line in stdout.split /\r\n|[\n\r\u0085\u2028\u2029]/g
+        for line in string.lines stdout
           continue if line is ''
           [key, value] = line.split ':'
           [value, unit] = value.trim().split ' '
           value = parseInt value.trim(), 10
           if unit is 'kB'
-            value = value * 1000
+            value = value * 1024
           else if typeof unit isnt 'undefined'
             return next new Error 'Invalid unit'
           ctx.meminfo[key.trim()] = value
-        next null, ctx.PASS
+        next null, false
 
+## Dependencies
 
+    mecano = require 'mecano'
+    string = require 'mecano/lib/misc/string'
 
 
 
