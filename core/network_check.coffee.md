@@ -80,7 +80,7 @@ Dig isn't available by default on CentOS and is installed by the
 
     exports.push name: 'DNS # Hostname', handler: (ctx, next) ->
       ctx.execute
-        cmd: "hostname"
+        cmd: "hostname --fqdn"
       , (err, _, stdout) ->
         return next err if err
         next null, if stdout.trim() is ctx.config.host then false else 'WARNING'
