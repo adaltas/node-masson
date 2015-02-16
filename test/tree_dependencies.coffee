@@ -17,7 +17,7 @@ describe 'tree dependencies', ->
       mecano.write [
         destination: "#{tmp}/module_1.coffee"
         content: """
-        exports = module.exports = [
+        module.exports = [
           '#{tmp}/module_2'
           {name: 'middleware 1', handler: (next) -> next()}
           '#{tmp}/module_3'
@@ -74,7 +74,7 @@ describe 'tree dependencies', ->
       mecano.write [
         destination: "#{tmp}/module_1.coffee"
         content: """
-        exports = module.exports = [
+        module.exports = [
           {commands: 'status', modules: '#{tmp}/module_2'}
           {commands: 'status', name: 'middleware 1', handler: (next) -> next()}
           {commands: 'status', modules: '#{tmp}/module_3'}
@@ -109,7 +109,7 @@ describe 'tree dependencies', ->
       mecano.write [
         destination: "#{tmp}/module_1.coffee"
         content: """
-        exports = module.exports = [
+        module.exports = [
           {commands: 'status', modules: '#{tmp}/module_2'}
           {commands: 'start', name: 'middleware 1.1', handler: (next) -> next()}
           {commands: 'status', name: 'middleware 1.2', handler: (next) -> next()}
