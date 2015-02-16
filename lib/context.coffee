@@ -11,6 +11,7 @@ class Context extends EventEmitter
       throw new Error 'Only accept functions for now'
   context: (host, modules=[]) ->
     host_ctx = @hosts[host]
+    throw Error "Invalid host: #{JSON.stringify host}" unless host? and host_ctx?
     modules = [modules] unless Array.isArray modules
     for module in modules
       host_ctx.run host_ctx, module
