@@ -41,6 +41,7 @@ Example using the EventEmitter API:
 Tree = (modules) ->
   modules = [modules] unless Array.isArray modules
   modules = flatten modules
+  @default_command = 'install'
   @names = modules
   @modules = @load_modules modules
   @
@@ -60,10 +61,11 @@ Tree::middlewares = (options, callback) ->
   if typeof options is 'function'
     callback = options
     options = {}
+  # Normalize Options
   options.modules = [options.modules] if typeof options.modules is 'string'
   options.modules = [] unless Array.isArray options.modules
   # Filter with the modules options
-  if options.command and options.command isnt 'install'
+  if options.command and options.command isnt @default_command
     # All the modules declaring the command
     modules = []
     for name, filename of @cache
@@ -95,6 +97,19 @@ Tree::middlewares = (options, callback) ->
     middleware.required or middleware.only
   middlewares = only_middlewares if only_middlewares.length > required_middlewares_count
   callback null, middlewares
+
+###
+Return all the commands referenced by the modules.
+###
+Tree::commands = ->
+  commands = {}
+  commands[@default_command] = true
+  for name, filename of @cache
+    module = Module._cache[filename]
+    for middleware in module.exports
+      for command in middleware.commands
+        commands[command] = true unless command in commands
+  Object.keys commands
 
 Tree::load_modules = (names) ->
   modules = {}
