@@ -18,6 +18,7 @@ Resources:
     exports = module.exports = []
     exports.push 'masson/bootstrap'
     exports.push 'masson/core/openldap_client'
+    exports.push 'masson/core/openldap_client/wait'
     exports.push 'masson/core/iptables'
     exports.push 'masson/core/yum'
     exports.push require('./index').configure
