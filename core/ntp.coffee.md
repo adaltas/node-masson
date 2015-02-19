@@ -37,6 +37,10 @@ Example:
       ntp.servers = ctx.config.ntp.servers.split(',') if typeof ctx.config.ntp.servers is 'string'
       ntp.lag ?= 2000
       ntp.fudge ?= false
+      if ntp.fudge  is true
+        # Normalize the fudge value into a valid stratum
+        # Servers are given the default value of 10 while clients default to 14.
+        fudge = if ctx.config.host in ntp.servers then 10 else 14
       # ntp.fudge = ctx.config.host if ntp.fudge is true
 
 ## Install
@@ -82,8 +86,8 @@ and when only ONE ntp server is configured
 
 The fudge property is only appliable on NTP servers
 
-        fudge = fudge and ctx.config.host in servers
-        servers.push '127.127.1.0' if fudge and '127.127.1.0' not in servers
+        # fudge = fudge and ctx.config.host in servers
+        # servers.push '127.127.1.0' if fudge and '127.127.1.0' not in servers
         found = []
         found_fudge = false
         for line, i in lines
@@ -118,8 +122,12 @@ The fudge property is only appliable on NTP servers
             lines.splice position+1, 0, "server #{server} iburst"
             position++
             modified = true
+        if fudge and '127.127.1.0' not in found
+          lines.splice position+1, 0, "server 127.127.1.0"
+          position++
+          modified = true
         if fudge and not found_fudge
-          lines.splice position+1, 0, "fudge 127.127.1.0 stratum 10"
+          lines.splice position+1, 0, "fudge 127.127.1.0 stratum #{fudge}"
           position++
           modified = true
         return next null, false unless modified
