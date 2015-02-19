@@ -37,12 +37,8 @@ Example:
       ntp.servers = ctx.config.ntp.servers.split(',') if typeof ctx.config.ntp.servers is 'string'
       ntp.lag ?= 2000
       ntp.fudge ?= false
-      if ntp.fudge  is true
-        # Normalize the fudge value into a valid stratum
-        # Servers are given the default value of 10 while clients default to 14.
-        fudge = if ctx.config.host in ntp.servers then 10 else 14
-      # ntp.fudge = ctx.config.host if ntp.fudge is true
-
+      ntp.fudge = if ctx.config.host in ntp.servers then 10 else 14
+      
 ## Install
 
 The installation respect the procedure published on [cyberciti][cyberciti]. The
@@ -75,8 +71,11 @@ It should only be used in a pure offline configuration,
 and when only ONE ntp server is configured
 
     exports.push name: 'NTP # Configure', handler: (ctx, next) ->
-      {servers, fudge} = ctx.config.ntp
+      {ntp} = ctx.config
+      servers = ntp.servers.slice 0
       return next() unless servers?.length
+      servers.remove ctx.config.host if ctx.config.host in servers
+      servers.push '127.127.1.0' if ntp.fudge
       ctx.fs.readFile '/etc/ntp.conf', 'ascii', (err, content) ->
         return next err if err
         lines = string.lines content
@@ -86,8 +85,6 @@ and when only ONE ntp server is configured
 
 The fudge property is only appliable on NTP servers
 
-        # fudge = fudge and ctx.config.host in servers
-        # servers.push '127.127.1.0' if fudge and '127.127.1.0' not in servers
         found = []
         found_fudge = false
         for line, i in lines
@@ -114,7 +111,7 @@ The fudge property is only appliable on NTP servers
             if commented and fudge
               lines[i] = "fudge #{opts}"
               modified = true
-            else if not commented and not fudge
+            else if not commented and not ntp.fudge
               lines[i] = "#fudge #{opts}"
               modified = true
         for server in servers
@@ -122,12 +119,8 @@ The fudge property is only appliable on NTP servers
             lines.splice position+1, 0, "server #{server} iburst"
             position++
             modified = true
-        if fudge and '127.127.1.0' not in found
-          lines.splice position+1, 0, "server 127.127.1.0"
-          position++
-          modified = true
-        if fudge and not found_fudge
-          lines.splice position+1, 0, "fudge 127.127.1.0 stratum #{fudge}"
+        if ntp.fudge and not found_fudge
+          lines.splice position+1, 0, "fudge 127.127.1.0 stratum #{ntp.fudge}"
           position++
           modified = true
         return next null, false unless modified
