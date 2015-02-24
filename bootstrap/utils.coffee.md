@@ -191,7 +191,7 @@ ctx.waitIsOpen [
             servers_flatten.push host: server.host, port: server.port
         return callback() unless servers_flatten.length
         each(servers_flatten)
-        .parallel(true)
+        .parallel(false)
         .on 'item', (server, next) ->
           if options.timeout
             rand = Date.now() + inc++

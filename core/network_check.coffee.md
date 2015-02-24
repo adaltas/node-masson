@@ -19,9 +19,12 @@ Dig isn't available by default on CentOS and is installed by the
     exports.push 'masson/bootstrap'
     exports.push 'masson/core/bind_client'
 
-## Forward Lookup
+## DNS Forward Lookup
 
-    exports.push name: 'DNS # `dig` Forward Lookup', handler: (ctx, next) ->
+Check forward DNS lookup using the configured DNS configuration present inside
+"/etc/resolv.conf". Internally, the exectuted command uses "dig".
+
+    exports.push name: 'Network Check # DNS Forward Lookup', handler: (ctx, next) ->
       # I didnt find how to restrict dig to return only A records like it
       # does for CNAME records if you append "cname" at the end of the command.
       # I assume the A record to always be printed on the last line.
@@ -37,9 +40,12 @@ Dig isn't available by default on CentOS and is installed by the
         else
          next null, false
 
-## Reverse Lookup
+## DNS Reverse Lookup
 
-    exports.push name: 'DNS # `dig` Reverse Lookup', handler: (ctx, next) ->
+Check reverse DNS lookup using the configured DNS configuration present inside
+"/etc/resolv.conf". Internally, the exectuted command uses "dig".
+
+    exports.push name: 'Network # DNS Reverse Lookup', handler: (ctx, next) ->
       ctx.execute
         cmd: "dig -x #{ctx.config.ip} +short"
         code_skipped: 1
@@ -52,9 +58,13 @@ Dig isn't available by default on CentOS and is installed by the
         else
          next null, false
 
-## Forward Lookup with getent
+## System Forward Lookup
 
-    exports.push name: 'DNS # `getent` Forward Lookup', handler: (ctx, next) ->
+Check forward DNS lookup using the system configuration which take into account
+the local configuration present inside "/etc/hosts". Internally, the exectuted
+command uses "getent".
+
+    exports.push name: 'Network # System Forward Lookup', handler: (ctx, next) ->
       ctx.execute
         cmd: "getent hosts #{ctx.config.host}"
         code_skipped: 2
@@ -64,9 +74,13 @@ Dig isn't available by default on CentOS and is installed by the
         [ip, fqdn] = stdout.split(/\s+/).filter( (entry) -> entry)
         next null, if ip is ctx.config.ip and fqdn is ctx.config.host then false else 'WARNING'
 
-## Reverse Lookup with getent
+## System Reverse Lookup
 
-    exports.push name: 'DNS # `getent` Reverse Lookup', handler: (ctx, next) ->
+Check forward DNS lookup using the system configuration which take into account
+the local configuration present inside "/etc/hosts". Internally, the exectuted
+command uses "getent".
+
+    exports.push name: 'Network # System Reverse Lookup', handler: (ctx, next) ->
       ctx.execute
         cmd: "getent hosts #{ctx.config.ip}"
         code_skipped: 2
@@ -78,7 +92,10 @@ Dig isn't available by default on CentOS and is installed by the
 
 ## Hostname
 
-    exports.push name: 'DNS # Hostname', handler: (ctx, next) ->
+Read the server hostname and check it matches the expected FQDN. Internally, 
+the executed command is `hostname --fqdn`.
+
+    exports.push name: 'Network # Hostname', handler: (ctx, next) ->
       ctx.execute
         cmd: "hostname --fqdn"
       , (err, _, stdout) ->
