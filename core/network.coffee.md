@@ -4,7 +4,6 @@
 Modify the various network related configuration files such as
 "/etc/hosts" and "/etc/resolv.conf".
 
-    quote = require 'regexp-quote'
     exports = module.exports = []
     exports.push 'masson/bootstrap'
 
@@ -33,11 +32,18 @@ Example:
 
 ```json
 {
-  "hosts_auto": true,
-  "hosts": {
-    "10.10.10.15": "myserver.hadoop"
-  },
-  "resolv": "search hadoop\nnameserver 10.10.10.16\nnameserver 10.0.2.3"
+  "network": {
+    "hosts_auto": true,
+    "hosts": {
+      "10.10.10.15": "myserver.hadoop"
+    },
+    "resolv": "search hadoop\nnameserver 10.10.10.16\nnameserver 10.0.2.3"
+    "ifcfg": {
+      "eth0": {
+        "PEERDNS": "no"
+      }
+    }
+  }
 }
 ```
 
@@ -62,7 +68,7 @@ this file.
       {hosts, hosts_auto} = ctx.config.network
       # content = ''
       write = []
-      if hosts_auto then for server in ctx.config.servers
+      if hosts_auto then for _, server of ctx.config.servers
         # content += "#{server.ip} #{server.host}\n"
         write.push 
           match: RegExp "^#{quote server.ip}\\s.*$", 'gm'
@@ -121,6 +127,7 @@ configuration file is considered a trusted source of DNS information.
         content: resolv
         destination: '/etc/resolv.conf'
         backup: true
+        eof: true
       , (err, written) ->
         return next err if err
         bind_server_hosts = ctx.hosts_with_module 'masson/core/bind_server'
@@ -130,4 +137,27 @@ configuration file is considered a trusted source of DNS information.
         ctx.waitIsOpen bind_server_hosts, 53, (err) ->
           next err, written
 
+## Interfaces
+
+Customize the network interfaces configured present inside the
+"/etc/sysconfig/network-scripts" folder.
+
+    exports.push name: 'Network # Interfaces', timeout: -1, handler: (ctx, next) ->
+      {ifcfg} = ctx.config.network
+      return next() unless ifcfg
+      writes = for name, config of ifcfg
+        write = for k, v of config
+          match: ///^#{quote k}=.*$///mg
+          replace: "#{k}=#{v}"
+          append: true
+        destination: "/etc/sysconfig/network-scripts/ifcfg-#{name}"
+        write: write
+        backup: false
+        eof: true
+      ctx.write writes , next
+
+## Dependencies
+
+    quote = require 'regexp-quote'
+    # misc = require 'mecano/lib/misc'
 
