@@ -51,7 +51,7 @@ developers on Solaris, Linux, Mac OS X or Windows.
 
 ## Install OpenJDK
 
-    exports.push name: 'Java # Install OpenJDK', handler: (ctx, next) ->
+    exports.push name: 'Java # Install OpenJDK', timeout: -1, handler: (ctx, next) ->
       {openjdk} = ctx.config.java
       return next() unless openjdk
       ctx.service
