@@ -182,8 +182,6 @@ Example:
         throw new Error "Kerberos property `krb5.dbmodules.#{name}.ldap_kdc_dn` is required" unless config.ldap_kdc_dn
         throw new Error "Kerberos property `krb5.dbmodules.#{name}.ldap_kadmind_dn` is required" unless config.ldap_kadmind_dn
 
-    # exports.push commands: 'backup', modules: 'masson/core/krb5_server_backup'
-
     # exports.push commands: 'check', modules: 'masson/core/krb5_server_check'
 
     exports.push commands: 'install', modules: [
@@ -198,6 +196,9 @@ Example:
     exports.push commands: 'status', modules: 'masson/core/krb5_server/status'
 
     exports.push commands: 'stop', modules: 'masson/core/krb5_server/stop'
+    
+    exports.push commands: 'backup', modules: 'masson/core/krb5_server/backup'
+
 
 ## Module Dependencies
 
