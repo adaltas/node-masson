@@ -16,4 +16,3 @@
 ## Module Dependencies
 
     misc = require 'mecano/lib/misc'
-    

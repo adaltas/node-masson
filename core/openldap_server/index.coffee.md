@@ -45,4 +45,4 @@ and should correspond to "openldap_server.config_password".
 
     exports.push commands: 'stop', modules: 'masson/core/openldap_server/stop'
 
-
+    exports.push commands: 'backup', modules: 'masson/core/openldap_server/backup'
