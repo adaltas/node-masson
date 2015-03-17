@@ -74,7 +74,8 @@ and when only ONE ntp server is configured
       {ntp} = ctx.config
       servers = ntp.servers.slice 0
       return next() unless servers?.length
-      servers.remove ctx.config.host if ctx.config.host in servers
+      if ctx.config.host in servers
+        servers = servers.filter (e) -> e isnt ctx.config.host
       servers.push '127.127.1.0' if ntp.fudge
       ctx.fs.readFile '/etc/ntp.conf', 'ascii', (err, content) ->
         return next err if err
