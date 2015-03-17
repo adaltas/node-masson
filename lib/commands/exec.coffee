@@ -9,11 +9,12 @@ config = require '../config'
 params = require '../params'
 
 module.exports = ->
-  config params.parse(), (err, config) ->
+  params = params.parse()
+  config params.config, (err, config) ->
     each config.servers
     .parallel true
     .on 'item', (server, next) ->
-      return next() if config.params.hosts? and multimatch(server.host, config.params.hosts).indexOf(server.host) is -1
+      return next() if params.hosts? and multimatch(server.host, params.hosts).indexOf(server.host) is -1
       connection = merge {}, config.connection, server.connection
       connection.username ?= 'root'
       connection.host ?= connection.ip or server.ip or server.host
@@ -21,7 +22,7 @@ module.exports = ->
       connection.private_key_location ?= '~/.ssh/id_rsa'
       connect connection, (err, ssh) ->
         return util.print "\x1b[31m#{err.message}\x1b[39m\n" if err
-        exec ssh, config.params.subcommand, (err, stdout, stderr) ->
+        exec ssh, params.subcommand, (err, stdout, stderr) ->
           util.print if err
           then "\x1b[31m#{server.host} (exit code #{err.code})\x1b[39m\n"
           else "\x1b[32m#{server.host}\x1b[39m\n"

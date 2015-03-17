@@ -16,7 +16,8 @@ print_time = (time) ->
     "#{time}ms"
 
 module.exports = ->
-  config params.parse(), (err, config) ->
+  params = params.parse()
+  config params.config, (err, config) ->
     # Open readline
     rl = readline.createInterface process.stdin, process.stdout
     rl.setPrompt ''
@@ -41,12 +42,12 @@ module.exports = ->
       process.exit()
     hostlength = 20
     for s in config.servers then hostlength = Math.max(hostlength, s.host.length+2)
-    multihost = config.params.hosts?.length isnt 1 and config.servers.length isnt 1
+    multihost = params.hosts?.length isnt 1 and config.servers.length isnt 1
     times = {}
     multihost = true
     for k, v of config.styles
       styles[k] = if typeof v is 'string' then colors[v] else v
-    run(config)
+    run params, config
     .on 'context', (ctx) ->
       ctx
       .on 'middleware_skip', () ->

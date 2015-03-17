@@ -11,15 +11,16 @@ List all the actions to execute
 
 ###
 module.exports = ->
-  config params.parse(), (err, config) ->
+  params = params.parse()
+  config params.config, (err, config) ->
     hosts = Object.keys config.servers
-    server = config.servers[config.params.host]
-    return util.print "\x1b[31mInvalid server \"#{config.params.host}\"\x1b[39m\n" unless server
-    # modules = server.run[config.params.run]
+    server = config.servers[params.host]
+    return util.print "\x1b[31mInvalid server \"#{params.host}\"\x1b[39m\n" unless server
+    # modules = server.run[params.run]
     modules = server.modules
-    config.params.command = config.params.run
+    params.command = params.run
     return util.print "\x1b[31mInvalid run list \"#{server.run}\"\x1b[39m\n" unless modules
-    tree(modules).middlewares config.params, (err, actions) ->
+    tree(modules).middlewares params, (err, actions) ->
       module = null
       for action in actions
         if action.module isnt module

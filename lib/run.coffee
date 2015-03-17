@@ -20,16 +20,17 @@ properties which are respectively a list of "middlewares" and a list of modules.
 
 On the second pass, the middewares are executed.
 ###
-Run = (config) ->
+Run = (params, config) ->
+  params.end ?= true
   EventEmitter.call @
   @setMaxListeners 100
   setImmediate =>
     # Work on each server
     contexts = {}
     for fqdn, server of config.servers
-      ctx = contexts[fqdn] = context (merge {}, config, server), config.params.command
+      ctx = contexts[fqdn] = context (merge {}, config, server), params.command
       ctx.hosts = contexts
-      ctx.config.modules = ctx.config.modules.reverse() if config.params.command is 'stop'
+      ctx.config.modules = ctx.config.modules.reverse() if params.command is 'stop'
       ctx.tree = tree ctx.config.modules
       ctx.modules = Object.keys ctx.tree.modules
     # Catch Uncaught Exception
@@ -39,14 +40,14 @@ Run = (config) ->
       @emit 'error', err
     each(contexts)
     .parallel(true)
-    .on 'item', (host, ctx, next) =>
+    .run (host, ctx, next) =>
       # Filter by hosts
-      return next() if config.params.hosts? and multimatch(host, config.params.hosts).indexOf(host) is -1
+      return next() if params.hosts? and multimatch(host, params.hosts).indexOf(host) is -1
       @emit 'context', ctx
-      ctx.tree.middlewares config.params, (err, middlewares) =>
+      ctx.tree.middlewares params, (err, middlewares) =>
         return next() unless middlewares?
         middlewareRun = each(middlewares)
-        .on 'item', (middleware, next) =>
+        .run (middleware, next) =>
           ctx.middleware = middleware
           retry = if middleware.retry? then middleware.retry else 2
           middleware.wait ?= 1
@@ -91,19 +92,26 @@ Run = (config) ->
               disregard_done = true
             , middleware.timeout
           run()
-        .on 'both', (err) =>
+        .then (err) =>
           @emit 'server', ctx, err
           if err 
           then (ctx.emit 'error', err if ctx.listeners('error').length)
-          else ctx.emit 'end'
+          else if params.end is true then ctx.emit 'end'
           next err
-    .on 'error', (err) =>
-      @emit 'error', err
-    .on 'end', (err) =>
-      @emit 'end'
+    .then (err) =>
+      if err
+      then @emit 'error', err
+      else @emit 'end'
+      
   @
 util.inherits Run, EventEmitter
 
-module.exports = (config) ->
-  new Run config
+module.exports = (options, config) ->
+  if arguments.length is 1
+    config = options
+    options = {}
+  new Run options, config
+  # tmp = (args) -> Run.apply @, args
+  # tmp.prototype = Run.prototype
+  # new tmp arguments
 
