@@ -77,14 +77,14 @@ Tree::middlewares = (options, callback) ->
     names = modules.map (m) -> m.name
   else
     names = @names
+  # Return the list of all modules
   modules = @load_modules_for_command names, options.command
+  # Filter by module
   if options.modules.length
     names = Object.keys modules
     names = multimatch names, options.modules
-    newmodules = {}
-    for name in names
-      newmodules[name] = modules[name]
-    modules = newmodules
+    # Re-compute modules to ensure correct ordering
+    modules = @load_modules_for_command names, options.command
   middlewares = @load_middlewares modules
   if options.fast
     middlewares = middlewares.filter (middleware) =>

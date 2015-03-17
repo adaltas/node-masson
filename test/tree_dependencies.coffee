@@ -67,6 +67,43 @@ describe 'tree dependencies', ->
           middlewares[0].should.have.properties name: 'middleware 2'
           middlewares[1].should.have.properties name: 'middleware 1'
           next()
+    
+    it 'filter commands inside filtered out modules', (next) ->
+      # We need to recompute module dependencies after module are filtered out
+      # or the ordering may be wrong
+      mecano.write [
+        destination: "#{tmp}/module_1.coffee"
+        content: """
+        module.exports = [
+          {commands: 'install', modules: '#{tmp}/module_2'}
+        ]
+        """
+      ,
+        destination: "#{tmp}/module_2.coffee"
+        content: """
+        module.exports = [
+          { commands: 'start', modules: '#{tmp}/module_2_start'}
+          { name: 'middleware 2', modules:[
+            '#{tmp}/module_2_install'
+            '#{tmp}/module_2_start'
+          ] }
+        ]
+        """
+      ,
+        destination: "#{tmp}/module_2_install.coffee"
+        content: """
+        module.exports = [name: 'middleware 3 install', handler: (next) -> next()]
+        """
+      ,
+        destination: "#{tmp}/module_2_start.coffee"
+        content: """
+        module.exports = [name: 'middleware 3 start', handler: (next) -> next()]
+        """
+      ], (err) ->
+        tree("#{tmp}/module_1").middlewares command: 'install', modules: "#{tmp}/module_1", (err, middlewares) ->
+          middlewares[0].should.have.properties name: 'middleware 3 install'
+          middlewares[1].should.have.properties name: 'middleware 3 start'
+          next()
 
   describe 'custom command', ->
 
