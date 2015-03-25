@@ -109,7 +109,7 @@ The fudge property is only appliable on NTP servers
             commented = match[1] is '#'
             opts = match[2]
             found_fudge = true
-            if commented and fudge
+            if commented and ntp.fudge
               lines[i] = "fudge #{opts}"
               modified = true
             else if not commented and not ntp.fudge
@@ -125,34 +125,17 @@ The fudge property is only appliable on NTP servers
           position++
           modified = true
         return next null, false unless modified
-        ctx.fs.writeFile '/etc/ntp.conf', lines.join('\n'), (err) ->
+        ctx.write
+          destination: '/etc/ntp.conf'
+          content: lines.join('\n')
+          backup: true
+        , (err, modified) ->
           return next err if err
           ctx.service
             srv_name: 'ntpd'
             action: 'restart'
-          , (err) ->
-            next err, true
-      # write = []
-      # write.push
-      #   match: /^(server [\d]+.*$)/mg
-      #   replace: "#$1"
-      # for server in servers
-      #   write.push
-      #     match: new RegExp "^server #{quote server}.*$", 'mg'
-      #     replace: "server #{server} iburst"
-      #     append: 'Please consider joining'
-      # ctx.write
-      #   destination: '/etc/ntp.conf'
-      #   write: write
-      #   backup: true
-      # , (err, written) ->
-      #   return next err if err
-      #   return next null, false unless written
-      #   ctx.service
-      #     name: 'ntp'
-      #     srv_name: 'ntpd'
-      #     action: 'restart'
-      #   , next
+            if_not: modified
+          , next
 
 ## Start
 
