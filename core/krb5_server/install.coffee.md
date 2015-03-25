@@ -213,7 +213,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
       .on 'both', (err) ->
         next err, modified
 
-    exports.push name: 'Krb5 Server # LDAP Stash password', handler: (ctx, next) ->
+    exports.push name: 'Krb5 Server # LDAP Stash password', timeout: 5*60*1000, handler: (ctx, next) ->
       {kdc_conf} = ctx.config.krb5
       modified = false
       each(kdc_conf.dbmodules)
