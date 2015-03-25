@@ -4,6 +4,7 @@
 Predefined Mecano functions with context related information.
 
     mecano = require 'mecano'
+    registry = require 'mecano/lib/misc/registry'
     fs = require 'ssh2-fs'
     exports = module.exports = []
     exports.push 'masson/bootstrap/log'
@@ -31,43 +32,26 @@ ctx.execute
 ```
 
     exports.push name: 'Bootstrap # Mecano', required: true, timeout: -1, handler:  (ctx, next) ->
-      ctx.cache.get ['mecano:installed', 'mecano:updates'], (err, cache) ->
-        m = (action, options) ->
-          options.ssh = ctx.ssh if typeof options.ssh is 'undefined'
-          options.log = ctx.log if typeof options.log is 'undefined'
-          options.stdout = ctx.log.out if typeof options.stdout is 'undefined'
-          options.stderr = ctx.log.err if typeof options.stderr is 'undefined'
-          options.installed = cache['mecano:installed']
-          options.updates = cache['mecano:updates']
-          options
-        functions = for k, v of mecano then k
-        functions.forEach (action) ->
-          ctx[action] = (options, goptions, callback) ->
-            if arguments.length is 2
-              callback = goptions
-              goptions = {parallel: 1}
-            if action is 'mkdir' and typeof options is 'string'
-              options = m action, destination: options
-            if Array.isArray options
-              for opts, i in options
-                options[i] = m action, opts
-            else
-              options = m action, options
-            if action is 'service'
-              mecano[action].call null, options, (err) ->
-                return callback.apply null, arguments if err
-                cache['mecano:installed'] = arguments[2] 
-                cache['mecano:updates'] = arguments[3]
-                args = arguments
-                ctx.cache.set
-                  'mecano:installed': arguments[2] 
-                  'mecano:updates': arguments[3]
-                , (err) ->
-                  args.err = err
-                  callback.apply null, args
-            else
-              mecano[action].call null, options, goptions, callback
-        next null, ctx.PASS
+      db = {}
+      m = (options) ->
+        options.ssh = ctx.ssh if typeof options.ssh is 'undefined'
+        options.log = ctx.log if typeof options.log is 'undefined'
+        options.stdout = ctx.log.out if typeof options.stdout is 'undefined'
+        options.stderr = ctx.log.err if typeof options.stderr is 'undefined'
+        options.cache = true
+        options.db = db
+        options
+      functions = for k, v of registry then k
+      functions.forEach (action) ->
+        ctx[action] = (options, callback) ->
+          if action is 'mkdir' and typeof options is 'string'
+            options = m destination: options
+          if Array.isArray options
+            options = for opts, i in options then m opts 
+          else
+            options = m options
+          mecano[action].call null, options, callback
+      next null, ctx.PASS
 
     exports.push name: 'Bootstrap # FS', required: true, timeout: -1, handler:  (ctx) ->
       ctx.fs ?= {}
