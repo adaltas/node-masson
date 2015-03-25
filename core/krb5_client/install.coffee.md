@@ -14,7 +14,7 @@ Institute of Technology](http://web.mit.edu).
     exports.push 'masson/core/yum'
     exports.push 'masson/core/ssh'
     exports.push 'masson/core/ntp'
-    exports.push 'masson/core/openldap_client'
+    exports.push 'masson/core/krb5_client/wait' # Server need to be ready to create principals
     exports.push require('./index').configure
 
 ## Install
@@ -58,6 +58,11 @@ Create a user principal for this host. The principal is named like
       modified = false
       each(etc_krb5_conf.realms)
       .on 'item', (realm, config, next) ->
+        # Note:
+        # The doc above say "apply if default realm unless create_hosts"
+        # but this isnt what we do bellow
+        # As a consequence, we never enter here, which might be acceptable
+        # but doc and code need to be aligned.
         return next() if default_realm isnt realm or not config.create_hosts
         {kadmin_principal, kadmin_password, admin_server} = config
         cmd = misc.kadmin
