@@ -109,7 +109,7 @@ following service: "sssd", "sssd-client", "pam\_krb5", "pam\_ldap" and
       do_startup = ->
         ctx.service
           chk_name: 'sssd'
-          startup: true
+          startup: '345'
         , (err, serviced) ->
           return next err if err
           modified = true if serviced
@@ -164,7 +164,7 @@ default overwritten unless the "sssd.merge" is `true`.
         mode: 0o600
         backup: true
       , (err, written) ->
-        # return next err, false unless written
+        return next err, false if err or not written
         options =
           # Configures the password, shadow, group, and netgroups services maps to use the SSSD module
           # https://access.redhat.com/site/documentation/en-US/Red_Hat_Enterprise_Linux/6/html/Deployment_Guide/Configuration_Options-NSS_Configuration_Options.html
