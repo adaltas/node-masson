@@ -19,7 +19,6 @@ See the documentation of each modules for additionnal information.
 
     exports.push 'masson/bootstrap/mecano'
 
-    exports.push 'masson/bootstrap/backup'
 
 
 
