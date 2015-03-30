@@ -33,7 +33,13 @@ ctx.execute
 
     exports.push name: 'Bootstrap # Mecano', required: true, timeout: -1, handler:  (ctx, next) ->
       db = {}
-      m = (options) ->
+      m = (action, options) ->
+        if ctx.config.mecano?[action]?
+          for key, value of ctx.config.mecano[action]
+            if key in ['destination','cache_dir']
+              options[key] ?= ''
+              options[key] = path.resolve value, options[key]
+            else options[key] = value if typeof options[key] is 'undefined'
         options.ssh = ctx.ssh if typeof options.ssh is 'undefined'
         options.log = ctx.log if typeof options.log is 'undefined'
         options.stdout = ctx.log.out if typeof options.stdout is 'undefined'
@@ -45,11 +51,11 @@ ctx.execute
       functions.forEach (action) ->
         ctx[action] = (options, callback) ->
           if action is 'mkdir' and typeof options is 'string'
-            options = m destination: options
+            options = m action, destination: options
           if Array.isArray options
-            options = for opts, i in options then m opts 
+            options = for opts, i in options then m action, opts 
           else
-            options = m options
+            options = m action, options
           mecano[action].call null, options, callback
       next null, ctx.PASS
 
@@ -63,6 +69,9 @@ ctx.execute
       ctx.PASS
 
 
+# Dependencies
+
+    path = require 'path'
 
 
 
