@@ -54,9 +54,9 @@ Example:
           realms[realm].default_domain ?= realm.toLowerCase()
         etc_krb5_conf.realms = misc.merge {}, realms, etc_krb5_conf.realms
       # Generate the "domain_realm" property
-      for realm of etc_krb5_conf.realms
-        etc_krb5_conf.domain_realm[".#{realm.toLowerCase()}"] ?= realm
-        etc_krb5_conf.domain_realm["#{realm.toLowerCase()}"] ?= realm
+      # for realm of etc_krb5_conf.realms
+      #   etc_krb5_conf.domain_realm[".#{realm.toLowerCase()}"] ?= realm
+      #   etc_krb5_conf.domain_realm["#{realm.toLowerCase()}"] ?= realm
 
     exports.push commands: 'install', modules: [
       'masson/core/krb5_server/wait'
