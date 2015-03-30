@@ -43,6 +43,7 @@ which create a Kerberos file with complementary information.
         content: safe_etc_krb5_conf etc_krb5_conf
         destination: '/etc/krb5.conf'
         stringify: misc.ini.stringify_square_then_curly
+        backup: true
       , next
 
 ## Host Principal
