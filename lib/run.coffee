@@ -50,7 +50,7 @@ Run = (params, config) ->
         .run (middleware, next) =>
           ctx.middleware = middleware
           retry = if middleware.retry? then middleware.retry else 2
-          middleware.wait ?= 1
+          middleware.wait ?= 1000
           attempts = 0
           disregard_done = false
           if middleware.skip
@@ -70,15 +70,15 @@ Run = (params, config) ->
           run = =>
             ctx.retry = attempts
             try
-              # Synchronous middleware
-              if middleware.handler.length is 0 or middleware.handler.length is 1
-                merge middleware, middleware.handler.call ctx, ctx
+              if middleware.handler.length < 2 # Synchronous middleware
+                # merge middleware, middleware.handler.call ctx, ctx
+                middleware.handler.call ctx, ctx
                 process.nextTick ->
                   middleware.timeout = -1
                   done()
-              # Asynchronous middleware
-              else
-                merge middleware, middleware.handler.call ctx, ctx, (err, statusOrMsg) =>
+              else # Asynchronous middleware
+                # merge middleware, middleware.handler.call ctx, ctx, (err, statusOrMsg) =>
+                middleware.handler.call ctx, ctx, (err, statusOrMsg) =>
                   done err, statusOrMsg
             catch e
               retry = false # Dont retry unhandled errors
