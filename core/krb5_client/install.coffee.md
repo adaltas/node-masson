@@ -14,7 +14,6 @@ Institute of Technology](http://web.mit.edu).
     exports.push 'masson/core/yum'
     exports.push 'masson/core/ssh'
     exports.push 'masson/core/ntp'
-    exports.push 'masson/core/krb5_client/wait' # Server need to be ready to create principals
     exports.push require('./index').configure
 
 ## Install
@@ -45,6 +44,12 @@ which create a Kerberos file with complementary information.
         stringify: misc.ini.stringify_square_then_curly
         backup: true
       , next
+
+## Wait
+
+Servers need to be ready to create principals.
+
+    exports.push 'masson/core/krb5_client/wait'
 
 ## Host Principal
 
