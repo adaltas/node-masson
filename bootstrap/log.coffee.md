@@ -11,7 +11,7 @@ TODO: look at https://github.com/trentm/node-bunyan
     mustache = require 'mustache'
     mecano = require 'mecano'
     exports = module.exports = []
-    exports.push 'masson/bootstrap/mecano'
+    # exports.push 'masson/bootstrap/mecano'
 
 ## Configure
 
