@@ -24,7 +24,7 @@ Wait for all the Kerberos servers referenced by the client configuration.
 
 Wait for the admin interface to be ready by issuing the command `listprincs`.
 
-    exports.push name: 'Krb5 Client # Wait Admin', timeout: -1, label_true: 'READY', handler: (ctx, next) ->
+    exports.push name: 'Krb5 Client # Wait Admin', retry: 5, timeout: -1, label_true: 'READY', handler: (ctx, next) ->
       {etc_krb5_conf} = ctx.config.krb5
       default_realm = etc_krb5_conf.libdefaults.default_realm
       cmds = for realm, config of etc_krb5_conf.realms
