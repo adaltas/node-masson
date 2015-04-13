@@ -230,7 +230,9 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
             do_stash()
         do_mkdir = ->
           ctx.log 'Create directory "/etc/krb5.d"'
-          ctx.mkdir path.dirname(ldap_service_password_file), (err, created) ->
+          ctx.mkdir
+            destination: path.dirname(ldap_service_password_file)
+          , (err, created) ->
             return next err if err
             do_stash()
         do_stash = ->
