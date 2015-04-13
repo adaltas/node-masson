@@ -50,7 +50,7 @@ Run = (params, config) ->
         .run (middleware, next) =>
           ctx.middleware = middleware
           retry = if middleware.retry? then middleware.retry else 2
-          middleware.wait ?= 1000
+          middleware.wait ?= 5000
           attempts = 0
           disregard_done = false
           if middleware.skip
