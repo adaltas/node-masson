@@ -103,18 +103,20 @@ ctx.waitForExecution cmd: "test -f /tmp/sth", (err) ->
         .on 'item', (cmd, next) ->
           run = ->
             ctx.log "Attempt #{++count}"
-            ctx.execute
+            ctx
+            .child()
+            .execute
               cmd: cmd
               code: options.code or 0
               code_skipped: options.code_skipped
-            , (err, ready, stdout, stderr) ->
+            , (err, ready) ->
               if not err and not ready
                 setTimeout run, options.interval
                 return
               return next err if err
               ctx.log "Finish wait for execution"
               ctx.emit 'waited'
-              next err, stdout, stderr
+              next()
           run()
         .on 'both', callback
 
@@ -190,8 +192,7 @@ ctx.waitIsOpen [
           else
             servers_flatten.push host: server.host, port: server.port
         return callback() unless servers_flatten.length
-        each(servers_flatten)
-        .parallel(false)
+        each servers_flatten
         .on 'item', (server, next) ->
           if options.timeout
             rand = Date.now() + inc++
@@ -200,7 +201,9 @@ ctx.waitIsOpen [
             timedout = false
             clear = setTimeout ->
               timedout = true
-              ctx.touch
+              ctx
+              .child()
+              .touch
                 destination: randfile
               , (err) -> # nothing to do
             , options.timeout
@@ -209,7 +212,9 @@ ctx.waitIsOpen [
             cmd = "while ! bash -c 'echo > /dev/tcp/#{server.host}/#{server.port}'; do sleep 2; done;"
           ctx.log "Start wait for #{server.host} #{server.port}"
           ctx.emit 'wait', server.host, server.port
-          ctx.execute
+          ctx
+          .child()
+          .execute
             cmd: cmd
           , (err, executed) ->
             clearTimeout clear if clear
