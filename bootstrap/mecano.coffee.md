@@ -75,36 +75,47 @@ Configure the `download` function to support cache.
 ```
 
     exports.push name: 'Bootstrap # Mecano', required: true, timeout: -1, handler:  (ctx, next) ->
-      # Normalize Configuration
-      ctx.config.mecano ?= {}
-      for k, v of registry then ctx.config.mecano[k] ?= {}
-      db = {}
-      # Merge Options with Configuration and Default Properties
-      m = (action, options) ->
-        for key, value of ctx.config.mecano[action]
-          if key in ['destination','cache_dir']
-            options[key] ?= ''
-            options[key] = path.resolve value, options[key]
-          else options[key] = value if typeof options[key] is 'undefined'
-        options.ssh = ctx.ssh if typeof options.ssh is 'undefined'
-        options.log = ctx.log if typeof options.log is 'undefined'
-        options.stdout = ctx.log.out if typeof options.stdout is 'undefined'
-        options.stderr = ctx.log.err if typeof options.stderr is 'undefined'
-        options.cache = true
-        options.db = db
-        options
-      # Register Mecano functions
-      functions = for k, v of registry then k
-      functions.forEach (action) ->
-        ctx[action] = (options, callback) ->
-          if action is 'mkdir' and typeof options is 'string'
-            options = m action, destination: options
-          if Array.isArray options
-            options = for opts, i in options then m action, opts 
-          else
-            options = m action, options
-          mecano[action].call null, options, callback
+      options = {}
+      options.ssh = ctx.ssh
+      options.log = ctx.log
+      options.stdout = ctx.log.out
+      options.stderr = ctx.log.err
+      options.cache = true
+      options.db = {}
+      mecano @, options
       next null, ctx.PASS
+
+    # exports.push name: 'Bootstrap # Mecano', required: true, timeout: -1, handler:  (ctx, next) ->
+    #   # Normalize Configuration
+    #   ctx.config.mecano ?= {}
+    #   for k, v of registry then ctx.config.mecano[k] ?= {}
+    #   db = {}
+    #   # Merge Options with Configuration and Default Properties
+    #   m = (action, options) ->
+    #     for key, value of ctx.config.mecano[action]
+    #       if key in ['destination','cache_dir']
+    #         options[key] ?= ''
+    #         options[key] = path.resolve value, options[key]
+    #       else options[key] = value if typeof options[key] is 'undefined'
+    #     options.ssh = ctx.ssh if typeof options.ssh is 'undefined'
+    #     options.log = ctx.log if typeof options.log is 'undefined'
+    #     options.stdout = ctx.log.out if typeof options.stdout is 'undefined'
+    #     options.stderr = ctx.log.err if typeof options.stderr is 'undefined'
+    #     options.cache = true
+    #     options.db = db
+    #     options
+    #   # Register Mecano functions
+    #   functions = for k, v of registry then k
+    #   functions.forEach (action) ->
+    #     ctx[action] = (options, callback) ->
+    #       if action is 'mkdir' and typeof options is 'string'
+    #         options = m action, destination: options
+    #       if Array.isArray options
+    #         options = for opts, i in options then m action, opts 
+    #       else
+    #         options = m action, options
+    #       mecano[action].call null, options, callback
+    #   next null, ctx.PASS
 
 ## File System
 
