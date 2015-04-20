@@ -82,6 +82,7 @@ Configure the `download` function to support cache.
       options.stderr = ctx.log.err
       options.cache = true
       options.db = {}
+      options[k] = v for k, v of ctx.config.mecano
       mecano @, options
       next null, ctx.PASS
 
