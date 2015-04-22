@@ -73,22 +73,22 @@ ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=co
       # host_ctx = ctx.hosts[host]
       # require('./openldap_server').configure host_ctx
       # {url, root_dn, root_password, users_dn, groups_dn} = host_ctx.config.openldap_server
-      {url, root_dn, root_password, proxy_user} = ctx.config.openldap_server
-      ctx.ldap_user [
-        url: url,
-        binddn: root_dn,
-        passwd: root_password,
-        user: proxy_user
-      ], next
+      {openldap_server} = ctx.config
+      ctx.ldap_user
+        uri: openldap_server.uri,
+        binddn: openldap_server.root_dn,
+        passwd: openldap_server.root_password,
+        user: openldap_server.proxy_user
+      , next
 
     exports.push name: 'OpenLDAP ACL # Insert Group', handler: (ctx, next) ->
-      {url, root_dn, root_password, proxy_group} = ctx.config.openldap_server
-      ctx.ldap_add [
-        url: url,
-        binddn: root_dn,
-        passwd: root_password,
-        entry: proxy_group
-      ], next
+      {openldap_server} = ctx.config
+      ctx.ldap_add
+        uri: openldap_server.uri,
+        binddn: openldap_server.root_dn,
+        passwd: openldap_server.root_password,
+        entry: openldap_server.proxy_group
+      , next
 
       
 

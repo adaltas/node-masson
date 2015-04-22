@@ -32,9 +32,9 @@ and should correspond to "openldap_server.config_password".
       if openldap_server.tls
         throw Error 'TLS mode requires "tls_cert_file"' unless openldap_server.tls_cert_file
         throw Error 'TLS mode requires "tls_key_file"' unless openldap_server.tls_key_file
-        openldap_server.url = "ldaps://#{ctx.config.host}"
+        openldap_server.uri = "ldaps://#{ctx.config.host}"
       else
-        openldap_server.url = "ldap://#{ctx.config.host}"
+        openldap_server.uri = "ldap://#{ctx.config.host}"
 
     exports.push commands: 'install', modules: [
       'masson/core/openldap_server/install'
