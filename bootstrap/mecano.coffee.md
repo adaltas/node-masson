@@ -1,9 +1,9 @@
 
 # Bootstrap Mecano
 
-Enrich the server context with [Mecano] and [File System][nodefs] functions. 
+Enrich the server context with [Mecano] and [File System][nodefs] functions.
 
-Options send to [Mecano] by the calling user are enriched with default options. 
+Options send to [Mecano] by the calling user are enriched with default options.
 Such options are "cache", "db", "log", "stdout", "stderr" and "ssh". All the
 default function may be created or modified in the user configuration through
 the "mecano" configuration property. Setting a value of "null" will disable the
@@ -112,7 +112,7 @@ Configure the `download` function to support cache.
     #       if action is 'mkdir' and typeof options is 'string'
     #         options = m action, destination: options
     #       if Array.isArray options
-    #         options = for opts, i in options then m action, opts 
+    #         options = for opts, i in options then m action, opts
     #       else
     #         options = m action, options
     #       mecano[action].call null, options, callback
@@ -125,8 +125,8 @@ transparent SSH2 transport thanks to the [ssh2-fs] package.
 
     exports.push name: 'Bootstrap # File System', required: true, timeout: -1, handler:  (ctx) ->
       ctx.fs ?= {}
-      [ 'rename', 'chown', 'chmod', 'stat', 'lstat', 'unlink', 'symlink', 
-        'readlink', 'unlink', 'mkdir', 'readdir', 'readFile', 'writeFile', 
+      [ 'rename', 'chown', 'chmod', 'stat', 'lstat', 'unlink', 'symlink',
+        'readlink', 'unlink', 'mkdir', 'readdir', 'readFile', 'writeFile',
         'exists', 'createReadStream', 'createWriteStream' ].forEach (fn) ->
         ctx.fs[fn] = ->
           fs[fn].call null, ctx.ssh, arguments...
@@ -143,4 +143,3 @@ transparent SSH2 transport thanks to the [ssh2-fs] package.
 [mecano]: http://mecano.adaltas.com
 [ssh2-fs]: https://github.com/wdavidw/node-ssh2-fs
 [nodefs]: http://nodejs.org/api/fs.html
-
