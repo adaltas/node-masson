@@ -110,11 +110,11 @@ Create the kerberos organisational unit, for example
 
     exports.push name: 'OpenLDAP Kerberos # Insert Container', handler: (ctx, next) ->
       {kerberos_dn, krbadmin_user} = ctx.config.openldap_server_krb5
-      {url, root_dn, root_password} = ctx.config.openldap_server
+      {openldap_server} = ctx.config
       ctx.ldap_add 
-        url: url,
-        binddn: root_dn,
-        passwd: root_password,
+        uri: openldap_server.uri,
+        binddn: openldap_server.root_dn,
+        passwd: openldap_server.root_password,
         entry: 
           dn: "#{kerberos_dn}"
           objectClass: ['top', 'organizationalUnit']
@@ -127,11 +127,11 @@ Create the kerberos administrator's group.
 
     exports.push name: 'OpenLDAP Kerberos # Insert Group', handler: (ctx, next) ->
       {krbadmin_group} = ctx.config.openldap_server_krb5
-      {url, root_dn, root_password} = ctx.config.openldap_server
+      {openldap_server} = ctx.config
       ctx.ldap_add
-        url: url,
-        binddn: root_dn,
-        passwd: root_password,
+        uri: openldap_server.uri,
+        binddn: openldap_server.root_dn,
+        passwd: openldap_server.root_password,
         entry: krbadmin_group
       , next
 
@@ -141,11 +141,11 @@ Create the kerberos administrator's user.
 
     exports.push name: 'OpenLDAP Kerberos # Insert User', handler: (ctx, next) ->
       {krbadmin_user} = ctx.config.openldap_server_krb5
-      {url, root_dn, root_password, users_dn, groups_dn} = ctx.config.openldap_server
+      {openldap_server} = ctx.config
       ctx.ldap_user
-        url: url,
-        binddn: root_dn,
-        passwd: root_password,
+        uri: openldap_server.uri,
+        binddn: openldap_server.root_dn,
+        passwd: openldap_server.root_password,
         user: krbadmin_user
       , next
 
