@@ -37,7 +37,7 @@ Default configuration:
       "mysqld": {
         "tmpdir": "/tmp/mysql"
       }
-    } 
+    }
   }
 }
 ```
@@ -63,10 +63,10 @@ Default configuration:
       mysql.server.my_cnf['mysqld']['tmpdir'] ?= '/tmp/mysql'
 
       mysql.user ?= name: 'mysql'
-      mysql.user = name: mysql.user if typeof mysql.user is 'string' 
+      mysql.user = name: mysql.user if typeof mysql.user is 'string'
       mysql.group ?= name: 'mysql'
-      mysql.group = name: mysql.group if typeof mysql.group is 'string' 
-      
+      mysql.group = name: mysql.group if typeof mysql.group is 'string'
+
 ## IPTables
 
 | Service    | Port | Proto | Parameter |
@@ -74,7 +74,7 @@ Default configuration:
 | MySQL      | 3306 | tcp   | -         |
 
 
-IPTables rules are only inserted if the parameter "iptables.action" is set to 
+IPTables rules are only inserted if the parameter "iptables.action" is set to
 "start" (default value).
 
     exports.push name: 'Mysql Server # IPTables', handler: (ctx, next) ->
@@ -231,15 +231,16 @@ Remove test database and access to it? [Y/n] y
           return next error if error
           if disallow_remote_root_login then return next null, modified
           # Note, "WITH GRANT OPTION" is required for root
-          sql = """
-          USE mysql;
-          GRANT ALL PRIVILEGES ON *.* TO root@'%' IDENTIFIED BY "#{password}" WITH GRANT OPTION;
-          FLUSH PRIVILEGES;
-          """
+          query = (query) -> "mysql -uroot -p#{password} -s -e \"#{query}\""
+          sql =
           ctx.execute
-            cmd: "mysql -uroot -p#{password} -e \"#{escape sql}\""
+            cmd: query """
+            USE mysql;
+            GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY "#{password}" WITH GRANT OPTION;
+            FLUSH PRIVILEGES;
+            """
+            not_if_exec: """
+            password=`#{query "SELECT PASSWORD('#{password}');"}`
+            #{query "SHOW GRANTS FOR root;"} | grep $password
+            """
           , next
-
-  
-
-
