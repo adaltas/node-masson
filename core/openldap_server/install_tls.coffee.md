@@ -2,30 +2,30 @@
     exports = module.exports = []
     exports.push 'masson/bootstrap'
     exports.push 'masson/core/openldap_server/install'
-    # We cant require openldap_client here, since it will deploy 
+    # We cant require openldap_client here, since it will deploy
     # and test a secure connection on a server not yet configured
 
 # OpenLDAP TLS
 
-Note, by default, openldap comes with ldaps support. The default value are:   
+Note, by default, openldap comes with ldaps support. The default value are:
 
-*   olcTLSCACertificatePath: /etc/openldap/certs   
-*   olcTLSCertificateFile: "OpenLDAP Server"   
-*   olcTLSCertificateKeyFile: /etc/openldap/certs/password   
+*   olcTLSCACertificatePath: /etc/openldap/certs
+*   olcTLSCertificateFile: "OpenLDAP Server"
+*   olcTLSCertificateKeyFile: /etc/openldap/certs/password
 
 To test if TLS is configured, run `ldapsearch -LLLY EXTERNAL -H ldapi:/// -b cn=config -s base | grep -i tls`
 
 Create a self-signed certificate
 --------------------------------
 
-Thanks to [Paul Kehrer ](https://langui.sh/2009/01/18/openssl-self-signed-ca/) 
-and [David Robillard](http://itdavid.blogspot.ca/2012/05/howto-centos-6.html) 
-for their great articles. This installation procedure wasn't as smooth as I 
+Thanks to [Paul Kehrer ](https://langui.sh/2009/01/18/openssl-self-signed-ca/)
+and [David Robillard](http://itdavid.blogspot.ca/2012/05/howto-centos-6.html)
+for their great articles. This installation procedure wasn't as smooth as I
 would expect so here's a recap.
 
-This is using the [OpenSSL](https://www.openssl.org/) library. Although not 
-tested, [Brad Chen](http://www.bradchen.com/blog/2012/08/openldap-tls-issue) 
-wrote a comprehensive tutorial on using the 
+This is using the [OpenSSL](https://www.openssl.org/) library. Although not
+tested, [Brad Chen](http://www.bradchen.com/blog/2012/08/openldap-tls-issue)
+wrote a comprehensive tutorial on using the
 [Mozilla NSS](https://developer.mozilla.org/en/docs/NSS) tools.
 
 We start by positioning ourself inside a new directory.
@@ -36,11 +36,11 @@ cd /tmp/openldap
 umask 066
 ```
 
-Generate a privkey.pem file (base64 encoded RSA private key) as well as a 
-openldap.hadoop.ca.cer file containing the self-signed Certificate Authority 
-(CA) public key with a 3650 day validity 
-period. Both will be referenced in our CA configuration. You may leave the 
-challenge password blank.    
+Generate a privkey.pem file (base64 encoded RSA private key) as well as a
+openldap.hadoop.ca.cer file containing the self-signed Certificate Authority
+(CA) public key with a 3650 day validity
+period. Both will be referenced in our CA configuration. You may leave the
+challenge password blank.
 
 ```bash
 openssl req -newkey rsa:2048 -days 3650 -x509 -nodes -out openldap.hadoop.ca.cer
@@ -70,7 +70,7 @@ Common Name (e.g. server FQDN or YOUR name) []:openldap.hadoop
 Email Address []:david@adaltas.com
 ```
 
-Now prepare a configuration file "myca.conf" and substitute the properties 
+Now prepare a configuration file "myca.conf" and substitute the properties
 "certificate", "database", "private_key", "serial" with their correct values.
 
 ```
@@ -117,7 +117,7 @@ touch certindex
 echo 000a > serialfile
 ```
 
-We are now ready to create our CSR (certificate signing request) and private 
+We are now ready to create our CSR (certificate signing request) and private
 key, leave the challenge password empty:
 
 ```bash
@@ -185,7 +185,7 @@ openssl x509 -noout -text -in openldap.hadoop.cer
 openssl verify -CAfile openldap.hadoop.ca.cer openldap.hadoop.cer
 ```
 
-We are now ready to deploy our certificate. This must be executed on the 
+We are now ready to deploy our certificate. This must be executed on the
 OpenLDAP server. Import the keys if they were generated from a different server.
 
 ```bash
@@ -232,7 +232,7 @@ olcTLSCertificateKeyFile: /etc/pki/tls/certs/openldap.hadoop.key
 olcTLSVerifyClient: never
 ```
 
-and 
+and
 
 ```bash
 openssl s_client -connect `hostname`:636 -showcerts -state -CAfile /etc/pki/tls/certs/openldap.hadoop.ca.cer
@@ -328,7 +328,7 @@ SSL-Session:
     Protocol  : TLSv1
     Cipher    : ECDHE-RSA-AES256-SHA
     Session-ID: 1E58B88449A5C6F6EEA34F7EBD6FCE7D7B2D0BCA4B4FEC72C8163E676E77DA6C
-    Session-ID-ctx: 
+    Session-ID-ctx:
     Master-Key: 1A19B4BF692DAAD1B2919E2A7BF7CC5B9078E6F6C0F6D7ADA94ADD44770D281A605A93B16CF35D32F86CC0028E47638A
     Key-Arg   : None
     Krb5 Principal: None
@@ -444,7 +444,7 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=adaltas,dc=com
 
     exports.push 'masson/core/openldap_client'
 
-    exports.push name: 'OpenLDAP Server # TLS Check', timeout: -1, handler: (ctx, next) ->
+    exports.push name: 'OpenLDAP Server # TLS Check', label_true: 'CHECKED', timeout: -1, handler: (ctx, next) ->
       { suffix, root_dn, root_password } = ctx.config.openldap_server
       ctx.execute
         cmd: "ldapsearch -x -H ldaps://#{ctx.config.host} -b #{suffix} -D #{root_dn} -w #{root_password}"
@@ -453,15 +453,3 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=adaltas,dc=com
 ## Module Dependencies
 
     path = require 'path'
-
-
-
-
-
-
-
-
-
-
-
-

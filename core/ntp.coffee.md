@@ -1,7 +1,7 @@
 
 # NTP
 
-Network Time Protocol (NTP) is a networking protocol for clock synchronization 
+Network Time Protocol (NTP) is a networking protocol for clock synchronization
 between computer systems over packet-switched, variable-latency data networks.
 
     exports = module.exports = []
@@ -10,14 +10,14 @@ between computer systems over packet-switched, variable-latency data networks.
 
 ## Configuration
 
-The NTP module defined 2 properties:   
+The NTP module defined 2 properties:
 
-*   `ntp.servers` (array or string)   
-    List the ntp servers used for synchronization.   
-*   `ntp.lag` (int)   
-    The tolerate time difference between the local and remote date untill which 
-    the module force a synchronization with `ntpdate`, default to 2000 
-    milliseconds.   
+*   `ntp.servers` (array or string)
+    List the ntp servers used for synchronization.
+*   `ntp.lag` (int)
+    The tolerate time difference between the local and remote date untill which
+    the module force a synchronization with `ntpdate`, default to 2000
+    milliseconds.
 
 
 Example:
@@ -38,11 +38,11 @@ Example:
       ntp.lag ?= 2000
       ntp.fudge ?= false
       ntp.fudge = if ctx.config.host in ntp.servers then 10 else 14
-      
+
 ## Install
 
 The installation respect the procedure published on [cyberciti][cyberciti]. The
-"ntp" server is installed as a startup service and `ntpdate` is run a first 
+"ntp" server is installed as a startup service and `ntpdate` is run a first
 time when the `ntpd` daemon isnt yet started.
 
     exports.push name: 'NTP # Install', timeout: -1, handler: (ctx, next) ->
@@ -63,7 +63,7 @@ time when the `ntpd` daemon isnt yet started.
 
 ## Configure
 
-The configuration file "/etc/ntp.conf" is updated with the list of servers 
+The configuration file "/etc/ntp.conf" is updated with the list of servers
 defined by the "ntp.servers" property. The "ntp" service is restarted if any
 change to this file is detected.
 The "fudge" property is used when a server should trust its own BIOS clock.
@@ -141,7 +141,7 @@ The fudge property is only appliable on NTP servers
 
 Start the `ntpd` daemon if it isnt yet running.
 
-    exports.push name: 'NTP # Start', timeout: -1, handler: (ctx, next) -> 
+    exports.push name: 'NTP # Start', label_true: 'STARTED', timeout: -1, handler: (ctx, next) ->
       ctx.log "Start the NTP service"
       ctx.service
         srv_name: 'ntpd'
@@ -152,10 +152,10 @@ Start the `ntpd` daemon if it isnt yet running.
 
 This action compare the date on the remote server with the one where Masson is
 being exectued. If the gap is greater than the one defined by the "ntp.lag"
-property, the `ntpd` daemon is stop, the `ntpdate` command is used to 
+property, the `ntpd` daemon is stop, the `ntpdate` command is used to
 synchronization the date and the `ntpd` daemon is finally restarted.
 
-    exports.push name: 'NTP # Check', handler: (ctx, next) ->
+    exports.push name: 'NTP # Check', label_true: 'CHECKED', handler: (ctx, next) ->
       # Here's good place to compare the date, maybe with the host maching:
       # if gap is greather than threehold, stop ntpd, ntpdate, start ntpd
       return next() if ctx.config.ntp.servers[0] is ctx.config.host
@@ -214,4 +214,3 @@ Upon execution of this module, the command `ntpq -p` should print:
 ```
 
 [cyberciti]: http://www.cyberciti.biz/faq/howto-install-ntp-to-synchronize-server-clock/
-
