@@ -11,21 +11,21 @@
 ## Configuration
 
 Configuration extends the configuration of the "masson/core/users" with
-new properties "authorized\_keys", "rsa" and "rsa_pub" and also define 
+new properties "authorized\_keys", "rsa" and "rsa_pub" and also define
 two new properties "sshd\_config" and "banner".
 
-*   `users.[].authorized_keys` (string, array)   
-    A list of SSH public keys added to the "~/.ssh/authorized_keys" file, optional.   
-*   `users.[].rsa` (string)   
+*   `users.[].authorized_keys` (string, array)
+    A list of SSH public keys added to the "~/.ssh/authorized_keys" file, optional.
+*   `users.[].rsa` (string)
     Private SSH key of the user, optional.
-*   `users.[].rsa_pub` (string)   
+*   `users.[].rsa_pub` (string)
     Public SSH key of the user, optional.
-*   `ssh.sshd_config` (object)   
-    Configure the SSH daemon by updating the "/etc/ssh/sshd_config" file with 
-    key/value properties, optional.   
-*   `ssh.banner` (object)   
-    Write a banner file in the system and register it with the "/etc/ssh/sshd_config" file, optional.   
-       
+*   `ssh.sshd_config` (object)
+    Configure the SSH daemon by updating the "/etc/ssh/sshd_config" file with
+    key/value properties, optional.
+*   `ssh.banner` (object)
+    Write a banner file in the system and register it with the "/etc/ssh/sshd_config" file, optional.
+
 
 ```json
 {
@@ -36,7 +36,7 @@ two new properties "sshd\_config" and "banner".
     "rsa_pub": "ssh-rsa AAAA...YYYY user@hadoop"
   },{
     "name": "sweet"
-    "home": "/home/sweet" 
+    "home": "/home/sweet"
     "authorized_keys": [ "ssh-rsa AAAA...XXXX you@email.com" ]
   }]
   "ssh": {
@@ -72,7 +72,7 @@ defined inside "users.[].authorized_keys".
       .on 'item', (user, next) ->
         return next() unless user.home
         return next() unless user.authorized_keys.length
-        ctx.mkdir 
+        ctx.mkdir
           destination: "#{user.home or '/home/'+user.name}/.ssh"
           uid: user.name
           gid: null
@@ -119,12 +119,12 @@ properties found in the "ssh.sshd_config" object.
           action: 'restart'
           if: written
         , (err, restarted) ->
-          next err, true
+          next err, written
 
 ## Public and Private Key
 
-Deploy user SSH keys. The private key is defined by the "users.[].rsa" 
-propery and is written in "~/.ssh/id\_rsa". The public key is defined by 
+Deploy user SSH keys. The private key is defined by the "users.[].rsa"
+propery and is written in "~/.ssh/id\_rsa". The public key is defined by
 the "users.[].rsa\_pub" propery and is written in "~/.ssh/id\_rsa.pub".
 
     exports.push name: 'SSH # Public and Private Key', timeout: -1, handler: (ctx, next) ->
@@ -156,9 +156,9 @@ the "users.[].rsa\_pub" propery and is written in "~/.ssh/id\_rsa.pub".
 
 # Banner
 
-Write the banner file in the system and register it with the SSH 
-daemon configuration file. The banner is a short message which appear 
-on the console once a user successfull logged-in with SSH. The "sshd" 
+Write the banner file in the system and register it with the SSH
+daemon configuration file. The banner is a short message which appear
+on the console once a user successfull logged-in with SSH. The "sshd"
 service will be restarted if this action had any effect.
 
     exports.push name: 'SSH # Banner', timeout: 100000, handler: (ctx, next) ->
@@ -180,8 +180,3 @@ service will be restarted if this action had any effect.
           action: 'restart'
           if: written
         , next
-
-
-
-
-

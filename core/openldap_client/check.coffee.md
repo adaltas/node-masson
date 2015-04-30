@@ -5,7 +5,7 @@
     exports.push 'masson/bootstrap'
     exports.push require('./index').configure
 
-    exports.push name: 'OpenLDAP Client # Check Search', handler: (ctx, next) ->
+    exports.push name: 'OpenLDAP Client # Check Search', label_true: 'CHECKED', handler: (ctx, next) ->
       {suffix, root_dn, root_password} = ctx.config.openldap_client
       return next() unless suffix
       ctx.execute

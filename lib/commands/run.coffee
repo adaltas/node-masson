@@ -66,7 +66,7 @@ module.exports = ->
         line += pad "#{styles.fqdn ctx.config.host}", hostlength
         line += pad "#{styles.label ctx.middleware.name}", 40
         line += pad "#{styles.status_start 'WORKING'}", 20
-        rl.write line 
+        rl.write line
       .on 'middleware_stop', (err, status) ->
         return unless ctx.middleware.name?
         time = Date.now() - times[ctx.config.host]
@@ -74,9 +74,9 @@ module.exports = ->
         line += pad "#{styles.fqdn ctx.config.host}", hostlength
         line += pad "#{styles.label ctx.middleware.name}", 40
         statusmsg = if err then "#{styles.status_error ctx.middleware.label_error or 'ERROR'}"
-        else if typeof status is 'string' then status 
+        else if typeof status is 'string' then status
         else if status then "#{styles.status_true ctx.middleware.label_true or 'MODIFIED'}"
-        else "#{styles.status_false ctx.middleware.label_false or 'OK'}"
+        else "#{styles.status_false ctx.middleware.label_false or '--'}"
         line += pad "#{statusmsg}", 20
         line += "#{styles.time print_time time}"
         rl.cursor = 0
@@ -124,7 +124,3 @@ module.exports = ->
       else
         rl.write "#{styles.final_status_error err.stack?.trim() or err.message}\n"
       rl.close()
-
-
-
-    

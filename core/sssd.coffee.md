@@ -1,7 +1,7 @@
 
 # SSSD
 
-The System Security Services Daemon (SSSD) provides access to different 
+The System Security Services Daemon (SSSD) provides access to different
 identity and authentication providers.
 
     exports = module.exports = []
@@ -9,18 +9,18 @@ identity and authentication providers.
     exports.push 'masson/core/yum'
     exports.push 'masson/core/openldap_client'
 
-Option includes:   
+Option includes:
 
-*   `sssd.certificates` (array)   
-    List of certificates to be uploaded to the server.   
-*   `sssd.merge`   
-    Merge the configuration with the one already present on the server, default 
+*   `sssd.certificates` (array)
+    List of certificates to be uploaded to the server.
+*   `sssd.merge`
+    Merge the configuration with the one already present on the server, default
     to false.
-*   `sssd.config`   
-*   `sssd.certificates`   
-*   `sssd.services` (array|string)   
+*   `sssd.config`
+*   `sssd.certificates`
+*   `sssd.services` (array|string)
     List of services to install, default to `['sssd', 'sssd-client', 'pam_krb5', 'pam_ldap']`
-*   `sssd.test_user`   
+*   `sssd.test_user`
 
 Example:
 
@@ -93,14 +93,14 @@ Example:
 
 ## Install
 
-Install the services defined by the "sssd.services" property. By default, the 
-following service: "sssd", "sssd-client", "pam\_krb5", "pam\_ldap" and 
+Install the services defined by the "sssd.services" property. By default, the
+following service: "sssd", "sssd-client", "pam\_krb5", "pam\_ldap" and
 "sssd-tools". It also ensures SSSD is marked as a startup service.
 
     exports.push name: 'SSSD # Install', timeout: -1, handler: (ctx, next) ->
       {services} = ctx.config.sssd
       services = for name in services then name: name
-      modified = true
+      modified = false
       do_install = ->
         ctx.service services, (err, serviced) ->
           return next err if err
@@ -129,7 +129,7 @@ the command `authconfig --update --ldaploadcacert={file}`.
       each(certificates)
       .on 'item', (certificate, next) ->
         hash = crypto.createHash('md5').update(certificate).digest('hex')
-        ctx.upload 
+        ctx.upload
           source: certificate
           destination: "/tmp/#{hash}"
         , (err) ->
@@ -139,7 +139,7 @@ the command `authconfig --update --ldaploadcacert={file}`.
           , (err, _, stdout) ->
             return next err if err
             stdout = stdout.trim()
-            ctx.upload 
+            ctx.upload
               source: certificate
               destination: "/etc/openldap/cacerts/#{stdout}.0"
             , (err, uploaded) ->
@@ -151,8 +151,8 @@ the command `authconfig --update --ldaploadcacert={file}`.
 
 ## Configure
 
-Update the SSSD configuration file present in "/etc/sssd/sssd.conf" with the 
-values defined in the "sssd.config" property. The destination file is by 
+Update the SSSD configuration file present in "/etc/sssd/sssd.conf" with the
+values defined in the "sssd.config" property. The destination file is by
 default overwritten unless the "sssd.merge" is `true`.
 
     exports.push name: 'SSSD # Configure', timeout: -1, handler: (ctx, next) ->
@@ -201,8 +201,8 @@ default overwritten unless the "sssd.merge" is `true`.
 
 ## Check NSS
 
-Check if NSS is correctly configured by executing the command `getent passwd 
-$user`. The command is only executed if a test user is defined by the 
+Check if NSS is correctly configured by executing the command `getent passwd
+$user`. The command is only executed if a test user is defined by the
 "sssd.test_user" property.
 
     exports.push name: 'SSSD # Check NSS', handler: (ctx, next) ->
@@ -220,8 +220,8 @@ $user`. The command is only executed if a test user is defined by the
 
 ## Check PAM
 
-Check if PAM is correctly configured by executing the command 
-`sh -l $user -c 'touch .masson_check_pam'`. This is only executed if a test 
+Check if PAM is correctly configured by executing the command
+`sh -l $user -c 'touch .masson_check_pam'`. This is only executed if a test
 user is defined by the "sssd.test_user" property.
 
     exports.push name: 'SSSD # Check PAM', handler: (ctx, next) ->
@@ -236,26 +236,4 @@ user is defined by the "sssd.test_user" property.
 
     crypto = require 'crypto'
     {merge} = require 'mecano/lib/misc'
-    each = require 'each'  
-      
-      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    each = require 'each'

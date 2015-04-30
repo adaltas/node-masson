@@ -6,7 +6,7 @@
 
 ## Start
 
-    exports.push name: 'OpenLDAP Server # Start', handler: (ctx, next) ->
+    exports.push name: 'OpenLDAP Server # Start', label_true: 'STARTED', handler: (ctx, next) ->
       ctx.service
         srv_name: 'slapd'
         action: 'start'

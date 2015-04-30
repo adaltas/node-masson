@@ -7,5 +7,8 @@
 
 Start the HTTPD service by executing the command `service httpd stop`.
 
-    exports.push name: 'HTTPD # Stop', handler: (ctx, next) ->
-      ctx.service srv_name: 'httpd', action: 'stop', next
+    exports.push name: 'HTTPD # Stop', label_true: 'STOPPED', handler: (ctx, next) ->
+      ctx.service
+        srv_name: 'httpd'
+        action: 'stop'
+      , next

@@ -6,7 +6,7 @@
 
 ## Stop
 
-    exports.push name: 'OpenLDAP Server # Stop', handler: (ctx, next) ->
+    exports.push name: 'OpenLDAP Server # Stop', label_true: 'STOPPED', handler: (ctx, next) ->
       ctx.service
         srv_name: 'slapd'
         action: 'stop'
