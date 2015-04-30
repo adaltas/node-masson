@@ -39,6 +39,7 @@ developers on Solaris, Linux, Mac OS X or Windows.
       # ctx.config.java.java_home ?= '/usr/java/default'
       # Shared
       java.java_home ?= '/usr/lib/jvm/java'
+      java.jre_home ?= '/usr/lib/jvm/java/jre'
       java.proxy = ctx.config.proxy.http_proxy if typeof ctx.config.java.proxy is 'undefined'
       # OpenJDK
       java.openjdk ?= true
