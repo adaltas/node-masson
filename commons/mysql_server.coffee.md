@@ -236,7 +236,7 @@ Remove test database and access to it? [Y/n] y
           ctx.execute
             cmd: query """
             USE mysql;
-            GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY "#{password}" WITH GRANT OPTION;
+            GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '#{password}' WITH GRANT OPTION;
             FLUSH PRIVILEGES;
             """
             not_if_exec: """
