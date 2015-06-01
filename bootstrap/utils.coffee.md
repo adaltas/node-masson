@@ -192,12 +192,20 @@ ctx.waitIsOpen [
           else
             servers_flatten.push host: server.host, port: server.port
         return callback() unless servers_flatten.length
+        quorum_target = options.quorum
+        if quorum_target and quorum_target is 'true'  
+          quorum_target = Math.ceil servers_flatten.length / 2
+        else
+          quorum_target = servers_flatten.length
+        quorum_current = 0
+        randfiles = []
         each servers_flatten
+        .parallel true
         .on 'item', (server, next) ->
+          options.randdir ?= '/tmp'
+          rand = Date.now() + inc++
+          randfiles.push randfile = "#{options.randdir}/#{rand}"
           if options.timeout
-            rand = Date.now() + inc++
-            options.randdir ?= '/tmp'
-            randfile = "#{options.randdir}/#{rand}"
             timedout = false
             clear = setTimeout ->
               timedout = true
@@ -207,21 +215,28 @@ ctx.waitIsOpen [
                 destination: randfile
               , (err) -> # nothing to do
             , options.timeout
-            cmd = "while ! `bash -c 'echo > /dev/tcp/#{server.host}/#{server.port}'` && [[ ! -f #{randfile} ]]; do sleep 2; done;"
-          else
-            cmd = "while ! bash -c 'echo > /dev/tcp/#{server.host}/#{server.port}'; do sleep 2; done;"
+          #   cmd = "while ! `bash -c 'echo > /dev/tcp/#{server.host}/#{server.port}'` && [[ ! -f #{randfile} ]]; do sleep 2; done;"
+          # else
+          #   cmd = "while ! bash -c 'echo > /dev/tcp/#{server.host}/#{server.port}'; do sleep 2; done;"
+          cmd = "echo > #{randfile}; while ! `bash -c 'echo > /dev/tcp/#{server.host}/#{server.port}'` && [[ -f #{randfile} ]]; do sleep 2; done;"
           ctx.log "Start wait for #{server.host} #{server.port}"
           ctx.emit 'wait', server.host, server.port
           ctx
-          .child()
           .execute
             cmd: cmd
+            shy: true
           , (err, executed) ->
             clearTimeout clear if clear
             err = new Error "Reached timeout #{options.timeout}" if not err and timedout
             ctx.log "Finish wait for #{server.host} #{server.port}"
             ctx.emit 'waited', server.host, server.port
-            next err
+            quorum_current++ unless err
+            cmd = for randfile in randfiles then "rm #{randfile};"
+            ctx.execute
+              cmd: cmd.join '\n'
+              shy: true
+              if: quorum_current >= quorum_target
+            , (_err_) -> next err
         .on 'both', callback
 
 ## SSH connection
