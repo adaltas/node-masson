@@ -232,6 +232,16 @@ user is defined by the "sssd.test_user" property.
       , (err, executed, stdout, stderr) ->
         return next err, executed
 
+## Clean "sssd" Cache
+
+If the command `sss_cache -E` fail, the cache may be manually removed with:
+
+```
+cp -rp /var/lib/sss/db /var/lib/sss/db.bck
+rm -rf /var/lib/sss/db/*
+service sssd restart
+```
+
 ## Module Dependencies
 
     crypto = require 'crypto'
