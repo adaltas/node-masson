@@ -6,9 +6,6 @@ deployed.
 
 Note, ntp is installed to encure correct date on the server or HTTPS will fail.
 
-    each = require 'each'
-    path = require 'path'
-    misc = require 'mecano/lib/misc'
     exports = module.exports = []
     exports.push 'masson/bootstrap'
     exports.push 'masson/core/profile' # In case yum make use of environmental variables
@@ -69,18 +66,10 @@ Examples
         ctx.config.yum.config.main.proxy_password = password
 
     exports.push name: 'YUM # Check', handler: (ctx, next) ->
-      misc.pidfileStatus ctx.ssh, '/var/run/yum.pid', {}, (err, status) ->
+      pidfile_running ctx.ssh, '/var/run/yum.pid', (err, running) ->
         return next err if err
-        switch status
-          when 0
-            ctx.log 'YUM is running, abort'
-            next new Error 'Yum is already running'
-          when 1
-            ctx.log 'YUM isnt running'
-            next null, false
-          when 2
-            ctx.log "YUM isnt running, removing invalid '/var/run/yum.pid'"
-            next null, true
+        return next new Error 'Yum is already running' if running
+        next null, false
 
 ## YUM # Configuration
 
@@ -96,7 +85,7 @@ is available on [the centos website](http://www.centos.org/docs/5/html/yum/sn-yu
         destination: '/etc/yum.conf'
         merge: true
         backup: true
-      , next
+      .then next
 
 ## YUM # repositories
 
@@ -121,10 +110,15 @@ in "/etc/yum.repos.d"
             do_clean local_files, remote_files
       do_clean = (local_files, remote_files) ->
         return do_upload local_files unless clean
-        local_filenames = local_files.map (file) -> path.basename file
-        removes = for file in remote_files
-          continue if path.basename(file) in local_filenames
+        removes = remote_files
+        .filter (file) -> # Only keep file not present locally
+          not local_files.some (local_file) -> path.basename(file) is path.basename(local_file)
+        .map (file) -> # Transform to object
           destination: file
+        # local_filenames = local_files.map (file) -> path.basename file
+        # removes = for file in remote_files
+        #   continue if path.basename(file) in local_filenames
+        #   destination: file
         ctx.remove removes, (err, removed) ->
           return next err if err
           modified = true if removed
@@ -133,15 +127,12 @@ in "/etc/yum.repos.d"
         uploads = for file in local_files
           source: file
           destination: "/etc/yum.repos.d/#{path.basename file}"
-        ctx.upload uploads, (err, uploaded) ->
-          return next err if err
-          modified = true if uploaded
-          do_update()
-      do_update = ->
-        ctx.execute
+        ctx
+        .upload uploads
+        .execute
           cmd: 'yum clean metadata; yum -y update'
           if: modified
-        , next
+        .then next
       do_search()
 
 ## Epel
@@ -159,24 +150,30 @@ property "yum.epel" to false.
         then "rpm -Uvh #{epel_url}"
         else 'yum install epel-release' 
         not_if_exec: 'yum list installed | grep epel-release'
-      , next
+      .then next
 
     exports.push name: 'YUM # Update', timeout: -1, handler: (ctx, next) ->
       {update} = ctx.config.yum
-      return next() unless update
-      ctx.execute
-        cmd: 'yum -y update'
-      , (err, executed, stdout, stderr) ->
-        next err, not /No Packages marked for Update/.test(stdout)
+      ctx.call (_, callback) ->
+        ctx.execute
+          cmd: 'yum -y update'
+          if: update
+        , (err, executed, stdout, stderr) ->
+          callback err, executed and not /No Packages marked for Update/.test stdout
+      .then next
 
     exports.push name: 'YUM # Packages', timeout: -1, handler: (ctx, next) ->
       services = for name, active of ctx.config.yum.packages
         continue unless active
         name: name
-      ctx.service services, next
+      ctx
+      .service services
+      .then next
 
 ## Dependencies
 
     glob = require 'glob'
+    path = require 'path'
+    pidfile_running = require 'mecano/lib/misc/pidfile_running'
 
 
