@@ -142,9 +142,8 @@ Install the Mysql database server. Secure the temporary directory.
         , (err, removed) ->
           return next err if err
           return next new Error 'Failed to install mysqld' unless removed
-          ctx.service
-            name: 'mysql-server'
-            srv_name: 'mysqld'
+          ctx.service_start
+            name: 'mysqld'
             action: 'start'
           , (err, started) ->
             return next err if err
