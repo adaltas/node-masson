@@ -1,9 +1,6 @@
 
 # Java
 
-    path = require 'path'
-    semver = require 'semver'
-    url = require 'url'
     exports = module.exports = []
     exports.push 'masson/bootstrap'
 
@@ -47,8 +44,7 @@ developers on Solaris, Linux, Mac OS X or Windows.
       # throw new Error "Configuration property 'java.version' is required." unless java.version
       # java.version ?= (/\w+-([\w\d]+)-/.exec path.basename java.location)[0]
       # JCE
-      ctx.log? 'JCE not configured' unless java.jce_local_policy or java.jce_us_export_policy
-        
+      # ctx.log? 'JCE not configured' unless java.jce_local_policy or java.jce_us_export_policy
 
 ## Install OpenJDK
 
@@ -57,7 +53,7 @@ developers on Solaris, Linux, Mac OS X or Windows.
       return next() unless openjdk
       ctx.service
         name: 'java-1.7.0-openjdk-devel'
-      , next
+      .then next
 
 ## Remove OpenJDK
 
@@ -67,16 +63,18 @@ come with the OpenJDK installed and to avoid any ambiguity, we simply remove the
     exports.push name: 'Java # Remove OpenJDK', handler: (ctx, next) ->
       {openjdk} = ctx.config.java
       return next() if openjdk
-      ctx.execute
-        cmd: 'yum list installed | grep openjdk'
-        code_skipped: 1
-      , (err, installed, stdout, stderr) ->
-        return next err if err
-        packages = for l in stdout.trim().split('\n') then /(.*?) .*$/.exec(l)?[1] or l
+      ctx.call (_, callback) ->
         ctx.execute
-          cmd: "yum remove -y #{packages.join ' '}"
-          if: installed
-        , next
+          cmd: 'yum list installed | grep openjdk'
+          code_skipped: 1
+        , (err, installed, stdout, stderr) ->
+          return callback err if err
+          packages = for l in stdout.trim().split('\n') then /(.*?) .*$/.exec(l)?[1] or l
+          ctx.execute
+            cmd: "yum remove -y #{packages.join ' '}"
+            if: installed
+          , callback
+      .then next
 
 ## Install Oracle JDK
 
@@ -91,43 +89,39 @@ inside the configuration. The properties "jce\_local\_policy" and
       ctx.log "Check if java is here and which version it is"
       ctx.execute
         cmd: 'ls -d /usr/java/jdk*'
-      , (err, executed, stdout) ->
+        if_exec: '[[ -d /usr/java/ ]]'
+      , (err, executed, stdout, stderr) ->
         return next err if err and err.code isnt 2
-        stdout = '' if err
+        stdout = '' if err or not executed
         installed_version = stdout.trim().split('\n').pop()
         if installed_version
           installed_version = /jdk(.*)/.exec(installed_version)[1]
           installed_version = installed_version.replace('_', '').replace('0', '')
           version = jdk.version.replace('_', '').replace('0', '')
-          unless semver.gt version, installed_version
-            return next null, false
-        action = if url.parse(jdk.location).protocol is 'http:' then 'download' else 'upload'
-        ctx.log "Java #{action}"
+          return next null, false unless semver.gt version, installed_version
+        # action = if url.parse(jdk.location).protocol is 'http:' then 'download' else 'upload'
+        # ctx.log "Java #{action}"
         tmpdir = "/tmp/masson_java_#{Date.now()}"
         destination = "#{tmpdir}/#{path.basename jdk.location}"
-        ctx[action]
+        ctx
+        .download
           source: jdk.location
           proxy: proxy
           destination: "#{destination}"
           binary: true
-        , (err, downloaded) ->
-          return next err if err
-          ctx.log 'Install jdk in /usr/java'
-          ctx.execute
-            # cmd: "yes | sh /tmp/#{path.basename jdk.location}"
-            cmd: """
-            mkdir -p /usr/java
-            tar xzf #{destination} -C #{tmpdir}
-            rm -rf #{destination}
-            version=`ls #{tmpdir}`
-            mv #{tmpdir}/$version /usr/java
-            ln -sf /usr/java/${version} /usr/java/latest
-            ln -sf /usr/java/$version /usr/java/default
-            rm -rf #{tmpdir}
-            """
-            trap_on_error: true
-          , (err, executed, stdout) ->
-            return next err, true
+        .execute
+          cmd: """
+          mkdir -p /usr/java
+          tar xzf #{destination} -C #{tmpdir}
+          rm -rf #{destination}
+          version=`ls #{tmpdir}`
+          mv #{tmpdir}/$version /usr/java
+          ln -sf /usr/java/${version} /usr/java/latest
+          ln -sf /usr/java/$version /usr/java/default
+          rm -rf #{tmpdir}
+          """
+          trap_on_error: true
+        .then next
 
 ## Java JCE
 
@@ -147,17 +141,18 @@ reference it inside the configuration. The properties "jce\_local\_policy" and
       return next() unless jdk
       jdk_home = "/usr/java/jdk#{jdk.version}"
       ctx.log "Download jce-6 Security JARs"
-      ctx.upload [
+      ctx
+      .download
         source: jce_local_policy
         destination: "#{jdk_home}/jre/lib/security/local_policy.jar"
         binary: true
         sha1: true
-      ,
+      .download
         source: jce_us_export_policy
         destination: "#{jdk_home}/jre/lib/security/US_export_policy.jar"
         binary: true
         sha1: true
-      ], next
+      .then next
 
     exports.push name: 'Java # Env', timeout: -1, handler: (ctx, next) ->
       {java_home} = ctx.config.java
@@ -168,7 +163,13 @@ reference it inside the configuration. The properties "jce\_local\_policy" and
         export JAVA_HOME=#{java_home}
         export PATH=$PATH:#{java_home}/bin
         """
-      , next
+      .then next
+
+## Dependencies
+
+    path = require 'path'
+    semver = require 'semver'
+    url = require 'url'
 
 ## Notes
 
