@@ -278,7 +278,7 @@ ctx.connect username: root, host: "master1.hadoop", (err, ssh) ->
               config.private_key = content
               do_connect()
         do_connect = ->
-          config.privateKey = config.private_key
+          # config.privateKey = config.private_key
           connect config, (err, connection) ->
             return callback err if err
             ctx.log "SSH connection open"
