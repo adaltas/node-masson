@@ -13,4 +13,5 @@ Princ the status for the HTTPD service by executing the command
       ctx.execute
         cmd: "service httpd status"
         code_skipped: 3
-      , next
+        if_exists: '/etc/init.d/httpd'
+      .then next
