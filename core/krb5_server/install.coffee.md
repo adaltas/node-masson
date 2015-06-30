@@ -14,6 +14,8 @@ Resources:
 *   [Propagation](http://www-old.grantcohoe.com/guides/services/krb5-kdc)
 *   [Replication](http://tldp.org/HOWTO/Kerberos-Infrastructure-HOWTO/server-replication.html)
 *   [Kerberos with LDAP backend on ubuntu](http://labs.opinsys.com/blog/2010/02/05/setting-up-openldap-kerberos-on-ubuntu-10-04-lucid/)
+*   [On Load Balancers and Kerberos](https://ssimo.org/blog/id_019.html)
+
 
     exports = module.exports = []
     exports.push 'masson/bootstrap'
@@ -216,8 +218,8 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
     exports.push name: 'Krb5 Server # LDAP Stash password', timeout: 5*60*1000, handler: (ctx, next) ->
       {kdc_conf} = ctx.config.krb5
       modified = false
-      each(kdc_conf.dbmodules)
-      .on 'item', (name, dbmodule, next) ->
+      each kdc_conf.dbmodules
+      .run (name, dbmodule, next) ->
         {kdc_master_key, manager_dn, manager_password, ldap_service_password_file, ldap_kadmind_dn} = dbmodule
         ctx.log "Stash key file is: #{dbmodule.ldap_service_password_file}"
         keyfileContent = null
@@ -265,61 +267,41 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
             modified = if keyfileContent is content then false else true
             next()
         do_read()
-      .on 'both', (err) ->
+      .then (err) ->
         next err, modified
 
     exports.push name: 'Krb5 Server # Log', timeout: 100000, handler: (ctx, next) ->
-      modified = false
-      touch = ->
-        ctx.log 'Touch "/etc/logrotate.d/krb5kdc" and "/etc/logrotate.d/kadmind"'
-        ctx.write [
-          content: ''
-          destination: '/var/log/krb5kdc.log'
-          not_if_exists: true
+      restart = false
+      ctx
+      .touch
+        destination: '/var/log/krb5kdc.log'
+      .touch
+        destination: '/var/log/kadmind.log'
+      .write
+        destination: '/etc/rsyslog.conf'
+        write: [
+          match: /.*krb5kdc.*/mg
+          replace: 'if $programname == \'krb5kdc\' then /var/log/krb5kdc.log'
+          append: '### RULES ###'
         ,
-          content: ''
-          destination: '/var/log/kadmind.log'
-          not_if_exists: true
-        ], (err, written) ->
-          return done err if err
-          modified = true if written
-          rsyslog()
-      rsyslog = ->
-        ctx.log 'Update /etc/rsyslog.conf'
-        ctx.write
-          destination: '/etc/rsyslog.conf'
-          write: [
-            match: /.*krb5kdc.*/mg
-            replace: 'if $programname == \'krb5kdc\' then /var/log/krb5kdc.log'
-            append: '### RULES ###'
-          ,
-            match: /.*kadmind.*/mg
-            replace: 'if $programname == \'kadmind\' then /var/log/kadmind.log'
-            append: '### RULES ###'
-          ]
-        , (err, written) ->
-          return done err if err
-          modified = true if written
-          if written then restart() else done()
-      restart = ->
-        ctx.log 'Restart krb5kdc and kadmin'
-        ctx.service [
-          action: 'start'
-          srv_name: 'krb5kdc'
-        ,
-          action: 'start'
-          srv_name: 'kadmin'
-        ], (err, restarted) ->
-          return done err if err
-          ctx.log 'Restart rsyslog'
-          ctx.service
-            srv_name: 'rsyslog'
-            action: 'restart'
-          , (err, restarted) ->
-            done err
-      done = (err) ->
-        next err, modified
-      touch()
+          match: /.*kadmind.*/mg
+          replace: 'if $programname == \'kadmind\' then /var/log/kadmind.log'
+          append: '### RULES ###'
+        ]
+      , (err, status) ->
+        throw err if err
+        restart = status
+      .service_start
+        name: 'krb5kdc'
+        if: -> restart
+      .service_start
+        name: 'kadmin'
+        if: -> restart
+      .service
+        srv_name: 'rsyslog'
+        action: 'restart'
+        if: -> restart
+      .then next
 
     exports.push name: 'Krb5 Server # Admin principal', timeout: -1, handler: (ctx, next) ->
       {etc_krb5_conf, kdc_conf} = ctx.config.krb5
