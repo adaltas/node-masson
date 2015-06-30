@@ -73,7 +73,7 @@ Run = (params, config) ->
               if middleware.handler.length < 2 # Synchronous middleware
                 # merge middleware, middleware.handler.call ctx, ctx
                 middleware.handler.call ctx, ctx
-                process.nextTick ->
+                setImmediate ->
                   middleware.timeout = -1
                   done()
               else # Asynchronous middleware
