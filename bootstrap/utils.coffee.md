@@ -62,6 +62,8 @@ Emitted event:
 
 Options include:   
 
+*   `quorum`    
+    Number of minimal successful connection, 50% if "true".   
 *   `cmd` (string|array)   
     The command to be executed.    
 *   `interval`   
@@ -94,14 +96,21 @@ ctx.waitForExecution cmd: "test -f /tmp/sth", (err) ->
           callback = options
           options = {}
         cmds = [cmds] unless Array.isArray cmds
+        quorum_target = options.quorum
+        if quorum_target and quorum_target is 'true'  
+          quorum_target = Math.ceil cmds.length / 2
+        else
+          quorum_target = cmds.length
         options.interval ?= 2000
         options.code_skipped ?= 1
         ctx.log "Start wait for execution"
         ctx.emit 'wait'
         count = 0
+        quorum_current = 1
         each(cmds)
         .on 'item', (cmd, next) ->
           run = ->
+            return next() if quorum_current >= quorum_target
             ctx.log "Attempt #{++count}"
             ctx
             .child()
@@ -116,7 +125,8 @@ ctx.waitForExecution cmd: "test -f /tmp/sth", (err) ->
               return next err if err
               ctx.log "Finish wait for execution"
               ctx.emit 'waited'
-              next()
+              quorum_current++
+              run()
           run()
         .on 'both', callback
 
@@ -134,6 +144,8 @@ Argument "servers" is an array of objects with the "host" and "port" properties:
 Ensure that the user provided callback will not be called until one or multiple 
 ports are open.
 
+*   `quorum`    
+    Number of minimal successful connection, 50% if "true".   
 *   `timeout`   
     Maximum time to wait until this function is considered to have failed.   
 *   `randdir`
@@ -215,13 +227,11 @@ ctx.waitIsOpen [
                 destination: randfile
               , (err) -> # nothing to do
             , options.timeout
-          #   cmd = "while ! `bash -c 'echo > /dev/tcp/#{server.host}/#{server.port}'` && [[ ! -f #{randfile} ]]; do sleep 2; done;"
-          # else
-          #   cmd = "while ! bash -c 'echo > /dev/tcp/#{server.host}/#{server.port}'; do sleep 2; done;"
           cmd = "echo > #{randfile}; while ! `bash -c 'echo > /dev/tcp/#{server.host}/#{server.port}'` && [[ -f #{randfile} ]]; do sleep 2; done;"
           ctx.log "Start wait for #{server.host} #{server.port}"
           ctx.emit 'wait', server.host, server.port
           ctx
+          .child()
           .execute
             cmd: cmd
             shy: true
