@@ -44,6 +44,11 @@ Run = (params, config) ->
       # Filter by hosts
       return next() if params.hosts? and multimatch(host, params.hosts).indexOf(host) is -1
       @emit 'context', ctx
+      for module in Object.keys ctx.tree.modules
+        module = ctx.tree.modules[module]
+        module.configure ctx if module.configure
+      # console.log ctx.config.ryba
+      # return next()
       ctx.tree.middlewares params, (err, middlewares) =>
         return next() unless middlewares?
         middlewareRun = each(middlewares)
