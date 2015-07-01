@@ -66,16 +66,13 @@ this file.
 
     exports.push name: 'Network # Hosts', handler: (ctx, next) ->
       {hosts, hosts_auto} = ctx.config.network
-      # content = ''
       write = []
       if hosts_auto then for _, server of ctx.config.servers
-        # content += "#{server.ip} #{server.host}\n"
         write.push 
           match: RegExp "^#{quote server.ip}\\s.*$", 'gm'
           replace: "#{server.ip} #{server.host} #{server.shortname}"
           append: true
       for ip, hostnames of hosts
-        # content += "#{ip} #{hostnames}\n"
         write.push 
           match: RegExp "^#{quote ip}\\s.*$", 'gm'
           replace: "#{ip} #{hostnames}"
