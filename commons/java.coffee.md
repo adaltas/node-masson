@@ -142,12 +142,14 @@ reference it inside the configuration. The properties "jce\_local\_policy" and
       jdk_home = "/usr/java/jdk#{jdk.version}"
       ctx.log "Download jce-6 Security JARs"
       ctx
-      .download
+      # .download
+      .upload
         source: jce_local_policy
         destination: "#{jdk_home}/jre/lib/security/local_policy.jar"
         binary: true
         sha1: true
-      .download
+      .upload
+      # .download
         source: jce_us_export_policy
         destination: "#{jdk_home}/jre/lib/security/US_export_policy.jar"
         binary: true
@@ -173,7 +175,6 @@ reference it inside the configuration. The properties "jce\_local\_policy" and
 
 ## Notes
 
-As of sep 2013, jdk7 is supported by Cloudera but not by Hortonworks.
 We do not attempt to remve GCJ because it is a requirement of the "mysql-connector-java"
 and removing the GCJ package also remove the MySQL connector package.
 
