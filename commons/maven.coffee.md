@@ -10,7 +10,7 @@ Currently being written, not yet registered in any config.
 
     exports.push (ctx) ->
       ctx.config.maven ?= {}
-      ctx.config.maven.source ?= 'http://mirror.olnevhost.net/pub/apache/maven/maven-3/3.0.5/binaries/apache-maven-3.0.5-bin.tar.gz'
+      ctx.config.maven.source ?= 'http://apache.websitebeheerjd.nl/maven/maven-3/3.3.3/binaries/apache-maven-3.3.3-bin.tar.gz'
 
 ## Installation
 
@@ -20,9 +20,12 @@ Currently being written, not yet registered in any config.
         destination: '/tmp/maven.tar.gz'
       , (err, executed) ->
         return next err if err
-        ctx.extract
-          source: '/tmp/maven.tar.gz'
-          destination: '/usr/lib/maven'
-        , (err, extracted) ->
-          return next err if err
-          next null, true
+        ctx
+          .mkdir
+            destination: "/usr/lib/maven"
+          .extract
+            source: '/tmp/maven.tar.gz'
+            destination: '/usr/lib/maven'
+          , (err, extracted) ->
+            return next err if err
+            next null, true
