@@ -80,13 +80,12 @@ this file.
           match: RegExp "^#{quote ip}\\s.*$", 'gm'
           replace: "#{ip} #{hostnames}"
           append: true
-      return next() unless write.length
       ctx.write
         destination: '/etc/hosts'
         write: write
         backup: true
         eof: true
-      , next
+      .then next
 
 ## Network # Hostname
 
@@ -96,15 +95,18 @@ relevant file is "/etc/sysconfig/network".
     exports.push name: 'Network # Hostname', handler: (ctx, next) ->
       {hostname, network} = ctx.config
       return next() if network.hostname_disabled
-      ctx.write
+      restart = false
+      ctx
+      .write
         match: /^HOSTNAME=.*/mg
         replace: "HOSTNAME=#{hostname}"
         destination: '/etc/sysconfig/network'
       , (err, replaced) ->
-        return next err, false if err or not replaced 
-        ctx.execute
-          cmd: "hostname #{ctx.config.host} && service network restart"
-        , next()
+        restart = true if replaced
+      .execute
+        cmd: "hostname #{ctx.config.host} && service network restart"
+        if: -> restart
+      .then next
 
 ## Network # DNS resolv
 
@@ -128,7 +130,7 @@ configuration file is considered a trusted source of DNS information.
         destination: '/etc/resolv.conf'
         backup: true
         eof: true
-      , (err, written) ->
+      .then (err, written) ->
         return next err if err
         bind_server_hosts = ctx.hosts_with_module 'masson/core/bind_server'
         bind_server_hosts = for host in bind_server_hosts
@@ -154,7 +156,9 @@ Customize the network interfaces configured present inside the
         write: write
         backup: false
         eof: true
-      ctx.write writes , next
+      ctx
+      .write writes
+      .then next
 
 ## Dependencies
 

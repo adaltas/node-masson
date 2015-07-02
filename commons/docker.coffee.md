@@ -21,7 +21,7 @@ service.
         yum_name: 'docker-io'
         startup: true
         action: 'start'
-      , next
+      .then next
 
 ## Install docker-pid
 
@@ -35,7 +35,7 @@ Get the PID of a docker container by name or ID.
         """
         destination: '/usr/local/bin/docker-pid'
         mode: 0o0755
-      , next
+      .then next
 
 ## Install docker-ip
 
@@ -49,7 +49,7 @@ Get the ip address of a container by name or ID.
         """
         destination: '/usr/local/bin/docker-ip'
         mode: 0o0755
-      , next
+      .then next
 
 ## Install nsenter
 
@@ -59,13 +59,31 @@ recipe to build nsenter easily and install it in your system. Check
 
 The recipe also install the `docker-enter` command.
 
+Important, starting from Docker 1.3 you can use Docker exec to enter a Docker
+container. There are differences between nsenter and docker exec; namely,
+nsenter doesn't enter the cgroups, and therefore evades resource limitations.
+The potential benefit of this would be debugging and external audit, but for
+remote access, docker exec is the current recommended approach.
+
     exports.push name: 'Docker # Install nsenter', handler: (ctx, next) ->
       ctx.execute
         cmd: """
         docker run -v /usr/local/bin:/target jpetazzo/nsenter
         """
         not_if_exec: "which nsenter"
-      , next
+      .then next
+
+## Registry 2.0
+
+Docker Registry stores and distributes images centrally. It's where you push
+images to and pull them from; Docker Registry gives team members the ability to
+share images and deploy them to testing, staging and production environments.
+
+    # exports.push name: 'Docker # Registry 2.0', handler: (ctx, next) ->
+    #   ctx.execute
+    #     cmd: "docker run -p 5000:5000 registry:2.0"
+    #   .then next
+    
 
 ## Additionnal resources
 

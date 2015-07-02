@@ -54,7 +54,7 @@ configuration will be enriched with the `http_proxy`, the
       ctx.config.proxy.password ?= null
       ctx.config.proxy.secure ?= null
       if not ctx.config.proxy.host and (ctx.config.proxy.port or ctx.config.proxy.username or ctx.config.proxy.password)
-        return next new Error "Invalid proxy configuration"
+        throw Error "Invalid proxy configuration"
       toUrl = (scheme, auth) ->
         return null unless ctx.config.proxy.host
         if scheme is 'https' and ctx.config.proxy.secure?.host

@@ -24,7 +24,9 @@ Create the users defined inside the "hdp.groups" configuration. See the
 
     exports.push name: 'Groups', handler: (ctx, next) ->
       groups = for _, group in ctx.config.groups then group
-      ctx.user groups, next
+      ctx
+      .group groups
+      .then next
 
 ## Users
 
@@ -33,7 +35,9 @@ Create the users defined inside the "hdp.users" configuration. See the
 
     exports.push name: 'Users', handler: (ctx, next) ->
       users = for _, user in ctx.config.users then user
-      ctx.user users, next
+      ctx
+      .user users
+      .then next
 
 [mecano_group]: https://github.com/wdavidw/node-mecano/blob/master/src/group.coffee.md
 [mecano_user]: https://github.com/wdavidw/node-mecano/blob/master/src/user.coffee.md

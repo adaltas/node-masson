@@ -187,7 +187,6 @@ synchronization the date and the `ntpd` daemon is finally restarted.
 
 ## Module Dependencies
 
-    quote = require 'regexp-quote'
     string = require 'mecano/lib/misc/string'
 
 ## Server configuration
