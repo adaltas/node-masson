@@ -15,17 +15,13 @@ Currently being written, not yet registered in any config.
 ## Installation
 
     exports.push name: 'Maven # Installation', handler: (ctx, next) ->
-      ctx.download
+      ctx
+      .download
         source: ctx.config.maven.source
-        destination: '/tmp/maven.tar.gz'
-      , (err, executed) ->
-        return next err if err
-        ctx
-          .mkdir
-            destination: "/usr/lib/maven"
-          .extract
-            source: '/tmp/maven.tar.gz'
-            destination: '/usr/lib/maven'
-          , (err, extracted) ->
-            return next err if err
-            next null, true
+        destination: '/var/tmp/maven.tar.gz'
+      .mkdir
+        destination: "/usr/lib/maven"
+      .extract
+        source: '/var/tmp/maven.tar.gz'
+        destination: '/usr/lib/maven'
+      .then next
