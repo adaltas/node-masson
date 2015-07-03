@@ -46,6 +46,19 @@ module.exports = parameters
       description: 'Fast mode without dependency resolution'
     ]
   ,
+    name: 'prepare'
+    description: 'Prepare components before deployment'
+    options: [
+      name: 'hosts', shortcut: 'h', type: 'array'
+      description: 'Limit to a list of server hostnames'
+    ,
+      name: 'modules', shortcut: 'm', type: 'array'
+      description: 'Limit to a list of modules'
+    , 
+      name: 'fast', shortcut: 'f', type: 'boolean'
+      description: 'Fast mode without dependency resolution'
+    ]
+  ,
     name: 'install'
     description: 'Install components and deploy configuration'
     options: [
