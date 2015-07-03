@@ -7,7 +7,6 @@ It depends on the "masson/core/git" and "masson/commons/users" modules. The form
 is used to download n and the latest is used to write a "~/.npmrc" file in the
 home of each users.
 
-    ini = require 'ini'
     each = require 'each'
     mecano = require 'mecano'
     misc = require 'mecano/lib/misc'
@@ -46,17 +45,17 @@ Example:
 }
 ```
 
-    exports.push (ctx, next) ->
+    exports.push (ctx) ->
       require('../core/proxy').configure ctx
       ctx.config.nodejs ?= {}
       ctx.config.nodejs.version ?= 'stable'
       ctx.config.nodejs.merge ?= true
       ctx.config.nodejs.config ?= {}
       ctx.config.nodejs.method ?= 'binary' # one of "binary" or "n"
+      throw Error 'Method not handled' unless ctx.config.nodejs.method in ['binary', 'n']
       ctx.config.nodejs.config['registry'] ?= 'http://registry.npmjs.org/'
       ctx.config.nodejs.config['proxy'] ?= ctx.config.proxy.http_proxy
       ctx.config.nodejs.config['https-proxy'] ?= ctx.config.proxy.http_proxy
-      next()
 
 ## N Installation
 
@@ -65,7 +64,6 @@ N is a Node.js binary management system, similar to nvm and nave.
     exports.push name: 'Node.js # N', timeout: 100000, handler: (ctx, next) ->
       # Accoring to current test, proxy env var arent used by ssh exec
       {method, http_proxy, https_proxy} = ctx.config.nodejs
-      return next() unless method is 'n'
       env = {}
       env.http_proxy = http_proxy if http_proxy
       env.https_proxy = https_proxy if https_proxy
@@ -79,20 +77,20 @@ N is a Node.js binary management system, similar to nvm and nave.
         cd n
         make install
         """
+        if: method is 'n'
         not_if_exists: '/usr/local/bin/n'
-      , next
+      .then next
 
 ## Node.js Installation
 
 Multiple installation of Node.js may coexist with N.
 
     exports.push name: 'Node.js # installation', timeout: -1, handler: (ctx, next) ->
-      if method is 'n'
-        ctx.execute
-          cmd: "n #{ctx.config.nodejs.version}"
-        , next
-      else next Error 'Method not handled'
-
+      {method} = ctx.config.nodejs
+      ctx.execute
+        cmd: "n #{ctx.config.nodejs.version}"
+        if: method is 'n'
+      .then next
 
 ## NPM configuration
 
@@ -102,10 +100,10 @@ module.
     exports.push name: 'Node.js # Npm Configuration', timeout: -1, handler: (ctx, next) ->
       {merge, config} = ctx.config.nodejs
       modified = false
-      each(ctx.config.users)
-      .on 'item', (user, next) ->
+      each ctx.config.users
+      .run (user, next) ->
         return next() unless user.home
-        ctx.write
+        ctx.ini
           destination: "#{user.home}/.npmrc"
           content: config
           merge: merge
@@ -114,7 +112,7 @@ module.
         , (err, written) ->
           modified = true if written
           next err
-      .on 'both', (err) ->
+      .then (err) ->
         next err, modified
 
 [nodejs]: http://www.nodejs.org
