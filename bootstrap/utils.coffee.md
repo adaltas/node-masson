@@ -95,15 +95,6 @@ ctx.waitForExecution cmd: "test -f /tmp/sth", (err) ->
         if typeof options is 'function'
           callback = options
           options = {}
-        # cmds = [cmds] unless Array.isArray cmds
-        # quorum_target = options.quorum
-        # if quorum_target and quorum_target is 'true'  
-        #   quorum_target = Math.ceil cmds.length / 2
-        # else
-        #   quorum_target = cmds.length
-        # options.interval ?= 2000
-        # options.code_skipped ?= 1
-        # ctx.log "Start wait for execution"
         ctx.emit 'wait'
         ctx
         .wait_execute
@@ -113,30 +104,6 @@ ctx.waitForExecution cmd: "test -f /tmp/sth", (err) ->
           code_skipped: options.code_skipped
           quorum: options.quorum
         .then callback
-        # count = 0
-        # quorum_current = 1
-        # each(cmds)
-        # .on 'item', (cmd, next) ->
-        #   run = ->
-        #     return next() if quorum_current >= quorum_target
-        #     ctx.log "Attempt #{++count}"
-        #     ctx
-        #     .child()
-        #     .execute
-        #       cmd: cmd
-        #       code: options.code or 0
-        #       code_skipped: options.code_skipped
-        #     , (err, ready) ->
-        #       if not err and not ready
-        #         setTimeout run, options.interval
-        #         return
-        #       return next err if err
-        #       ctx.log "Finish wait for execution"
-        #       ctx.emit 'waited'
-        #       quorum_current++
-        #       run()
-        #   run()
-        # .on 'both', callback
 
 ## Wait for an open port
 
@@ -220,8 +187,8 @@ ctx.waitIsOpen [
         quorum_current = 0
         randfiles = []
         each servers_flatten
-        .parallel true
-        .on 'item', (server, next) ->
+        .parallel 8 # Make sure we dont hit max listeners limit
+        .run (server, next) ->
           options.randdir ?= '/tmp'
           rand = Date.now() + inc++
           randfiles.push randfile = "#{options.randdir}/#{rand}"
@@ -255,7 +222,7 @@ ctx.waitIsOpen [
               shy: true
               if: quorum_current >= quorum_target
             , (_err_) -> next err
-        .on 'both', callback
+        .then callback
 
 ## SSH connection
 
