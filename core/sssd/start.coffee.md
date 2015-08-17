@@ -5,7 +5,6 @@
     exports.push 'masson/bootstrap'
 
     exports.push name: 'SSSD # Start', handler: (ctx, next) ->
-      ctx.service
-        srv_name: 'sssd'
-        action: 'start'
-      , next
+      ctx.service_start
+        name: 'sssd'
+      .then next
