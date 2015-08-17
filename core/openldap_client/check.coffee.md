@@ -3,6 +3,7 @@
 
     exports = module.exports = []
     exports.push 'masson/bootstrap'
+    exports.push 'masson/core/openldap_client/wait'
     exports.push require('./index').configure
 
     exports.push name: 'OpenLDAP Client # Check Search', label_true: 'CHECKED', handler: (ctx, next) ->

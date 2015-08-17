@@ -8,29 +8,26 @@ certificate to upload.
 
     exports = module.exports = []
     exports.push 'masson/bootstrap'
-    exports.push 'masson/bootstrap/utils'
+    # exports.push 'masson/bootstrap/utils'
     exports.push 'masson/core/yum'
     exports.push require('./index').configure
 
     exports.push name: 'OpenLDAP Client # Install', timeout: -1, handler: (ctx, next) ->
       ctx.service
         name: 'openldap-clients'
-      , next
+      .then next
 
     exports.push name: 'OpenLDAP Client # Configure', timeout: -1, handler: (ctx, next) ->
       {config} = ctx.config.openldap_client
-      write = []
-      for k, v of config
-        v = v.join(' ') if Array.isArray v
-        write.push
+      ctx.write
+        write: for k, v of config
+          v = v.join(' ') if Array.isArray v
           match: new RegExp "^#{k}.*$", 'mg'
           replace: "#{k} #{v}"
           append: true
-      ctx.write
-        write: write
         destination: '/etc/openldap/ldap.conf'
-        eof: true # was 4 lines up in write.push
-      , next
+        eof: true
+      .then next
 
 ## Upload certificate
 
@@ -45,36 +42,32 @@ hash=`openssl x509 -noout -hash -in cert.pem`
 mv cert.pem /etc/openldap/cacerts/$hash.0
 ```
 
+Important, when changing the certificate for a server, we had to remove the old
+certificate, not sure why.
+
 Certificates are temporarily uploaded to the "/tmp" folder and registered with
 the command `authconfig --update --ldaploadcacert={file}`.
 
     exports.push name: 'OpenLDAP Client # Certificate', timeout: -1, handler: (ctx, next) ->
       {certificates, config} = ctx.config.openldap_client
-      modified = false
-      each(certificates)
-      .on 'item', (certificate, next) ->
+      for certificate in certificates
         hash = crypto.createHash('md5').update(certificate).digest('hex')
-        ctx.upload
+        filename = null
+        ctx
+        .upload
           source: certificate
           destination: "/tmp/#{hash}"
-        , (err) ->
-          return next err if err
-          ctx.execute # openssh is executed remotely
+        .execute # openssh is executed remotely
             cmd: "openssl x509 -noout -hash -in /tmp/#{hash}; rm -rf /tmp/#{hash}"
-          , (err, _, stdout) ->
-            return next err if err
-            stdout = stdout.trim()
-            ctx.upload 
-              source: certificate
-              destination: "#{config.TLS_CACERTDIR}/#{stdout}.0"
-            , (err, uploaded) ->
-              return next err if err
-              modified = true if uploaded
-              next()
-      .on 'both', (err) ->
-        next err, modified
+        , (err, _, stdout) ->
+          filename = stdout.trim() unless err
+        .call ({}, callback) ->
+          ctx.upload 
+            source: certificate
+            destination: "#{config.TLS_CACERTDIR}/#{filename}.0"
+          .then (err) -> callback err, true
+      ctx.then next
 
-## Module Dependencies
+## Dependencies
 
-    each = require 'each'
     crypto = require 'crypto'

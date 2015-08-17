@@ -49,7 +49,7 @@ Example:
 }
 ```
 
-    module.exports.configure = (ctx) ->
+    exports.configure = (ctx) ->
       config = ctx.config.openldap_client ?= {}
       ctx.config.openldap_client.config ?= {}
       openldap_servers = ctx.hosts_with_module 'masson/core/openldap_server'
@@ -77,12 +77,10 @@ Example:
 
     exports.push commands: 'install', modules: [
       'masson/core/openldap_client/install'
-      'masson/core/openldap_client/wait'
       'masson/core/openldap_client/check'
     ]
 
     exports.push commands: 'check', modules: [
-      'masson/core/openldap_client/wait'
       'masson/core/openldap_client/check'
     ]
 

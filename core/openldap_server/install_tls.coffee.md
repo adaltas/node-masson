@@ -371,84 +371,69 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=adaltas,dc=com
       tls_ca_cert_filename = path.basename tls_ca_cert_file
       tls_cert_filename = path.basename tls_cert_file
       tls_key_filename = path.basename tls_key_file
-      modified = false
-      do_upload = ->
-        ctx.log 'Write certificate files'
-        ctx.upload [
-          source: tls_ca_cert_file
-          local_source: true
-          destination: "/etc/pki/tls/certs/#{tls_ca_cert_filename}"
-          uid: 'ldap'
-          gid: 'ldap'
-          mode: '400'
+      ctx
+      .upload
+        source: tls_ca_cert_file
+        local_source: true
+        destination: "/etc/pki/tls/certs/#{tls_ca_cert_filename}"
+        uid: 'ldap'
+        gid: 'ldap'
+        mode: '400'
+      .upload
+        source: tls_cert_file
+        local_source: true
+        destination: "/etc/pki/tls/certs/#{tls_cert_filename}"
+        uid: 'ldap'
+        gid: 'ldap'
+        mode: '400'
+      .upload
+        source: tls_key_file
+        local_source: true
+        destination: "/etc/pki/tls/certs/#{tls_key_filename}"
+        uid: 'ldap'
+        gid: 'ldap'
+        mode: '400'
+      .write
+        destination: '/etc/openldap/slapd.d/cn=config.ldif'
+        write: [
+          match: /^olcTLSCACertificatePath.*$/mg
+          replace: "olcTLSCACertificatePath: /etc/pki/tls/certs/#{tls_ca_cert_filename}"
+          # append: 'olcRootPW'
         ,
-          source: tls_cert_file
-          local_source: true
-          destination: "/etc/pki/tls/certs/#{tls_cert_filename}"
-          uid: 'ldap'
-          gid: 'ldap'
-          mode: '400'
+          match: /^olcTLSCertificateFile.*$/mg
+          replace: "olcTLSCertificateFile: /etc/pki/tls/certs/#{tls_cert_filename}"
+          # append: 'olcRootPW'
         ,
-          source: tls_key_file
-          local_source: true
-          destination: "/etc/pki/tls/certs/#{tls_key_filename}"
-          uid: 'ldap'
-          gid: 'ldap'
-          mode: '400'
-        ], (err, written) ->
-          return next err if err
-          modified = true if written
-          do_config()
-      do_config = ->
-        ctx.log 'Write certificate configuration'
-        ctx.write
-          destination: '/etc/openldap/slapd.d/cn=config.ldif'
-          write: [
-            match: /^olcTLSCACertificatePath.*$/mg
-            replace: "olcTLSCACertificatePath: /etc/pki/tls/certs/#{tls_ca_cert_filename}"
-            # append: 'olcRootPW'
-          ,
-            match: /^olcTLSCertificateFile.*$/mg
-            replace: "olcTLSCertificateFile: /etc/pki/tls/certs/#{tls_cert_filename}"
-            # append: 'olcRootPW'
-          ,
-            match: /^olcTLSCertificateKeyFile.*$/mg
-            replace: "olcTLSCertificateKeyFile: /etc/pki/tls/certs/#{tls_key_filename}"
-            # append: 'olcTLSCertificateFile'
-          ]
-        , (err, written) ->
-          return next err if err
-          modified = true if written
-          do_end()
-      do_end = ->
-        ctx.service
-          name: 'openldap-servers'
-          srv_name: 'slapd'
-          action: 'restart'
-          if: modified
-        , next
-      do_upload()
+          match: /^olcTLSCertificateKeyFile.*$/mg
+          replace: "olcTLSCertificateKeyFile: /etc/pki/tls/certs/#{tls_key_filename}"
+          # append: 'olcTLSCertificateFile'
+        ]
+      .service
+        name: 'openldap-servers'
+        srv_name: 'slapd'
+        action: 'restart'
+        if: -> @status()
+      .then next
 
-    exports.push name: 'OpenLDAP TLS # Activate LDAPS', handler: (ctx, next) ->
-      ctx.write
+    exports.push name: 'OpenLDAP Server # TLS Activate LDAPS', handler: (ctx, next) ->
+      ctx
+      .write
         match: /^SLAPD_LDAPS.*/mg
         replace: 'SLAPD_LDAPS=yes'
         destination: '/etc/sysconfig/ldap'
-      , (err, written) ->
-        return next err if err
-        ctx.service
-          srv_name: 'slapd'
-          action: 'restart'
-          if: written
-        , next
+      .service
+        srv_name: 'slapd'
+        action: 'restart'
+        if: -> @status -1
+      .then next
 
     exports.push 'masson/core/openldap_client'
 
     exports.push name: 'OpenLDAP Server # TLS Check', label_true: 'CHECKED', timeout: -1, handler: (ctx, next) ->
-      { suffix, root_dn, root_password } = ctx.config.openldap_server
+      {suffix, root_dn, root_password} = ctx.config.openldap_server
       ctx.execute
         cmd: "ldapsearch -x -H ldaps://#{ctx.config.host} -b #{suffix} -D #{root_dn} -w #{root_password}"
-      , next
+      .then next
 
 ## Module Dependencies
 
