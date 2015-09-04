@@ -13,13 +13,13 @@ Wait for all the Kerberos servers referenced by the client configuration.
 
     exports.push name: 'Krb5 Client # Wait admin TCP', timeout: -1, label_true: 'READY', handler: (ctx, next) ->
       {etc_krb5_conf} = ctx.config.krb5
-      default_realm = etc_krb5_conf.libdefaults.default_realm
-      servers = for realm, config of etc_krb5_conf.realms
-        # continue if default_realm isnt realm
-        continue unless config.kadmin_principal
-        [host, port] = config.admin_server.split ':'
-        host: host, port: port or 749
-      ctx.waitIsOpen servers, next
+      ctx.wait_connect
+        servers: for realm, config of etc_krb5_conf.realms
+          continue unless config.kadmin_principal
+          [host, port] = config.admin_server.split ':'
+          host: host
+          port: port or 749
+      .then next
 
 ## Wait Admin
 
@@ -27,9 +27,7 @@ Wait for the admin interface to be ready by issuing the command `listprincs`.
 
     exports.push name: 'Krb5 Client # Wait Admin', retry: 5, timeout: -1, label_true: 'READY', handler: (ctx, next) ->
       {etc_krb5_conf} = ctx.config.krb5
-      # default_realm = etc_krb5_conf.libdefaults.default_realm
       cmds = for realm, config of etc_krb5_conf.realms
-        # continue if default_realm isnt realm
         continue unless config.kadmin_principal
         {kadmin_principal, kadmin_password, admin_server} = config
         continue unless kadmin_principal
@@ -40,19 +38,6 @@ Wait for the admin interface to be ready by issuing the command `listprincs`.
           kadmin_server: admin_server
         , 'listprincs'
       ctx.waitForExecution cmds, next
-
-      # each etc_krb5_conf.realms
-      # .run (realm, config, next) ->
-      #   {kadmin_principal, kadmin_password, admin_server} = config
-      #   return next() unless kadmin_principal
-      #   misc.kadmin
-      #     realm: realm
-      #     kadmin_principal: kadmin_principal
-      #     kadmin_password: kadmin_password
-      #     kadmin_server: admin_server
-      #   , 'listprincs'
-      #   ctx.waitForExecution cmds, next
-      # .then next
 
 ## Module Dependencies
 

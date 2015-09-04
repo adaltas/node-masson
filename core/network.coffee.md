@@ -118,23 +118,18 @@ configuration file is considered a trusted source of DNS information.
     exports.push name: 'Network # DNS Resolver', timeout: -1, handler: (ctx, next) ->
       {resolv} = ctx.config.network
       return next() unless resolv
-      # nameservers = []
-      # re = /nameserver(.*)/g
-      # while (match = re.exec resolv) isnt null
-      #   nameservers.push match[1].trim()
-      ctx.write
+      ctx
+      .write
         content: resolv
         destination: '/etc/resolv.conf'
         backup: true
         eof: true
-      .then (err, written) ->
-        return next err if err
-        bind_server_hosts = ctx.hosts_with_module 'masson/core/bind_server'
-        bind_server_hosts = for host in bind_server_hosts
-          continue if host is ctx.config.host
-          ctx.hosts[host].config.ip or host
-        ctx.waitIsOpen bind_server_hosts, 53, (err) ->
-          next err, written
+      .wait_connect
+        servers: for bs_ctx in ctx.contexts 'masson/core/bind_server'
+          continue if bs_ctx is ctx
+          host: bs_ctx.config.ip or bs_ctx.config.host
+          port: 53
+      .then next
 
 ## Interfaces
 
@@ -145,12 +140,11 @@ Customize the network interfaces configured present inside the
       {ifcfg} = ctx.config.network
       return next() unless ifcfg
       writes = for name, config of ifcfg
-        write = for k, v of config
+        destination: "/etc/sysconfig/network-scripts/ifcfg-#{name}"
+        write: for k, v of config
           match: ///^#{quote k}=.*$///mg
           replace: "#{k}=#{v}"
           append: true
-        destination: "/etc/sysconfig/network-scripts/ifcfg-#{name}"
-        write: write
         backup: false
         eof: true
       ctx
@@ -160,5 +154,4 @@ Customize the network interfaces configured present inside the
 ## Dependencies
 
     quote = require 'regexp-quote'
-    # misc = require 'mecano/lib/misc'
 
