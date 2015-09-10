@@ -42,7 +42,7 @@ configuration will be enriched with the `http_proxy`, the
 `https_proxy`, the `http_proxy_no_auth` and the 
 `https_proxy_no_auth` urls properties.
 
-    exports.push module.exports.configure = (ctx) ->
+    module.exports.configure = (ctx) ->
       ctx.config.proxy ?= {}
       ctx.config.proxy.system ?= false
       ctx.config.proxy.system_file ?= "phyla_proxy.sh"
@@ -81,14 +81,15 @@ Declare the http_proxy and "https_proxy" environment
 variables by declaring a shell script inside the 
 profile initialization directory.
 
-    exports.push name: 'Proxy # Profile', handler: (ctx, next) ->
+    exports.push name: 'Proxy # Profile', handler: ->
       # There is no proxy to configure
-      return next() unless ctx.config.proxy.http_proxy
-      return next null, 'TODO'
-      # {system, http_proxy, https_proxy} = ctx.config.proxy
+      return unless @config.proxy.http_proxy
+      # TODO: removed, not sure if we want it back, proxy shouldn't be 
+      # configured globally
+      # {system, http_proxy, https_proxy} = @config.proxy
       # modified = 0
       # write = (file, callback) ->
-      #   ctx.write [
+      #   @write [
       #     match: /.*http_proxy.*/
       #     replace: "{if system and http_proxy then '' else '#'}export http_proxy=#{http_proxy}"
       #     destination: file
@@ -102,20 +103,12 @@ profile initialization directory.
       #     modified++ if written
       #     callback()
       # # System wide
-      # write ctx.config.proxy.system_file, (err) ->
+      # write @config.proxy.system_file, (err) ->
       #   return next err if err
-      #   each(ctx.config.users)
+      #   each(@config.users)
       #   .on 'item', (user, next) ->
       #     return next() unless user.home
       #     file = path.resolve user.home, '.bash_profile'
       #     write file, next
       #   .on 'both', (err) ->
       #     next err, modified
-
-
-
-
-
-
-
-

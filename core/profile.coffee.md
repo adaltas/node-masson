@@ -24,19 +24,19 @@ Example:
 }
 ```
 
-    exports.push (ctx) ->
-      ctx.config.profile ?= {}
+    exports.configure = (ctx) ->
+      @config.profile ?= {}
 
 ## Upload
 
 Upload all the configured scripts.
 
-    exports.push name: 'Profile # Upload', handler: (ctx, next) ->
-      writes = for filename, content of ctx.config.profile
-        destination: "/etc/profile.d/#{filename}"
-        content: content
-        eof: true
-      ctx.write writes, next
+    exports.push name: 'Profile # Upload', handler: ->
+      for filename, content of @config.profile
+        @write
+          destination: "/etc/profile.d/#{filename}"
+          content: content
+          eof: true
 
 ## Dependencies
 

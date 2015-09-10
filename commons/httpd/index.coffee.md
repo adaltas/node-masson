@@ -7,7 +7,7 @@
 
 Configure the HTTPD server.
 
-    exports.push (ctx) ->
+    exports.configure = (ctx) ->
       require('../../core/iptables').configure ctx
       ctx.config.httpd ?= {}
       # Service
@@ -42,6 +42,3 @@ Configure the HTTPD server.
     exports.push commands: 'status', modules: 'masson/commons/httpd/status'
 
     exports.push commands: 'stop', modules: 'masson/commons/httpd/stop'
-
-
-

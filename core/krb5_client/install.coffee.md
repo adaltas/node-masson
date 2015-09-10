@@ -10,20 +10,18 @@ Institute of Technology](http://web.mit.edu).
 
     exports = module.exports = []
     exports.push 'masson/bootstrap'
-    exports.push 'masson/bootstrap/utils'
     exports.push 'masson/core/yum'
     exports.push 'masson/core/ssh'
     exports.push 'masson/core/ntp'
-    exports.push require('./index').configure
+    # exports.push require('./index').configure
 
 ## Install
 
 The package "krb5-workstation" is installed.
 
-    exports.push name: 'Krb5 Client # Install', timeout: -1, handler: (ctx, next) ->
-      ctx.service
+    exports.push name: 'Krb5 Client # Install', timeout: -1, handler: ->
+      @service
         name: 'krb5-workstation'
-      , next
 
 ## Configure
 
@@ -33,17 +31,17 @@ This is to avoid any conflict where both modules would try to write
 their own configuration one. We give the priority to the server module 
 which create a Kerberos file with complementary information.
 
-    exports.push name: 'Krb5 Client # Configure', timeout: -1, handler: (ctx, next) ->
+    exports.push
+      name: 'Krb5 Client # Configure'
+      timeout: -1
       # Kerberos config is also managed by the kerberos server action.
-      ctx.log 'Check who manage /etc/krb5.conf'
-      return next() if ctx.has_module 'masson/core/krb5_server'
-      {etc_krb5_conf} = ctx.config.krb5
-      ctx.ini
-        content: safe_etc_krb5_conf etc_krb5_conf
-        destination: '/etc/krb5.conf'
-        stringify: misc.ini.stringify_square_then_curly
-        backup: true
-      , next
+      not_if: -> @has_module 'masson/core/krb5_server'
+      handler: ->
+        @ini
+          content: safe_etc_krb5_conf @config.krb5.etc_krb5_conf
+          destination: '/etc/krb5.conf'
+          stringify: misc.ini.stringify_square_then_curly
+          backup: true
 
 ## Wait
 
@@ -58,42 +56,30 @@ Create a user principal for this host. The principal is named like
 ("krb5.etc\_krb5\_conf.libdefaults.default_realm") unless the property
 "etc_krb5_conf[realm].create\_hosts" is set.
 
-    exports.push name: 'Krb5 Client # Host Principal', timeout: -1, handler: (ctx, next) ->
-      {etc_krb5_conf} = ctx.config.krb5
+    exports.push name: 'Krb5 Client # Host Principal', timeout: -1, handler: ->
+      {etc_krb5_conf} = @config.krb5
       default_realm = etc_krb5_conf.libdefaults.default_realm
       modified = false
-      each(etc_krb5_conf.realms)
-      .on 'item', (realm, config, next) ->
+      for realm, config of etc_krb5_conf.realms
         # Note:
         # The doc above say "apply if default realm unless create_hosts"
         # but this isnt what we do bellow
         # As a consequence, we never enter here, which might be acceptable
         # but doc and code need to be aligned.
-        return next() if default_realm isnt realm or not config.create_hosts
-        {kadmin_principal, kadmin_password, admin_server} = config
-        cmd = misc.kadmin
-          realm: realm
-          kadmin_principal: kadmin_principal
-          kadmin_password: kadmin_password
-          kadmin_server: admin_server
-        , 'listprincs'
-        ctx.waitForExecution cmd, (err) ->
-          return next err if err
-          ctx.krb5_addprinc
-            principal: "host/#{ctx.config.host}@#{realm}"
-            randkey: true
-            # kadmin_principal: kadmin_principal if admin_server isnt ctx.config.host
-            # kadmin_password: kadmin_password if admin_server isnt ctx.config.host
-            # kadmin_server: admin_server if admin_server isnt ctx.config.host
-            kadmin_principal: kadmin_principal
-            kadmin_password: kadmin_password
-            kadmin_server: admin_server
-          , (err, created) ->
-            return next err if err
-            modified = true if created
-            next()
-      .on 'both', (err) ->
-        next err, modified
+        continue if default_realm isnt realm or not config.create_hosts
+        @wait_execute
+          cmd: misc.kadmin
+            realm: realm
+            kadmin_principal: config.kadmin_principal
+            kadmin_password: config.kadmin_password
+            kadmin_server: config.admin_server
+          , 'listprincs'
+        @krb5_addprinc
+          principal: "host/#{@config.host}@#{realm}"
+          randkey: true
+          kadmin_principal: config.kadmin_principal
+          kadmin_password: config.kadmin_password
+          kadmin_server: config.admin_server
 
 ## principals
 
@@ -101,27 +87,16 @@ Populate the Kerberos database with new principals. The "wait" property is
 set to 10s because multiple instance of this handler may try to create the same
 principals and generate concurrency errors.
 
-    exports.push name: 'Krb5 Client # Principals', wait: 10000, handler: (ctx, next) ->
-      {etc_krb5_conf} = ctx.config.krb5
-      modified = false
-      utils = require 'util'
-      each(etc_krb5_conf.realms)
-      .on 'item', (realm, config, next) ->
-        {kadmin_principal, kadmin_password, admin_server, principals} = config
-        return next() unless principals?.length > 0
-        principals = for principal in principals
-          misc.merge
-            kadmin_principal: kadmin_principal
-            kadmin_password: kadmin_password
-            kadmin_server: admin_server
+    exports.push name: 'Krb5 Client # Principals', wait: 10000, handler: ->
+      {etc_krb5_conf} = @config.krb5
+      for realm, config of etc_krb5_conf.realms
+        continue unless config.principals
+        for principal in config.principals  
+          @krb5_addprinc misc.merge
+            kadmin_principal: config.kadmin_principal
+            kadmin_password: config.kadmin_password
+            kadmin_server: config.admin_server
           , principal
-        ctx.log "Create principal #{principal.principal}"
-        ctx.krb5_addprinc principals, (err, created) ->
-          return next err if err
-          modified = true if created
-          next()
-      .on 'both', (err) ->
-        next err, modified
 
 ## Configure SSHD
 
@@ -130,28 +105,21 @@ configuration object. By default, we set the following properties to "yes": "Cha
 "KerberosAuthentication", "KerberosOrLocalPasswd", "KerberosTicketCleanup", "GSSAPIAuthentication", 
 "GSSAPICleanupCredentials". The "sshd" service will be restarted if a change to the configuration is detected.
 
-    exports.push name: 'Krb5 Client # Configure SSHD', timeout: -1, handler: (ctx, next) ->
-      {sshd} = ctx.config.krb5
-      return next() unless sshd
-      write = for k, v of sshd
-        match: new RegExp "^#{k}.*$", 'mg'
-        replace: "#{k} #{v}"
-        append: true
-      return next() if write.length is 0
-      ctx.log 'Write /etc/ssh/sshd_config'
-      ctx.write
-        write: write
-        destination: '/etc/ssh/sshd_config'
-      , (err, written) ->
-        return next err if err
-        return next null, false unless written
-        ctx.log 'Restart openssh'
-        ctx.service
-          name: 'openssh'
+    exports.push
+      name: 'Krb5 Client # Configure SSHD'
+      if: -> @config.krb5.sshd
+      handler: ->
+        {sshd} = @config.krb5
+        @write
+          write: for k, v of sshd
+            match: new RegExp "^#{k}.*$", 'mg'
+            replace: "#{k} #{v}"
+            append: true
+          destination: '/etc/ssh/sshd_config'
+        @service
           srv_name: 'sshd'
           action: 'restart'
-        , (err, restarted) ->
-          next err, true
+          if: -> @status -1
 
 ## Module Dependencies
 
@@ -181,5 +149,3 @@ configuration object. By default, we set the following properties to "yes": "Cha
 ## Notes
 
 Kerberos clients require connectivity to the KDC's TCP ports 88 and 749.
-
-

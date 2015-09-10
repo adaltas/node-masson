@@ -3,23 +3,21 @@
 
     exports = module.exports = []
     exports.push 'masson/bootstrap'
-    exports.push require('./index').configure
+    # exports.push require('./index').configure
 
 ## Wait
 
-    exports.push name: 'OpenLDAP Client # Wait', timeout: -1, label_true: 'READY', handler: (ctx, next) ->
-      {config} = ctx.config.openldap_client
-      each(config['URI'].split ' ')
-      .on 'item', (uri, next) ->
+    exports.push name: 'OpenLDAP Client # Wait', timeout: -1, label_true: 'READY', handler: ->
+      {config} = @config.openldap_client
+      for uri in config['URI'].split ' '
         uri = url.parse uri
-        return next() if ['ldap:', 'ldaps:'].indexOf(uri.protocol) is -1
+        continue if ['ldap:', 'ldaps:'].indexOf(uri.protocol) is -1
         uri.port ?= 389 if uri.protocol is 'ldap:'
         uri.port ?= 636 if uri.protocol is 'ldaps:'
-        ctx.waitIsOpen uri.hostname, uri.port, next
-      .on 'both', (err) ->
-        next err, true
+        @wait_connect
+          host: uri.hostname
+          port: uri.port
 
 ## Module Dependencies
 
-    each = require 'each'
     url = require 'url'

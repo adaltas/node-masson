@@ -42,7 +42,7 @@ Examples
 }
 ```
 
-    exports.push module.exports.configure = (ctx) ->
+    module.exports.configure = (ctx) ->
       require('./proxy').configure ctx
       ctx.config.yum ?= {}
       ctx.config.yum.clean ?= false
@@ -65,11 +65,11 @@ Examples
         ctx.config.yum.config.main.proxy_username = username
         ctx.config.yum.config.main.proxy_password = password
 
-    exports.push name: 'YUM # Check', handler: (ctx, next) ->
-      pidfile_running ctx.ssh, '/var/run/yum.pid', (err, running) ->
-        return next err if err
-        return next new Error 'Yum is already running' if running
-        next null, false
+    exports.push name: 'YUM # Check', handler: (_, callback) ->
+      pidfile_running @ssh, '/var/run/yum.pid', (err, running) ->
+        return callback err if err
+        return callback Error 'Yum is already running' if running
+        callback null, false
 
 ## YUM # Configuration
 
@@ -79,13 +79,12 @@ merge server configuration and write the content back.
 More information about configuring the proxy settings 
 is available on [the centos website](http://www.centos.org/docs/5/html/yum/sn-yum-proxy-server.html)
 
-    exports.push name: 'YUM # Configuration', handler: (ctx, next) ->
-      ctx.ini
-        content: ctx.config.yum.config
+    exports.push name: 'YUM # Configuration', handler: ->
+      @ini
+        content: @config.yum.config
         destination: '/etc/yum.conf'
         merge: true
         backup: true
-      .then next
 
 ## YUM # repositories
 
@@ -93,46 +92,42 @@ Upload the YUM repository definitions files present in
 "ctx.config.yum.copy" to the yum repository directory 
 in "/etc/yum.repos.d"
 
-    exports.push name: 'YUM # Repositories', timeout: -1, handler: (ctx, next) ->
-      {copy, clean} = ctx.config.yum
-      return next() unless copy
+    exports.push name: 'YUM # Repositories', timeout: -1, handler: (_, callback) ->
+      {copy, clean} = @config.yum
+      return callback() unless copy
       modified = false
       basenames = []
-      do_search = ->
-        glob copy, (err, files) ->
+      do_search = =>
+        glob copy, (err, files) =>
           local_files = for file in files
             continue if /^\./.test path.basename file
             file
-          ctx.fs.readdir '/etc/yum.repos.d/', (err, files) ->
+          @fs.readdir '/etc/yum.repos.d/', (err, files) ->
             remote_files = for file in files
               continue if /^\./.test path.basename file
               "/etc/yum.repos.d/#{file}"
             do_clean local_files, remote_files
-      do_clean = (local_files, remote_files) ->
+      do_clean = (local_files, remote_files) =>
         return do_upload local_files unless clean
         removes = remote_files
         .filter (file) -> # Only keep file not present locally
           not local_files.some (local_file) -> path.basename(file) is path.basename(local_file)
         .map (file) -> # Transform to object
           destination: file
-        # local_filenames = local_files.map (file) -> path.basename file
-        # removes = for file in remote_files
-        #   continue if path.basename(file) in local_filenames
-        #   destination: file
-        ctx.remove removes, (err, removed) ->
-          return next err if err
+        @remove removes, (err, removed) ->
+          return callback err if err
           modified = true if removed
           do_upload local_files
-      do_upload = (local_files) ->
-        uploads = for file in local_files
-          source: file
-          destination: "/etc/yum.repos.d/#{path.basename file}"
-        ctx
-        .upload uploads
-        .execute
+      do_upload = (local_files) =>
+        for file in local_files
+          @download
+            source: file
+            destination: "/etc/yum.repos.d/#{path.basename file}"
+        @execute
           cmd: 'yum clean metadata; yum -y update'
           if: modified
-        .then next
+        @then (err) ->
+          callback err, modified
       do_search()
 
 ## Epel
@@ -142,38 +137,35 @@ deployed by installing the "epel-release" package. It may also be installed from
 an url by defining the "yum.epel_url" property. To disable Epel, simply set the
 property "yum.epel" to false.
 
-    exports.push name: 'YUM # Epel', timeout: 100000, handler: (ctx, next) ->
-      {epel, epel_url} = ctx.config.yum
-      return next() unless epel
-      ctx.execute
-        cmd: if epel_url
-        then "rpm -Uvh #{epel_url}"
-        else 'yum install epel-release' 
-        not_if_exec: 'yum list installed | grep epel-release'
-      .then next
+    exports.push
+      name: 'YUM # Epel'
+      timeout: 100000
+      if: -> @config.yum.epel
+      handler: ->
+        {epel, epel_url} = @config.yum
+        @execute
+          cmd: if epel_url
+          then "rpm -Uvh #{epel_url}"
+          else 'yum install epel-release' 
+          not_if_exec: 'yum list installed | grep epel-release'
 
-    exports.push name: 'YUM # Update', timeout: -1, handler: (ctx, next) ->
-      {update} = ctx.config.yum
-      ctx.call (_, callback) ->
-        ctx.execute
-          cmd: 'yum -y update'
-          if: update
-        , (err, executed, stdout, stderr) ->
-          callback err, executed and not /No Packages marked for Update/.test stdout
-      .then next
+    exports.push name: 'YUM # Update', timeout: -1, handler: (_, callback) ->
+      {update} = @config.yum
+      @execute
+        cmd: "yum -y update | grep 'No Packages marked for Update'"
+        if: update
+      , (err, executed, stdout, stderr) ->
+        callback err, executed and not /No Packages marked for Update/.test stdout
 
-    exports.push name: 'YUM # Packages', timeout: -1, handler: (ctx, next) ->
-      services = for name, active of ctx.config.yum.packages
-        continue unless active
-        name: name
-      ctx
-      .service services
-      .then next
+    exports.push name: 'YUM # Packages', timeout: -1, handler: ->
+      for name, active of @config.yum.packages
+        @service
+          name: name
+          if: active
+      
 
 ## Dependencies
 
     glob = require 'glob'
     path = require 'path'
     pidfile_running = require 'mecano/lib/misc/pidfile_running'
-
-

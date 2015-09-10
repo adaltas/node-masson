@@ -47,7 +47,7 @@ Example:
 }
 ```
 
-    exports.push (ctx) ->
+    exports.configure = (ctx) ->
       ctx.config.hostname ?= ctx.config.host
       ctx.config.network ?= {}
       ctx.config.network.hostname_disabled ?= false
@@ -64,10 +64,10 @@ enriched with the cluster hostname if the property "network.hosts_auto" is
 set. Set the "network.hosts_disabled" to "true" if you dont wish to overwrite
 this file.
 
-    exports.push name: 'Network # Hosts', handler: (ctx, next) ->
-      {hosts, hosts_auto} = ctx.config.network
+    exports.push name: 'Network # Hosts', handler: ->
+      {hosts, hosts_auto} = @config.network
       write = []
-      if hosts_auto then for _, server of ctx.config.servers
+      if hosts_auto then for _, server of @config.servers
         write.push 
           match: RegExp "^#{quote server.ip}\\s.*$", 'gm'
           replace: "#{server.ip} #{server.host} #{server.shortname}"
@@ -77,33 +77,32 @@ this file.
           match: RegExp "^#{quote ip}\\s.*$", 'gm'
           replace: "#{ip} #{hostnames}"
           append: true
-      ctx.write
+      @write
         destination: '/etc/hosts'
         write: write
         backup: true
         eof: true
-      .then next
 
 ## Network # Hostname
 
 Declare the server hostname. On CentOs like system, the 
 relevant file is "/etc/sysconfig/network".
 
-    exports.push name: 'Network # Hostname', handler: (ctx, next) ->
-      {hostname, network} = ctx.config
-      return next() if network.hostname_disabled
-      restart = false
-      ctx
-      .write
-        match: /^HOSTNAME=.*/mg
-        replace: "HOSTNAME=#{hostname}"
-        destination: '/etc/sysconfig/network'
-      , (err, replaced) ->
-        restart = true if replaced
-      .execute
-        cmd: "hostname #{ctx.config.host} && service network restart"
-        if: -> restart
-      .then next
+    exports.push
+      name: 'Network # Hostname'
+      not_if: -> @config.network.hostname_disabled
+      handler: ->
+        {hostname, network} = @config
+        restart = false
+        @write
+          match: /^HOSTNAME=.*/mg
+          replace: "HOSTNAME=#{hostname}"
+          destination: '/etc/sysconfig/network'
+        , (err, replaced) ->
+          restart = true if replaced
+        @execute
+          cmd: "hostname #{@config.host} && service network restart"
+          if: -> restart
 
 ## Network # DNS resolv
 
@@ -115,43 +114,42 @@ is a set of routines in the C library that provide
 access to the Internet Domain Name System (DNS). The
 configuration file is considered a trusted source of DNS information.
 
-    exports.push name: 'Network # DNS Resolver', timeout: -1, handler: (ctx, next) ->
-      {resolv} = ctx.config.network
-      return next() unless resolv
-      ctx
-      .write
-        content: resolv
-        destination: '/etc/resolv.conf'
-        backup: true
-        eof: true
-      .wait_connect
-        servers: for bs_ctx in ctx.contexts 'masson/core/bind_server'
-          continue if bs_ctx is ctx
-          host: bs_ctx.config.ip or bs_ctx.config.host
-          port: 53
-      .then next
+    exports.push
+      name: 'Network # DNS Resolver'
+      timeout: -1
+      if: -> @config.network.resolv
+      handler: ->
+        @write
+          content:  @config.network.resolv
+          destination: '/etc/resolv.conf'
+          backup: true
+          eof: true
+        @wait_connect
+          servers: for bs_ctx in @contexts 'masson/core/bind_server'
+            continue if bs_ctx is @
+            host: bs_ctx.config.ip or bs_ctx.config.host
+            port: 53
 
 ## Interfaces
 
 Customize the network interfaces configured present inside the
 "/etc/sysconfig/network-scripts" folder.
 
-    exports.push name: 'Network # Interfaces', timeout: -1, handler: (ctx, next) ->
-      {ifcfg} = ctx.config.network
-      return next() unless ifcfg
-      writes = for name, config of ifcfg
-        destination: "/etc/sysconfig/network-scripts/ifcfg-#{name}"
-        write: for k, v of config
-          match: ///^#{quote k}=.*$///mg
-          replace: "#{k}=#{v}"
-          append: true
-        backup: false
-        eof: true
-      ctx
-      .write writes
-      .then next
+    exports.push
+      name: 'Network # Interfaces'
+      timeout: -1
+      if: -> @config.network.ifcg
+      handler: ->
+        for name, config of @config.network
+          @write
+            destination: "/etc/sysconfig/network-scripts/ifcfg-#{name}"
+            write: for k, v of config
+              match: ///^#{quote k}=.*$///mg
+              replace: "#{k}=#{v}"
+              append: true
+            backup: false
+            eof: true
 
 ## Dependencies
 
     quote = require 'regexp-quote'
-

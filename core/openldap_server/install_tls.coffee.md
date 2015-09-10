@@ -235,7 +235,7 @@ olcTLSVerifyClient: never
 and
 
 ```bash
-openssl s_client -connect `hostname`:636 -showcerts -state -CAfile /etc/pki/tls/certs/openldap.hadoop.ca.cer
+openssl s_client -connect `hostname`:636 -showcerts -state -CAfile /etc/pki/tls/certs/cacert.pem
 ```
 
 should print
@@ -343,7 +343,7 @@ SSL-Session:
 We will now setup the OpenLDAP client environment. Note, this could be done from openldap client server. Start by editing "/etc/openldap/ldap.conf".
 
 ```
-BASE            dc=adaltas,dc=com
+BASE            dc=ryba
 URI             ldap://openldap.hadoop
 TLS_CACERT      /etc/pki/tls/certs/openldap.hadoop.cer
 TLS_REQCERT     allow
@@ -356,44 +356,43 @@ If you are on a different server, place your certificate into "/etc/pki/tls/cert
 You shall now be able to query the ldap server over ldaps.
 
 ```
-ldapsearch -H ldaps://master3.hadoop:636 -x -D cn=Manager,dc=adaltas,dc=com -w test -b dc=adaltas,dc=com
-ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=adaltas,dc=com
+ldapsearch -H ldaps://master3.hadoop:636 -x -D cn=Manager,dc=ryba -w test -b dc=ryba
+ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=ryba
 ```
 
 ###
 
-    exports.push (ctx) ->
+    exports.configure = (ctx) ->
       ctx.config.openldap_server ?= {}
 
-    exports.push name: 'OpenLDAP Server # TLS Deploy', handler: (ctx, next) ->
-      { tls, tls_ca_cert_file, tls_cert_file, tls_key_file } = ctx.config.openldap_server
+    exports.push name: 'OpenLDAP Server # TLS Deploy', handler: ->
+      { tls, tls_ca_cert_file, tls_cert_file, tls_key_file } = @config.openldap_server
       return next() unless tls
       tls_ca_cert_filename = path.basename tls_ca_cert_file
       tls_cert_filename = path.basename tls_cert_file
       tls_key_filename = path.basename tls_key_file
-      ctx
-      .upload
+      @upload
         source: tls_ca_cert_file
         local_source: true
         destination: "/etc/pki/tls/certs/#{tls_ca_cert_filename}"
         uid: 'ldap'
         gid: 'ldap'
-        mode: '400'
-      .upload
+        mode: 0o0400
+      @upload
         source: tls_cert_file
         local_source: true
         destination: "/etc/pki/tls/certs/#{tls_cert_filename}"
         uid: 'ldap'
         gid: 'ldap'
-        mode: '400'
-      .upload
+        mode: 0o0400
+      @upload
         source: tls_key_file
         local_source: true
         destination: "/etc/pki/tls/certs/#{tls_key_filename}"
         uid: 'ldap'
         gid: 'ldap'
-        mode: '400'
-      .write
+        mode: 0o0400
+      @write
         destination: '/etc/openldap/slapd.d/cn=config.ldif'
         write: [
           match: /^olcTLSCACertificatePath.*$/mg
@@ -408,32 +407,27 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=adaltas,dc=com
           replace: "olcTLSCertificateKeyFile: /etc/pki/tls/certs/#{tls_key_filename}"
           # append: 'olcTLSCertificateFile'
         ]
-      .service
-        name: 'openldap-servers'
+      @service
         srv_name: 'slapd'
         action: 'restart'
         if: -> @status()
-      .then next
 
-    exports.push name: 'OpenLDAP Server # TLS Activate LDAPS', handler: (ctx, next) ->
-      ctx
-      .write
+    exports.push name: 'OpenLDAP Server # TLS Activate LDAPS', handler: ->
+      @write
         match: /^SLAPD_LDAPS.*/mg
         replace: 'SLAPD_LDAPS=yes'
         destination: '/etc/sysconfig/ldap'
-      .service
+      @service
         srv_name: 'slapd'
         action: 'restart'
         if: -> @status -1
-      .then next
 
     exports.push 'masson/core/openldap_client'
 
-    exports.push name: 'OpenLDAP Server # TLS Check', label_true: 'CHECKED', timeout: -1, handler: (ctx, next) ->
-      {suffix, root_dn, root_password} = ctx.config.openldap_server
-      ctx.execute
-        cmd: "ldapsearch -x -H ldaps://#{ctx.config.host} -b #{suffix} -D #{root_dn} -w #{root_password}"
-      .then next
+    exports.push name: 'OpenLDAP Server # TLS Check', label_true: 'CHECKED', timeout: -1, handler: ->
+      {suffix, root_dn, root_password} = @config.openldap_server
+      @execute
+        cmd: "ldapsearch -x -H ldaps://#{@config.host} -b #{suffix} -D #{root_dn} -w #{root_password}"
 
 ## Module Dependencies
 

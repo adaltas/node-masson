@@ -5,7 +5,7 @@
     exports.push 'masson/bootstrap'
     exports.push 'masson/core/yum'
     exports.push 'masson/core/iptables'
-    exports.push require('./index').configure
+    # exports.push require('./index').configure
 
 The default ports used by OpenLdap server are 389 and 636.
 
@@ -22,28 +22,26 @@ todo: add migrationtools
 IPTables rules are only inserted if the parameter "iptables.action" is set to 
 "start" (default value).
 
-    exports.push name: 'OpenLDAP Server # IPTables', handler: (ctx, next) ->
-      {etc_krb5_conf, kdc_conf} = ctx.config.krb5
+    exports.push name: 'OpenLDAP Server # IPTables', handler: ->
+      {etc_krb5_conf, kdc_conf} = @config.krb5
       rules = []
-      ctx.iptables
+      @iptables
         rules: [
           { chain: 'INPUT', jump: 'ACCEPT', dport: 389, protocol: 'tcp', state: 'NEW', comment: "LDAP (non-secured)" }
           { chain: 'INPUT', jump: 'ACCEPT', dport: 636, protocol: 'tcp', state: 'NEW', comment: "LDAP (secured)" }
         ]
-        if: ctx.config.iptables.action is 'start'
-      , next
+        if: @config.iptables.action is 'start'
 
-    exports.push name: 'OpenLDAP Server # Install', timeout: -1, handler: (ctx, next) ->
-      ctx.service [
+    exports.push name: 'OpenLDAP Server # Install', timeout: -1, handler: ->
+      @service
         name: 'openldap-servers'
         chk_name: 'slapd'
         startup: true
         action: 'start'
-      ,
+      @service
         name: 'openldap-clients'
-      ,
+      @service
         name: 'migrationtools'
-      ], next
 
 ###
 Borrowed from
@@ -53,77 +51,69 @@ http://itdavid.blogspot.ca/2012/05/howto-centos-6.html
 http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
 ###
 
-    exports.push name: 'OpenLDAP Server # DB config', timeout: -1, handler: (ctx, next) ->
-      {config_file, config_dn, config_password, config_slappasswd} = ctx.config.openldap_server
-      do_compare_rootpw = ->
-        return do_write() if config_slappasswd
-        ctx.log "Extract password from #{config_file}"
-        ctx.fs.readFile config_file, 'ascii', (err, content) ->
-          return next err if err
+    exports.push name: 'OpenLDAP Server # DB config', timeout: -1, handler: ->
+      {config_file, config_dn, config_password, config_slappasswd} = @config.openldap_server
+      @call (_, callback) ->
+        return callback null, false if config_slappasswd
+        @log? "Extract password from #{config_file}"
+        @fs.readFile config_file, 'ascii', (err, content) ->
+          return callback err if err
           if match = /^olcRootPW: {SSHA}(.*)$/m.exec content
             if check_password config_password, match[1]
-            then do_write()
-            else do_create_rootpw() # Password has changed
+            then callback null, false
+            else callback null, true # Password has changed
           else # First installation, password not yet defined
-            do_create_rootpw()
-      do_create_rootpw = ->
-        ctx.execute
-          cmd: "slappasswd -s #{config_password}"
-        , (err, executed, stdout) ->
-          return next err if err
-          config_slappasswd = stdout.trim()
-          do_write()
-      do_write = ->
-        ctx.log 'Database config: root DN & PW'
+            callback null, true
+      @execute
+        cmd: "slappasswd -s #{config_password}"
+        if: -> @status -1
+      , (err, executed, stdout) ->
+        config_slappasswd = stdout.trim() if not err and executed
+      @call (_, callback) ->
+        @log? 'Database config: root DN & PW'
         write = [match: /^olcRootDN:.*$/mg, replace: "olcRootDN: #{config_dn}"]
         if config_slappasswd
           write.push
             match: /^olcRootPW:.*$/mg
             replace: "olcRootPW: #{config_slappasswd}"
             append: 'olcRootDN'
-        ctx.write
+        @write
           destination: config_file
           write: write
-        , (err, written) ->
-          return next err, false if err or not written
-          ctx.service
-            srv_name: 'slapd'
-            action: 'restart'
-          , next
-      do_compare_rootpw()
+        @service
+          srv_name: 'slapd'
+          action: 'restart'
+          if: -> @status -1
+        @then callback
 
-    exports.push name: 'OpenLDAP Server # DB monitor', timeout: -1, handler: (ctx, next) ->
-      {suffix, monitor_file} = ctx.config.openldap_server
-      ctx.log 'Database monitor: root DN'
-      ctx.write
+    exports.push name: 'OpenLDAP Server # DB monitor', timeout: -1, handler: ->
+      {suffix, monitor_file} = @config.openldap_server
+      @log? 'Database monitor: root DN'
+      @write
         destination: monitor_file
         match: /^(.*)dc=my-domain,dc=com(.*)$/mg
         replace: "$1#{suffix}$2"
-      , next
 
-    exports.push name: 'OpenLDAP Server # DB bdb', timeout: -1, handler: (ctx, next) ->
-      {suffix, bdb_file, root_dn, root_password, root_slappasswd} = ctx.config.openldap_server
-      modified = 0
-      do_compare_rootpw = ->
-        return do_write() if root_slappasswd
-        ctx.log "Extract password from #{bdb_file}"
-        ctx.fs.readFile bdb_file, 'ascii', (err, content) ->
-          return next err if err
+    exports.push name: 'OpenLDAP Server # DB bdb', timeout: -1, handler: ->
+      {suffix, bdb_file, root_dn, root_password, root_slappasswd} = @config.openldap_server
+      @call (_, callback) ->
+        return callback null, false if root_slappasswd
+        @log? "Extract password from #{bdb_file}"
+        @fs.readFile bdb_file, 'ascii', (err, content) ->
+          return callback err if err
           if match = /^olcRootPW: {SSHA}(.*)$/m.exec content
             if check_password root_password, match[1]
-            then do_write()
-            else do_create_rootpw() # Password has changed
+            then callback null, false
+            else callback null, true # Password has changed
           else # First installation, password not yet defined
-            do_create_rootpw()
-      do_create_rootpw = ->
-        ctx.execute
-          cmd: "slappasswd -s #{root_password}"
-        , (err, executed, stdout) ->
-          return next err if err
-          root_slappasswd = stdout.trim()
-          do_write()
-      do_write = ->
-        ctx.log 'Database bdb: root DN, root PW, password protection'
+            callback null, true
+      @execute
+        cmd: "slappasswd -s #{root_password}"
+        if: -> @status -1
+      , (err, executed, stdout) ->
+        root_slappasswd = stdout.trim() if not err and executed
+      @call (_, callback) ->
+        @log? 'Database bdb: root DN, root PW, password protection'
         write = [
           {match: /^(.*)dc=my-domain,dc=com(.*)$/mg, replace: "$1#{suffix}$2"}
           {match: /^olcRootDN:.*$/mg, replace: "olcRootDN: #{root_dn}"}
@@ -133,63 +123,45 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
             match: /^olcRootPW:.*$/mg
             replace: "olcRootPW: #{root_slappasswd}"
             append: 'olcRootDN'
-        ctx.write
+        @write
           destination: bdb_file
           write: write
-        , (err, written) ->
-          return next err, false if err or not written
-          ctx.service
-            srv_name: 'slapd'
-            action: 'restart'
-          , next
-      do_compare_rootpw()
+        @service
+          srv_name: 'slapd'
+          action: 'restart'
+          if: -> @status -1
+        @then callback
 
 ## Logging
 
 http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
 
-    exports.push name: 'OpenLDAP Server # Logging', handler: (ctx, next) ->
-      {config_dn, config_password, config_file, log_level} = ctx.config.openldap_server
-      modified = false
-      rsyslog = ->
-        ctx.log 'Check rsyslog dependency'
-        ctx.service
-          name: 'rsyslog'
-        , (err, serviced) ->
-          return next err if err
-          ctx.log 'Declare local4 in rsyslog configuration'
-          ctx.write
-            destination: '/etc/rsyslog.conf'
-            match: /^local4.*/mg
-            replace: 'local4.*                                                /var/log/slapd.log'
-            append: 'RULES'
-          , (err, written) ->
-            return next err if err
-            return slapdconf() unless written
-            ctx.log 'Restart rsyslog service'
-            ctx.service
-              name: 'rsyslog'
-              action: 'restart'
-            , (err, serviced) ->
-              modified = true
-              slapdconf()
-      slapdconf = ->
-        ctx.write
-          destination: config_file
-          match: /^olcLogLevel:.*$/mg
-          replace: "olcLogLevel: #{log_level}"
-          before: 'olcRootDN'
-        , (err, written) ->
-          modified = true if written
-          finish err
-      finish = (err) ->
-        next err, modified
-      rsyslog()
+    exports.push name: 'OpenLDAP Server # Logging', handler: ->
+      {config_dn, config_password, config_file, log_level} = @config.openldap_server
+      @log 'Check rsyslog dependency'
+      @service
+        name: 'rsyslog'
+      @log? 'Declare local4 in rsyslog configuration'
+      @write
+        destination: '/etc/rsyslog.conf'
+        match: /^local4.*/mg
+        replace: 'local4.*                                                /var/log/slapd.log'
+        append: 'RULES'
+      @log? 'Restart rsyslog service'
+      @service
+        name: 'rsyslog'
+        action: 'restart'
+        if: -> @status -1
+      @write
+        destination: config_file
+        match: /^olcLogLevel:.*$/mg
+        replace: "olcLogLevel: #{log_level}"
+        before: 'olcRootDN'
 
-    exports.push name: 'OpenLDAP Server # Users and Groups', timeout: -1, handler: (ctx, next) ->
-      {root_dn, root_password, suffix, users_dn, groups_dn} = ctx.config.openldap_server
+    exports.push name: 'OpenLDAP Server # Users and Groups', timeout: -1, handler: ->
+      {root_dn, root_password, suffix, users_dn, groups_dn} = @config.openldap_server
       [_, suffix_k, suffix_v] = /(\w+)=([^,]+)/.exec suffix
-      ctx.execute
+      @execute
         cmd: """
         ldapadd -c -H ldapi:/// -D #{root_dn} -w #{root_password} <<-EOF
         dn: #{suffix}
@@ -211,100 +183,74 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
         EOF
         """
         code_skipped: 68
-      , next
 
-    exports.push name: 'OpenLDAP Server # SUDO schema', timeout: -1, handler: (ctx, next) ->
-      {config_dn, config_password} = ctx.config.openldap_server
-      do_install = ->
-        ctx.log 'Install Sudo schema'
-        ctx.service
-          name: 'sudo'
-        , (err, serviced) ->
-          return next err if err
-          do_locate()
-      do_locate = ->
-        ctx.log 'Get schema location'
-        ctx.execute
-          cmd: """
-          schema=`rpm -ql sudo | grep -i schema.openldap`
-          if [ ! -f $schema ]; then exit 2; fi
-          echo $schema
-          """
-          code_skipped: 2
-        , (err, installed, schema) ->
-          return next err if err
-          # return next Error 'Sudo schema not found' if schema is ''
-          return do_register schema.trim() if installed
-          ctx.upload
-            source: "#{__dirname}/../files/ldap.schema"
-            destination: '/tmp/ldap.schema'
-          , (err, uploaded) ->
-            return next err if err
-            do_register '/tmp/ldap.schema'
-      do_register = (schema) ->
-        ctx.ldap_schema
+    exports.push name: 'OpenLDAP Server # SUDO schema', timeout: -1, handler: ->
+      {config_dn, config_password} = @config.openldap_server
+      @service
+        name: 'sudo'
+      schema = null
+      @execute
+        cmd: """
+        schema=`rpm -ql sudo | grep -i schema.openldap`
+        if [ ! -f $schema ]; then exit 2; fi
+        echo $schema
+        """
+        code_skipped: 2
+      , (err, installed, stdout) ->
+        schema = stdout.trim() if installed
+      @upload
+        source: "#{__dirname}/../files/ldap.schema"
+        destination: '/tmp/ldap.schema'
+        mode: 0o0640
+        not_if: -> @status -1
+      , (err, uploaded) ->
+        schema = '/tmp/ldap.schema' if not err and uploaded
+      @call ->
+        @ldap_schema
           name: 'sudo'
           schema: schema
           binddn: config_dn
           passwd: config_password
           uri: true
-          log: ctx.log
-          ssh: ctx.ssh
-        , next
-      do_install()
 
-    exports.push name: 'OpenLDAP Server # Delete ldif data', handler: (ctx, next) ->
-      {root_dn, root_password, ldapdelete} = ctx.config.openldap_server
-      return next() unless ldapdelete.length
-      modified = 0
-      each(ldapdelete)
-      .on 'item', (path, next) ->
-        destination = "/tmp/phyla_#{Date.now()}"
-        ctx.upload
+    exports.push name: 'OpenLDAP Server # Delete ldif data', handler: ->
+      {root_dn, root_password, ldapdelete} = @config.openldap_server
+      for path in ldapdelete
+        destination = "/tmp/ryba_#{Date.now()}"
+        @upload
           source: path
           destination: destination
-        , (err, uploaded) ->
-          return next err if err
-          ctx.log "Delete #{destination}"
-          ctx.execute
-            cmd: "ldapdelete -c -H ldapi:/// -f #{destination} -D #{root_dn} -w #{root_password}"
-            code_skipped: 32
-          , (err, executed, stdout, stderr) ->
-            return next err if err
-            # modified += 1 if stdout.match(/Delete /g).length
-            ctx.remove
-              destination: destination
-            , (err, removed) ->
-              next err
-      .on 'both', (err) ->
-        next err, modified
+          mode: 0o0640
+        @execute
+          cmd: "ldapdelete -c -H ldapi:/// -f #{destination} -D #{root_dn} -w #{root_password}"
+          code_skipped: 32
+        # , (err, executed, stdout, stderr) ->
+        #   return if err
+        #   # modified += 1 if stdout.match(/Delete /g).length
+        @remove
+          destination: destination
 
-    exports.push name: 'OpenLDAP Server # Add ldif data', timeout: 100000, handler: (ctx, next) ->
-      {root_dn, root_password, ldapadd} = ctx.config.openldap_server
-      return next() unless ldapadd.length
-      modified = 0
-      each(ldapadd)
-      .on 'item', (path, next) ->
-        destination = "/tmp/phyla_#{Date.now()}"
-        ctx.log "Create temp file: #{destination}"
-        ctx.upload
+    exports.push name: 'OpenLDAP Server # Add ldif data', timeout: 100000, handler: ->
+      {root_dn, root_password, ldapadd} = @config.openldap_server
+      status = false
+      for path in ldapadd
+        destination = "/tmp/ryba_#{Date.now()}"
+        @upload
           source: path
           destination: destination
-        , (err, uploaded) ->
-          return next err if err
-          ctx.execute
-            cmd: "ldapadd -c -H ldapi:/// -D #{root_dn} -w #{root_password} -f #{destination}"
-            code_skipped: 68
-          , (err, executed, stdout, stderr) ->
-            return next err if err
-            modified += 1 if stdout.match(/Already exists/g)?.length isnt stdout.match(/adding new entry/g).length
-            ctx.log "Clean temp file: #{destination}"
-            ctx.remove
-              destination: destination
-            , (err, removed) ->
-              next err
-      .on 'both', (err) ->
-        next err, modified
+          shy: true
+        @execute
+          cmd: "ldapadd -c -H ldapi:/// -D #{root_dn} -w #{root_password} -f #{destination}"
+          code_skipped: 68
+          shy: true
+        , (err, executed, stdout, stderr) ->
+          return if err
+          status = true if stdout.match(/Already exists/g)?.length isnt stdout.match(/adding new entry/g).length
+        @remove
+          destination: destination
+          shy: true
+      @call (_, callback) ->
+        callback null, status
 
 ## Exported functions
 
@@ -330,17 +276,17 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
 ldapsearch -LLLY EXTERNAL -H ldapi:/// -b cn=schema,cn=config dn
 
 # Search from remote:
-ldapsearch -x -LLL -H ldap://master3.hadoop:389 -D cn=Manager,dc=adaltas,dc=com -w test -b "dc=adaltas,dc=com" "objectClass=*" 
-ldapsearch -H ldaps://master3.hadoop:636 -x -D cn=Manager,dc=adaltas,dc=com -w test -b dc=adaltas,dc=com
+ldapsearch -x -LLL -H ldap://master3.hadoop:389 -D cn=Manager,dc=ryba -w test -b "dc=ryba" "objectClass=*" 
+ldapsearch -H ldaps://master3.hadoop:636 -x -D cn=Manager,dc=ryba -w test -b dc=ryba
 ldapsearch -D cn=admin,cn=config -w test -d 1 -b "cn=config"
-ldapsearch -D cn=Manager,dc=adaltas,dc=com -w test -b "dc=adaltas,dc=com"
-ldapsearch -ZZ -d 5 -D cn=Manager,dc=adaltas,dc=com -w test -b "dc=adaltas,dc=com"
+ldapsearch -D cn=Manager,dc=ryba -w test -b "dc=ryba"
+ldapsearch -ZZ -d 5 -D cn=Manager,dc=ryba -w test -b "dc=ryba"
 
 # Check configuration with debug information:
 slaptest -v -d5 -u
 
 # Change user password:
-ldappasswd -xZWD cn=Manager,dc=adaltas,dc=com -S cn=wdavidw,ou=users,dc=adaltas,dc=com
+ldappasswd -xZWD cn=Manager,dc=ryba -S cn=wdavidw,ou=users,dc=ryba
 ```
 
 Enable ldapi:// access to root on our ldap tree
@@ -348,13 +294,9 @@ Enable ldapi:// access to root on our ldap tree
   # Add new olcAccess rule
   > olcAccess: {0}to *  by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=externa
   > l,cn=auth" manage  by * none
-  ldapsearch -LLLY EXTERNAL -H ldapi:/// -b dc=adaltas,dc=com
+  ldapsearch -LLLY EXTERNAL -H ldapi:/// -b dc=ryba
 
 Resources:
 
 *   [How to fix "ldif_read_file: checksum error"](http://injustfiveminutes.com/2014/10/28/how-to-fix-ldif_read_file-checksum-error/)
 *   [script with just about everything](http://serverfault.com/questions/323497/how-do-i-configure-ldap-on-centos-6-for-user-authentication-in-the-most-secure-a)
-
-
-
-

@@ -52,7 +52,7 @@ two new properties "sshd\_config" and "banner".
 }
 ```
 
-    exports.push (ctx) ->
+    exports.configure = (ctx) ->
       require('./users').configure ctx
       ctx.config.ssh ?= {}
       ctx.config.ssh.sshd_config ?= null
@@ -65,61 +65,45 @@ two new properties "sshd\_config" and "banner".
 Update the "~/.ssh/authorized_keys" file for each users and add the public SSH keys
 defined inside "users.[].authorized_keys".
 
-    exports.push name: 'SSH # Authorized Keys', timeout: -1, handler: (ctx, next) ->
-      modified = false
-      users = for _, user of ctx.config.users then user
-      each(users)
-      .on 'item', (user, next) ->
-        return next() unless user.home
-        return next() unless user.authorized_keys.length
-        ctx.mkdir
+    exports.push name: 'SSH # Authorized Keys', timeout: -1, handler: ->
+      users = for _, user of @config.users then user
+      for _, user of users
+        @mkdir
           destination: "#{user.home or '/home/'+user.name}/.ssh"
           uid: user.name
           gid: null
-          mode: 0o700 # was "permissions: 16832"
-        , (err, created) ->
-          return next err if err
-          write = for key in user.authorized_keys
+          mode: 0o0700 # was "permissions: 16832"
+        @write
+          destination: "#{user.home or '/home/'+user.name}/.ssh/authorized_keys"
+          write: for key in user.authorized_keys
             match: new RegExp ".*#{misc.regexp.escape key}.*", 'mg'
             replace: key
             append: true
-          ctx.write
-            destination: "#{user.home or '/home/'+user.name}/.ssh/authorized_keys"
-            write: write
-            uid: user.name
-            gid: null
-            mode: 0o600
-            eof: true
-          , (err, written) ->
-            return next err if err
-            modified = true if written
-            next()
-      .on 'both', (err) ->
-        next err, modified
+          uid: user.name
+          gid: null
+          mode: 0o600
+          eof: true
 
 ## Configure
 
 Configure the SSH daemon by updated the "/etc/ssh/sshd_config" file with the
 properties found in the "ssh.sshd_config" object.
 
-    exports.push name: 'SSH # Configure', timeout: -1, handler: (ctx, next) ->
-      {sshd_config} = ctx.config.ssh
-      return next() unless sshd_config
-      write = for k, v of sshd_config
-        match: new RegExp "^#{k}.*$", 'mg'
-        replace: "#{k} #{v}"
-        append: true
-      ctx.write
-        write: write
-        destination: '/etc/ssh/sshd_config'
-      , (err, written) ->
-        return next err if err
-        ctx.service
+    exports.push
+      name: 'SSH # Configure'
+      timeout: -1
+      if: -> @config.ssh.sshd_config
+      handler: ->
+        @write
+          write: for k, v of @config.ssh.sshd_config
+            match: new RegExp "^#{k}.*$", 'mg'
+            replace: "#{k} #{v}"
+            append: true
+          destination: '/etc/ssh/sshd_config'
+        @service
           srv_name: 'sshd'
           action: 'restart'
-          if: written
-        , (err, restarted) ->
-          next err, written
+          if: -> @status -1
 
 ## Public and Private Key
 
@@ -127,32 +111,25 @@ Deploy user SSH keys. The private key is defined by the "users.[].rsa"
 propery and is written in "~/.ssh/id\_rsa". The public key is defined by
 the "users.[].rsa\_pub" propery and is written in "~/.ssh/id\_rsa.pub".
 
-    exports.push name: 'SSH # Public and Private Key', timeout: -1, handler: (ctx, next) ->
-      modified = false
-      users = for _, user of ctx.config.users then user
-      each(users)
-      .on 'item', (user, next) ->
-        return next() unless user.home
-        return next new Error "Property rsa_pub required if rsa defined" if user.rsa and not user.rsa_pub
-        return next new Error "Property rsa required if rsa_pub defined" if user.rsa_pub and not user.rsa
-        return next() unless user.rsa
-        ctx.write [
+    exports.push name: 'SSH # Public and Private Key', timeout: -1, handler: ->
+      users = for _, user of @config.users then user
+      for _, user of users
+        throw Error "Property rsa_pub required if rsa defined" if user.rsa and not user.rsa_pub
+        throw Error "Property rsa required if rsa_pub defined" if user.rsa_pub and not user.rsa
+        @write
+          if: user.rsa
           destination: "#{user.home or '/home/'+user.name}/.ssh/id_rsa"
           content: user.rsa
           uid: user.name
           gid: null
           mode: 0o600
-        ,
+        @write
+          if: user.rsa
           destination: "#{user.home or '/home/'+user.name}/.ssh/id_rsa.pub"
           content: user.rsa_pub
           uid: user.name
           gid: null
           mode: 0o600
-        ], (err, written) ->
-          modified = true if written
-          next err
-      .on 'both', (err) ->
-        next err, modified
 
 # Banner
 
@@ -161,22 +138,22 @@ daemon configuration file. The banner is a short message which appear
 on the console once a user successfull logged-in with SSH. The "sshd"
 service will be restarted if this action had any effect.
 
-    exports.push name: 'SSH # Banner', timeout: 100000, handler: (ctx, next) ->
-      {banner} = ctx.config.ssh
-      return next() unless banner
-      banner.content += '\n\n' if banner.content
-      ctx.write [
-        destination: banner.destination
-        content: banner.content
-      ,
-        match: new RegExp "^Banner.*$", 'mg'
-        replace: "Banner #{banner.destination}"
-        append: true
-        destination: '/etc/ssh/sshd_config'
-      ], (err, written) ->
-        return next err if err
-        ctx.service
+    exports.push
+      name: 'SSH # Banner'
+      timeout: 100000
+      if: -> @config.ssh.banner
+      handler: ->
+        {banner} = @config.ssh
+        banner.content += '\n\n' if banner.content
+        @write
+          destination: banner.destination
+          content: banner.content
+        @write
+          match: new RegExp "^Banner.*$", 'mg'
+          replace: "Banner #{banner.destination}"
+          append: true
+          destination: '/etc/ssh/sshd_config'
+        @service
           srv_name: 'sshd'
           action: 'restart'
-          if: written
-        , next
+          if: -> @status()

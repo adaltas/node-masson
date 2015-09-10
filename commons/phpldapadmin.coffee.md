@@ -10,7 +10,7 @@ installation, the web application will be accessible at the following URL:
     exports.push 'masson/core/yum'
     exports.push 'masson/commons/httpd'
 
-    exports.push (ctx) ->
+    exports.configure = (ctx) ->
       ctx.config.phpldapadmin ?= {}
       ctx.config.phpldapadmin.config_path ?= '/etc/phpldapadmin/config.php'
       ctx.config.phpldapadmin.config_httpd_path ?= '/etc/httpd/conf.d/phpldapadmin.conf'
@@ -19,31 +19,27 @@ installation, the web application will be accessible at the following URL:
 
 Install the "phpldapadmin" package.
 
-    exports.push name: 'phpLDAPadmin # Install', timeout: -1, handler: (ctx, next) ->
-      ctx.service
+    exports.push name: 'phpLDAPadmin # Install', timeout: -1, handler: ->
+      @service
         name: 'phpldapadmin'
-      , next
 
 ## Configure
 
 Configure the application. The configuration file is defined by the
 "phpldapadmin.config_path" property (default to "/etc/phpldapadmin/config.php").
 
-    exports.push name: 'phpLDAPadmin # Configure', handler: (ctx, next) ->
-      ctx.write
+    exports.push name: 'phpLDAPadmin # Configure', handler: ->
+      @write
         write: [
           {match: /^(\/\/)(.*'login','attr','dn'.*)$/m, replace: '$2'}
           {match: /^(?!\/\/)(.*'login','attr','uid'.*)$/m, replace: '//$1'}
         ],
-        destination: ctx.config.phpldapadmin.config_path
+        destination: @config.phpldapadmin.config_path
         backup: true
-      , (err, written) ->
-        return next err,false if err or not written
-        ctx.service
-          name: 'httpd'
-          action: 'restart'
-        , (err, serviced) ->
-          next err, true
+      @service
+        name: 'httpd'
+        action: 'restart'
+        if: -> @status -1
 
 ## HTTPD
 
@@ -52,9 +48,9 @@ by the "phpldapadmin.config_httpd_path" property (default to
 "/etc/httpd/conf.d/phpldapadmin.conf") and made the application visible under
 the "http://{host}/ldapadmin" URL path.
 
-    exports.push name: 'phpLDAPadmin # HTTPD', handler: (ctx, next) ->
-      ctx.write
-        destination: ctx.config.phpldapadmin.config_httpd_path
+    exports.push name: 'phpLDAPadmin # HTTPD', handler: ->
+      @write
+        destination: @config.phpldapadmin.config_httpd_path
         write: [
           match: /^(?!#)(.*Alias \/phpldapadmin.*)$/m
           replace: '#$1'
@@ -80,11 +76,7 @@ the "http://{host}/ldapadmin" URL path.
           append: 'Allow from ::1'
         ]
         backup: true
-      , (err, written) ->
-        return next err if err
-        return next null, false unless written
-        ctx.service
-          name: 'httpd'
-          action: 'restart'
-        , (err, serviced) ->
-          next err, true
+      @service
+        name: 'httpd'
+        action: 'restart'
+        if: @status -1

@@ -42,7 +42,6 @@ ctx.execute
 
     exports = module.exports = []
     exports.push 'masson/bootstrap/log'
-    exports.push 'masson/bootstrap/cache_memory'
 
 ## Mecano
 
@@ -84,22 +83,20 @@ Configure the `download` function to support cache.
       options.store = {}
       options[k] = v for k, v of ctx.config.mecano
       mecano @, options
-      next null, ctx.PASS
+      next()
 
 ## File System
 
 File System functionnalities are imported from the [Node.js `fs`][nodefs] API with
 transparent SSH2 transport thanks to the [ssh2-fs] package.
 
-    exports.push name: 'Bootstrap # File System', required: true, timeout: -1, handler:  (ctx) ->
-      ctx.fs ?= {}
+    exports.push name: 'Bootstrap # File System', required: true, timeout: -1, handler: ->
+      @fs ?= {}
       [ 'rename', 'chown', 'chmod', 'stat', 'lstat', 'unlink', 'symlink',
         'readlink', 'unlink', 'mkdir', 'readdir', 'readFile', 'writeFile',
-        'exists', 'createReadStream', 'createWriteStream' ].forEach (fn) ->
-        ctx.fs[fn] = ->
-          fs[fn].call null, ctx.ssh, arguments...
-      ctx.PASS
-
+        'exists', 'createReadStream', 'createWriteStream' ].forEach (fn) =>
+        @fs[fn] = =>
+          fs[fn].call null, @ssh, arguments...
 
 # Dependencies
 

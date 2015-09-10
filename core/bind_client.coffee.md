@@ -7,13 +7,11 @@ nslookup, dig and host.
 
     exports = module.exports = []
     exports.push 'masson/bootstrap'
-    exports.push 'masson/core/yum'
 
 ## Install
 
 The package "bind-utils" is installed.
 
-    exports.push name: 'Bind Client # Install', timeout: -1, handler: (ctx, next) ->
-      ctx.service
+    exports.push name: 'Bind Client # Install', timeout: -1, handler: ->
+      @service
         name: 'bind-utils'
-      , next

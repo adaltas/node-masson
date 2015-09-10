@@ -29,7 +29,7 @@ developers on Solaris, Linux, Mac OS X or Windows.
 [Oracle JDK 6]: http://www.oracle.com/technetwork/java/javasebusiness/downloads/java-archive-downloads-javase6-419409.html#jdk-6u45-oth-JPR
 [Oracle JDK 7]: http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html
 
-    exports.push module.exports.configure = (ctx) ->
+    module.exports.configure = (ctx) ->
       require('../core/proxy').configure ctx
       java = ctx.config.java ?= {}
       # ctx.config.java['openjdk-1.7.0'] ?= true
@@ -48,33 +48,35 @@ developers on Solaris, Linux, Mac OS X or Windows.
 
 ## Install OpenJDK
 
-    exports.push name: 'Java # Install OpenJDK', timeout: -1, handler: (ctx, next) ->
-      {openjdk} = ctx.config.java
-      return next() unless openjdk
-      ctx.service
-        name: 'java-1.7.0-openjdk-devel'
-      .then next
+    exports.push
+      name: 'Java # Install OpenJDK'
+      timeout: -1
+      if: -> @config.java.openjdk
+      handler: ->
+        @service
+          name: 'java-1.7.0-openjdk-devel'
 
 ## Remove OpenJDK
 
 At this time, it is recommanded to run Hadoop against the Oracle Java JDK. Since RHEL and CentOS 
 come with the OpenJDK installed and to avoid any ambiguity, we simply remove the OpenJDK.
 
-    exports.push name: 'Java # Remove OpenJDK', handler: (ctx, next) ->
-      {openjdk} = ctx.config.java
-      return next() if openjdk
-      ctx.call (_, callback) ->
-        ctx.execute
-          cmd: 'yum list installed | grep openjdk'
-          code_skipped: 1
-        , (err, installed, stdout, stderr) ->
-          return callback err if err
-          packages = for l in stdout.trim().split('\n') then /(.*?) .*$/.exec(l)?[1] or l
-          ctx.execute
-            cmd: "yum remove -y #{packages.join ' '}"
-            if: installed
-          , callback
-      .then next
+    exports.push
+      name: 'Java # Remove OpenJDK'
+      not_if: -> @config.java.openjdk
+      handler: ->
+        @execute
+          cmd: 'yum -y remove *openjdk*'
+        # @execute
+        #   cmd: 'yum list installed | grep openjdk'
+        #   code_skipped: 1
+        # , (err, installed, stdout, stderr) ->
+        #   return callback err if err
+        #   packages = for l in stdout.trim().split('\n') then /(.*?) .*$/.exec(l)?[1] or l
+        #   ctx.execute
+        #     cmd: "yum remove -y #{packages.join ' '}"
+        #     if: installed
+        #   , callback
 
 ## Install Oracle JDK
 
@@ -83,33 +85,35 @@ phyla integrator responsibility to download the jdk manually and reference it
 inside the configuration. The properties "jce\_local\_policy" and 
 "jce\_us\_export_policy" must be modified accordingly with an appropriate location.
 
-    exports.push name: 'Java # Install Oracle JDK', timeout: -1, handler: (ctx, next) ->
-      {proxy, jdk} = ctx.config.java # location, version
-      return next() unless jdk
-      ctx.log "Check if java is here and which version it is"
-      ctx.execute
-        cmd: 'ls -d /usr/java/jdk*'
-        if_exec: '[[ -d /usr/java/ ]]'
-      , (err, executed, stdout, stderr) ->
-        return next err if err and err.code isnt 2
-        stdout = '' if err or not executed
-        installed_version = stdout.trim().split('\n').pop()
-        if installed_version
+    exports.push
+      name: 'Java # Install Oracle JDK'
+      timeout: -1
+      if: -> @config.java.jdk
+      handler: ->
+        {proxy, jdk} = @config.java # location, version
+        @log? "Check if java is here and which version it is"
+        installed = false
+        @execute
+          cmd: 'ls -d /usr/java/jdk*'
+          if_exec: '[[ -d /usr/java/ ]]'
+        , (err, executed, stdout, stderr) ->
+          throw err if err and err.code isnt 2
+          stdout = '' if err or not executed
+          installed_version = stdout.trim().split('\n').pop()
+          return unless installed_version
           installed_version = /jdk(.*)/.exec(installed_version)[1]
           installed_version = installed_version.replace('_', '').replace('0', '')
           version = jdk.version.replace('_', '').replace('0', '')
-          return next null, false unless semver.gt version, installed_version
-        # action = if url.parse(jdk.location).protocol is 'http:' then 'download' else 'upload'
-        # ctx.log "Java #{action}"
+          installed = true unless semver.gt version, installed_version
         tmpdir = "/tmp/masson_java_#{Date.now()}"
         destination = "#{tmpdir}/#{path.basename jdk.location}"
-        ctx
-        .download
+        @download
           source: jdk.location
           proxy: proxy
           destination: "#{destination}"
           binary: true
-        .execute
+          not_if: -> installed
+        @execute
           cmd: """
           mkdir -p /usr/java
           tar xzf #{destination} -C #{tmpdir}
@@ -120,8 +124,8 @@ inside the configuration. The properties "jce\_local\_policy" and
           ln -sf /usr/java/$version /usr/java/default
           rm -rf #{tmpdir}
           """
+          not_if: -> installed
           trap_on_error: true
-        .then next
 
 ## Java JCE
 
@@ -135,37 +139,39 @@ repository. It is the phyla integrator responsibility to download the jdk manual
 reference it inside the configuration. The properties "jce\_local\_policy" and 
 "jce\_us\_export_policy" must be modified accordingly with an appropriate location.
 
-    exports.push name: 'Java # Java JCE', timeout: -1, handler: (ctx, next) ->
-      {jdk, jce_local_policy, jce_us_export_policy} = ctx.config.java
-      return next() unless jce_local_policy or jce_us_export_policy
-      return next() unless jdk
-      jdk_home = "/usr/java/jdk#{jdk.version}"
-      ctx.log "Download jce-6 Security JARs"
-      ctx
-      # .download
-      .upload
-        source: jce_local_policy
-        destination: "#{jdk_home}/jre/lib/security/local_policy.jar"
-        binary: true
-        sha1: true
-      .upload
-      # .download
-        source: jce_us_export_policy
-        destination: "#{jdk_home}/jre/lib/security/US_export_policy.jar"
-        binary: true
-        sha1: true
-      .then next
+    exports.push
+      name: 'Java # Java JCE'
+      timeout: -1
+      if: [
+        -> @config.java.jce_local_policy or @config.java.jce_us_export_policy
+        -> @config.java.jdk
+      ]
+      handler: ->
+        {jdk, jce_local_policy, jce_us_export_policy} = @config.java
+        jdk_home = "/usr/java/jdk#{jdk.version}"
+        @log "Download jce-6 Security JARs"
+        @download
+          source: jce_local_policy
+          destination: "#{jdk_home}/jre/lib/security/local_policy.jar"
+          binary: true
+          sha1: true
+        @download
+          source: jce_us_export_policy
+          destination: "#{jdk_home}/jre/lib/security/US_export_policy.jar"
+          binary: true
+          sha1: true
 
-    exports.push name: 'Java # Env', timeout: -1, handler: (ctx, next) ->
-      {java_home} = ctx.config.java
-      ctx.write
+## Java # Env
+
+    exports.push name: 'Java # Env', timeout: -1, handler: ->
+      {java_home} = @config.java
+      @write
         destination: '/etc/profile.d/java.sh'
-        mode: 0o644
+        mode: 0o0644
         content: """
         export JAVA_HOME=#{java_home}
         export PATH=$PATH:#{java_home}/bin
         """
-      .then next
 
 ## Dependencies
 
@@ -181,7 +187,3 @@ and removing the GCJ package also remove the MySQL connector package.
 ## Resources
 
 *   [Instructions to install Oracle JDK with alternative](http://www.if-not-true-then-false.com/2010/install-sun-oracle-java-jdk-jre-6-on-fedora-centos-red-hat-rhel/) 
-
-
-
-

@@ -10,16 +10,15 @@ certificate to upload.
     exports.push 'masson/bootstrap'
     # exports.push 'masson/bootstrap/utils'
     exports.push 'masson/core/yum'
-    exports.push require('./index').configure
+    # exports.push require('./index').configure
 
-    exports.push name: 'OpenLDAP Client # Install', timeout: -1, handler: (ctx, next) ->
-      ctx.service
+    exports.push name: 'OpenLDAP Client # Install', timeout: -1, handler: ->
+      @service
         name: 'openldap-clients'
-      .then next
 
-    exports.push name: 'OpenLDAP Client # Configure', timeout: -1, handler: (ctx, next) ->
-      {config} = ctx.config.openldap_client
-      ctx.write
+    exports.push name: 'OpenLDAP Client # Configure', timeout: -1, handler: ->
+      {config} = @config.openldap_client
+      @write
         write: for k, v of config
           v = v.join(' ') if Array.isArray v
           match: new RegExp "^#{k}.*$", 'mg'
@@ -27,7 +26,6 @@ certificate to upload.
           append: true
         destination: '/etc/openldap/ldap.conf'
         eof: true
-      .then next
 
 ## Upload certificate
 
@@ -48,25 +46,25 @@ certificate, not sure why.
 Certificates are temporarily uploaded to the "/tmp" folder and registered with
 the command `authconfig --update --ldaploadcacert={file}`.
 
-    exports.push name: 'OpenLDAP Client # Certificate', timeout: -1, handler: (ctx, next) ->
-      {certificates, config} = ctx.config.openldap_client
+    exports.push name: 'OpenLDAP Client # Certificate', timeout: -1, handler: ->
+      {certificates, config} = @config.openldap_client
       for certificate in certificates
         hash = crypto.createHash('md5').update(certificate).digest('hex')
         filename = null
-        ctx
-        .upload
+        @upload
           source: certificate
           destination: "/tmp/#{hash}"
-        .execute # openssh is executed remotely
-            cmd: "openssl x509 -noout -hash -in /tmp/#{hash}; rm -rf /tmp/#{hash}"
+          mode: 0o0640
+          shy: true
+        @execute # openssh is executed remotely
+          cmd: "openssl x509 -noout -hash -in /tmp/#{hash}; rm -rf /tmp/#{hash}"
+          shy: true
         , (err, _, stdout) ->
           filename = stdout.trim() unless err
-        .call ({}, callback) ->
-          ctx.upload 
+        .call ->
+          @download 
             source: certificate
             destination: "#{config.TLS_CACERTDIR}/#{filename}.0"
-          .then (err) -> callback err, true
-      ctx.then next
 
 ## Dependencies
 

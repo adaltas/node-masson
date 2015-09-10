@@ -14,15 +14,14 @@
 IPTables rules are only inserted if the parameter "iptables.action" is set to 
 "start" (default value).
 
-    exports.push name: 'HTTPD # IPTables', handler: (ctx, next) ->
-      {etc_krb5_conf, kdc_conf} = ctx.config.krb5
+    exports.push name: 'HTTPD # IPTables', handler: ->
+      {etc_krb5_conf, kdc_conf} = @config.krb5
       rules = []
-      ctx.iptables
+      @iptables
         rules: [
           chain: 'INPUT', jump: 'ACCEPT', dport: 80, protocol: 'tcp', state: 'NEW', comment: "HTTPD"
         ]
-        if: ctx.config.iptables.action is 'start'
-      , next
+        if: @config.iptables.action is 'start'
 
 ## Users & Groups
 
@@ -35,21 +34,18 @@ cat /etc/group | grep hadoop
 apache:x:48:
 ```
 
-    exports.push name: 'HTTPD # Users & Groups', handler: (ctx, next) ->
-      {group, user} = ctx.config.httpd
-      ctx.group group, (err, gmodified) ->
-        return next err if err
-        ctx.user user, (err, umodified) ->
-          next err, gmodified or umodified
+    exports.push name: 'HTTPD # Users & Groups', handler: ->
+      {group, user} = @config.httpd
+      @group group
+      @user user
 
 ## Install
 
 Install the HTTPD service and declare it as a startup service.
 
-    exports.push name: 'HTTPD # Install', timeout: -1, handler: (ctx, next) ->
-      {startup, action} = ctx.config.httpd
-      ctx.service
+    exports.push name: 'HTTPD # Install', timeout: -1, handler: ->
+      {startup, action} = @config.httpd
+      @service
         name: 'httpd'
         startup: startup
         action: action
-      , next

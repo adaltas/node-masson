@@ -7,8 +7,6 @@ See the documentation of each modules for additionnal information.
 
     exports = module.exports = []
 
-    exports.push 'masson/bootstrap/cache_memory'
-
     exports.push 'masson/bootstrap/log'
 
     exports.push 'masson/bootstrap/utils'
@@ -18,16 +16,3 @@ See the documentation of each modules for additionnal information.
     exports.push 'masson/bootstrap/info'
 
     exports.push 'masson/bootstrap/mecano'
-
-
-
-
-
-
-
-
-
-
-
-
-
