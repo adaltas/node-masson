@@ -28,7 +28,7 @@ Example:
 }
 ```
 
-    exports.push (ctx) ->
+    exports.push.configure = (ctx) ->
       ctx.config.security ?= {}
       ctx.config.security.selinux ?= true
       ctx.config.security.limits ?= {}
@@ -40,24 +40,23 @@ mechanism implemented in the kernel.
 
 This action update the configuration file present in "/etc/selinux/config".
 
-    exports.push name: 'Security # SELinux', handler: (ctx, next) ->
-      {selinux} = ctx.config.security
+    exports.push name: 'Security # SELinux', handler: ->
+      {selinux} = @config.security
       if selinux
         from = 'disabled'
         to = 'enforcing'
       else
         from = 'enforcing'
         to = 'disabled'
-      ctx.write
+      @write
         destination: '/etc/selinux/config'
         match: /^SELINUX=.*/mg
         replace: "SELINUX=#{to}"
+      @execute
+        cmd: 'shutdown -r now'
+        if: -> @status -1
       , (err, executed) ->
-        return next err, false if err or not executed
-        ctx.execute
-          cmd: 'shutdown -r now'
-        , (err, executed) ->
-          next Error 'Server Reboot after SELINUX changes'
+        @log '[WARN masson.core.security] Reboot after SELINUX changes'
 
 # Limits
 
@@ -71,15 +70,10 @@ cat /etc/security/limits.d/90-nproc.conf
 root       soft    nproc     unlimited
 ```
 
-    exports.push name: 'Security # Limits', handler: (ctx, next) ->
-      {limits} = ctx.config.security
+    exports.push name: 'Security # Limits', handler: ->
+      {limits} = @config.security
       writes = for filename, content of limits
         destination: "/etc/security/limits.d/#{filename}"
         content: content
         backup: true
-      ctx.write writes, next
-
-
-
-
-
+      @write writes

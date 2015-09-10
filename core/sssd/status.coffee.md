@@ -3,10 +3,9 @@
 
     exports = module.exports = []
     exports.push 'masson/bootstrap'
-    exports.push require('./index').configure
+    # exports.push require('./index').configure
 
-    exports.push name: 'SSSD # Status', label_true: 'STARTED', label_false: 'STOPPED', handler: (ctx, next) ->
-      ctx.execute
+    exports.push name: 'SSSD # Status', label_true: 'STARTED', label_false: 'STOPPED', handler: ->
+      @execute
         cmd: "service sssd status"
         code_skipped: 3
-      .then next

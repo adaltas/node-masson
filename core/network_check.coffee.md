@@ -24,39 +24,35 @@ Dig isn't available by default on CentOS and is installed by the
 Check forward DNS lookup using the configured DNS configuration present inside
 "/etc/resolv.conf". Internally, the exectuted command uses "dig".
 
-    exports.push name: 'Network # Check DNS Forward Lookup', handler: (ctx, next) ->
+    exports.push name: 'Network # Check DNS Forward Lookup', handler: ->
       # I didnt find how to restrict dig to return only A records like it
       # does for CNAME records if you append "cname" at the end of the command.
       # I assume the A record to always be printed on the last line.
-      ctx.execute
-        cmd: "dig #{ctx.config.host}. +short"
+      @execute
+        cmd: "dig #{@config.host}. +short"
         code_skipped: 1
+        shy: true
       , (err, executed, stdout, stderr) ->
-        if err
-          next err
-        else unless ipRegex.test stdout.split(/\s+/).shift()
-          ctx.log "Invalid IP #{stdout.trim()}"
-          next null, 'WARNING'
-        else
-         next null, false
+        throw err if err
+        unless ipRegex.test stdout.split(/\s+/).shift()
+          @log? "[WARN, masson `dig host`] Invalid returned IP #{stdout.trim()}"
+          # next null, 'WARNING'
 
 ## DNS Reverse Lookup
 
 Check reverse DNS lookup using the configured DNS configuration present inside
 "/etc/resolv.conf". Internally, the exectuted command uses "dig".
 
-    exports.push name: 'Network # DNS Reverse Lookup', handler: (ctx, next) ->
-      ctx.execute
-        cmd: "dig -x #{ctx.config.ip} +short"
+    exports.push name: 'Network # DNS Reverse Lookup', handler: ->
+      @execute
+        cmd: "dig -x #{@config.ip} +short"
         code_skipped: 1
+        shy: true
       , (err, executed, stdout) ->
-        if err
-          next err
-        else if "#{ctx.config.host}." isnt stdout.trim()
-          ctx.log "Invalid host #{stdout.trim()}"
-          next null, 'WARNING'
-        else
-         next null, false
+        throw err if err
+        if "#{@config.host}." isnt stdout.trim()
+          @log? "[WARN, masson `dig ip`] Invalid returned host #{stdout.trim()}"
+          # next null, 'WARNING'
 
 ## Check System Forward Lookup
 
@@ -64,15 +60,18 @@ Check forward DNS lookup using the system configuration which take into account
 the local configuration present inside "/etc/hosts". Internally, the exectuted
 command uses "getent".
 
-    exports.push name: 'Network # Check System Forward Lookup', handler: (ctx, next) ->
-      ctx.execute
-        cmd: "getent hosts #{ctx.config.host}"
+    exports.push name: 'Network # Check System Forward Lookup', handler: ->
+      @execute
+        cmd: "getent hosts #{@config.host}"
         code_skipped: 2
+        shy: true
       , (err, valid, stdout, stderr) ->
-        return next err if err
-        return next null, 'WARNING' if not valid
+        throw err if err
+        @log? "[WARN, masson `getent host`] Invalid host #{stdout.trim()}" if not valid
+        # return next null, 'WARNING' if not valid
         [ip, fqdn] = stdout.split(/\s+/).filter( (entry) -> entry)
-        next null, if ip is ctx.config.ip and fqdn is ctx.config.host then false else 'WARNING'
+        @log? "[WARN, masson `getent host`] Invalid host #{@config.host}" if ip isnt @config.ip or fqdn isnt @config.host
+        # next null, if ip is @config.ip and fqdn is @config.host then false else 'WARNING'
 
 ## Check System Reverse Lookup
 
@@ -80,27 +79,29 @@ Check forward DNS lookup using the system configuration which take into account
 the local configuration present inside "/etc/hosts". Internally, the exectuted
 command uses "getent".
 
-    exports.push name: 'Network # Check System Reverse Lookup', handler: (ctx, next) ->
-      ctx.execute
-        cmd: "getent hosts #{ctx.config.ip}"
+    exports.push name: 'Network # Check System Reverse Lookup', handler: ->
+      @execute
+        cmd: "getent hosts #{@config.ip}"
         code_skipped: 2
+        shy: true
       , (err, valid, stdout) ->
-        return next err if err
-        return next null, 'WARNING' if not valid
+        throw err if err
+        @log? "[WARN, masson `getent host`] Invalid ip #{stdout.trim()}" if not valid
+        # return next null, 'WARNING' if not valid
         [ip, fqdn] = stdout.split(/\s+/).filter( (entry) -> entry)
-        next null, if ip is ctx.config.ip and fqdn is ctx.config.host then false else 'WARNING'
+        @log? "[WARN, masson `getent host`] Invalid ip #{@config.ip}" if ip isnt @config.ip or fqdn isnt @config.host
+        # next null, if ip is @config.ip and fqdn is @config.host then false else 'WARNING'
 
 ## Check Hostname
 
 Read the server hostname and check it matches the expected FQDN. Internally, 
 the executed command is `hostname --fqdn`.
 
-    exports.push name: 'Network # Check Hostname', handler: (ctx, next) ->
-      ctx.execute
+    exports.push name: 'Network # Check Hostname', handler: ->
+      @execute
         cmd: "hostname --fqdn"
+        shy: true
       , (err, _, stdout) ->
-        return next err if err
-        next null, if stdout.trim() is ctx.config.host then false else 'WARNING'
-
-
-
+        throw err if err
+        @log? "[WARN, masson `getent host`] Invalid hostname" if stdout.trim() isnt @config.host
+        # next null, if stdout.trim() is @config.host then false else 'WARNING'

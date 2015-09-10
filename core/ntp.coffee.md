@@ -31,7 +31,7 @@ Example:
 }
 ```
 
-    exports.push (ctx) ->
+    exports.configure = (ctx) ->
       ntp = ctx.config.ntp ?= {}
       ntp.servers ?= []
       ntp.servers = ctx.config.ntp.servers.split(',') if typeof ctx.config.ntp.servers is 'string'
@@ -45,21 +45,18 @@ The installation respect the procedure published on [cyberciti][cyberciti]. The
 "ntp" server is installed as a startup service and `ntpdate` is run a first
 time when the `ntpd` daemon isnt yet started.
 
-    exports.push name: 'NTP # Install', timeout: -1, handler: (ctx, next) ->
-      {servers} = ctx.config.ntp
-      ctx.service
+    exports.push name: 'NTP # Install', timeout: -1, handler: ->
+      {servers} = @config.ntp
+      @service
         name: 'ntp'
         chk_name: 'ntpd'
         startup: true
-      , (err, serviced) ->
-        return next err if err
-        return next null, false unless serviced
-        return next null, false unless servers?.length
-        ctx.execute
-          cmd: "ntpdate #{servers[0]}"
-          if: servers[0] isnt ctx.config.host
-        , (err) ->
-          next err, true
+      # Note, no NTPD server may be available yet, no solution at the moment
+      # to wait for an available NTPD server
+      @execute
+        cmd: "ntpdate #{servers[0]}"
+        if: ->
+          @status -1 and servers?.length and servers[0] isnt @config.host
 
 ## Configure
 
@@ -70,22 +67,19 @@ The "fudge" property is used when a server should trust its own BIOS clock.
 It should only be used in a pure offline configuration,
 and when only ONE ntp server is configured
 
-    exports.push name: 'NTP # Configure', handler: (ctx, next) ->
-      {ntp} = ctx.config
+    exports.push name: 'NTP # Configure', handler: (_, callback) ->
+      {ntp} = @config
       servers = ntp.servers.slice 0
-      return next() unless servers?.length
-      if ctx.config.host in servers
-        servers = servers.filter (e) -> e isnt ctx.config.host
+      return callback() unless servers?.length
+      if @config.host in servers
+        servers = servers.filter (e) => e isnt @config.host
       servers.push '127.127.1.0' if ntp.fudge
-      ctx.fs.readFile '/etc/ntp.conf', 'ascii', (err, content) ->
-        return next err if err
+      @fs.readFile '/etc/ntp.conf', 'ascii', (err, content) =>
+        return callback err if err
         lines = string.lines content
         modified = false
         position = 0
-        # local_server = null
-
-The fudge property is only appliable on NTP servers
-
+        #The fudge property is only appliable on NTP servers
         found = []
         found_fudge = false
         for line, i in lines
@@ -124,29 +118,25 @@ The fudge property is only appliable on NTP servers
           lines.splice position+1, 0, "fudge 127.127.1.0 stratum #{ntp.fudge}"
           position++
           modified = true
-        return next null, false unless modified
-        ctx.write
+        return callback null, false unless modified
+        @write
           destination: '/etc/ntp.conf'
           content: lines.join('\n')
           backup: true
-        , (err, modified) ->
-          return next err if err
-          ctx.service
-            srv_name: 'ntpd'
-            action: 'restart'
-            if_not: modified
-          , next
+        @service
+          srv_name: 'ntpd'
+          action: 'restart'
+          if_not: modified
+        .then callback
 
 ## Start
 
 Start the `ntpd` daemon if it isnt yet running.
 
-    exports.push name: 'NTP # Start', label_true: 'STARTED', timeout: -1, handler: (ctx, next) ->
-      ctx.log "Start the NTP service"
-      ctx.service
-        srv_name: 'ntpd'
-        action: 'start'
-      , next
+    exports.push name: 'NTP # Start', label_true: 'STARTED', timeout: -1, handler: ->
+      @log? "Start the NTP service"
+      @service_start
+        name: 'ntpd'
 
 ## Check
 
@@ -155,35 +145,37 @@ being exectued. If the gap is greater than the one defined by the "ntp.lag"
 property, the `ntpd` daemon is stop, the `ntpdate` command is used to
 synchronization the date and the `ntpd` daemon is finally restarted.
 
-    exports.push name: 'NTP # Check', label_true: 'CHECKED', handler: (ctx, next) ->
-      # Here's good place to compare the date, maybe with the host maching:
-      # if gap is greather than threehold, stop ntpd, ntpdate, start ntpd
-      return next() if ctx.config.ntp.servers[0] is ctx.config.host
-      return next() if ctx.config.ntp.servers.length is 0
-      ctx.log "Synchronize the system clock with #{ctx.config.ntp.servers[0]}"
-      {lag} = ctx.config.ntp
-      return next() if lag < 1
-      ctx.execute
-        cmd: "date +%s"
-      , (err, executed, stdout) ->
-        return next err if err
-        time = parseInt(stdout.trim(), 10) * 1000
-        current_lag = Math.abs(new Date() - new Date(time))
-        return next null, false if current_lag < lag
-        ctx.log "Lag greater than #{lag}ms: #{current_lag}"
-        ctx.service
-          srv_name: 'ntpd'
-          action: 'stop'
-        , (err, serviced) ->
-          return next err if err
-          ctx.execute
-            cmd: "ntpdate #{ctx.config.ntp.servers[0]}"
-          , (err) ->
-            return next err if err
-            ctx.service
-              srv_name: 'ntpd'
-              action: 'start'
-            , next
+    exports.push
+      name: 'NTP # Check'
+      label_true: 'CHECKED'
+      not_if: [
+         -> @config.ntp.servers[0] is @config.host
+         -> @config.ntp.servers.length is 0
+         -> @config.ntp.lag < 1
+      ]
+      handler: ->
+        # Here's good place to compare the date, maybe with the host maching:
+        # if gap is greather than threehold, stop ntpd, ntpdate, start ntpd
+        @log? "Synchronize the system clock with #{@config.ntp.servers[0]}"
+        {lag} = @config.ntp
+        current_lag = null
+        @execute
+          cmd: "date +%s"
+        , (err, executed, stdout) ->
+          throw err if err
+          time = parseInt(stdout.trim(), 10) * 1000
+          current_lag = Math.abs(new Date() - new Date(time))
+        .call ->
+          @log? "Lag greater than #{lag}ms: #{current_lag}"
+          @service_stop
+            name: 'ntpd'
+            if: current_lag < lag
+          @execute
+            cmd: "ntpdate #{@config.ntp.servers[0]}"
+            if: current_lag < lag
+          @service_start
+            name: 'ntpd'
+            if: current_lag < lag
 
 ## Module Dependencies
 

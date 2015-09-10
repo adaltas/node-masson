@@ -42,7 +42,7 @@ Default configuration:
 }
 ```
 
-    exports.push module.exports.configure = (ctx) ->
+    exports.configure = (ctx) ->
       require('../core/iptables').configure ctx
       mysql = ctx.config.mysql ?= {}
 
@@ -77,97 +77,56 @@ Default configuration:
 IPTables rules are only inserted if the parameter "iptables.action" is set to
 "start" (default value).
 
-    exports.push name: 'Mysql Server # IPTables', handler: (ctx, next) ->
-      ctx.iptables
+    exports.push name: 'Mysql Server # IPTables', handler: ->
+      @iptables
         rules: [
           { chain: 'INPUT', jump: 'ACCEPT', dport: 3306, protocol: 'tcp', state: 'NEW', comment: "MySQL" }
         ]
-        if: ctx.config.iptables.action is 'start'
-      , next
+        if: @config.iptables.action is 'start'
 
 ## Package
 
 Install the Mysql database server. Secure the temporary directory.
 
-    exports.push name: 'Mysql Server # Package', timeout: -1, handler: (ctx, next) ->
-      {user, group, server} = ctx.config.mysql
-      modified = false
-      do_install = ->
-        ctx.service
-          name: 'mysql-server'
-          chk_name: 'mysqld'
-          startup: '235'
-        , (err, serviced) ->
-          return next err if err
-          modified = true if serviced
-          do_tmp()
-      do_tmp = ->
-        ctx.mkdir
-          destination: '/tmp/mysql'
-          uid: user.name
-          gid: group.name
-          mode: '0744'
-        , (err, created) ->
-          return next err if err
-          modified = true if created
-          ctx.ini
-            destination: '/etc/my.cnf'
-            content: server.my_cnf
-            merge: true
-            backup: true
-          , (err, updated) ->
-            return next err if err
-            modified = true if updated
-            do_end()
-      do_end = ->
-        next null, modified
-      do_install()
+    exports.push name: 'Mysql Server # Package', timeout: -1, handler: ->
+      {user, group, server} = @config.mysql
+      @service
+        name: 'mysql-server'
+        chk_name: 'mysqld'
+        startup: '235'
+      @mkdir
+        destination: '/tmp/mysql'
+        uid: user.name
+        gid: group.name
+        mode: 0o0744
+      @ini
+        destination: '/etc/my.cnf'
+        content: server.my_cnf
+        merge: true
+        backup: true
 
-    exports.push name: 'Mysql Server # Start', handler: (ctx, next) ->
+    exports.push name: 'Mysql Server # Start', handler: ->
       modified = false
-      do_start = ->
-        ctx.service
-          name: 'mysql-server'
-          srv_name: 'mysqld'
-          action: 'start'
-        , (err, started) ->
-          # return next err if err
-          return do_clean_sock() if err
-          modified = true if started
-          do_end()
-      do_clean_sock = ->
-        console.log 'do_clean_sock'
-        ctx.remove
-          destination: "/var/lib/mysql/mysql.sock"
-        , (err, removed) ->
-          return next err if err
-          return next new Error 'Failed to install mysqld' unless removed
-          ctx.service_start
-            name: 'mysqld'
-            action: 'start'
-          , (err, started) ->
-            return next err if err
-            modified = true if started
-            do_end()
-      do_end = ->
-        next null, modified
-      do_start()
+      @service_start
+        name: 'mysqld'
+        relax: true
+      # TODO: wait for error in mecano
+      # @call 
+      #   if: -> @error -1
+      #   handler: ->
+      #     @remove
+      #       destination: "/var/lib/mysql/mysql.sock"
+      #     , (err, removed) ->
+      #       throw err if err
+      #       throw Error 'Failed to install mysqld' unless removed
+      #     @service_start
+      #       name: 'mysqld'
 
-    exports.push name: 'Mysql Server # Populate', handler: (ctx, next) ->
-      {sql_on_install} = ctx.config.mysql.server
-      each(sql_on_install)
-      .on 'item', (sql, next) ->
-        cmd = "mysql -uroot -e \"#{escape sql}\""
-        ctx.log "Execute: #{cmd}"
-        ctx.execute
-          cmd: cmd
+    exports.push name: 'Mysql Server # Populate', handler: ->
+      for sql in  @config.mysql.server.sql_on_install
+        @execute
+          cmd: "mysql -uroot -e \"#{escape sql}\""
           code_skipped: 1
-        , (err, executed) ->
-          return next err if err
-          modified = true if executed
-          next()
-      .on 'both', (err) ->
-        next err, false
 
 ## Secure Installation
 
@@ -179,16 +138,16 @@ Remove anonymous users? [Y/n] y
 Disallow root login remotely? [Y/n] n
 Remove test database and access to it? [Y/n] y
 
-    exports.push name: 'Mysql Server # Secure', handler: (ctx, next) ->
-      {current_password, password, remove_anonymous, disallow_remote_root_login, remove_test_db, reload_privileges} = ctx.config.mysql.server
+    exports.push name: 'Mysql Server # Secure', handler: (_, callback) ->
+      {current_password, password, remove_anonymous, disallow_remote_root_login, remove_test_db, reload_privileges} = @config.mysql.server
       test_password = true
       modified = false
-      ctx.ssh.shell (err, stream) ->
+      @ssh.shell (err, stream) =>
         stream.write '/usr/bin/mysql_secure_installation\n'
         data = ''
         error = exit = null
-        stream.on 'data', (data, extended) ->
-          ctx.log[if extended is 'stderr' then 'err' else 'out'].write data
+        stream.on 'data', (data, extended) =>
+          @log[if extended is 'stderr' then 'err' else 'out'].write data
           switch
             when /Enter current password for root/.test data
               stream.write "#{if test_password then password else current_password}\n"
@@ -226,13 +185,13 @@ Remove test database and access to it? [Y/n] y
               error = new Error data
               stream.end 'exit\n' unless exit
               exit = true
-        stream.on 'exit', ->
-          return next error if error
-          if disallow_remote_root_login then return next null, modified
+        stream.on 'exit', =>
+          return callback error if error
+          if disallow_remote_root_login then return callback null, modified
           # Note, "WITH GRANT OPTION" is required for root
           query = (query) -> "mysql -uroot -p#{password} -s -e \"#{query}\""
           sql =
-          ctx.execute
+          @execute
             cmd: query """
             USE mysql;
             GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '#{password}' WITH GRANT OPTION;
@@ -242,4 +201,4 @@ Remove test database and access to it? [Y/n] y
             password=`#{query "SELECT PASSWORD('#{password}');"}`
             #{query "SHOW GRANTS FOR root;"} | grep $password
             """
-          , next
+          .then callback

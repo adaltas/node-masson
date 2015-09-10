@@ -45,7 +45,7 @@ Example:
 }
 ```
 
-    exports.push (ctx) ->
+    exports.configure = (ctx) ->
       require('../core/proxy').configure ctx
       ctx.config.nodejs ?= {}
       ctx.config.nodejs.version ?= 'stable'
@@ -61,13 +61,13 @@ Example:
 
 N is a Node.js binary management system, similar to nvm and nave.
 
-    exports.push name: 'Node.js # N', timeout: 100000, handler: (ctx, next) ->
+    exports.push name: 'Node.js # N', timeout: 100000, handler: ->
       # Accoring to current test, proxy env var arent used by ssh exec
-      {method, http_proxy, https_proxy} = ctx.config.nodejs
+      {method, http_proxy, https_proxy} = @config.nodejs
       env = {}
       env.http_proxy = http_proxy if http_proxy
       env.https_proxy = https_proxy if https_proxy
-      ctx.execute
+      @execute
         env: env
         cmd: """
         export http_proxy=#{http_proxy or ''}
@@ -79,42 +79,32 @@ N is a Node.js binary management system, similar to nvm and nave.
         """
         if: method is 'n'
         not_if_exists: '/usr/local/bin/n'
-      .then next
 
 ## Node.js Installation
 
 Multiple installation of Node.js may coexist with N.
 
-    exports.push name: 'Node.js # installation', timeout: -1, handler: (ctx, next) ->
-      {method} = ctx.config.nodejs
-      ctx.execute
-        cmd: "n #{ctx.config.nodejs.version}"
+    exports.push name: 'Node.js # installation', timeout: -1, handler: ->
+      {method} = @config.nodejs
+      @execute
+        cmd: "n #{@config.nodejs.version}"
         if: method is 'n'
-      .then next
 
 ## NPM configuration
 
 Write the "~/.npmrc" file for each user defined by the "masson/core/users" 
 module.
 
-    exports.push name: 'Node.js # Npm Configuration', timeout: -1, handler: (ctx, next) ->
-      {merge, config} = ctx.config.nodejs
-      modified = false
-      each ctx.config.users
-      .run (user, next) ->
-        return next() unless user.home
-        ctx.ini
+    exports.push name: 'Node.js # Npm Configuration', timeout: -1, handler: ->
+      {merge, config} = @config.nodejs
+      for user in @config.users do (user) ->
+        @ini
           destination: "#{user.home}/.npmrc"
           content: config
           merge: merge
           uid: user.username
           gid: null
-        , (err, written) ->
-          modified = true if written
-          next err
-      .then (err) ->
-        next err, modified
+          if:  user.home
 
 [nodejs]: http://www.nodejs.org
 [n]: https://github.com/visionmedia/n
-

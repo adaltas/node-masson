@@ -58,7 +58,7 @@ any settings from the proxy action.
 }
 ```
 
-    exports.push (ctx) ->
+    exports.configure = (ctx) ->
       require('../core/proxy').configure ctx
       {http_proxy} = ctx.config.proxy
       ctx.config.git ?= {}
@@ -74,49 +74,33 @@ any settings from the proxy action.
 
 Install the git package.
 
-    exports.push name: 'Git # Package', timeout: -1, handler: (ctx, next) ->
-      ctx.service
+    exports.push name: 'Git # Package', timeout: -1, handler: ->
+      @service
         name: 'git'
-      , next
 
 ## Config
 
 Deploy the git configuration.
 
-    exports.push name: 'Git # Config', handler: (ctx, next) ->
-      modified = false
-      {merge, properties, global} = ctx.config.git
-      work = (user, file, config, callback)->
-        config = misc.merge {}, properties, config
-        ctx.ini
+    exports.push name: 'Git # Config', handler: ->
+      {merge, properties, global} = @config.git
+      unless @registered 'git_config'
+        @register 'git_config', (options) ->
+          throw Error unless options.config
+          options.content = misc.merge {}, properties, options.config
+          options.merge ?= merge
+          @ini options
+      @git_config
+        uid: 'root'
+        gid: 'root'
+        destination: '/etc/gitconfig'
+        config: global
+        if: global
+      @remove
+        if: global is false
+        destination: '/etc/gitconfig'
+      for user in @config.users then do (user) ->
+        @git_config
           destination: file
-          content: config
-          merge: merge
-          uid: user.username
-          gid: user.username
-        , (err, written) ->
-          modified = true if written
-          callback err
-      do_global = ->
-        update = () ->
-          work 'root', '/etc/gitconfig', global, (err) ->
-            return next err if err
-            do_users()
-        remove = () ->
-          ctx.fs.exists '/etc/gitconfig', (err, exists) ->
-            return next err if err
-            return do_users() unless exists
-            ctx.fs.exists.remove '/etc/gitconfig', (err) ->
-              return next err if err
-              modified = true
-              do_users()
-        if global then update() else remove()
-      do_users = () ->
-        each(ctx.config.users)
-        .on 'item', (user, next) ->
-          return next() unless user.home
-          file = "#{user.home}/.gitconfig"
-          work user, file, {}, next
-        .on 'both', next
-      do_global()
-
+          uid: user.name or user.uid
+          gid: user.gid

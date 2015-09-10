@@ -2,12 +2,12 @@
     exports = module.exports = []
     exports.push 'masson/bootstrap'
     exports.push 'masson/core/openldap_server/install'
-    exports.push require('./index').configure
+    # exports.push require('./index').configure
 
 # OpenLDAP ACL
 
-    exports.push (ctx) ->
-      {openldap_server} = ctx.config
+    exports.configure = (ctx) ->
+      {openldap_server} = @config
       throw Error 'Missing required "openldap_server.users_dn" property' unless openldap_server.users_dn
       throw Error 'Missing required "openldap_server.groups_dn" property' unless openldap_server.groups_dn
       openldap_server.proxy_user ?= {}
@@ -36,9 +36,9 @@ After this call, the follwing command should execute with success:
 ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=com -w test
 ```
 
-    exports.push name: 'OpenLDAP ACL # Permissions for nssproxy', handler: (ctx, next) ->
-      {suffix} = ctx.config.openldap_server
-      ctx.ldap_acl
+    exports.push name: 'OpenLDAP Server # ACL Permissions for nssproxy', handler: ->
+      {suffix} = @config.openldap_server
+      @ldap_acl
         suffix: suffix
         acls: [
           to: 'attrs=userPassword,userPKCS12'
@@ -64,37 +64,27 @@ ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=co
             '* none'
           ]
         ]
-      , next
 
-    exports.push name: 'OpenLDAP ACL # Insert User', handler: (ctx, next) ->
+    exports.push name: 'OpenLDAP Server # ACL Insert User', handler: ->
       # Keeping this as an example but we dont need it here since this module
       # is always run next to the OpenLDAP server
-      # host = ctx.host_with_module 'masson/core/openldap_server'
-      # host_ctx = ctx.hosts[host]
+      # host = @host_with_module 'masson/core/openldap_server'
+      # host_ctx = @hosts[host]
       # require('./openldap_server').configure host_ctx
-      # {url, root_dn, root_password, users_dn, groups_dn} = host_ctx.config.openldap_server
-      {openldap_server} = ctx.config
-      ctx.ldap_user
+      # {url, root_dn, root_password, users_dn, groups_dn} = host_@config.openldap_server
+      {openldap_server} = @config
+      @ldap_user
         uri: openldap_server.uri,
         binddn: openldap_server.root_dn,
         passwd: openldap_server.root_password,
         user: openldap_server.proxy_user
-      , next
 
-    exports.push name: 'OpenLDAP ACL # Insert Group', handler: (ctx, next) ->
-      {openldap_server} = ctx.config
-      ctx.ldap_add
+    exports.push name: 'OpenLDAP Server # ACL Insert Group', handler: ->
+      {openldap_server} = @config
+      @ldap_add
         uri: openldap_server.uri,
         binddn: openldap_server.root_dn,
         passwd: openldap_server.root_password,
         entry: openldap_server.proxy_group
-      , next
 
       
-
-
-
-
-
-
-

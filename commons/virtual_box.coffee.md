@@ -5,40 +5,42 @@
     exports.push 'masson/bootstrap'
     exports.push 'masson/core/curl'
 
-    exports.push name: 'VirtualBox # Guest Additions', timeout: -1, handler: (ctx, next) ->
-      ctx.execute
+    exports.push name: 'VirtualBox # Guest Additions', timeout: -1, handler: ->
+      version_target, version_current
+      @execute
         ssh: false
         cmd: 'VBoxManage -v'
       , (err, executed, stdout) ->
         return next err if err
-        ctx.log 'Get Guest Additions version on VM machine'
-        version = /\d+\.\d+\.\d+/.exec(stdout)[0]
-        ctx.execute
-          cmd: 'modinfo vboxguest | grep ^version:'
+        @log? 'Get Guest Additions version on VM machine'
+        version_target = /\d+\.\d+\.\d+/.exec(stdout)[0]
+      @call ->
+        @execute
+          cmd: "modinfo vboxguest | grep ^version: | sed -r 's/.* ([0-9\\.]+)/\\1/'"
           code_skipped: 1
         , (err, executed, stdout) ->
-          return next err if err
-          return next null, false if executed and /\d+\.\d+\.\d+/.exec(stdout)[0] is version
-          ctx.log "Install latest Guest Additions #{version}"
-          source = "http://download.virtualbox.org/virtualbox/#{version}/VBoxGuestAdditions_#{version}.iso"
-          destination = "/tmp/VBoxGuestAdditions_#{version}.iso"
-          ctx.execute
-            cmd: """
-              yum install -y gcc kernel-* # might need to reboot
-              curl -L #{source} -o #{destination}
-              mount #{destination} -o loop /mnt
-              cd /mnt
-              sh VBoxLinuxAdditions.run --nox11
-              rm #{destination}
-              /etc/init.d/vboxadd setup
-              chkconfig --add vboxadd
-              chkconfig vboxadd on
-              umount /mnt
-              """
-          , (err, executed, stdout, stderr) ->
-            return next err if err
-            ctx.reboot (err) ->
-              next err, true
+          throw err if err
+          version_current = stdout.trim()
+      @call ->
+        @log? "Install latest Guest Additions #{version_target}"
+        @execute
+          cmd: """
+            yum install -y gcc kernel-* # might need to reboot
+            source="http://download.virtualbox.org/virtualbox/#{version_target}/VBoxGuestAdditions_#{version_target}.iso"
+            destination="/tmp/VBoxGuestAdditions_#{version_target}.iso"
+            curl -L #{source} -o #{destination}
+            mount #{destination} -o loop /mnt
+            cd /mnt
+            sh VBoxLinuxAdditions.run --nox11
+            rm #{destination}
+            /etc/init.d/vboxadd setup
+            chkconfig --add vboxadd
+            chkconfig vboxadd on
+            umount /mnt
+            """
+            if: version_current is version_target
+        @call
+          if: -> @status()
+          handler: (_, callback) ->
+            @reboot callback
         
-
-

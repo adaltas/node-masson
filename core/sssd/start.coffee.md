@@ -4,7 +4,6 @@
     exports = module.exports = []
     exports.push 'masson/bootstrap'
 
-    exports.push name: 'SSSD # Start', handler: (ctx, next) ->
-      ctx.service_start
+    exports.push name: 'SSSD # Start', handler: ->
+      @service_start
         name: 'sssd'
-      .then next

@@ -6,7 +6,7 @@
     exports.push 'masson/bootstrap'
     exports.push 'masson/core/yum'
 
-    exports.push (ctx) ->
+    exports.configure = (ctx) ->
       ctx.config.docker ?= {}
       ctx.config.docker.nsenter ?= true
 
@@ -15,41 +15,38 @@
 Install the `docker-io` package and configure it as a startup and started
 service.
 
-    exports.push name: 'Docker # Service', handler: (ctx, next) ->
-      ctx.service
+    exports.push name: 'Docker # Service', handler: ->
+      @service
         name: 'docker'
         yum_name: 'docker-io'
         startup: true
         action: 'start'
-      .then next
 
 ## Install docker-pid
 
 Get the PID of a docker container by name or ID.
 
-    exports.push name: 'Docker # Install docker-pid', handler: (ctx, next) ->
-      ctx.write
+    exports.push name: 'Docker # Install docker-pid', handler: ->
+      @write
         content: """
         #!/bin/sh
         exec docker inspect --format '{{ .State.Pid }}' "$@"
         """
         destination: '/usr/local/bin/docker-pid'
         mode: 0o0755
-      .then next
 
 ## Install docker-ip
 
 Get the ip address of a container by name or ID.
 
-    exports.push name: 'Docker # Install docker-ip', handler: (ctx, next) ->
-      ctx.write
+    exports.push name: 'Docker # Install docker-ip', handler: ->
+      @write
         content: """
         #!/bin/sh
         exec docker inspect --format '{{ .NetworkSettings.IPAddress }}' "$@"
         """
         destination: '/usr/local/bin/docker-ip'
         mode: 0o0755
-      .then next
 
 ## Install nsenter
 
@@ -65,13 +62,12 @@ nsenter doesn't enter the cgroups, and therefore evades resource limitations.
 The potential benefit of this would be debugging and external audit, but for
 remote access, docker exec is the current recommended approach.
 
-    exports.push name: 'Docker # Install nsenter', handler: (ctx, next) ->
-      ctx.execute
+    exports.push name: 'Docker # Install nsenter', handler: ->
+      @execute
         cmd: """
         docker run -v /usr/local/bin:/target jpetazzo/nsenter
         """
         not_if_exec: "which nsenter"
-      .then next
 
 ## Registry 2.0
 
@@ -79,11 +75,9 @@ Docker Registry stores and distributes images centrally. It's where you push
 images to and pull them from; Docker Registry gives team members the ability to
 share images and deploy them to testing, staging and production environments.
 
-    # exports.push name: 'Docker # Registry 2.0', handler: (ctx, next) ->
-    #   ctx.execute
-    #     cmd: "docker run -p 5000:5000 registry:2.0"
-    #   .then next
-    
+    # exports.push name: 'Docker # Registry 2.0', handler: ->
+    #   @execute
+    #     cmd: "docker run -p 5000:5000 registry:2.0"    
 
 ## Additionnal resources
 
@@ -91,4 +85,3 @@ share images and deploy them to testing, staging and production environments.
 *   [Four ways to connect a Docker container](http://blog.oddbit.com/2014/08/11/four-ways-to-connect-a-docker/), providing the `docker-pid` and `docker-ip` scripts.
 
 [nsenter]: http://jpetazzo.github.io/2014/06/23/docker-ssh-considered-evil/
-

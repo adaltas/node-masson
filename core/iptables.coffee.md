@@ -38,7 +38,7 @@ Example:
 }
 ```
 
-    exports.push module.exports.configure = (ctx) ->
+    module.exports.configure = (ctx) ->
       iptables = ctx.config.iptables ?= {}
       iptables.action ?= 'start'
       # Service supports chkconfig, but is not referenced in any runlevel
@@ -58,40 +58,38 @@ Example:
 
 The package "iptables" is installed.
 
-    exports.push name: 'Iptables # Package', timeout: -1, handler: (ctx, next) ->
-      {action, startup} = ctx.config.iptables
-      ctx.service
+    exports.push name: 'Iptables # Package', timeout: -1, handler: ->
+      {action, startup} = @config.iptables
+      @service
         name: 'iptables'
         startup: startup
         action: action
-      , next
 
 ## Log
 
 Redirect input logs in "/var/log/messages".
 
-    exports.push name: 'Iptables # Log', timeout: -1, handler: (ctx, next) ->
-      {action, log, log_rules} = ctx.config.iptables
-      return next() if action isnt 'start' or log is false
-      ctx.iptables
-        rules: log_rules
-        # if: action is 'start'
-      , (err, configured) ->
-        return next err, false if err or not configured
-        ctx.service
+    exports.push
+      name: 'Iptables # Log'
+      timeout: -1
+      not_if: -> @config.iptables.action isnt 'start' or @config.iptables.log is false
+      handler: ->
+        @iptables
+          rules: @config.iptables.log_rules
+        @service
           srv_name: 'restart'
-        , next
+          if: -> @status -1
 
 ## Rules
 
 Add user defined rules to IPTables.
 
-    exports.push name: 'Iptables # Rules', timeout: -1, handler: (ctx, next) ->
-      {rules, action} = ctx.config.iptables
-      return next() unless action is 'start'
-      return next null, false unless rules.length
-      ctx.iptables
-        rules: rules
-        # if: action is 'start'
-      , next
-
+    exports.push
+      name: 'Iptables # Rules'
+      timeout: -1
+      if: -> @config.iptables.action is 'start'
+      handler: ->
+        {rules, action} = @config.iptables
+        return next() unless action is 'start'
+        @iptables
+          rules: rules

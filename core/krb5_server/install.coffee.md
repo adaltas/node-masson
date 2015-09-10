@@ -23,7 +23,7 @@ Resources:
     exports.push 'masson/core/openldap_client/wait'
     exports.push 'masson/core/iptables'
     exports.push 'masson/core/yum'
-    exports.push require('./index').configure
+    # exports.push require('./index').configure
     safe_etc_krb5_conf = require('./index').safe_etc_krb5_conf
 
 ## IPTables
@@ -37,8 +37,8 @@ Resources:
 IPTables rules are only inserted if the parameter "iptables.action" is set to 
 "start" (default value).
 
-    exports.push name: 'Krb5 Server # IPTables', handler: (ctx, next) ->
-      {kdc_conf} = ctx.config.krb5
+    exports.push name: 'Krb5 Server # IPTables', handler: ->
+      {kdc_conf} = @config.krb5
       rules = []
       add_default_kadmind_port = false
       add_default_kdc_ports = false
@@ -65,188 +65,140 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
       if add_default_kdc_tcp_ports
         for port in (kdc_conf.kdcdefaults.kdc_tcp_ports or '88').split /\s,/
           rules.push chain: 'INPUT', jump: 'ACCEPT', dport: port, protocol: 'tcp', state: 'NEW', comment: "Kerberos Authentication Service and Key Distribution Center (krb5kdc daemon)"
-      ctx.iptables
+      @iptables
         rules: rules
-        if: ctx.config.iptables.action is 'start'
-      , next
+        if: @config.iptables.action is 'start'
 
-    exports.push name: 'Krb5 Server # LDAP Install', timeout: -1, handler: (ctx, next) ->
-      ctx.service
+    exports.push name: 'Krb5 Server # LDAP Install', timeout: -1, handler: ->
+      @service
         name: 'krb5-server-ldap'
-      , next
 
-    exports.push name: 'Krb5 Server # LDAP Configuration', timeout: 100000, handler: (ctx, next) ->
-      {etc_krb5_conf} = ctx.config.krb5
-      ctx.ini
+    exports.push name: 'Krb5 Server # LDAP Configuration', timeout: 100000, handler: ->
+      {etc_krb5_conf} = @config.krb5
+      @ini
         content: safe_etc_krb5_conf etc_krb5_conf
         destination: '/etc/krb5.conf'
         stringify: misc.ini.stringify_square_then_curly
         backup: true
-      , next
 
-    exports.push name: 'Krb5 Server # Install', timeout: -1, handler: (ctx, next) ->
-      ctx.log 'Install krb5kdc and kadmin services'
-      ctx.service [
+    exports.push name: 'Krb5 Server # Install', timeout: -1, handler: ->
+      @service
         name: 'krb5-pkinit-openssl'
-      ,
+      @service
         name: 'krb5-server-ldap'
         startup: true
         chk_name: 'krb5kdc'
-      ,
+      @service
         name: 'krb5-server-ldap'
         startup: true
         chk_name: 'kadmin'
-      ,
-        name: 'words'
-      ,
+      # @service
+      #   name: 'words'
+      @service
         name: 'krb5-workstation'
-      ], next
 
-    exports.push name: 'Krb5 Server # Configure', timeout: 100000, handler: (ctx, next) ->
-      {realm, etc_krb5_conf, kdc_conf} = ctx.config.krb5
-      modified = false
-      exists = false
-      do_exists = ->
-        ctx.fs.exists '/etc/krb5.conf', (err, e) ->
-          exists = e
-          do_krb5()
-      do_krb5 = ->
-        ctx.ini
-          content: safe_etc_krb5_conf etc_krb5_conf
-          destination: '/etc/krb5.conf'
-          stringify: misc.ini.stringify_square_then_curly
-          backup: true
-        , (err, written) ->
-          return next err if err
-          modified = true if written
-          do_kadm5()
-      do_kadm5 = ->
-        # Not sure this is a good idea,
-        # we end up with admin user from another realm
-        writes = for realm of etc_krb5_conf.realms
+    exports.push name: 'Krb5 Server # Configure', timeout: 100000, handler: ->
+      {realm, etc_krb5_conf, kdc_conf} = @config.krb5
+      # first_time = false
+      # @call = (_, callback) ->
+      #   @fs.exists '/etc/krb5.conf', (err, exists) ->
+      #     first_time = not exists
+      #     callback()
+      any_realm = Object.keys(kdc_conf.realms)[0]
+      @ini
+        content: safe_etc_krb5_conf etc_krb5_conf
+        destination: '/etc/krb5.conf'
+        stringify: misc.ini.stringify_square_then_curly
+        backup: true
+      @write 
+        write: for realm of etc_krb5_conf.realms
           match: ///^\*/\w+@#{misc.regexp.escape realm}\s+\*///mg
           replace: "*/admin@#{realm}     *"
           append: true
-        ctx.write 
-          write: writes
-          destination: '/var/kerberos/krb5kdc/kadm5.acl'
-          backup: true
-        , (err, written) ->
-          return next err if err
-          modified = true if written
-          do_kdc()
-      do_kdc = ->
-        ctx.ini
-          content: safe_etc_krb5_conf kdc_conf
-          destination: '/var/kerberos/krb5kdc/kdc.conf'
-          stringify: misc.ini.stringify_square_then_curly
-          backup: true
-        , (err, written) ->
-          return next err if err
-          modified = true if written
-          do_sysconfig()
-      do_sysconfig = ->
-        realm = Object.keys(kdc_conf.realms)[0]
-        ctx.write [
-          destination: '/etc/sysconfig/kadmin'
-          match: /^KRB5REALM=.*$/mg
-          replace: "KRB5REALM=#{realm}"
-          backup: true
-        ,
-          destination: '/etc/sysconfig/krb5kdc'
-          match: /^KRB5REALM=.*$/mg
-          replace: "KRB5REALM=#{realm}"
-          backup: true
-        ], (err, written) ->
-          return next err if err
-          modified = true if written
-          do_end()
-      do_end = (err) ->
-        return next err if err
-        return next null, false unless modified
-        # The first time, we dont restart because ldap conf is 
-        # not there yet
-        return next null, true unless exists
-        ctx.log '(Re)start krb5kdc and kadmin services'
-        ctx.service [
-          name: 'krb5-server'
-          action: 'restart'
-          srv_name: 'krb5kdc'
-        ,
-          name: 'krb5-server'
-          action: 'restart'
-          srv_name: 'kadmin'
-        ], (err, serviced) ->
-          next err, true
-      do_exists()
+        destination: '/var/kerberos/krb5kdc/kadm5.acl'
+        backup: true
+      @ini
+        content: safe_etc_krb5_conf kdc_conf
+        destination: '/var/kerberos/krb5kdc/kdc.conf'
+        stringify: misc.ini.stringify_square_then_curly
+        backup: true
+      @write
+        destination: '/etc/sysconfig/kadmin'
+        match: /^KRB5REALM=.*$/mg
+        replace: "KRB5REALM=#{any_realm}"
+        backup: true
+      @write
+        destination: '/etc/sysconfig/krb5kdc'
+        match: /^KRB5REALM=.*$/mg
+        replace: "KRB5REALM=#{any_realm}"
+        backup: true
+      @service
+        srv_name: 'krb5kdc'
+        action: 'restart'
+        # if: -> first_time
+      @service
+        srv_name: 'kadmin'
+        action: 'restart'
+        # if: -> first_time
 
-    exports.push name: 'Krb5 Server # LDAP Insert Entries', timeout: -1, handler: (ctx, next) ->
-      {kdc_conf} = ctx.config.krb5
-      modified = false
-      each(kdc_conf.realms)
-      .on 'item', (realm, config, next) ->
-        return next() unless config.database_module
+    exports.push name: 'Krb5 Server # LDAP Insert Entries', timeout: -1, handler: ->
+      {kdc_conf} = @config.krb5
+      for realm, config of kdc_conf.realms
+        continue unless config.database_module
         {kdc_master_key, ldap_kerberos_container_dn, manager_dn, manager_password, ldap_servers} = kdc_conf.dbmodules[config.database_module]
         ldap_server = ldap_servers.split(' ')[0]
-        do_wait = ->
-          ctx.waitForExecution 
-            cmd: "ldapsearch -x -LLL -H #{ldap_server} -D \"#{manager_dn}\" -w #{manager_password} -b \"#{ldap_kerberos_container_dn}\""
-            code_skipped: 32
-          , (err) ->
-            return next err if err
-            do_exists()
-        do_exists = ->
-          searchbase = "cn=#{realm},#{ldap_kerberos_container_dn}"
-          ctx.execute 
-            cmd: "ldapsearch -x -H #{ldap_server} -D \"#{manager_dn}\" -w #{manager_password} -b \"#{searchbase}\""
-            code_skipped: 32
-          , (err, exists) ->
-            return next err if err
-            if exists then next() else do_subtrees()
-        do_subtrees = ->
-          # Note, kdb5_ldap_util is using /etc/krb5.conf (server version)
-          ctx.execute
-            cmd: "kdb5_ldap_util -D \"#{manager_dn}\" -w #{manager_password} create -subtrees \"#{ldap_kerberos_container_dn}\" -r #{realm} -s -P #{kdc_master_key}"
-          , (err, executed, stdout, stderr) ->
-            return next err if err
-            modified = true if executed
-            next()
-        do_wait()
-      .on 'both', (err) ->
-        next err, modified
+        @wait_execute 
+          cmd: """
+          ldapsearch -x -LLL \
+            -H #{ldap_server} -D \"#{manager_dn}\" -w #{manager_password} \
+            -b \"#{ldap_kerberos_container_dn}\"
+          """
+          code_skipped: 32
+        @execute 
+          cmd: """
+          ldapsearch -x \
+          -H #{ldap_server} -D \"#{manager_dn}\" -w #{manager_password} \
+          -b \"cn=#{realm},#{ldap_kerberos_container_dn}\"
+          """
+          code_skipped: 32
+        # Note, kdb5_ldap_util is using /etc/krb5.conf (server version)
+        @execute
+          cmd: """
+          kdb5_ldap_util \
+          -D \"#{manager_dn}\" -w #{manager_password} \
+          create -subtrees \"#{ldap_kerberos_container_dn}\" -r #{realm} -s -P #{kdc_master_key}
+          """
+          not_if: -> @status -1
 
-    exports.push name: 'Krb5 Server # LDAP Stash password', timeout: 5*60*1000, handler: (ctx, next) ->
-      {kdc_conf} = ctx.config.krb5
-      modified = false
-      each kdc_conf.dbmodules
-      .run (name, dbmodule, next) ->
+    exports.push name: 'Krb5 Server # LDAP Stash password', timeout: 5*60*1000, handler: ->
+      {kdc_conf} = @config.krb5
+      # modified = false
+      for name, dbmodule of kdc_conf.dbmodules then do(name, dbmodule) =>
+      # each kdc_conf.dbmodules
+      # .run (name, dbmodule, next) ->
         {kdc_master_key, manager_dn, manager_password, ldap_service_password_file, ldap_kadmind_dn} = dbmodule
-        ctx.log "Stash key file is: #{dbmodule.ldap_service_password_file}"
+        @log? "Stash key file is: #{dbmodule.ldap_service_password_file}"
         keyfileContent = null
-        do_read = ->
-          ctx.log 'Read current keyfile if it exists'
-          ctx.fs.readFile "#{ldap_service_password_file}", 'utf8', (err, content) ->
-            return do_mkdir() if err and err.code is 'ENOENT'
-            return next err if err
+        @call (_, callback) ->
+          @log? 'Read current keyfile if it exists'
+          @fs.readFile "#{ldap_service_password_file}", 'utf8', (err, content) ->
+            return callback null, true if err and err.code is 'ENOENT'
+            return callback err if err
             keyfileContent = content
-            do_stash()
-        do_mkdir = ->
-          ctx.log 'Create directory "/etc/krb5.d"'
-          ctx.mkdir
-            destination: path.dirname(ldap_service_password_file)
-          , (err, created) ->
-            return next err if err
-            do_stash()
-        do_stash = ->
-          ctx.log 'Stash password into local file for kadmin dn'
-          ctx.ssh.shell (err, stream) ->
-            return next err if err
+            callback null, false
+        @mkdir
+          destination: path.dirname(ldap_service_password_file)
+          if: -> @status -1
+        @call (_, callback) ->
+          @log? 'Stash password into local file for kadmin dn'
+          @ssh.shell (err, stream) =>
+            return callback err if err
             cmd = "kdb5_ldap_util -D \"#{manager_dn}\" -w #{manager_password} stashsrvpw -f #{ldap_service_password_file} #{ldap_kadmind_dn}"
-            ctx.log "Run #{cmd}"
+            @log "Run #{cmd}"
             reentered = done = false
             stream.write "#{cmd}\n"
-            stream.on 'data', (data, stderr) ->
-              ctx.log[if stderr then 'err' else 'out'].write data
+            stream.on 'data', (data, stderr) =>
+              @log[if stderr then 'err' else 'out'].write data
               data = data.toString()
               if /Password for/.test data
                 stream.write "#{kdc_master_key}\n"
@@ -257,27 +209,20 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
                 done = true
                 stream.end 'exit\n'
             stream.on 'exit', ->
-              do_compare()
-        do_compare = ->
-          unless keyfileContent
-            modified = true
-            return next()
-          ctx.fs.readFile "#{ldap_service_password_file}", 'utf8', (err, content) ->
-            return next err if err
+              callback()
+        @call (_, callback) ->
+          return callback null, true  unless keyfileContent
+          @fs.readFile "#{ldap_service_password_file}", 'utf8', (err, content) ->
+            return callback err if err
             modified = if keyfileContent is content then false else true
-            next()
-        do_read()
-      .then (err) ->
-        next err, modified
+            callback null, keyfileContent isnt content
 
-    exports.push name: 'Krb5 Server # Log', timeout: 100000, handler: (ctx, next) ->
-      restart = false
-      ctx
-      .touch
+    exports.push name: 'Krb5 Server # Log', timeout: 100000, handler: ->
+      @touch
         destination: '/var/log/krb5kdc.log'
-      .touch
+      @touch
         destination: '/var/log/kadmind.log'
-      .write
+      @write
         destination: '/etc/rsyslog.conf'
         write: [
           match: /.*krb5kdc.*/mg
@@ -288,67 +233,69 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
           replace: 'if $programname == \'kadmind\' then /var/log/kadmind.log'
           append: '### RULES ###'
         ]
-      , (err, status) ->
-        throw err if err
-        restart = status
-      .service_start
+      @service_start
         name: 'krb5kdc'
-        if: -> restart
-      .service_start
+        if: -> @status -1
+      @service_start
         name: 'kadmin'
-        if: -> restart
-      .service
+        if: -> @status -2
+      @service
         srv_name: 'rsyslog'
         action: 'restart'
-        if: -> restart
-      .then next
+        if: -> @status -3
 
-    exports.push name: 'Krb5 Server # Admin principal', timeout: -1, handler: (ctx, next) ->
-      {etc_krb5_conf, kdc_conf} = ctx.config.krb5
-      modified = false
-      each(etc_krb5_conf.realms)
-      .on 'item', (realm, config, next) ->
-        {kadmin_principal, kadmin_password} = config
-        return next() unless kdc_conf.realms[realm]?.database_module
-        ctx.log "Create principal #{kadmin_principal}"
-        ctx.krb5_addprinc
-          # We dont provide an "kadmin_server". Instead, we need
-          # to use "kadmin.local" because the principal used
-          # to login with "kadmin" isnt created yet
+    exports.push name: 'Krb5 Server # Admin principal', timeout: -1, handler: ->
+      {etc_krb5_conf, kdc_conf} = @config.krb5
+      for realm, config of etc_krb5_conf.realms
+        continue unless kdc_conf.realms[realm]?.database_module
+        # We dont provide an "kadmin_server". Instead, we need
+        # to use "kadmin.local" because the principal used
+        # to login with "kadmin" isnt created yet
+        @krb5_addprinc
           realm: realm
-          principal: kadmin_principal
-          password: kadmin_password
-        , (err, created) ->
-          return next err if err
-          modified = true if created
-          next()
-      .on 'both', (err) ->
-        next err, modified
+          principal: config.kadmin_principal
+          password: config.kadmin_password
+      # modified = false
+      # each(etc_krb5_conf.realms)
+      # .on 'item', (realm, config, next) ->
+      #   {kadmin_principal, kadmin_password} = config
+      #   return next() unless kdc_conf.realms[realm]?.database_module
+      #   @log "Create principal #{kadmin_principal}"
+      #   @krb5_addprinc
+      #     # We dont provide an "kadmin_server". Instead, we need
+      #     # to use "kadmin.local" because the principal used
+      #     # to login with "kadmin" isnt created yet
+      #     realm: realm
+      #     principal: kadmin_principal
+      #     password: kadmin_password
+      #   , (err, created) ->
+      #     return next err if err
+      #     modified = true if created
+      #     next()
+      # .on 'both', (err) ->
+      #   next err, modified
 
     # TODO: no time to work on this, the idea is to modified kadmin startup
     # script to handle multiple kadmin server. Note, for `killproc` to stop
     # all instances, it seems that we need to set multiple pid files, here
     # a exemple: `/usr/sbin/kadmind -r USERS.ADALTAS.COM -P /var/run/kadmind1.pid`
-    # exports.push name: 'Krb5 Server # Startup', timeout: 100000, handler: (ctx, next) ->
-    #   {kdc_conf} = ctx.config.krb5
+    # exports.push name: 'Krb5 Server # Startup', timeout: 100000, handler: ->
+    #   {kdc_conf} = @config.krb5
     #   write = []
     #   write.push match: /^(\s+)(daemon\s+.*)/mg, replace: "$1#$2"
     #   for realm, _ of kdc_conf
     #     replace: "        daemon ${kadmind} -r"
     #     append: /\s+#daemon\s+.*/
-    #   ctx.write
+    #   @write
     #     destination: '/etc/init.d/kadmin'
     #     write: write
     #   , next
 
-    exports.push name: 'Krb5 Server # Start', timeout: 100000, handler: (ctx, next) ->
-      ctx.service [
-        srv_name: 'krb5kdc'
-        action: 'start'
-      ,
-        srv_name: 'kadmin'
-        action: 'start'
-      ], next
+    exports.push name: 'Krb5 Server # Start', timeout: 100000, handler: ->
+      @service_start
+        name: 'krb5kdc'
+      @service_start
+        name: 'kadmin'
 
 ## Module Dependencies
 
@@ -364,8 +311,3 @@ Renewable tickets is per default disallowed in the most linux distributions. Thi
 kadmin.local: modprinc -maxrenewlife 7day krbtgt/YOUR_REALM
 kadmin.local: modprinc -maxrenewlife 7day +allow_renewable hue/FQRN
 ```
-
-
-
-
-

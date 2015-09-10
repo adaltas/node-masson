@@ -57,7 +57,7 @@ command is designed to work without user interaction.
 }
 ```
 
-    exports.push (ctx) ->
+    exports.configure = (ctx) ->
       require('./users').configure ctx
       require('./proxy').configure ctx
       ctx.config.curl ?= {}
@@ -78,54 +78,42 @@ Deploy the "~/.curlrc" file to each users. Set the property `curl.users` to
 false to disable this action to run. For the configuration file to be uploaded, 
 the user must have a `user.home` property.
 
-    exports.push name: 'Curl # User Configuration', handler: (ctx, next) ->
-      ok = false
-      {merge, users, config} = ctx.config.curl
-      return next() unless users
-      work = (user, file, next)->
-        ctx.log "Write config into #{file}"
-        ctx.ini
-          content: config
-          destination: file
-          uid: user.username
-          gid: null
-          merge: merge
-        , (err, written) ->
-          return next err if err
-          ok = true if written
-          next()
-      each(ctx.config.users)
-      .on 'item', (user, next) ->
-        return next() unless user.home
-        file = "#{user.home}/.curlrc"
-        work user, file, next
-      .on 'both', (err) ->
-        next err, ok
+    exports.push
+      name: 'Curl # User Configuration'
+      if: -> @config.curl.users
+      handler: ->
+        {merge, config} = @config.curl
+        for user in ctx.config.users then do (user) =>
+          @ini
+            content: config
+            destination: "#{user.home}/.curlrc"
+            uid: user.username
+            gid: null
+            merge: merge
+            if: user.home
 
 ## Install
 
 Install the "curl" package. Note, on some plateform like CentOS, `curl` is 
 already installed.
 
-    exports.push name: 'Curl # Install', timeout: -1, handler: (ctx, next) ->
+    exports.push name: 'Curl # Install', timeout: -1, handler: ->
       # On centOS, curl is already here
-      ctx.service
-        name: 'curl'
-      , next
+      @service name: 'curl'
 
 ## Check
 
 Check a remote call. This action is commonly activated to validate the Internet
 connection.
 
-    exports.push name: 'Curl # Connection Check', handler: (ctx, next) ->
-      {check, check_match, config} = ctx.config.curl
-      return next() unless check
-      ctx.execute
-        cmd: "curl -s #{check}"
-        stdout: null
-      , (err, executed, stdout, stderr) ->
-        return next err if err
-        unless check_match.test stdout
-          return next new Error "#{if config.proxy then 'Proxy' else 'Connection'} not active"
-        next null, true
+    exports.push
+      name: 'Curl # Connection Check'
+      if: -> @config.curl.check
+      handler: ->
+        {check, check_match, config} = @config.curl
+        @execute
+          cmd: "curl -s #{check}"
+          stdout: null
+        , (err, executed, stdout, stderr) ->
+          throw err if err
+          throw new Error "#{if config.proxy then 'Proxy' else 'Connection'} not active" unless check_match.test stdout

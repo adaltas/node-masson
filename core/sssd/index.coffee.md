@@ -83,8 +83,6 @@ Example:
           'offline_failed_login_attempts' : '3'
           'offline_failed_login_delay' : '5'
       , ctx.config.sssd.config or {}
-      ctx.config.sssd.services ?= ['sssd', 'sssd-client', 'pam_krb5', 'pam_ldap', 'authconfig'] #, 'sssd-tools'
-      ctx.config.sssd.services = ctx.config.sssd.services.split ' ' if typeof ctx.config.sssd.services is 'string'
       ctx.config.sssd.test_user ?= null
 
 The System Security Services Daemon (SSSD) provides access to different
@@ -107,6 +105,3 @@ identity and authentication providers.
 ## Dependencies
 
     {merge} = require 'mecano/lib/misc'
-
-
-

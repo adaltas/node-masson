@@ -46,7 +46,7 @@ Run = (params, config) ->
       @emit 'context', ctx
       for module in Object.keys ctx.tree.modules
         module = ctx.tree.modules[module]
-        module.configure ctx if module.configure
+        module.configure.call ctx, ctx if module.configure
       # console.log ctx.config.ryba
       # return next()
       ctx.tree.middlewares params, (err, middlewares) =>
@@ -74,20 +74,24 @@ Run = (params, config) ->
             next err
           run = =>
             ctx.retry = attempts
-            try
-              if middleware.handler.length < 2 # Synchronous middleware
-                # merge middleware, middleware.handler.call ctx, ctx
-                middleware.handler.call ctx, ctx
-                setImmediate ->
-                  middleware.timeout = -1
-                  done()
-              else # Asynchronous middleware
-                # merge middleware, middleware.handler.call ctx, ctx, (err, statusOrMsg) =>
-                middleware.handler.call ctx, ctx, (err, statusOrMsg) =>
-                  done err, statusOrMsg
-            catch e
-              retry = false # Dont retry unhandled errors
-              done e
+            if ctx.call
+              ctx.call middleware
+              ctx.then done
+            else
+              try
+                if middleware.handler.length < 2 # Synchronous middleware
+                  # merge middleware, middleware.handler.call ctx, ctx
+                  middleware.handler.call ctx, ctx
+                  setImmediate ->
+                    middleware.timeout = -1
+                    done()
+                else # Asynchronous middleware
+                  # merge middleware, middleware.handler.call ctx, ctx, (err, statusOrMsg) =>
+                  middleware.handler.call ctx, ctx, (err, statusOrMsg) =>
+                    done err, statusOrMsg
+              catch e
+                retry = false # Dont retry unhandled errors
+                done e
           # Timeout, default to 100s
           middleware.timeout ?= 100000
           if middleware.timeout > 0
@@ -119,4 +123,3 @@ module.exports = (options, config) ->
   # tmp = (args) -> Run.apply @, args
   # tmp.prototype = Run.prototype
   # new tmp arguments
-

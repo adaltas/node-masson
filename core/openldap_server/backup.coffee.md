@@ -36,8 +36,7 @@ is that the generated LDIF files can be rather large and the accumulation of the
 to a substantial amount of space.
 
 
-    module.exports.push name: "OpenLDAP Server # Backup", timeout: -1, label_true: 'BACKUPED', handler: (ctx, next) ->
-      ctx.backup
+    module.exports.push name: "OpenLDAP Server # Backup", timeout: -1, label_true: 'BACKUPED', handler: ->
+      @backup
         name: 'openldap'
         cmd: 'slapcat'
-      , next
