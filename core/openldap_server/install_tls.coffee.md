@@ -15,8 +15,7 @@ Note, by default, openldap comes with ldaps support. The default value are:
 
 To test if TLS is configured, run `ldapsearch -LLLY EXTERNAL -H ldapi:/// -b cn=config -s base | grep -i tls`
 
-Create a self-signed certificate
---------------------------------
+## Create a self-signed certificate
 
 Thanks to [Paul Kehrer ](https://langui.sh/2009/01/18/openssl-self-signed-ca/)
 and [David Robillard](http://itdavid.blogspot.ca/2012/05/howto-centos-6.html)
