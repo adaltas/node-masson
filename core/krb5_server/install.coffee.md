@@ -68,18 +68,18 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
       @iptables
         rules: rules
         if: @config.iptables.action is 'start'
-
-    exports.push name: 'Krb5 Server # LDAP Install', timeout: -1, handler: ->
-      @service
-        name: 'krb5-server-ldap'
-
-    exports.push name: 'Krb5 Server # LDAP Configuration', timeout: 100000, handler: ->
-      {etc_krb5_conf} = @config.krb5
-      @ini
-        content: safe_etc_krb5_conf etc_krb5_conf
-        destination: '/etc/krb5.conf'
-        stringify: misc.ini.stringify_square_then_curly
-        backup: true
+    # 
+    # exports.push name: 'Krb5 Server # LDAP Install', timeout: -1, handler: ->
+    #   @service
+    #     name: 'krb5-server-ldap'
+    # 
+    # exports.push name: 'Krb5 Server # LDAP Configuration', timeout: 100000, handler: ->
+    #   {etc_krb5_conf} = @config.krb5
+    #   @ini
+    #     content: safe_etc_krb5_conf etc_krb5_conf
+    #     destination: '/etc/krb5.conf'
+    #     stringify: misc.ini.stringify_square_then_curly
+    #     backup: true
 
     exports.push name: 'Krb5 Server # Install', timeout: -1, handler: ->
       @service
@@ -99,11 +99,6 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
 
     exports.push name: 'Krb5 Server # Configure', timeout: 100000, handler: ->
       {realm, etc_krb5_conf, kdc_conf} = @config.krb5
-      # first_time = false
-      # @call = (_, callback) ->
-      #   @fs.exists '/etc/krb5.conf', (err, exists) ->
-      #     first_time = not exists
-      #     callback()
       any_realm = Object.keys(kdc_conf.realms)[0]
       @ini
         content: safe_etc_krb5_conf etc_krb5_conf
