@@ -43,6 +43,32 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
       @service
         name: 'migrationtools'
 
+## Logging
+
+http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
+
+    exports.push name: 'OpenLDAP Server # Logging', handler: ->
+      {config_dn, config_password, config_file, log_level} = @config.openldap_server
+      @log 'Check rsyslog dependency'
+      @service
+        name: 'rsyslog'
+      @log? 'Declare local4 in rsyslog configuration'
+      @write
+        destination: '/etc/rsyslog.conf'
+        match: /^local4.*/mg
+        replace: 'local4.*                                                /var/log/slapd.log'
+        append: 'RULES'
+      @log? 'Restart rsyslog service'
+      @service
+        name: 'rsyslog'
+        action: 'restart'
+        if: -> @status -1
+      @write
+        destination: config_file
+        match: /^olcLogLevel:.*$/mg
+        replace: "olcLogLevel: #{log_level}"
+        before: 'olcRootDN'
+
 ###
 Borrowed from
 http://docs.adaptivecomputing.com/viewpoint/hpc/Content/topics/1-setup/installSetup/settingUpOpenLDAPOnCentos6.htm
@@ -131,33 +157,7 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
           action: 'restart'
           if: -> @status -1
         @then callback
-
-## Logging
-
-http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
-
-    exports.push name: 'OpenLDAP Server # Logging', handler: ->
-      {config_dn, config_password, config_file, log_level} = @config.openldap_server
-      @log 'Check rsyslog dependency'
-      @service
-        name: 'rsyslog'
-      @log? 'Declare local4 in rsyslog configuration'
-      @write
-        destination: '/etc/rsyslog.conf'
-        match: /^local4.*/mg
-        replace: 'local4.*                                                /var/log/slapd.log'
-        append: 'RULES'
-      @log? 'Restart rsyslog service'
-      @service
-        name: 'rsyslog'
-        action: 'restart'
-        if: -> @status -1
-      @write
-        destination: config_file
-        match: /^olcLogLevel:.*$/mg
-        replace: "olcLogLevel: #{log_level}"
-        before: 'olcRootDN'
-
+    
     exports.push name: 'OpenLDAP Server # Users and Groups', timeout: -1, handler: ->
       {root_dn, root_password, suffix, users_dn, groups_dn} = @config.openldap_server
       [_, suffix_k, suffix_v] = /(\w+)=([^,]+)/.exec suffix
