@@ -71,17 +71,20 @@ Example:
           'reconnection_retries' : '3'
           'sbus_timeout' : '30'
           'services' : 'nss, pam'
+          'debug_level': '1'
         'nss':
           'filter_groups' : 'root'
           'filter_users' : 'root'
           'reconnection_retries' : '3'
           'entry_cache_timeout' : '300'
           'entry_cache_nowait_percentage' : '75'
+          'debug_level': '1'
         'pam':
           'reconnection_retries' : '3'
           'offline_credentials_expiration' : '2'
           'offline_failed_login_attempts' : '3'
           'offline_failed_login_delay' : '5'
+          'debug_level': '1'
       , ctx.config.sssd.config or {}
       ctx.config.sssd.test_user ?= null
 
