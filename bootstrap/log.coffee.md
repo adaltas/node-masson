@@ -29,50 +29,50 @@ engine. All properties from the configuration are exposed to moustache with the
 additionnal "logs.fqdn_reversed" property used in the default filename to
 preserve alphanumerical ordering of files.
 
-    exports.push required: true, handler: (ctx) ->
-      log = ctx.config.log ?= {}
+    exports.push required: true, handler: ->
+      log = @config.log ?= {}
       log.disabled ?= false
       log.basedir ?= './log'
-      log.fqdn_reversed = ctx.config.host.split('.').reverse().join('.')
+      log.fqdn_reversed = @config.host.split('.').reverse().join('.')
       log.filename_stdout ?= '{{shortname}}.stdout.log'
       log.filename_stderr ?= '{{shortname}}.stderr.log'
       # Rendering
-      log.basedir = mustache.render log.basedir, ctx.config
-      log.filename_stdout = mustache.render log.filename_stdout, ctx.config
-      log.filename_stderr = mustache.render log.filename_stderr, ctx.config
+      log.basedir = mustache.render log.basedir, @config
+      log.filename_stdout = mustache.render log.filename_stdout, @config
+      log.filename_stderr = mustache.render log.filename_stderr, @config
 
-    exports.push name: 'Bootstrap # Log', required: true, handler: (ctx, next) ->
-      {disabled, basedir, filename_stdout, filename_stderr} = ctx.config.log
+    exports.push name: 'Bootstrap # Log', required: true, handler: (_, next) ->
+      {disabled, basedir, filename_stdout, filename_stderr} = @config.log
       if disabled
-        ctx.log = -> # Dummy function
+        @log = -> # Dummy function
         return next()
-      mecano.mkdir
+      @mkdir
         destination: "#{basedir}"
       , (err, created) ->
         return next err if err
         # Add log interface
-        ctx.log = log = (msg) ->
+        @options.log = @log = log = (msg) ->
           log.out.write "#{msg}\n"
-        log.out = fs.createWriteStream path.resolve basedir, filename_stdout
-        log.err = fs.createWriteStream path.resolve basedir, filename_stderr
+        @options.stdout = log.out = fs.createWriteStream path.resolve basedir, filename_stdout
+        @options.stderr = log.err = fs.createWriteStream path.resolve basedir, filename_stderr
         close = ->
           setTimeout ->
             log.out.close()
             log.err.close()
           , 100
-        ctx.on 'middleware_start', (status) ->
+        @on 'middleware_start', (status) ->
           date = (new Date).toISOString()
-          name = ctx.middleware.name || ctx.middleware.id
+          name = @middleware.name || @middleware.id
           msg = "\n#{name}\n#{pad date.length+name.length, '', '-'}\n"
           log.out.write msg
           log.out.write ">>> START #{date}\n"
           log.err.write msg
-        ctx.on 'middleware_stop', (err, status) ->
+        @on 'middleware_stop', (err, status) ->
           log.out.write ">>> END #{(new Date).toISOString()}\n"
-        ctx.on 'end', ->
+        @on 'end', ->
           log.out.write '\nFINISHED WITH SUCCESS\n'
           close()
-        ctx.on 'error', (err) ->
+        @on 'error', (err) ->
           log.out.write 'FINISHED WITH ERROR\n'
           print = (err) ->
             log.err.write err.stack or err.message + '\n'
@@ -82,7 +82,4 @@ preserve alphanumerical ordering of files.
             log.err.write err.message + '\n'
             for error in err.errors then print error
           close()
-        next null, ctx.PASS
-
-
-
+        next null, false

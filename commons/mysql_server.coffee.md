@@ -142,7 +142,7 @@ Remove test database and access to it? [Y/n] y
       {current_password, password, remove_anonymous, disallow_remote_root_login, remove_test_db, reload_privileges} = @config.mysql.server
       test_password = true
       modified = false
-      @ssh.shell (err, stream) =>
+      @options.ssh.shell (err, stream) =>
         stream.write '/usr/bin/mysql_secure_installation\n'
         data = ''
         error = exit = null

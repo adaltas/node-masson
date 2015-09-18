@@ -205,7 +205,3 @@ Example:
     misc = require 'mecano/lib/misc'
 
 [gss_sspi]: http://www.drdobbs.com/ssh-kerberos-authentication-using-gssapi/184402071
-
-
-
-

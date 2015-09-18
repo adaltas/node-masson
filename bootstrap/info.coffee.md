@@ -194,7 +194,3 @@ It will output:
 
     mecano = require 'mecano'
     string = require 'mecano/lib/misc/string'
-
-
-
-

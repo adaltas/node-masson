@@ -62,7 +62,7 @@ Example:
 }
 ```
 
-    exports.push required: true, handler: module.exports.configure = (ctx) ->
+    module.exports.configure = (ctx) ->
       connection = ctx.config.connection ?= {}
       connection.username ?= 'root'
       connection.host ?= connection.ip or ctx.config.ip or ctx.config.host
@@ -89,54 +89,52 @@ its own private key by declaring the "bootstrap.private_key" option.
 However, it is important in such circumstances that we guarantee no
 existing key would be overwritten.
 
-    exports.push name: 'Bootstrap # Connection', required: true, timeout: -1, handler: (ctx, next) ->
-      {private_key, private_key_location, end} = ctx.config.connection
-      close = -> ctx.ssh?.end() if end
-      ctx.on 'error', close
-      ctx.on 'end', close
+    exports.push name: 'Bootstrap # Connection', required: true, timeout: -1, handler: (_, next) ->
+      {private_key, private_key_location, end} = @config.connection
+      close = -> @options.ssh?.end() if end
+      @on 'error', close
+      @on 'end', close
       attempts = 0
       has_rebooted = false
       modified = false
-      do_private_key = ->
+      do_private_key = =>
         return do_connect() if private_key
-        ctx.log "Read private key file: #{private_key_location}"
-        misc.path.normalize private_key_location, (location) ->
-          fs.readFile location, 'ascii', (err, content) ->
+        @log "Read private key file: #{private_key_location}"
+        misc.path.normalize private_key_location, (location) =>
+          fs.readFile location, 'ascii', (err, content) =>
             return next Error "Private key doesnt exists: #{JSON.stringify location}" if err and err.code is 'ENOENT'
             return next err if err
-            ctx.config.connection.private_key = content
+            @config.connection.private_key = content
             do_connect()
-      do_connect = ->
-        ctx.log "Connect with private key"
-        config = misc.merge {}, ctx.config.connection
-        connect config, (err, connection) ->
+      do_connect = =>
+        @log "Connect with private key"
+        config = misc.merge {}, @config.connection
+        connect config, (err, connection) =>
           return do_bootstrap() if err
-          ctx.log "SSH connected"
-          ctx.ssh = connection
+          @log "SSH connected"
+          @options.ssh = connection
           next null, false
-      do_bootstrap = ->
-        ctx.log "Connection failed, bootstrap"
-        bootstrap ctx, (err, reboot) ->
+      do_bootstrap = =>
+        @log "Connection failed, bootstrap"
+        bootstrap @, (err, reboot) =>
           return next err if err
           if reboot then do_wait_reboot() else do_connect_after_bootstrap()
-      do_wait_reboot = ->
-        ctx.log 'Wait for reboot'
-        config = misc.merge {}, ctx.config.connection,
+      do_wait_reboot = =>
+        @log 'Wait for reboot'
+        config = misc.merge {}, @config.connection,
           retry: 3
-        connect config, (err, conn) ->
+        connect config, (err, conn) =>
           return do_connect_after_bootstrap() if err
           conn.end()
           conn.on 'error', do_wait_reboot
           conn.on 'end', do_wait_reboot
-      do_connect_after_bootstrap = ->
-        ctx.log 'Connect when rebooted'
-        config = misc.merge {}, ctx.config.connection,
+      do_connect_after_bootstrap = =>
+        @log 'Connect when rebooted'
+        config = misc.merge {}, @config.connection,
           retry: true
-        connect config, (err, conn) ->
+        connect config, (err, conn) =>
           return next err if err
-          ctx.log "SSH connected"
-          ctx.ssh = conn
+          @log "SSH connected"
+          @options.ssh = conn
           next null, true
       do_private_key()
-
-

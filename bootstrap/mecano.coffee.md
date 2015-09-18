@@ -73,17 +73,17 @@ Configure the `download` function to support cache.
 }
 ```
 
-    exports.push name: 'Bootstrap # Mecano', required: true, timeout: -1, handler:  (ctx, next) ->
-      options = {}
-      options.ssh = ctx.ssh
-      options.log = ctx.log
-      options.stdout = ctx.log.out
-      options.stderr = ctx.log.err
-      options.cache = true
-      options.store = {}
-      options[k] = v for k, v of ctx.config.mecano
-      mecano @, options
-      next()
+    # exports.push name: 'Bootstrap # Mecano', required: true, timeout: -1, handler:  (ctx, next) ->
+    #   options = {}
+    #   # options.ssh = ctx.ssh
+    #   options.log = ctx.log
+    #   options.stdout = ctx.log.out
+    #   options.stderr = ctx.log.err
+    #   options.cache = true
+    #   options.store = {}
+    #   options[k] = v for k, v of ctx.config.mecano
+    #   mecano @, options
+    #   next()
 
 ## File System
 
@@ -96,7 +96,7 @@ transparent SSH2 transport thanks to the [ssh2-fs] package.
         'readlink', 'unlink', 'mkdir', 'readdir', 'readFile', 'writeFile',
         'exists', 'createReadStream', 'createWriteStream' ].forEach (fn) =>
         @fs[fn] = =>
-          fs[fn].call null, @ssh, arguments...
+          fs[fn].call null, @options.ssh, arguments...
 
 # Dependencies
 

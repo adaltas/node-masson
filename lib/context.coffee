@@ -1,9 +1,16 @@
 
+mecano = require 'mecano'
 {EventEmitter} = require 'events'
 {flatten, merge} = require './misc'
 
 class Context extends EventEmitter
   constructor: (@config, @command)->
+    options = {}
+    options.cache = true
+    options.store = {}
+    options[k] = v for k, v of @config.mecano
+    mecano @, options
+    @
   run: (ctx, module) ->
     if typeof module is 'function'
       module.call ctx, @

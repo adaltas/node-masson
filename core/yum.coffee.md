@@ -66,7 +66,7 @@ Examples
         ctx.config.yum.config.main.proxy_password = password
 
     exports.push name: 'YUM # Check', handler: (_, callback) ->
-      pidfile_running @ssh, '/var/run/yum.pid', (err, running) ->
+      pidfile_running @options.ssh, '/var/run/yum.pid', (err, running) ->
         return callback err if err
         return callback Error 'Yum is already running' if running
         callback null, false

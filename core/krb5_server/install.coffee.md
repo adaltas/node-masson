@@ -186,7 +186,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
           if: -> @status -1
         @call (_, callback) ->
           @log? 'Stash password into local file for kadmin dn'
-          @ssh.shell (err, stream) =>
+          @options.ssh.shell (err, stream) =>
             return callback err if err
             cmd = "kdb5_ldap_util -D \"#{manager_dn}\" -w #{manager_password} stashsrvpw -f #{ldap_service_password_file} #{ldap_kadmind_dn}"
             @log "Run #{cmd}"
