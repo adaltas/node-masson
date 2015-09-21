@@ -77,7 +77,7 @@ http://itdavid.blogspot.ca/2012/05/howto-centos-6.html
 http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
 ###
 
-    exports.push name: 'OpenLDAP Server # DB config', timeout: -1, handler: ->
+    exports.push name: 'OpenLDAP Server # Config Access', timeout: -1, handler: ->
       {config_file, config_dn, config_password, config_slappasswd} = @config.openldap_server
       @call (_, callback) ->
         return callback null, false if config_slappasswd
@@ -97,10 +97,10 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
         config_slappasswd = stdout.trim() if not err and executed
       @call (_, callback) ->
         @log? 'Database config: root DN & PW'
-        write = [match: /^olcRootDN:.*$/mg, replace: "olcRootDN: #{config_dn}"]
+        write = [match: /^olcRootDN:.*$/m, replace: "olcRootDN: #{config_dn}"]
         if config_slappasswd
           write.push
-            match: /^olcRootPW:.*$/mg
+            match: /^olcRootPW:.*$/m
             replace: "olcRootPW: #{config_slappasswd}"
             append: 'olcRootDN'
         @write
@@ -117,7 +117,7 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
       @log? 'Database monitor: root DN'
       @write
         destination: monitor_file
-        match: /^(.*)dc=my-domain,dc=com(.*)$/mg
+        match: /^(.*)dc=my-domain,dc=com(.*)$/m
         replace: "$1#{suffix}$2"
 
     exports.push name: 'OpenLDAP Server # DB bdb', timeout: -1, handler: ->
@@ -141,12 +141,12 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
       @call (_, callback) ->
         @log? 'Database bdb: root DN, root PW, password protection'
         write = [
-          {match: /^(.*)dc=my-domain,dc=com(.*)$/mg, replace: "$1#{suffix}$2"}
-          {match: /^olcRootDN:.*$/mg, replace: "olcRootDN: #{root_dn}"}
+          {match: /^(.*)dc=my-domain,dc=com(.*)$/m, replace: "$1#{suffix}$2"}
+          {match: /^olcRootDN:.*$/m, replace: "olcRootDN: #{root_dn}"}
         ]
         if root_slappasswd
           write.push
-            match: /^olcRootPW:.*$/mg
+            match: /^olcRootPW:.*$/m
             replace: "olcRootPW: #{root_slappasswd}"
             append: 'olcRootDN'
         @write
