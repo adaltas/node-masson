@@ -71,7 +71,7 @@ Example:
         config.root_password ?= ctx_server.config.openldap_server.root_password
       config.config['URI'] ?= uris.join ' '
       config.config['TLS_CACERTDIR'] ?= '/etc/openldap/cacerts'
-      config.config['TLS_REQCERT'] ?= 'allow'
+      config.config['TLS_REQCERT'] ?= 'allow' # Allow self-signed certificates, use "demand" otherwise
       config.config['TIMELIMIT'] ?= '15'
       config.config['TIMEOUT'] ?= '20'
 
@@ -83,5 +83,3 @@ Example:
     exports.push commands: 'check', modules: [
       'masson/core/openldap_client/check'
     ]
-
-
