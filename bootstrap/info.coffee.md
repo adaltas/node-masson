@@ -13,24 +13,21 @@ Expose system information. On execution, the context is enriched with the
 properties "kernel\_name", "nodename", "kernel\_release", "kernel\_version", 
 "processor" and "operating_system".
 
-    exports.push name: 'Bootstrap # Server Info', required: true, handler: (ctx, next) ->
-      mecano.execute
-        ssh: ctx.ssh
+    exports.push name: 'Bootstrap # Server Info', required: true, handler: ->
+      @execute
         cmd: 'uname -snrvmo'
-        # too verbose
-        # stdout: ctx.log.out
-        # stderr: ctx.log.err
+        stdout: null
+        stderr: null
       , (err, executed, stdout, stderr) ->
-        return next err if err
+        throw err if err
         # Linux hadoop1 2.6.32-279.el6.x86_64 #1 SMP Fri Jun 22 12:19:21 UTC 2012 x86_64 x86_64 x86_64 GNU/Linux
         match = /(\w+) (\w+) ([^ ]+)/.exec stdout
-        ctx.kernel_name = match[1]
-        ctx.nodename = match[2]
-        ctx.kernel_release = match[3]
-        ctx.kernel_version = match[4]
-        ctx.processor = match[5]
-        ctx.operating_system = match[6]
-        next null, ctx.PASS
+        @kernel_name = match[1]
+        @nodename = match[2]
+        @kernel_release = match[3]
+        @kernel_version = match[4]
+        @processor = match[5]
+        @operating_system = match[6]
 
 ## Disk Info
 
@@ -62,14 +59,13 @@ It will output:
     mountpoint: '/dev/shm' } ]
 ```
 
-    exports.push name: 'Bootstrap # Disk Info', required: true, handler: (ctx, next) ->
+    exports.push name: 'Bootstrap # Disk Info', required: true, handler: ->
       properties = ['filesystem', 'total', 'used', 'available', 'available_pourcent', 'mountpoint']
-      mecano.execute
-        ssh: ctx.ssh
+      @execute
         cmd: 'df'
       , (err, executed, stdout) ->
-        return next err if err
-        ctx.diskinfo = []
+        throw err if err
+        @diskinfo = []
         for line, i in string.lines stdout
           continue if i is 0
           continue if /^\s*$/.test line
@@ -80,8 +76,7 @@ It will output:
           disk.total *= 1024
           disk.used *= 1024
           disk.available *= 1024
-          ctx.diskinfo.push disk
-        next null, false
+          @diskinfo.push disk
 
 ## CPU Info
 
@@ -119,24 +114,22 @@ It will output:
 ]
 ```
 
-    exports.push name: 'Bootstrap # CPU Info', required: true, handler: (ctx, next) ->
-      mecano.execute
-        ssh: ctx.ssh
+    exports.push name: 'Bootstrap # CPU Info', required: true, handler: ->
+      @execute
         cmd: 'cat /proc/cpuinfo'
       , (err, executed, stdout, stderr) ->
         return next err if err
-        ctx.cpuinfo = []
+        @cpuinfo = []
         cpu = {}
         for line in string.lines stdout
           line = line.trim()
           if line is ''
-            ctx.cpuinfo.push cpu if Object.keys(cpu).length
+            @cpuinfo.push cpu if Object.keys(cpu).length
             cpu = {}
             continue
           [key, value] = line.split ':'
           cpu[key.trim()] = value.trim()
-        ctx.cpuinfo.push cpu if Object.keys(cpu).length
-        next null, false
+        @cpuinfo.push cpu if Object.keys(cpu).length
 
 ## Mem Info
 
@@ -168,16 +161,14 @@ It will output:
   "Hugepagesize":2048000,"DirectMap4k":8128000,"DirectMap2M":1040384000}
 ```
 
-    exports.push name: 'Bootstrap # Mem Info', required: true, handler: (ctx, next) ->
-      mecano.execute
-        ssh: ctx.ssh
+    exports.push name: 'Bootstrap # Mem Info', required: true, handler: ->
+      @execute
         cmd: 'cat /proc/meminfo'
-        # too verbose
-        # stdout: ctx.log.out
-        # stderr: ctx.log.err
+        stdout: null
+        stderr: null
       , (err, executed, stdout, stderr) ->
         return next err if err
-        ctx.meminfo = {}
+        @meminfo = {}
         for line in string.lines stdout
           continue if line is ''
           [key, value] = line.split ':'
@@ -187,8 +178,7 @@ It will output:
             value = value * 1024
           else if typeof unit isnt 'undefined'
             return next new Error 'Invalid unit'
-          ctx.meminfo[key.trim()] = value
-        next null, false
+          @meminfo[key.trim()] = value
 
 ## Dependencies
 

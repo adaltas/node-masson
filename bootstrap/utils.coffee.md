@@ -8,7 +8,7 @@ The `utils` module enriches the bootstraping process with commonly used function
     misc = require 'mecano/lib/misc'
     connect = require 'ssh2-connect'
     exports = module.exports = []
-    exports.push name: 'Bootstrap # Utils', required: true, handler: (ctx) ->
+    exports.push name: 'Bootstrap # Utils', required: true, handler: ->
 
 ## Reboot
 
@@ -17,25 +17,25 @@ The `utils` module enriches the bootstraping process with commonly used function
 Reboot the current server and call the user provided callback when the startup
 process is finished.
 
-      ctx.reboot = (callback) ->
+      @reboot = (callback) ->
         attempts = 0
-        wait = ->
-          ctx.log 'Wait for reboot'
+        wait = =>
+          @log 'Wait for reboot'
           return setTimeout ssh, 2000
-        ssh = ->
+        ssh = =>
           attempts++
-          ctx.log "SSH login attempt: #{attempts}"
-          config = misc.merge {}, ctx.config.bootstrap,
+          @log "SSH login attempt: #{attempts}"
+          config = misc.merge {}, @config.bootstrap,
             username: 'root'
             password: null
           connect config, (err, connection) ->
             if err and (err.code is 'ETIMEDOUT' or err.code is 'ECONNREFUSED')
               return wait()
             return callback err if err
-            ctx.ssh = connection
+            @ssh = connection
             callback()
-        ctx.log "Reboot"
-        ctx.execute
+        @log "Reboot"
+        @execute
           cmd: 'reboot\n'
         , (err, executed, stdout, stderr) ->
           return callback err if err
@@ -44,10 +44,10 @@ process is finished.
 ## Wait for process execution
 
 The command is provided as a string:   
-`ctx.waitForExecution(cmd, [options], callback)`   
+`@waitForExecution(cmd, [options], callback)`   
 
 The command is associated to the `cmd` property of the `options` object:   
-`ctx.waitForExecution(options, callback)`
+`@waitForExecution(options, callback)`
 
 Run a command periodically and call the user provided callback once it returns 
 the expected status code.
@@ -77,11 +77,11 @@ Options include:
 Example:
 
 ```coffee
-ctx.waitForExecution cmd: "test -f /tmp/sth", (err) ->
+@waitForExecution cmd: "test -f /tmp/sth", (err) ->
   # file is created, ready to continue
 ``` 
 
-      ctx.waitForExecution = () ->
+      @waitForExecution = ->
         if typeof arguments[0] is 'string' or Array.isArray arguments[0]
           # cmds, [options], callback
           cmds = arguments[0]
@@ -95,15 +95,13 @@ ctx.waitForExecution cmd: "test -f /tmp/sth", (err) ->
         if typeof options is 'function'
           callback = options
           options = {}
-        ctx.emit 'wait'
-        ctx
-        .wait_execute
+        @emit 'wait'
+        @wait_execute
           cmd: cmds
           interval: options.interval
           code: options.code
           code_skipped: options.code_skipped
           quorum: options.quorum
-        .then callback
 
 ## Wait for an open port
 
@@ -130,14 +128,14 @@ ports are open.
 Example waiting for the active and standby NameNodes:
 
 ```coffee
-ctx.waitIsOpen ["master1.hadoop", "master2.hadoop"], 8020, (err) ->
+@waitIsOpen ["master1.hadoop", "master2.hadoop"], 8020, (err) ->
   # do something
 ```
 
 is equivalent to:
 
 ```coffee
-ctx.waitIsOpen [
+@waitIsOpen [
   {host: "master1.hadoop", port: 8020}
   {host: "master2.hadoop", port: 8020}
 ], (err) ->
@@ -145,7 +143,7 @@ ctx.waitIsOpen [
 ```
 
       inc = 0
-      ctx.waitIsOpen = ->
+      @waitIsOpen = =>
         if typeof arguments[0] is 'string'
           if Array.isArray arguments[1]
              # host, ports, [options], callback
@@ -171,7 +169,7 @@ ctx.waitIsOpen [
         if typeof options is 'function'
           callback = options
           options = {}
-        ctx.wait_connect
+        @wait_connect
           servers: servers
           interval: options.interval
           timeout: options.timeout
@@ -250,43 +248,39 @@ ctx.connect username: root, host: "master1.hadoop", (err, ssh) ->
   console.log 'connected' unless err
 ```
 
-      ctx.connect = (config, callback) ->
-        return callback null, ctx.ssh unless config?
-        ctx.connections ?= {}
+      @connect = (config, callback) =>
+        return callback null, @ssh unless config?
+        @connections ?= {}
         if typeof config is 'string'
-          destctx = ctx.hosts[config]
+          destctx = @hosts[config]
           require('./connection').configure destctx
           config = destctx.config.connection
-        ctx.log "SSH connection to #{config.host}"
+        @log "SSH connection to #{config.host}"
         # Connection already created, use it
-        return callback null, ctx.connections[config.host] if ctx.connections[config.host]
-        do_private_key = ->
+        return callback null, @connections[config.host] if @connections[config.host]
+        do_private_key = =>
           return do_connect() if config.private_key
-          ctx.log "Read private key file: #{config.private_key_location}"
+          @log "Read private key file: #{config.private_key_location}"
           misc.path.normalize config.private_key_location, (location) ->
             fs.readFile location, 'ascii', (err, content) ->
               return next Error "Private key doesnt exists: #{JSON.encode location}" if err and err.code is 'ENOENT'
               return next err if err
               config.private_key = content
               do_connect()
-        do_connect = ->
+        do_connect = =>
           # config.privateKey = config.private_key
-          connect config, (err, connection) ->
+          connect config, (err, connection) =>
             return callback err if err
-            ctx.log "SSH connection open"
-            ctx.connections[config.host] = connection
+            @log "SSH connection open"
+            @connections[config.host] = connection
             close = (err) ->
-              ctx.log "SSH connection closed for #{config.host}"
-              ctx.log "Error closing connection: #{err.stack or err.message}" if err
+              @log "SSH connection closed for #{config.host}"
+              @log "Error closing connection: #{err.stack or err.message}" if err
               connection.end()
-            ctx.on 'error', close
-            ctx.on 'end', close
+            @on 'error', close
+            @on 'end', close
             callback null, connection
         do_private_key()
 
 [ssh2]: https://github.com/mscdex/ssh2
 [exec]: https://github.com/wdavidw/node-ssh2-exec/blob/master/src/connect.coffee.md
-
-
-
-
