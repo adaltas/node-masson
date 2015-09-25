@@ -26,25 +26,6 @@ developers on Solaris, Linux, Mac OS X or Windows.
 }
 ```
 
-[Oracle JDK 6]: http://www.oracle.com/technetwork/java/javasebusiness/downloads/java-archive-downloads-javase6-419409.html#jdk-6u45-oth-JPR
-[Oracle JDK 7]: http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html
-
-    module.exports.configure = (ctx) ->
-      require('../core/proxy').configure ctx
-      java = ctx.config.java ?= {}
-      # ctx.config.java['openjdk-1.7.0'] ?= true
-      # ctx.config.java.java_home ?= '/usr/java/default'
-      # Shared
-      java.java_home ?= '/usr/lib/jvm/java'
-      java.jre_home ?= '/usr/lib/jvm/java/jre'
-      java.proxy = ctx.config.proxy.http_proxy if typeof ctx.config.java.proxy is 'undefined'
-      # OpenJDK
-      java.openjdk ?= true
-      # throw new Error "Configuration property 'java.location' is required." unless java.location
-      # throw new Error "Configuration property 'java.version' is required." unless java.version
-      # java.version ?= (/\w+-([\w\d]+)-/.exec path.basename java.location)[0]
-      # JCE
-      # ctx.log? 'JCE not configured' unless java.jce_local_policy or java.jce_us_export_policy
 
 ## Install OpenJDK
 
@@ -154,12 +135,12 @@ reference it inside the configuration. The properties "jce\_local\_policy" and
           source: jce_local_policy
           destination: "#{jdk_home}/jre/lib/security/local_policy.jar"
           binary: true
-          sha1: true
+          # sha1: true
         @download
           source: jce_us_export_policy
           destination: "#{jdk_home}/jre/lib/security/US_export_policy.jar"
           binary: true
-          sha1: true
+          # sha1: true
 
 ## Java # Env
 
