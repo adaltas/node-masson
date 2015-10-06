@@ -21,15 +21,16 @@ module.exports = ->
       connection.port ?= 22
       connection.private_key_location ?= '~/.ssh/id_rsa'
       connect connection, (err, ssh) ->
-        return util.print "\x1b[31m#{err.message}\x1b[39m\n" if err
+        write = (msg) -> process.stdout.write msg
+        return write "\x1b[31m#{err.message}\x1b[39m\n" if err
         exec ssh, params.subcommand, (err, stdout, stderr) ->
-          util.print if err
+          write if err
           then "\x1b[31m#{server.host} (exit code #{err.code})\x1b[39m\n"
           else "\x1b[32m#{server.host}\x1b[39m\n"
-          util.print "\n" if stdout.length or stderr.length
-          util.print "\x1b[36m#{stdout.trim()}\x1b[39m\n" if stdout.length
-          util.print "\x1b[35m#{stderr.trim()}\x1b[39m\n" if stderr.length
-          util.print "\n"
+          write "\n" if stdout.length or stderr.length
+          write "\x1b[36m#{stdout.trim()}\x1b[39m\n" if stdout.length
+          write "\x1b[35m#{stderr.trim()}\x1b[39m\n" if stderr.length
+          write "\n"
           ssh.end()
     .on 'both', (err) ->
       # Done
