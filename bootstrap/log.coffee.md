@@ -36,7 +36,7 @@ preserve alphanumerical ordering of files.
       log.prefix = "#{Date.now()}" if log.prefix is true
       log.basedir ?= './log'
       log.fqdn_reversed = @config.host.split('.').reverse().join('.')
-      filename = if log.prefix then "#{log.prefix}{{shortname}}" else '{{shortname}}'
+      filename = if log.prefix then "#{log.prefix}-{{shortname}}" else '{{shortname}}'
       log.filename_stdout ?= "#{filename}.stdout.log"
       log.filename_stderr ?= "#{filename}.stderr.log"
       # Rendering
