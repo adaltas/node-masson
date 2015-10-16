@@ -32,10 +32,13 @@ preserve alphanumerical ordering of files.
     exports.push required: true, handler: ->
       log = @config.log ?= {}
       log.disabled ?= false
+      log.prefix ?= false
+      log.prefix = "#{Date.now()}" if log.prefix is true
       log.basedir ?= './log'
       log.fqdn_reversed = @config.host.split('.').reverse().join('.')
-      log.filename_stdout ?= '{{shortname}}.stdout.log'
-      log.filename_stderr ?= '{{shortname}}.stderr.log'
+      filename = if log.prefix then "#{log.prefix}{{shortname}}" else '{{shortname}}'
+      log.filename_stdout ?= "#{filename}.stdout.log"
+      log.filename_stderr ?= "#{filename}.stderr.log"
       # Rendering
       log.basedir = mustache.render log.basedir, @config
       log.filename_stdout = mustache.render log.filename_stdout, @config
