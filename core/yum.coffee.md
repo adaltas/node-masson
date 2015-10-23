@@ -152,10 +152,11 @@ property "yum.epel" to false.
     exports.push name: 'YUM # Update', timeout: -1, handler: (_, callback) ->
       {update} = @config.yum
       @execute
-        cmd: "yum -y update | grep 'No Packages marked for Update'"
+        cmd: "yum -y update | grep -i 'no packages marked for update'"
         if: update
       , (err, executed, stdout, stderr) ->
-        callback err, executed and not /No Packages marked for Update/.test stdout
+        regex = new RegExp 'no package marked for update', 'i'
+        callback err, executed and not regex.test stdout
 
     exports.push name: 'YUM # Packages', timeout: -1, handler: ->
       for name, active of @config.yum.packages
