@@ -151,11 +151,12 @@ property "yum.epel" to false.
 
     exports.push name: 'YUM # Update', timeout: -1, handler: (_, callback) ->
       {update} = @config.yum
+      # We use case-insensitive search because case change between rh 6 and 7
       @execute
         cmd: "yum -y update | grep -i 'no packages marked for update'"
         if: update
       , (err, executed, stdout, stderr) ->
-        regex = new RegExp 'no package marked for update', 'i'
+        regex = new RegExp 'no packages marked for update', 'i'
         callback err, executed and not regex.test stdout
 
     exports.push name: 'YUM # Packages', timeout: -1, handler: ->
