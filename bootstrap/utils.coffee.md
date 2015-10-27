@@ -3,10 +3,6 @@
 
 The `utils` module enriches the bootstraping process with commonly used functions.
 
-    fs = require 'fs'
-    each = require 'each'
-    misc = require 'mecano/lib/misc'
-    connect = require 'ssh2-connect'
     exports = module.exports = []
     exports.push name: 'Bootstrap # Utils', required: true, handler: ->
 
@@ -281,6 +277,12 @@ ctx.connect username: root, host: "master1.hadoop", (err, ssh) ->
             @on 'end', close
             callback null, connection
         do_private_key()
+
+## Modules Dependencies
+
+    fs = require 'fs'
+    misc = require 'mecano/lib/misc'
+    connect = require 'ssh2-connect'
 
 [ssh2]: https://github.com/mscdex/ssh2
 [exec]: https://github.com/wdavidw/node-ssh2-exec/blob/master/src/connect.coffee.md

@@ -118,10 +118,9 @@ Generates configuration files for rndc.
 ## Module Dependencies
 
     path = require 'path'
-    each = require 'each'
     quote = require 'regexp-quote'
 
-## resources
+## Resources
 
 *   [Centos installation](https://www.digitalocean.com/community/articles/how-to-install-the-bind-dns-server-on-centos-6)
 *   [Forward configuration](http://gleamynode.net/articles/2267/)

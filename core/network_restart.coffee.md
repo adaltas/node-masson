@@ -1,7 +1,11 @@
 
+# Network Restart
+
     exports = module.exports = []
     exports.push 'masson/bootstrap'
 
-    exports.push name: 'Network # restart', timeout: -1, handler: ->
+## Restart
+
+    exports.push name: 'Network # Restart', timeout: -1, handler: ->
       @execute
         cmd: 'service network restart'

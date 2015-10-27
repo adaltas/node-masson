@@ -1,8 +1,8 @@
 
 # Mysql Server
 
-    each = require 'each'
     escape = (text) -> text.replace(/[\\"]/g, "\\$&")
+    
     exports = module.exports = []
     exports.push 'masson/bootstrap'
     exports.push 'masson/core/iptables'

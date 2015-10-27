@@ -3,8 +3,6 @@
 
 Wait for all the OpenLDAP servers deployed by Masson.
 
-## Preparation
-
     exports = module.exports = []
     exports.push 'masson/bootstrap'
 

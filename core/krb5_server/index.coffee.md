@@ -200,7 +200,7 @@ Example:
     exports.push commands: 'backup', modules: 'masson/core/krb5_server/backup'
 
 
-## Module Dependencies
+## Dependencies
 
     misc = require 'mecano/lib/misc'
 

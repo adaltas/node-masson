@@ -40,4 +40,3 @@ Wait for the admin interface to be ready by issuing the command `listprincs`.
 ## Module Dependencies
 
     misc = require 'mecano/lib/misc'
-    each = require 'each'

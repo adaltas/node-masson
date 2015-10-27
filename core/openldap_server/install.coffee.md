@@ -267,7 +267,6 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
 ## Module Dependencies
 
     crypto = require 'crypto'
-    each = require 'each'
 
 ## Useful commands
 

@@ -6,7 +6,6 @@ protocols (DICT, FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP,
 LDAPS, POP3, POP3S, RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP). The 
 command is designed to work without user interaction. 
 
-    each = require 'each'
     exports = module.exports = []
     exports.push 'masson/bootstrap'
     exports.push 'masson/core/users'

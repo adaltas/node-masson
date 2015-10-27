@@ -38,6 +38,3 @@ Upload all the configured scripts.
           content: content
           eof: true
 
-## Dependencies
-
-    each = require 'each'

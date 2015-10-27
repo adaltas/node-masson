@@ -428,6 +428,6 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=ryba
       @execute
         cmd: "ldapsearch -x -H ldaps://#{@config.host} -b #{suffix} -D #{root_dn} -w #{root_password}"
 
-## Module Dependencies
+## Dependencies
 
     path = require 'path'

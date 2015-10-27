@@ -292,10 +292,9 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
       @service_start
         name: 'kadmin'
 
-## Module Dependencies
+## Dependencies
 
     path = require 'path'
-    each = require 'each'
     misc = require 'mecano/lib/misc'
 
 ## Notes

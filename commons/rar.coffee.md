@@ -1,9 +1,10 @@
 
 # RAR
 
-    url = require 'url'
     exports = module.exports = []
     exports.push 'masson/bootstrap'
+
+## Configure
 
     exports.configure (ctx) ->
       require('../core/proxy').configure ctx
@@ -40,3 +41,7 @@
         cmd: "rpm -Uvh /tmp/unrar.rpm"
       @remove
         destination: '/tmp/unrar.rpm'
+
+## Dependencies
+
+    url = require 'url'

@@ -123,11 +123,10 @@ configuration object. By default, we set the following properties to "yes": "Cha
 
 ## Module Dependencies
 
-    each = require 'each'
     misc = require 'mecano/lib/misc'
     {safe_etc_krb5_conf} = require './index'
 
-## Usefull Client Commands
+## Useful Client Commands
 
 *   List all the current principals in the realm: `getprincs`
 *   Login to a local kadmin: `kadmin.local`

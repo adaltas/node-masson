@@ -168,7 +168,7 @@ Create the kerberos administrator's user.
         indexes:
           krbPrincipalName: 'sub,eq'
 
-## Module Dependencies
+## Dependencies
 
     ssha = require 'ssha'
     {check_password} = require './index'
