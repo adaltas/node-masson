@@ -1,4 +1,6 @@
 
+# https://gist.github.com/branneman/8048520
+
 Module = require 'module'
 path = require 'path'
 path.isAbsolute ?= (filename) -> filename[0] is '/'

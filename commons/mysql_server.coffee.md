@@ -77,7 +77,7 @@ Default configuration:
 IPTables rules are only inserted if the parameter "iptables.action" is set to
 "start" (default value).
 
-    exports.push name: 'Mysql Server # IPTables', handler: ->
+    exports.push header: 'Mysql Server # IPTables', handler: ->
       @iptables
         rules: [
           { chain: 'INPUT', jump: 'ACCEPT', dport: 3306, protocol: 'tcp', state: 'NEW', comment: "MySQL" }
@@ -88,7 +88,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
 
 Install the Mysql database server. Secure the temporary directory.
 
-    exports.push name: 'Mysql Server # Package', timeout: -1, handler: ->
+    exports.push header: 'Mysql Server # Package', timeout: -1, handler: ->
       {user, group, server} = @config.mysql
       @service
         name: 'mysql-server'
@@ -105,7 +105,7 @@ Install the Mysql database server. Secure the temporary directory.
         merge: true
         backup: true
 
-    exports.push name: 'Mysql Server # Start', handler: ->
+    exports.push header: 'Mysql Server # Start', handler: ->
       modified = false
       @service_start
         name: 'mysqld'
@@ -122,7 +122,7 @@ Install the Mysql database server. Secure the temporary directory.
       #     @service_start
       #       name: 'mysqld'
 
-    exports.push name: 'Mysql Server # Populate', handler: ->
+    exports.push header: 'Mysql Server # Populate', handler: ->
       for sql in  @config.mysql.server.sql_on_install
         @execute
           cmd: "mysql -uroot -e \"#{escape sql}\""
@@ -138,7 +138,7 @@ Remove anonymous users? [Y/n] y
 Disallow root login remotely? [Y/n] n
 Remove test database and access to it? [Y/n] y
 
-    exports.push name: 'Mysql Server # Secure', handler: (_, callback) ->
+    exports.push header: 'Mysql Server # Secure', handler: (options, callback) ->
       {current_password, password, remove_anonymous, disallow_remote_root_login, remove_test_db, reload_privileges} = @config.mysql.server
       test_password = true
       modified = false
@@ -147,7 +147,9 @@ Remove test database and access to it? [Y/n] y
         data = ''
         error = exit = null
         stream.on 'data', (data, extended) =>
-          @log[if extended is 'stderr' then 'err' else 'out'].write data
+          # todo: not working anymore after implementing log object in mecano
+          # options.log message = data, type: ''
+          # options.log[if extended is 'stderr' then 'err' else 'out']?.write data
           switch
             when /Enter current password for root/.test data
               stream.write "#{if test_password then password else current_password}\n"

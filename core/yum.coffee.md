@@ -65,7 +65,7 @@ Examples
         ctx.config.yum.config.main.proxy_username = username
         ctx.config.yum.config.main.proxy_password = password
 
-    exports.push name: 'YUM # Check', handler: (_, callback) ->
+    exports.push header: 'YUM # Check', handler: (_, callback) ->
       pidfile_running @options.ssh, '/var/run/yum.pid', (err, running) ->
         return callback err if err
         return callback Error 'Yum is already running' if running
@@ -79,7 +79,7 @@ merge server configuration and write the content back.
 More information about configuring the proxy settings 
 is available on [the centos website](http://www.centos.org/docs/5/html/yum/sn-yum-proxy-server.html)
 
-    exports.push name: 'YUM # Configuration', handler: ->
+    exports.push header: 'YUM # Configuration', handler: ->
       @ini
         content: @config.yum.config
         destination: '/etc/yum.conf'
@@ -92,7 +92,7 @@ Upload the YUM repository definitions files present in
 "ctx.config.yum.copy" to the yum repository directory 
 in "/etc/yum.repos.d"
 
-    exports.push name: 'YUM # Repositories', timeout: -1, handler: (_, callback) ->
+    exports.push header: 'YUM # Repositories', timeout: -1, handler: (_, callback) ->
       {copy, clean} = @config.yum
       return callback() unless copy
       modified = false
@@ -138,7 +138,7 @@ an url by defining the "yum.epel_url" property. To disable Epel, simply set the
 property "yum.epel" to false.
 
     exports.push
-      name: 'YUM # Epel'
+      header: 'YUM # Epel'
       timeout: 100000
       if: -> @config.yum.epel
       handler: ->
@@ -149,7 +149,7 @@ property "yum.epel" to false.
           else 'yum install epel-release' 
           not_if_exec: 'yum list installed | grep epel-release'
 
-    exports.push name: 'YUM # Update', timeout: -1, handler: (_, callback) ->
+    exports.push header: 'YUM # Update', timeout: -1, handler: (_, callback) ->
       {update} = @config.yum
       @execute
         cmd: "yum -y update | grep 'No Packages marked for Update'"
@@ -157,11 +157,11 @@ property "yum.epel" to false.
       , (err, executed, stdout, stderr) ->
         callback err, executed and not /No Packages marked for Update/.test stdout
 
-    exports.push name: 'YUM # Packages', timeout: -1, handler: ->
-      for name, active of @config.yum.packages
-        @service
-          name: name
-          if: active
+    exports.push header: 'YUM # Packages', timeout: -1, handler: ->
+      @service (
+        name: name
+        if: active
+      ) for name, active of @config.yum.packages
       
 
 ## Dependencies

@@ -51,28 +51,31 @@ module.exports = ->
     .on 'context', (ctx) ->
       ctx
       .on 'middleware_skip', () ->
-        return unless ctx.middleware.name?
+        ctx.middleware.header = "#{ctx.middleware.name } WARN" if ctx.middleware.name
+        return unless ctx.middleware.header?
         line = ''
         line += pad "#{styles.fqdn ctx.config.host}", hostlength
-        line += pad "#{styles.label ctx.middleware.name}", 40
+        line += pad "#{styles.label ctx.middleware.header}", 40
         line += pad "#{styles.status_skip 'SKIPPED'}", 20
         rl.write line
         rl.write '\n'
       .on 'middleware_start', () ->
-        return unless ctx.middleware.name?
+        ctx.middleware.header = "#{ctx.middleware.name } WARN" if ctx.middleware.name
+        return unless ctx.middleware.header?
         times[ctx.config.host] = Date.now()
         return if multihost
         line = ''
         line += pad "#{styles.fqdn ctx.config.host}", hostlength
-        line += pad "#{styles.label ctx.middleware.name}", 40
+        line += pad "#{styles.label ctx.middleware.header}", 40
         line += pad "#{styles.status_start 'WORKING'}", 20
         rl.write line
       .on 'middleware_stop', (err, status) ->
-        return unless ctx.middleware.name?
+        ctx.middleware.header = "#{ctx.middleware.name } WARN" if ctx.middleware.name
+        return unless ctx.middleware.header?
         time = Date.now() - times[ctx.config.host]
         line = ''
         line += pad "#{styles.fqdn ctx.config.host}", hostlength
-        line += pad "#{styles.label ctx.middleware.name}", 40
+        line += pad "#{styles.label ctx.middleware.header}", 40
         statusmsg = if err then "#{styles.status_error ctx.middleware.label_error or 'ERROR'}"
         else if typeof status is 'string' then status
         else if status then "#{styles.status_true ctx.middleware.label_true or 'MODIFIED'}"
@@ -89,7 +92,7 @@ module.exports = ->
         return if multihost
         line = ''
         line += pad "#{styles.fqdn ctx.config.host}", hostlength
-        line += pad "#{styles.label ctx.middleware.name}", 40
+        line += pad "#{styles.label ctx.middleware.header}", 40
         line += pad "#{styles.status_wait 'WAIT'}", 20
         rl.cursor = 0
         rl.line = ''
@@ -99,7 +102,7 @@ module.exports = ->
         return if multihost
         line = ''
         line += pad "#{ctx.config.host}", hostlength
-        line += pad "#{ctx.middleware.name}", 40
+        line += pad "#{ctx.middleware.header}", 40
         line += pad "#{styles.status_start 'WORKING'}", 20
         rl.cursor = 0
         rl.line = ''

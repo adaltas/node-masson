@@ -40,7 +40,7 @@ mechanism implemented in the kernel.
 
 This action update the configuration file present in "/etc/selinux/config".
 
-    exports.push name: 'Security # SELinux', handler: ->
+    exports.push header: 'Security # SELinux', handler: (options) ->
       {selinux} = @config.security
       if selinux
         from = 'disabled'
@@ -56,7 +56,7 @@ This action update the configuration file present in "/etc/selinux/config".
         cmd: 'shutdown -r now'
         if: -> @status -1
       , (err, executed) ->
-        @log '[WARN masson.core.security] Reboot after SELINUX changes'
+        options.log '[WARN masson.core.security] Reboot after SELINUX changes'
 
 # Limits
 
@@ -70,7 +70,7 @@ cat /etc/security/limits.d/90-nproc.conf
 root       soft    nproc     unlimited
 ```
 
-    exports.push name: 'Security # Limits', handler: ->
+    exports.push header: 'Security # Limits', handler: ->
       {limits} = @config.security
       writes = for filename, content of limits
         destination: "/etc/security/limits.d/#{filename}"

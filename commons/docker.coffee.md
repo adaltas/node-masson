@@ -15,7 +15,7 @@
 Install the `docker-io` package and configure it as a startup and started
 service.
 
-    exports.push name: 'Docker # Service', handler: ->
+    exports.push header: 'Docker # Service', handler: ->
       @service
         name: 'docker'
         yum_name: 'docker-io'
@@ -26,7 +26,7 @@ service.
 
 Get the PID of a docker container by name or ID.
 
-    exports.push name: 'Docker # Install docker-pid', handler: ->
+    exports.push header: 'Docker # Install docker-pid', handler: ->
       @write
         content: """
         #!/bin/sh
@@ -39,7 +39,7 @@ Get the PID of a docker container by name or ID.
 
 Get the ip address of a container by name or ID.
 
-    exports.push name: 'Docker # Install docker-ip', handler: ->
+    exports.push header: 'Docker # Install docker-ip', handler: ->
       @write
         content: """
         #!/bin/sh
@@ -62,7 +62,7 @@ nsenter doesn't enter the cgroups, and therefore evades resource limitations.
 The potential benefit of this would be debugging and external audit, but for
 remote access, docker exec is the current recommended approach.
 
-    exports.push name: 'Docker # Install nsenter', handler: ->
+    exports.push header: 'Docker # Install nsenter', handler: ->
       @execute
         cmd: """
         docker run -v /usr/local/bin:/target jpetazzo/nsenter
@@ -75,7 +75,7 @@ Docker Registry stores and distributes images centrally. It's where you push
 images to and pull them from; Docker Registry gives team members the ability to
 share images and deploy them to testing, staging and production environments.
 
-    # exports.push name: 'Docker # Registry 2.0', handler: ->
+    # exports.push header: 'Docker # Registry 2.0', handler: ->
     #   @execute
     #     cmd: "docker run -p 5000:5000 registry:2.0"    
 

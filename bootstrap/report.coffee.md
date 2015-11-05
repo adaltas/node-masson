@@ -11,7 +11,7 @@
       # report.writer ?= new stream.PassThrough
       # report.writer.pipe process.stdout
 
-    exports.push name: 'Bootstrap # Report Console', required: true, handler: ->
+    exports.push header: 'Bootstrap # Report Console', required: true, handler: ->
       {writer} = @config.report
       reports = []
       @on 'report', (report) ->

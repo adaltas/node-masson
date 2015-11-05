@@ -162,16 +162,17 @@ Module middlewares when defining a string dependency may be prefixed with:
 ###
 Tree::load_module = (module, parent) ->
   @cache ?= {}
-  return Module._cache[@cache[module]].exports if @cache[module]
+  module = name: module if typeof module is 'string'
+  return Module._cache[@cache[module.name]].exports if @cache[module.name]
   # Load the module
   required = false
-  [_, meta, module] = /([\!\?]?)(.*)/.exec module
+  [_, meta, module.name] = /([\!\?]?)(.*)/.exec module.name
   switch meta
     when '?' then # nothing yet
     when '!' then required = true
   # Load the module
-  m = load module, parent
-  m.name = module
+  m = load module.name, parent
+  m.name = module.name
   m.parents ?= []
   m.parents.push parent
   m.exports = [m.exports] unless Array.isArray m.exports
@@ -193,8 +194,8 @@ Tree::load_module = (module, parent) ->
       middleware.handler = null
     middleware.skip ?= false
     middleware.required = true if required
-    middleware.module = module
-  @cache[module] = m.filename
+    middleware.module = module.name
+  @cache[module.name] = m.filename
   m.exports
 
 ###

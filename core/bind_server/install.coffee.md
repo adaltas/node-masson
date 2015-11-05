@@ -17,7 +17,7 @@ cat /etc/group | grep named
 named:x:25:
 ```
 
-    exports.push name: 'Bind Server # Users & Groups', handler: ->
+    exports.push header: 'Bind Server # Users & Groups', handler: ->
       {group, user} = @config.bind_server
       @group group
       @user user
@@ -32,7 +32,7 @@ named:x:25:
 IPTables rules are only inserted if the parameter "iptables.action" is set to 
 "start" (default value).
 
-    exports.push name: 'Bind Server # IPTables', handler: ->
+    exports.push header: 'Bind Server # IPTables', handler: ->
       @iptables
         rules: [
           { chain: 'INPUT', jump: 'ACCEPT', dport: 53, protocol: 'tcp', state: 'NEW', comment: "Named" }
@@ -44,7 +44,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
 
 The packages "bind" is installed as a startup item and not yet installed.
 
-    exports.push name: 'Bind Server # Install', timeout: -1, handler: ->
+    exports.push header: 'Bind Server # Install', timeout: -1, handler: ->
       @service
         name: 'bind'
         srv_name: 'named'
@@ -55,7 +55,7 @@ The packages "bind" is installed as a startup item and not yet installed.
 Update the "/etc/named.conf" file by modifying the commenting the listen-on port
 and setting "allow-query" to any. The "named" service is restarted if modified.
 
-    exports.push name: 'Bind Server # Configure', handler: ->
+    exports.push header: 'Bind Server # Configure', handler: ->
       @write
         destination: '/etc/named.conf'
         write: [
@@ -76,7 +76,7 @@ and setting "allow-query" to any. The "named" service is restarted if modified.
 
 Upload the zones definition files provided in the configuration file.   
 
-    exports.push name: 'Bind Server # Zones', handler: ->
+    exports.push header: 'Bind Server # Zones', handler: ->
       modified = false
       {zones} = @config.bind_server
       @write
@@ -101,7 +101,7 @@ Upload the zones definition files provided in the configuration file.
 
 Generates configuration files for rndc.   
 
-    exports.push name: 'Bind Server # rndc Key', handler: ->
+    exports.push header: 'Bind Server # rndc Key', handler: ->
       {group, user} = @config.bind_server
       @execute
         cmd: 'rndc-confgen -a -r /dev/urandom -c /etc/rndc.key'

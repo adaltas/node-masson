@@ -13,7 +13,7 @@
       ctx.config.rar.rar_url ?= 'http://apt.sw.be/redhat/el6/en/x86_64/rpmforge/RPMS/rar-3.8.0-1.el6.rf.x86_64.rpm'
       ctx.config.rar.unrar_url ?= 'http://apt.sw.be/redhat/el6/en/x86_64/rpmforge/RPMS/unrar-4.0.7-1.el6.rf.x86_64.rpm'
 
-    exports.push name: 'Rar # install rar', handler: ->
+    exports.push header: 'Rar # install rar', handler: ->
       {proxy, rar_url} = ctx.config.rar
       @download
         source: rar_url
@@ -28,7 +28,7 @@
         destination: '/tmp/rar.rpm'
         if: -> @status -2
 
-    exports.push name: 'Rar # install unrar', handler: ->
+    exports.push header: 'Rar # install unrar', handler: ->
       {proxy, unrar_url} = ctx.config.rar
       @download
         source: unrar_url

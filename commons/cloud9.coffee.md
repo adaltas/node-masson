@@ -17,18 +17,16 @@
 
 ## Installation
 
-    exports.push name: 'Cloud9 # Install', handler: ->
+    exports.push header: 'Cloud9 # Install', handler: ->
       {proxy, github}} = @config.cloud9
 
 Install libxml2
 
-      @service
-        name: 'libxml2-devel'
+      @service name: 'libxml2-devel'
 
 Install SM plugin manager using NPM
 
-      @execute
-        cmd: 'npm install -g sm'
+      @execute cmd: 'npm install -g sm'
 
 Download source code from github
 

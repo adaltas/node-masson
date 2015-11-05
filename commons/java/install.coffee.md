@@ -26,11 +26,12 @@ developers on Solaris, Linux, Mac OS X or Windows.
 }
 ```
 
+TODO: leverage /etc/alternative to switch between multiple JDKs.
 
 ## Install OpenJDK
 
     exports.push
-      name: 'Java # Install OpenJDK'
+      header: 'Java # Install OpenJDK'
       timeout: -1
       if: -> @config.java.openjdk
       handler: ->
@@ -43,7 +44,7 @@ At this time, it is recommanded to run Hadoop against the Oracle Java JDK. Since
 come with the OpenJDK installed and to avoid any ambiguity, we simply remove the OpenJDK.
 
     exports.push
-      name: 'Java # Remove OpenJDK'
+      header: 'Java # Remove OpenJDK'
       not_if: -> @config.java.openjdk
       handler: ->
         @execute
@@ -67,12 +68,12 @@ inside the configuration. The properties "jce\_local\_policy" and
 "jce\_us\_export_policy" must be modified accordingly with an appropriate location.
 
     exports.push
-      name: 'Java # Install Oracle JDK'
+      header: 'Java # Install Oracle JDK'
       timeout: -1
       if: -> @config.java.jdk
-      handler: ->
+      handler: (options) ->
         {proxy, jdk} = @config.java # location, version
-        @log? "Check if java is here and which version it is"
+        options.log "Check if java is here and which version it is"
         installed = false
         @execute
           cmd: 'ls -d /usr/java/jdk*'
@@ -121,16 +122,16 @@ reference it inside the configuration. The properties "jce\_local\_policy" and
 "jce\_us\_export_policy" must be modified accordingly with an appropriate location.
 
     exports.push
-      name: 'Java # Java JCE'
+      header: 'Java # Java JCE'
       timeout: -1
       if: [
         -> @config.java.jce_local_policy or @config.java.jce_us_export_policy
         -> @config.java.jdk
       ]
-      handler: ->
+      handler: (options) ->
         {jdk, jce_local_policy, jce_us_export_policy} = @config.java
         jdk_home = "/usr/java/jdk#{jdk.version}"
-        @log "Download jce-6 Security JARs"
+        options.log "Download jce-6 Security JARs"
         @download
           source: jce_local_policy
           destination: "#{jdk_home}/jre/lib/security/local_policy.jar"
@@ -144,14 +145,14 @@ reference it inside the configuration. The properties "jce\_local\_policy" and
 
 ## Java # Env
 
-    exports.push name: 'Java # Env', timeout: -1, handler: ->
+    exports.push header: 'Java # Env', timeout: -1, handler: ->
       {java_home} = @config.java
       @write
         destination: '/etc/profile.d/java.sh'
         mode: 0o0644
         content: """
         export JAVA_HOME=#{java_home}
-        export PATH=$PATH:#{java_home}/bin
+        export PATH=#{java_home}/bin:$PATH
         """
 
 ## Dependencies

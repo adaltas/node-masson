@@ -13,7 +13,7 @@ Expose system information. On execution, the context is enriched with the
 properties "kernel\_name", "nodename", "kernel\_release", "kernel\_version", 
 "processor" and "operating_system".
 
-    exports.push name: 'Bootstrap # Server Info', required: true, handler: ->
+    exports.push header: 'Bootstrap # Server Info', required: true, handler: ->
       @execute
         cmd: 'uname -snrvmo'
         stdout: null
@@ -38,7 +38,7 @@ converted to bytes.
 Here's how to use it inside a module:
 
 ```coffee
-module.export = name: 'My Module', modules: 'masson/bootstrap/info', handler: (ctx) ->
+module.export = header: 'My Module', modules: 'masson/bootstrap/info', handler: (ctx) ->
   console.log ctx.diskinfo
 ```
 
@@ -59,7 +59,7 @@ It will output:
     mountpoint: '/dev/shm' } ]
 ```
 
-    exports.push name: 'Bootstrap # Disk Info', required: true, handler: ->
+    exports.push header: 'Bootstrap # Disk Info', required: true, handler: ->
       properties = ['filesystem', 'total', 'used', 'available', 'available_pourcent', 'mountpoint']
       @execute
         cmd: 'df'
@@ -86,7 +86,7 @@ result of "/proc/cpuinfo".
 Here's how to use it inside a module:
 
 ```coffee
-module.export = name: 'My Module', modules: 'masson/bootstrap/info', handler: (ctx) ->
+module.export = header: 'My Module', modules: 'masson/bootstrap/info', handler: (ctx) ->
   console.log ctx.cpuinfo
 ```
 
@@ -114,7 +114,7 @@ It will output:
 ]
 ```
 
-    exports.push name: 'Bootstrap # CPU Info', required: true, handler: ->
+    exports.push header: 'Bootstrap # CPU Info', required: true, handler: ->
       @execute
         cmd: 'cat /proc/cpuinfo'
       , (err, executed, stdout, stderr) ->
@@ -139,7 +139,7 @@ result of "/proc/meminfo". All the values are in bytes.
 Here's how to use it inside a module:
 
 ```coffee
-module.export = name: 'My Module', modules: 'masson/bootstrap/info', handler: (ctx) ->
+module.export = header: 'My Module', modules: 'masson/bootstrap/info', handler: (ctx) ->
   console.log JSON.stringify ctx.meminfo
 ```
 
@@ -161,7 +161,7 @@ It will output:
   "Hugepagesize":2048000,"DirectMap4k":8128000,"DirectMap2M":1040384000}
 ```
 
-    exports.push name: 'Bootstrap # Mem Info', required: true, handler: ->
+    exports.push header: 'Bootstrap # Mem Info', required: true, handler: ->
       @execute
         cmd: 'cat /proc/meminfo'
         stdout: null

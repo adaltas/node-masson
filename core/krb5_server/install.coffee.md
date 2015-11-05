@@ -37,7 +37,7 @@ Resources:
 IPTables rules are only inserted if the parameter "iptables.action" is set to 
 "start" (default value).
 
-    exports.push name: 'Krb5 Server # IPTables', handler: ->
+    exports.push header: 'Krb5 Server # IPTables', handler: ->
       {kdc_conf} = @config.krb5
       rules = []
       add_default_kadmind_port = false
@@ -81,7 +81,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
     #     stringify: misc.ini.stringify_square_then_curly
     #     backup: true
 
-    exports.push name: 'Krb5 Server # Install', timeout: -1, handler: ->
+    exports.push header: 'Krb5 Server # Install', timeout: -1, handler: ->
       @service
         name: 'krb5-pkinit-openssl'
       @service
@@ -97,7 +97,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
       @service
         name: 'krb5-workstation'
 
-    exports.push name: 'Krb5 Server # Configure', timeout: 100000, handler: ->
+    exports.push header: 'Krb5 Server # Configure', timeout: 100000, handler: ->
       {realm, etc_krb5_conf, kdc_conf} = @config.krb5
       any_realm = Object.keys(kdc_conf.realms)[0]
       @ini
@@ -136,7 +136,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
         action: 'restart'
         # if: -> first_time
 
-    exports.push name: 'Krb5 Server # LDAP Insert Entries', timeout: -1, handler: ->
+    exports.push header: 'Krb5 Server # LDAP Insert Entries', timeout: -1, handler: ->
       {kdc_conf} = @config.krb5
       for realm, config of kdc_conf.realms
         continue unless config.database_module
@@ -165,17 +165,17 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
           """
           not_if: -> @status -1
 
-    exports.push name: 'Krb5 Server # LDAP Stash password', timeout: 5*60*1000, handler: ->
+    exports.push header: 'Krb5 Server # LDAP Stash password', timeout: 5*60*1000, handler: (options) ->
       {kdc_conf} = @config.krb5
       # modified = false
       for name, dbmodule of kdc_conf.dbmodules then do(name, dbmodule) =>
       # each kdc_conf.dbmodules
       # .run (name, dbmodule, next) ->
         {kdc_master_key, manager_dn, manager_password, ldap_service_password_file, ldap_kadmind_dn} = dbmodule
-        @log? "Stash key file is: #{dbmodule.ldap_service_password_file}"
+        options.log "Stash key file is: #{dbmodule.ldap_service_password_file}"
         keyfileContent = null
         @call (_, callback) ->
-          @log? 'Read current keyfile if it exists'
+          options.log 'Read current keyfile if it exists'
           @fs.readFile "#{ldap_service_password_file}", 'utf8', (err, content) ->
             return callback null, true if err and err.code is 'ENOENT'
             return callback err if err
@@ -185,15 +185,15 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
           destination: path.dirname(ldap_service_password_file)
           if: -> @status -1
         @call (_, callback) ->
-          @log? 'Stash password into local file for kadmin dn'
+          options.log 'Stash password into local file for kadmin dn'
           @options.ssh.shell (err, stream) =>
             return callback err if err
             cmd = "kdb5_ldap_util -D \"#{manager_dn}\" -w #{manager_password} stashsrvpw -f #{ldap_service_password_file} #{ldap_kadmind_dn}"
-            @log "Run #{cmd}"
+            options.log "Run #{cmd}"
             reentered = done = false
             stream.write "#{cmd}\n"
             stream.on 'data', (data, stderr) =>
-              @log[if stderr then 'err' else 'out'].write data
+              # options.log[if stderr then 'err' else 'out'].write data
               data = data.toString()
               if /Password for/.test data
                 stream.write "#{kdc_master_key}\n"
@@ -212,7 +212,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
             modified = if keyfileContent is content then false else true
             callback null, keyfileContent isnt content
 
-    exports.push name: 'Krb5 Server # Log', timeout: 100000, handler: ->
+    exports.push header: 'Krb5 Server # Log', timeout: 100000, handler: ->
       @touch
         destination: '/var/log/krb5kdc.log'
       @touch
@@ -239,7 +239,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
         action: 'restart'
         if: -> @status -3
 
-    exports.push name: 'Krb5 Server # Admin principal', timeout: -1, handler: ->
+    exports.push header: 'Krb5 Server # Admin principal', timeout: -1, handler: ->
       {etc_krb5_conf, kdc_conf} = @config.krb5
       for realm, config of etc_krb5_conf.realms
         continue unless kdc_conf.realms[realm]?.database_module
@@ -255,7 +255,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
       # .on 'item', (realm, config, next) ->
       #   {kadmin_principal, kadmin_password} = config
       #   return next() unless kdc_conf.realms[realm]?.database_module
-      #   @log "Create principal #{kadmin_principal}"
+      #   options.log "Create principal #{kadmin_principal}"
       #   @krb5_addprinc
       #     # We dont provide an "kadmin_server". Instead, we need
       #     # to use "kadmin.local" because the principal used
@@ -286,7 +286,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
     #     write: write
     #   , next
 
-    exports.push name: 'Krb5 Server # Start', timeout: 100000, handler: ->
+    exports.push header: 'Krb5 Server # Start', timeout: 100000, handler: ->
       @service_start
         name: 'krb5kdc'
       @service_start

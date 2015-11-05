@@ -13,7 +13,7 @@ inside "/etc/openldap/ldap.conf". The success of the test rely on the command
 exit code.
 
     exports.push
-      name: 'OpenLDAP Client # Check Search'
+      header: 'OpenLDAP Client # Check Search'
       label_true: 'CHECKED'
       if: -> @config.openldap_client.suffix
       handler: ->

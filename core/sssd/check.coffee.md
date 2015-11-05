@@ -11,7 +11,7 @@ $user`. The command is only executed if a test user is defined by the
 "sssd.test_user" property.
 
     exports.push
-      name: 'SSSD # Check NSS'
+      header: 'SSSD # Check NSS'
       if: -> @config.sssd.test_user
       handler: ->
         {test_user} = ctx.config.sssd
@@ -25,7 +25,7 @@ Check if PAM is correctly configured by executing the command
 user is defined by the "sssd.test_user" property.
 
     exports.push
-      name: 'SSSD # Check PAM'
+      header: 'SSSD # Check PAM'
       if: -> @config.sssd.test_user
       handler: ->
         {test_user} = ctx.config.sssd

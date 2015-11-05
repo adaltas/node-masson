@@ -9,7 +9,7 @@
 Princ the status for the HTTPD service by executing the command
 `service httpd status`.
 
-    exports.push name: 'HTTPD # Status', label_true: 'STARTED', label_false: 'STOPPED', handler: ->
+    exports.push header: 'HTTPD # Status', label_true: 'STARTED', label_false: 'STOPPED', handler: ->
       @execute
         cmd: "service httpd status"
         code_skipped: 3

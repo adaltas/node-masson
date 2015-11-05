@@ -89,7 +89,7 @@ its own private key by declaring the "bootstrap.private_key" option.
 However, it is important in such circumstances that we guarantee no
 existing key would be overwritten.
 
-    exports.push name: 'Bootstrap # Connection', required: true, timeout: -1, handler: (_, next) ->
+    exports.push header: 'Bootstrap # Connection', required: true, timeout: -1, handler: (options, next) ->
       {private_key, private_key_location, end} = @config.connection
       close = -> @options.ssh?.end() if end
       @on 'error', close
@@ -99,7 +99,7 @@ existing key would be overwritten.
       modified = false
       do_private_key = =>
         return do_connect() if private_key
-        @log "Read private key file: #{private_key_location}"
+        options.log "Read private key file: #{private_key_location}"
         misc.path.normalize private_key_location, (location) =>
           fs.readFile location, 'ascii', (err, content) =>
             return next Error "Private key doesnt exists: #{JSON.stringify location}" if err and err.code is 'ENOENT'
@@ -107,20 +107,20 @@ existing key would be overwritten.
             @config.connection.private_key = content
             do_connect()
       do_connect = =>
-        @log "Connect with private key"
+        options.log "Connect with private key"
         config = misc.merge {}, @config.connection
         connect config, (err, connection) =>
           return do_bootstrap() if err
-          @log "SSH connected"
+          options.log "SSH connected"
           @options.ssh = connection
           next null, false
       do_bootstrap = =>
-        @log "Connection failed, bootstrap"
+        options.log "Connection failed, bootstrap"
         bootstrap @, (err, reboot) =>
           return next err if err
           if reboot then do_wait_reboot() else do_connect_after_bootstrap()
       do_wait_reboot = =>
-        @log 'Wait for reboot'
+        options.log 'Wait for reboot'
         config = misc.merge {}, @config.connection,
           retry: 3
         connect config, (err, conn) =>
@@ -129,12 +129,12 @@ existing key would be overwritten.
           conn.on 'error', do_wait_reboot
           conn.on 'end', do_wait_reboot
       do_connect_after_bootstrap = =>
-        @log 'Connect when rebooted'
+        options.log 'Connect when rebooted'
         config = misc.merge {}, @config.connection,
           retry: true
         connect config, (err, conn) =>
           return next err if err
-          @log "SSH connected"
+          options.log "SSH connected"
           @options.ssh = conn
           next null, true
       do_private_key()

@@ -58,7 +58,7 @@ Example:
 
 The package "iptables" is installed.
 
-    exports.push name: 'Iptables # Package', timeout: -1, handler: ->
+    exports.push header: 'Iptables # Package', timeout: -1, handler: ->
       {action, startup} = @config.iptables
       @service
         name: 'iptables'
@@ -70,7 +70,7 @@ The package "iptables" is installed.
 Redirect input logs in "/var/log/messages".
 
     exports.push
-      name: 'Iptables # Log'
+      header: 'Iptables # Log'
       timeout: -1
       not_if: -> @config.iptables.action isnt 'start' or @config.iptables.log is false
       handler: ->
@@ -85,7 +85,7 @@ Redirect input logs in "/var/log/messages".
 Add user defined rules to IPTables.
 
     exports.push
-      name: 'Iptables # Rules'
+      header: 'Iptables # Rules'
       timeout: -1
       if: -> @config.iptables.action is 'start'
       handler: ->

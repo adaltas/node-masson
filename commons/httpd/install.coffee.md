@@ -14,7 +14,7 @@
 IPTables rules are only inserted if the parameter "iptables.action" is set to 
 "start" (default value).
 
-    exports.push name: 'HTTPD # IPTables', handler: ->
+    exports.push header: 'HTTPD # IPTables', handler: ->
       {etc_krb5_conf, kdc_conf} = @config.krb5
       rules = []
       @iptables
@@ -34,7 +34,7 @@ cat /etc/group | grep hadoop
 apache:x:48:
 ```
 
-    exports.push name: 'HTTPD # Users & Groups', handler: ->
+    exports.push header: 'HTTPD # Users & Groups', handler: ->
       {group, user} = @config.httpd
       @group group
       @user user
@@ -43,7 +43,7 @@ apache:x:48:
 
 Install the HTTPD service and declare it as a startup service.
 
-    exports.push name: 'HTTPD # Install', timeout: -1, handler: ->
+    exports.push header: 'HTTPD # Install', timeout: -1, handler: ->
       {startup, action} = @config.httpd
       @service
         name: 'httpd'

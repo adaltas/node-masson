@@ -8,5 +8,5 @@
 
 Now the service being configured, the "named" service is started.
 
-    exports.push name: 'Bind Server # Start', label_true: 'STARTED', handler: ->
+    exports.push header: 'Bind Server # Start', label_true: 'STARTED', handler: ->
       @service_start name: 'named'

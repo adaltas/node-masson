@@ -13,7 +13,7 @@ Install the services defined by the "sssd.services" property. By default, the
 following service: "sssd", "sssd-client", "pam\_krb5", "pam\_ldap" and
 "sssd-tools". It also ensures SSSD is marked as a startup service.
 
-    exports.push name: 'SSSD # Install', timeout: -1, handler: ->
+    exports.push header: 'SSSD # Install', timeout: -1, handler: ->
       @service
         name: 'sssd'
         startup: true # 2015/09 was 345
@@ -27,7 +27,7 @@ following service: "sssd", "sssd-client", "pam\_krb5", "pam\_ldap" and
 Certificates are temporarily uploaded to the "/tmp" folder and registered with
 the command `authconfig --update --ldaploadcacert={file}`.
 
-    exports.push name: 'SSSD # Certificates', handler: ->
+    exports.push header: 'SSSD # Certificates', handler: ->
       {certificates} = @config.sssd
       for certificate in certificates then do =>
         hash = crypto.createHash('md5').update(certificate).digest('hex')
@@ -55,7 +55,7 @@ Update the SSSD configuration file present in "/etc/sssd/sssd.conf" with the
 values defined in the "sssd.config" property. The destination file is by
 default overwritten unless the "sssd.merge" is `true`.
 
-    exports.push name: 'SSSD # Configure', timeout: -1, handler: ->
+    exports.push header: 'SSSD # Configure', timeout: -1, handler: ->
       {merge, config} = @config.sssd
       @ini
         content: config

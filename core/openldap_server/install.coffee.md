@@ -22,7 +22,7 @@ todo: add migrationtools
 IPTables rules are only inserted if the parameter "iptables.action" is set to 
 "start" (default value).
 
-    exports.push name: 'OpenLDAP Server # IPTables', handler: ->
+    exports.push header: 'OpenLDAP Server # IPTables', handler: ->
       {etc_krb5_conf, kdc_conf} = @config.krb5
       rules = []
       @iptables
@@ -32,7 +32,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
         ]
         if: @config.iptables.action is 'start'
 
-    exports.push name: 'OpenLDAP Server # Install', timeout: -1, handler: ->
+    exports.push header: 'OpenLDAP Server # Install', timeout: -1, handler: ->
       @service
         name: 'openldap-servers'
         chk_name: 'slapd'
@@ -47,18 +47,18 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
 
 http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
 
-    exports.push name: 'OpenLDAP Server # Logging', handler: ->
+    exports.push header: 'OpenLDAP Server # Logging', handler: (options) ->
       {config_dn, config_password, config_file, log_level} = @config.openldap_server
-      @log 'Check rsyslog dependency'
+      options.log 'Check rsyslog dependency'
       @service
         name: 'rsyslog'
-      @log? 'Declare local4 in rsyslog configuration'
+      options.log 'Declare local4 in rsyslog configuration'
       @write
         destination: '/etc/rsyslog.conf'
         match: /^local4.*/mg
         replace: 'local4.*                                                /var/log/slapd.log'
         append: 'RULES'
-      @log? 'Restart rsyslog service'
+      options.log 'Restart rsyslog service'
       @service
         name: 'rsyslog'
         action: 'restart'
@@ -77,11 +77,11 @@ http://itdavid.blogspot.ca/2012/05/howto-centos-6.html
 http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
 ###
 
-    exports.push name: 'OpenLDAP Server # Config Access', timeout: -1, handler: ->
+    exports.push header: 'OpenLDAP Server # Config Access', timeout: -1, handler: (options) ->
       {config_file, config_dn, config_password, config_slappasswd} = @config.openldap_server
       @call (_, callback) ->
         return callback null, false if config_slappasswd
-        @log? "Extract password from #{config_file}"
+        options.log "Extract password from #{config_file}"
         @fs.readFile config_file, 'ascii', (err, content) ->
           return callback err if err
           if match = /^olcRootPW: {SSHA}(.*)$/m.exec content
@@ -96,7 +96,7 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
       , (err, executed, stdout) ->
         config_slappasswd = stdout.trim() if not err and executed
       @call (_, callback) ->
-        @log? 'Database config: root DN & PW'
+        options.log 'Database config: root DN & PW'
         write = [match: /^olcRootDN:.*$/m, replace: "olcRootDN: #{config_dn}"]
         if config_slappasswd
           write.push
@@ -112,19 +112,19 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
           if: -> @status -1
         @then callback
 
-    exports.push name: 'OpenLDAP Server # DB monitor', timeout: -1, handler: ->
+    exports.push header: 'OpenLDAP Server # DB monitor', timeout: -1, handler: (options) ->
       {suffix, monitor_file} = @config.openldap_server
-      @log? 'Database monitor: root DN'
+      options.log 'Database monitor: root DN'
       @write
         destination: monitor_file
         match: /^(.*)dc=my-domain,dc=com(.*)$/m
         replace: "$1#{suffix}$2"
 
-    exports.push name: 'OpenLDAP Server # DB bdb', timeout: -1, handler: ->
+    exports.push header: 'OpenLDAP Server # DB bdb', timeout: -1, handler: (options) ->
       {suffix, bdb_file, root_dn, root_password, root_slappasswd} = @config.openldap_server
       @call (_, callback) ->
         return callback null, false if root_slappasswd
-        @log? "Extract password from #{bdb_file}"
+        options.log "Extract password from #{bdb_file}"
         @fs.readFile bdb_file, 'ascii', (err, content) ->
           return callback err if err
           if match = /^olcRootPW: {SSHA}(.*)$/m.exec content
@@ -139,7 +139,7 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
       , (err, executed, stdout) ->
         root_slappasswd = stdout.trim() if not err and executed
       @call (_, callback) ->
-        @log? 'Database bdb: root DN, root PW, password protection'
+        options.log 'Database bdb: root DN, root PW, password protection'
         write = [
           {match: /^(.*)dc=my-domain,dc=com(.*)$/m, replace: "$1#{suffix}$2"}
           {match: /^olcRootDN:.*$/m, replace: "olcRootDN: #{root_dn}"}
@@ -158,7 +158,7 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
           if: -> @status -1
         @then callback
     
-    exports.push name: 'OpenLDAP Server # Users and Groups', timeout: -1, handler: ->
+    exports.push header: 'OpenLDAP Server # Users and Groups', timeout: -1, handler: ->
       {root_dn, root_password, suffix, users_dn, groups_dn} = @config.openldap_server
       [_, suffix_k, suffix_v] = /(\w+)=([^,]+)/.exec suffix
       @execute
@@ -184,7 +184,7 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
         """
         code_skipped: 68
 
-    exports.push name: 'OpenLDAP Server # SUDO schema', timeout: -1, handler: ->
+    exports.push header: 'OpenLDAP Server # SUDO schema', timeout: -1, handler: ->
       {config_dn, config_password} = @config.openldap_server
       @service
         name: 'sudo'
@@ -213,7 +213,7 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
           passwd: config_password
           uri: true
 
-    exports.push name: 'OpenLDAP Server # Delete ldif data', handler: ->
+    exports.push header: 'OpenLDAP Server # Delete ldif data', handler: ->
       {root_dn, root_password, ldapdelete} = @config.openldap_server
       for path in ldapdelete
         destination = "/tmp/ryba_#{Date.now()}"
@@ -230,7 +230,7 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
         @remove
           destination: destination
 
-    exports.push name: 'OpenLDAP Server # Add ldif data', timeout: 100000, handler: ->
+    exports.push header: 'OpenLDAP Server # Add ldif data', timeout: 100000, handler: ->
       {root_dn, root_password, ldapadd} = @config.openldap_server
       status = false
       for path in ldapadd

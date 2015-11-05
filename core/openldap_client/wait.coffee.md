@@ -7,7 +7,7 @@
 
 ## Wait
 
-    exports.push name: 'OpenLDAP Client # Wait', timeout: -1, label_true: 'READY', handler: ->
+    exports.push header: 'OpenLDAP Client # Wait', timeout: -1, label_true: 'READY', handler: ->
       {config} = @config.openldap_client
       for uri in config['URI'].split ' '
         uri = url.parse uri

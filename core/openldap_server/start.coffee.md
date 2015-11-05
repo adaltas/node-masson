@@ -6,6 +6,6 @@
 
 ## Start
 
-    exports.push name: 'OpenLDAP Server # Start', label_true: 'STARTED', handler: ->
+    exports.push header: 'OpenLDAP Server # Start', label_true: 'STARTED', handler: ->
       @service_start
         name: 'slapd'

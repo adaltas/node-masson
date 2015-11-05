@@ -22,7 +22,7 @@ A module to create and manage unix users and groups.
 Create the users defined inside the "hdp.groups" configuration. See the
 [mecano "group" documentation][mecano_group] for additionnal information.
 
-    exports.push name: 'Groups', handler: ->
+    exports.push header: 'Groups', handler: ->
       @group group for _, group of @config.groups
 
 ## Users
@@ -30,7 +30,7 @@ Create the users defined inside the "hdp.groups" configuration. See the
 Create the users defined inside the "hdp.users" configuration. See the
 [mecano "user" documentation][mecano_user] for additionnal information.
 
-    exports.push name: 'Users', handler: ->
+    exports.push header: 'Users', handler: ->
       @user user for _, user of @config.users
 
 [mecano_group]: https://github.com/wdavidw/node-mecano/blob/master/src/group.coffee.md

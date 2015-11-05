@@ -5,14 +5,14 @@
     exports.push 'masson/bootstrap'
     exports.push 'masson/core/curl'
 
-    exports.push name: 'VirtualBox # Guest Additions', timeout: -1, handler: ->
+    exports.push header: 'VirtualBox # Guest Additions', timeout: -1, handler: (options) ->
       version_target, version_current
       @execute
         ssh: false
         cmd: 'VBoxManage -v'
       , (err, executed, stdout) ->
         return next err if err
-        @log? 'Get Guest Additions version on VM machine'
+        options.log 'Get Guest Additions version on VM machine'
         version_target = /\d+\.\d+\.\d+/.exec(stdout)[0]
       @call ->
         @execute
@@ -22,7 +22,7 @@
           throw err if err
           version_current = stdout.trim()
       @call ->
-        @log? "Install latest Guest Additions #{version_target}"
+        options.log "Install latest Guest Additions #{version_target}"
         @execute
           cmd: """
             yum install -y gcc kernel-* # might need to reboot

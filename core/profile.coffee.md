@@ -31,7 +31,7 @@ Example:
 
 Upload all the configured scripts.
 
-    exports.push name: 'Profile # Upload', handler: ->
+    exports.push header: 'Profile # Upload', handler: ->
       for filename, content of @config.profile
         @write
           destination: "/etc/profile.d/#{filename}"

@@ -65,7 +65,7 @@ two new properties "sshd\_config" and "banner".
 Update the "~/.ssh/authorized_keys" file for each users and add the public SSH keys
 defined inside "users.[].authorized_keys".
 
-    exports.push name: 'SSH # Authorized Keys', timeout: -1, handler: ->
+    exports.push header: 'SSH # Authorized Keys', timeout: -1, handler: ->
       users = for _, user of @config.users then user
       for _, user of users
         @mkdir
@@ -90,7 +90,7 @@ Configure the SSH daemon by updated the "/etc/ssh/sshd_config" file with the
 properties found in the "ssh.sshd_config" object.
 
     exports.push
-      name: 'SSH # Configure'
+      header: 'SSH # Configure'
       timeout: -1
       if: -> @config.ssh.sshd_config
       handler: ->
@@ -111,7 +111,7 @@ Deploy user SSH keys. The private key is defined by the "users.[].rsa"
 propery and is written in "~/.ssh/id\_rsa". The public key is defined by
 the "users.[].rsa\_pub" propery and is written in "~/.ssh/id\_rsa.pub".
 
-    exports.push name: 'SSH # Public and Private Key', timeout: -1, handler: ->
+    exports.push header: 'SSH # Public and Private Key', timeout: -1, handler: ->
       users = for _, user of @config.users then user
       for _, user of users
         throw Error "Property rsa_pub required if rsa defined" if user.rsa and not user.rsa_pub
@@ -139,7 +139,7 @@ on the console once a user successfull logged-in with SSH. The "sshd"
 service will be restarted if this action had any effect.
 
     exports.push
-      name: 'SSH # Banner'
+      header: 'SSH # Banner'
       timeout: 100000
       if: -> @config.ssh.banner
       handler: ->

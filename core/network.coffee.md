@@ -64,7 +64,7 @@ enriched with the cluster hostname if the property "network.hosts_auto" is
 set. Set the "network.hosts_disabled" to "true" if you dont wish to overwrite
 this file.
 
-    exports.push name: 'Network # Hosts', handler: ->
+    exports.push header: 'Network # Hosts', handler: ->
       {hosts, hosts_auto} = @config.network
       write = []
       if hosts_auto then for _, server of @config.servers
@@ -89,7 +89,7 @@ Declare the server hostname. On CentOs like system, the
 relevant file is "/etc/sysconfig/network".
 
     exports.push
-      name: 'Network # Hostname'
+      header: 'Network # Hostname'
       not_if: -> @config.network.hostname_disabled
       handler: ->
         {hostname, network} = @config
@@ -115,7 +115,7 @@ access to the Internet Domain Name System (DNS). The
 configuration file is considered a trusted source of DNS information.
 
     exports.push
-      name: 'Network # DNS Resolver'
+      header: 'Network # DNS Resolver'
       timeout: -1
       if: -> @config.network.resolv
       handler: ->
@@ -136,7 +136,7 @@ Customize the network interfaces configured present inside the
 "/etc/sysconfig/network-scripts" folder.
 
     exports.push
-      name: 'Network # Interfaces'
+      header: 'Network # Interfaces'
       timeout: -1
       if: -> @config.network.ifcg
       handler: ->

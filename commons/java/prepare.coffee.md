@@ -8,15 +8,16 @@ Download the Oracle JDK.
 
 ## Spark Users And Group
 
-    module.exports.push name: 'Java # Oracle JDK', handler: ->
-      @execute
-        cmd: """
-          wget --no-cookies \
-          --no-check-certificate \
-          --header "Cookie: oraclelicense=accept-securebackup-cookie" \
-          "http://download.oracle.com/otn-pub/java/jdk/7u55-b13/jdk-7u55-linux-x64.rpm" \
-          -O jdk-7-linux-x64.rpm
-          """
+    module.exports.push
+      header: 'Java # Oracle JDK'
+      timeout: -1
+      if: -> @contexts('masson/commons/java')[0]?.config.host is @config.host
+      handler: ->
+        @cache
+          ssh: null
+          source: "http://download.oracle.com/otn-pub/java/jdk/7u79-b15/jdk-7u79-linux-x64.tar.gz"
+          headers: ['Cookie: oraclelicense=accept-securebackup-cookie']
+          location: true
 
 ## Resources
 

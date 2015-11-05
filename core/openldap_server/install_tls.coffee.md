@@ -364,7 +364,7 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=ryba
     exports.configure = (ctx) ->
       ctx.config.openldap_server ?= {}
 
-    exports.push name: 'OpenLDAP Server # TLS Deploy', handler: ->
+    exports.push header: 'OpenLDAP Server # TLS Deploy', handler: ->
       { tls, tls_ca_cert_file, tls_cert_file, tls_key_file } = @config.openldap_server
       return next() unless tls
       tls_ca_cert_filename = path.basename tls_ca_cert_file
@@ -411,7 +411,7 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=ryba
         action: 'restart'
         if: -> @status()
 
-    exports.push name: 'OpenLDAP Server # TLS Activate LDAPS', handler: ->
+    exports.push header: 'OpenLDAP Server # TLS Activate LDAPS', handler: ->
       @write
         match: /^SLAPD_LDAPS.*/mg
         replace: 'SLAPD_LDAPS=yes'
@@ -423,7 +423,7 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=ryba
 
     exports.push 'masson/core/openldap_client'
 
-    exports.push name: 'OpenLDAP Server # TLS Check', label_true: 'CHECKED', timeout: -1, handler: ->
+    exports.push header: 'OpenLDAP Server # TLS Check', label_true: 'CHECKED', timeout: -1, handler: ->
       {suffix, root_dn, root_password} = @config.openldap_server
       @execute
         cmd: "ldapsearch -x -H ldaps://#{@config.host} -b #{suffix} -D #{root_dn} -w #{root_password}"

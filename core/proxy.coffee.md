@@ -81,7 +81,7 @@ Declare the http_proxy and "https_proxy" environment
 variables by declaring a shell script inside the 
 profile initialization directory.
 
-    exports.push name: 'Proxy # Profile', handler: ->
+    exports.push header: 'Proxy # Profile', handler: ->
       # There is no proxy to configure
       return unless @config.proxy.http_proxy
       # TODO: removed, not sure if we want it back, proxy shouldn't be 

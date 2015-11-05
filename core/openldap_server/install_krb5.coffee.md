@@ -74,12 +74,12 @@ Prepare and deploy the kerberos schema. Upon installation, it
 is possible to check if the schema is installed by calling
 the command `ldapsearch  -D cn=admin,cn=config -w test -b "cn=config"`.
 
-    exports.push name: 'OpenLDAP Server # Kerberos Install schema', timeout: -1, handler: ->
+    exports.push header: 'OpenLDAP Server # Kerberos Install schema', timeout: -1, handler: (options) ->
       {config_dn, config_password} = @config.openldap_server
-      @log? 'Install schema'
+      options.log 'Install schema'
       @service
         name: 'krb5-server-ldap'
-      @log? 'Get schema location'
+      options.log 'Get schema location'
       schema = null
       @execute
         cmd: 'rpm -ql krb5-server-ldap | grep kerberos.schema'
@@ -98,7 +98,7 @@ the command `ldapsearch  -D cn=admin,cn=config -w test -b "cn=config"`.
 Create the kerberos organisational unit, for example 
 "ou=kerberos,dc=adaltas,dc=com".
 
-    exports.push name: 'OpenLDAP Server # Kerberos Insert Container', handler: ->
+    exports.push header: 'OpenLDAP Server # Kerberos Insert Container', handler: ->
       {kerberos_dn, krbadmin_user} = @config.openldap_server_krb5
       {openldap_server} = @config
       @ldap_add 
@@ -114,7 +114,7 @@ Create the kerberos organisational unit, for example
 
 Create the kerberos administrator's group.
 
-    exports.push name: 'OpenLDAP Server # Kerberos Insert Group', handler: ->
+    exports.push header: 'OpenLDAP Server # Kerberos Insert Group', handler: ->
       {krbadmin_group} = @config.openldap_server_krb5
       {openldap_server} = @config
       @ldap_add
@@ -127,7 +127,7 @@ Create the kerberos administrator's group.
 
 Create the kerberos administrator's user.
 
-    exports.push name: 'OpenLDAP Server # Kerberos Insert User', handler: ->
+    exports.push header: 'OpenLDAP Server # Kerberos Insert User', handler: ->
       {krbadmin_user} = @config.openldap_server_krb5
       {openldap_server} = @config
       @ldap_user
@@ -136,7 +136,7 @@ Create the kerberos administrator's user.
         passwd: openldap_server.root_password,
         user: krbadmin_user
 
-    exports.push name: 'OpenLDAP Server # Kerberos User permissions', handler: ->
+    exports.push header: 'OpenLDAP Server # Kerberos User permissions', handler: (options) ->
       # We used: http://itdavid.blogspot.fr/2012/05/howto-centos-62-kerberos-kdc-with.html
       # But this is also interesting: http://web.mit.edu/kerberos/krb5-current/doc/admin/conf_ldap.html
       {kerberos_dn, krbadmin_user} = @config.openldap_server_krb5
@@ -157,11 +157,11 @@ Create the kerberos administrator's user.
             "dn.exact=\"#{krbadmin_user.dn}\" write"
           ]
         ]
-      @log? "Check it returns the entire #{kerberos_dn} subtree"
+      options.log "Check it returns the entire #{kerberos_dn} subtree"
       @execute
         cmd: "ldapsearch -H #{uri} -x -D #{krbadmin_user.dn} -w #{krbadmin_user.userPassword} -b #{kerberos_dn}"
 
-    exports.push name: 'OpenLDAP Server # Kerberos Index', handler: ->
+    exports.push header: 'OpenLDAP Server # Kerberos Index', handler: ->
       {suffix} = @config.openldap_server
       @ldap_index
         suffix: suffix

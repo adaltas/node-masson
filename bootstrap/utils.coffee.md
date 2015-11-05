@@ -8,7 +8,7 @@ The `utils` module enriches the bootstraping process with commonly used function
     misc = require 'mecano/lib/misc'
     connect = require 'ssh2-connect'
     exports = module.exports = []
-    exports.push name: 'Bootstrap # Utils', required: true, handler: ->
+    exports.push header: 'Bootstrap # Utils', required: true, handler: ->
 
 ## Reboot
 
@@ -20,11 +20,11 @@ process is finished.
       @reboot = (callback) ->
         attempts = 0
         wait = =>
-          @log 'Wait for reboot'
+          # @log 'Wait for reboot'
           return setTimeout ssh, 2000
         ssh = =>
           attempts++
-          @log "SSH login attempt: #{attempts}"
+          # @log "SSH login attempt: #{attempts}"
           config = misc.merge {}, @config.bootstrap,
             username: 'root'
             password: null
@@ -34,7 +34,7 @@ process is finished.
             return callback err if err
             @ssh = connection
             callback()
-        @log "Reboot"
+        # @log "Reboot"
         @execute
           cmd: 'reboot\n'
         , (err, executed, stdout, stderr) ->
@@ -255,12 +255,12 @@ ctx.connect username: root, host: "master1.hadoop", (err, ssh) ->
           destctx = @hosts[config]
           require('./connection').configure destctx
           config = destctx.config.connection
-        @log "SSH connection to #{config.host}"
+        # @log "SSH connection to #{config.host}"
         # Connection already created, use it
         return callback null, @connections[config.host] if @connections[config.host]
         do_private_key = =>
           return do_connect() if config.private_key
-          @log "Read private key file: #{config.private_key_location}"
+          # @log "Read private key file: #{config.private_key_location}"
           misc.path.normalize config.private_key_location, (location) ->
             fs.readFile location, 'ascii', (err, content) ->
               return next Error "Private key doesnt exists: #{JSON.encode location}" if err and err.code is 'ENOENT'
@@ -271,11 +271,11 @@ ctx.connect username: root, host: "master1.hadoop", (err, ssh) ->
           # config.privateKey = config.private_key
           connect config, (err, connection) =>
             return callback err if err
-            @log "SSH connection open"
+            # @log "SSH connection open"
             @connections[config.host] = connection
             close = (err) ->
-              @log "SSH connection closed for #{config.host}"
-              @log "Error closing connection: #{err.stack or err.message}" if err
+              # @log "SSH connection closed for #{config.host}"
+              # @log "Error closing connection: #{err.stack or err.message}" if err
               connection.end()
             @on 'error', close
             @on 'end', close

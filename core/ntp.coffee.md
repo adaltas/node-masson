@@ -45,7 +45,7 @@ The installation respect the procedure published on [cyberciti][cyberciti]. The
 "ntp" server is installed as a startup service and `ntpdate` is run a first
 time when the `ntpd` daemon isnt yet started.
 
-    exports.push name: 'NTP # Install', timeout: -1, handler: ->
+    exports.push header: 'NTP # Install', timeout: -1, handler: ->
       {servers} = @config.ntp
       @service
         name: 'ntp'
@@ -67,7 +67,7 @@ The "fudge" property is used when a server should trust its own BIOS clock.
 It should only be used in a pure offline configuration,
 and when only ONE ntp server is configured
 
-    exports.push name: 'NTP # Configure', handler: (_, callback) ->
+    exports.push header: 'NTP # Configure', handler: (_, callback) ->
       {ntp} = @config
       servers = ntp.servers.slice 0
       return callback() unless servers?.length
@@ -133,8 +133,8 @@ and when only ONE ntp server is configured
 
 Start the `ntpd` daemon if it isnt yet running.
 
-    exports.push name: 'NTP # Start', label_true: 'STARTED', timeout: -1, handler: ->
-      @log? "Start the NTP service"
+    exports.push header: 'NTP # Start', label_true: 'STARTED', timeout: -1, handler: (options) ->
+      options.log "Start the NTP service"
       @service_start
         name: 'ntpd'
 
@@ -146,17 +146,17 @@ property, the `ntpd` daemon is stop, the `ntpdate` command is used to
 synchronization the date and the `ntpd` daemon is finally restarted.
 
     exports.push
-      name: 'NTP # Check'
+      header: 'NTP # Check'
       label_true: 'CHECKED'
       not_if: [
          -> @config.ntp.servers[0] is @config.host
          -> @config.ntp.servers.length is 0
          -> @config.ntp.lag < 1
       ]
-      handler: ->
+      handler: (options) ->
         # Here's good place to compare the date, maybe with the host maching:
         # if gap is greather than threehold, stop ntpd, ntpdate, start ntpd
-        @log? "Synchronize the system clock with #{@config.ntp.servers[0]}"
+        options.log "Synchronize the system clock with #{@config.ntp.servers[0]}"
         {lag} = @config.ntp
         current_lag = null
         @execute
@@ -166,7 +166,7 @@ synchronization the date and the `ntpd` daemon is finally restarted.
           time = parseInt(stdout.trim(), 10) * 1000
           current_lag = Math.abs(new Date() - new Date(time))
         .call ->
-          @log? "Lag greater than #{lag}ms: #{current_lag}"
+          options.log "Lag greater than #{lag}ms: #{current_lag}"
           @service_stop
             name: 'ntpd'
             if: current_lag < lag

@@ -74,7 +74,7 @@ any settings from the proxy action.
 
 Install the git package.
 
-    exports.push name: 'Git # Package', timeout: -1, handler: ->
+    exports.push header: 'Git # Package', timeout: -1, handler: ->
       @service
         name: 'git'
 
@@ -82,7 +82,7 @@ Install the git package.
 
 Deploy the git configuration.
 
-    exports.push name: 'Git # Config', handler: ->
+    exports.push header: 'Git # Config', handler: ->
       {merge, properties, global} = @config.git
       unless @registered 'git_config'
         @register 'git_config', (options) ->

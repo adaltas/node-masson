@@ -73,7 +73,7 @@ Configure the `download` function to support cache.
 }
 ```
 
-    # exports.push name: 'Bootstrap # Mecano', required: true, timeout: -1, handler:  (ctx, next) ->
+    # exports.push header: 'Bootstrap # Mecano', required: true, timeout: -1, handler:  (ctx, next) ->
     #   options = {}
     #   # options.ssh = ctx.ssh
     #   options.log = ctx.log
@@ -90,7 +90,7 @@ Configure the `download` function to support cache.
 File System functionnalities are imported from the [Node.js `fs`][nodefs] API with
 transparent SSH2 transport thanks to the [ssh2-fs] package.
 
-    exports.push name: 'Bootstrap # File System', required: true, timeout: -1, handler: ->
+    exports.push header: 'Bootstrap # File System', required: true, timeout: -1, handler: ->
       @fs ?= {}
       [ 'rename', 'chown', 'chmod', 'stat', 'lstat', 'unlink', 'symlink',
         'readlink', 'unlink', 'mkdir', 'readdir', 'readFile', 'writeFile',

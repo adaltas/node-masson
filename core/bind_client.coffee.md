@@ -13,6 +13,6 @@ nslookup, dig and host.
 
 The package "bind-utils" is installed.
 
-    exports.push name: 'Bind Client # Install', timeout: -1, handler: ->
+    exports.push header: 'Bind Client # Install', timeout: -1, handler: ->
       @service
         name: 'bind-utils'
