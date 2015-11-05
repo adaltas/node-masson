@@ -92,43 +92,44 @@ Upload the YUM repository definitions files present in
 "ctx.config.yum.copy" to the yum repository directory 
 in "/etc/yum.repos.d"
 
-    exports.push header: 'YUM # Repositories', timeout: -1, handler: (_, callback) ->
+    exports.push header: 'YUM # Repositories', timeout: -1, handler: (options) ->
       {copy, clean} = @config.yum
-      return callback() unless copy
-      modified = false
-      basenames = []
-      do_search = =>
+      return unless copy
+      local_files = null
+      remote_files = null
+      @call (_, callback) ->
+        options.log message: "Searching repositories inside \"/etc/yum.repos.d/\"", level: 'DEBUG', module: 'masson/core/yum'
         glob copy, (err, files) =>
           local_files = for file in files
             continue if /^\./.test path.basename file
             file
-          @fs.readdir '/etc/yum.repos.d/', (err, files) ->
+          @fs.readdir '/etc/yum.repos.d/', (err, files) =>
+            return callback err if err
+            options.log "Found #{files.length} repositories", level: 'DEBUG', module: 'masson/core/yum'
             remote_files = for file in files
               continue if /^\./.test path.basename file
               "/etc/yum.repos.d/#{file}"
-            do_clean local_files, remote_files
-      do_clean = (local_files, remote_files) =>
-        return do_upload local_files unless clean
-        removes = remote_files
-        .filter (file) -> # Only keep file not present locally
-          not local_files.some (local_file) -> path.basename(file) is path.basename(local_file)
-        .map (file) -> # Transform to object
-          destination: file
-        @remove removes, (err, removed) ->
-          return callback err if err
-          modified = true if removed
-          do_upload local_files
-      do_upload = (local_files) =>
-        for file in local_files
-          @download
-            source: file
-            destination: "/etc/yum.repos.d/#{path.basename file}"
+            callback()
+      @call ->
+        return unless clean
+        options.log "Remove #{remote_files.length} files", level: 'WARN', module: 'masson/core/yum'
+        remote_files = remote_files
+          .filter (file) -> # Only keep file not present locally
+            not local_files.some (local_file) -> path.basename(file) is path.basename(local_file)
+          .map (file) -> # Transform to object
+            destination: file
+        @remove remote_files
+      @call (_, callback) ->
+        options.log "Upload #{local_files.length} files", level: 'INFO', module: 'masson/core/yum'
+        @write (
+          source: file
+          local_source: true
+          destination: "/etc/yum.repos.d/#{path.basename file}"
+        ) for file in local_files
         @execute
           cmd: 'yum clean metadata; yum -y update'
-          if: modified
-        @then (err) ->
-          callback err, modified
-      do_search()
+          if: @status -1
+        @then callback
 
 ## Epel
 
