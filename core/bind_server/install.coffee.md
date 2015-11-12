@@ -105,7 +105,7 @@ Generates configuration files for rndc.
       {group, user} = @config.bind_server
       @execute
         cmd: 'rndc-confgen -a -r /dev/urandom -c /etc/rndc.key'
-        not_if_exists: '/etc/rndc.key'
+        unless_exists: '/etc/rndc.key'
       @chown
         destination: '/etc/rndc.key'
         uid: user.name

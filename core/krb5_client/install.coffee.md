@@ -35,7 +35,7 @@ which create a Kerberos file with complementary information.
       name: 'Krb5 Client # Configure'
       timeout: -1
       # Kerberos config is also managed by the kerberos server action.
-      not_if: -> @has_module 'masson/core/krb5_server'
+      unless: -> @has_module 'masson/core/krb5_server'
       handler: ->
         @ini
           content: safe_etc_krb5_conf @config.krb5.etc_krb5_conf

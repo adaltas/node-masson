@@ -46,7 +46,7 @@ the command `authconfig --update --ldaploadcacert={file}`.
             source: certificate
             destination: "/etc/openldap/cacerts/#{filename}.0"
             # destination: "#{config.TLS_CACERTDIR}/#{filename}.0"
-            not_if_exists: true
+            unless_exists: true
 
 
 ## Configure

@@ -197,7 +197,7 @@ Remove test database and access to it? [Y/n] y
             GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '#{password}' WITH GRANT OPTION;
             FLUSH PRIVILEGES;
             """
-            not_if_exec: """
+            unless_exec: """
             password=`#{query "SELECT PASSWORD('#{password}');"}`
             #{query "SHOW GRANTS FOR root;"} | grep $password
             """

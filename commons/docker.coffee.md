@@ -66,7 +66,7 @@ remote access, docker exec is the current recommended approach.
         cmd: """
         docker run -v /usr/local/bin:/target jpetazzo/nsenter
         """
-        not_if_exec: "which nsenter"
+        unless_exec: "which nsenter"
 
 ## Registry 2.0
 

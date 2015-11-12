@@ -147,7 +147,7 @@ property "yum.epel" to false.
           cmd: if epel_url
           then "rpm -Uvh #{epel_url}"
           else 'yum install epel-release' 
-          not_if_exec: 'yum list installed | grep epel-release'
+          unless_exec: 'yum list installed | grep epel-release'
 
     exports.push name: 'YUM # Update', timeout: -1, handler: (_, callback) ->
       {update} = @config.yum

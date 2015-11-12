@@ -21,7 +21,7 @@
         destination: '/tmp/rar.rpm'
         proxy: proxy
         binary: true
-        not_if_exec: 'which rar'
+        unless_exec: 'which rar'
       @execute
         cmd: "rpm -Uvh /tmp/rar.rpm"
         if: -> @status -1
@@ -36,7 +36,7 @@
         destination: '/tmp/unrar.rpm'
         proxy: proxy
         binary: true
-        not_if_exec: 'which unrar'
+        unless_exec: 'which unrar'
       @execute
         cmd: "rpm -Uvh /tmp/unrar.rpm"
       @remove

@@ -163,7 +163,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
           -D \"#{manager_dn}\" -w #{manager_password} \
           create -subtrees \"#{ldap_kerberos_container_dn}\" -r #{realm} -s -P #{kdc_master_key}
           """
-          not_if: -> @status -1
+          unless: -> @status -1
 
     exports.push name: 'Krb5 Server # LDAP Stash password', timeout: 5*60*1000, handler: ->
       {kdc_conf} = @config.krb5

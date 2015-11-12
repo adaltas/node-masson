@@ -44,7 +44,7 @@ come with the OpenJDK installed and to avoid any ambiguity, we simply remove the
 
     exports.push
       name: 'Java # Remove OpenJDK'
-      not_if: -> @config.java.openjdk
+      unless: -> @config.java.openjdk
       handler: ->
         @execute
           cmd: 'yum -y remove *openjdk*'
@@ -93,7 +93,7 @@ inside the configuration. The properties "jce\_local\_policy" and
           proxy: proxy
           destination: "#{destination}"
           binary: true
-          not_if: -> installed
+          unless: -> installed
         @execute
           cmd: """
           mkdir -p /usr/java
@@ -105,7 +105,7 @@ inside the configuration. The properties "jce\_local\_policy" and
           ln -sf /usr/java/$version /usr/java/default
           rm -rf #{tmpdir}
           """
-          not_if: -> installed
+          unless: -> installed
           trap_on_error: true
 
 ## Java JCE

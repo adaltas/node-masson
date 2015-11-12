@@ -75,7 +75,7 @@ N is a Node.js binary management system, similar to nvm and nave.
         make install
         """
         if: method is 'n'
-        not_if_exists: '/usr/local/bin/n'
+        unless_exists: '/usr/local/bin/n'
 
 ## Node.js Installation
 
