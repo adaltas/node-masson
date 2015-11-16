@@ -2,7 +2,6 @@
 util = require 'util'
 connect = require 'ssh2-connect'
 exec = require 'ssh2-exec'
-each = require 'each'
 
 module.exports = (options, callback) ->
   {public_key, bootstrap} = @config.connection

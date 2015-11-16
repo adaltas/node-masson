@@ -148,7 +148,7 @@ synchronization the date and the `ntpd` daemon is finally restarted.
     exports.push
       header: 'NTP # Check'
       label_true: 'CHECKED'
-      not_if: [
+      unless: [
          -> @config.ntp.servers[0] is @config.host
          -> @config.ntp.servers.length is 0
          -> @config.ntp.lag < 1

@@ -1,8 +1,8 @@
 
 # Mysql Server
 
-    each = require 'each'
     escape = (text) -> text.replace(/[\\"]/g, "\\$&")
+    
     exports = module.exports = []
     exports.push 'masson/bootstrap'
     exports.push 'masson/core/iptables'
@@ -199,7 +199,7 @@ Remove test database and access to it? [Y/n] y
             GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '#{password}' WITH GRANT OPTION;
             FLUSH PRIVILEGES;
             """
-            not_if_exec: """
+            unless_exec: """
             password=`#{query "SELECT PASSWORD('#{password}');"}`
             #{query "SHOW GRANTS FOR root;"} | grep $password
             """

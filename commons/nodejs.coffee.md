@@ -7,9 +7,6 @@ It depends on the "masson/core/git" and "masson/commons/users" modules. The form
 is used to download n and the latest is used to write a "~/.npmrc" file in the
 home of each users.
 
-    each = require 'each'
-    mecano = require 'mecano'
-    misc = require 'mecano/lib/misc'
     exports = module.exports = []
     exports.push 'masson/bootstrap'
     exports.push 'masson/commons/git'
@@ -78,7 +75,7 @@ N is a Node.js binary management system, similar to nvm and nave.
         make install
         """
         if: method is 'n'
-        not_if_exists: '/usr/local/bin/n'
+        unless_exists: '/usr/local/bin/n'
 
 ## Node.js Installation
 
@@ -108,3 +105,9 @@ module.
 
 [nodejs]: http://www.nodejs.org
 [n]: https://github.com/visionmedia/n
+
+## Dependencies
+
+    mecano = require 'mecano'
+    misc = require 'mecano/lib/misc'
+

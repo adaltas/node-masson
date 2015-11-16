@@ -131,7 +131,7 @@ the "users.[].rsa\_pub" propery and is written in "~/.ssh/id\_rsa.pub".
           gid: null
           mode: 0o600
 
-# Banner
+## Banner
 
 Write the banner file in the system and register it with the SSH
 daemon configuration file. The banner is a short message which appear

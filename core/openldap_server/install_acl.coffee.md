@@ -36,7 +36,7 @@ After this call, the follwing command should execute with success:
 ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=com -w test
 ```
 
-    exports.push header: 'OpenLDAP Server # ACL Permissions for nssproxy', handler: ->
+    exports.push header: 'OpenLDAP Server # ACL for nssproxy', handler: ->
       {suffix} = @config.openldap_server
       @ldap_acl
         suffix: suffix

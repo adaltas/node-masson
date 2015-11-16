@@ -202,7 +202,7 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
         source: "#{__dirname}/../files/ldap.schema"
         destination: '/tmp/ldap.schema'
         mode: 0o0640
-        not_if: -> @status -1
+        unless: -> @status -1
       , (err, uploaded) ->
         schema = '/tmp/ldap.schema' if not err and uploaded
       @call ->
@@ -267,7 +267,6 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
 ## Module Dependencies
 
     crypto = require 'crypto'
-    each = require 'each'
 
 ## Useful commands
 

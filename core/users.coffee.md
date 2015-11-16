@@ -1,10 +1,10 @@
 
-    exports = module.exports = []
-    exports.push 'masson/bootstrap'
-
 # Users
 
 A module to create and manage unix users and groups.
+
+    exports = module.exports = []
+    exports.push 'masson/bootstrap'
 
 ## Configuration
 

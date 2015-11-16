@@ -90,7 +90,7 @@ relevant file is "/etc/sysconfig/network".
 
     exports.push
       header: 'Network # Hostname'
-      not_if: -> @config.network.hostname_disabled
+      unless: -> @config.network.hostname_disabled
       handler: ->
         {hostname, network} = @config
         restart = false

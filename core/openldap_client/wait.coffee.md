@@ -18,6 +18,6 @@
           host: uri.hostname
           port: uri.port
 
-## Module Dependencies
+## Dependencies
 
     url = require 'url'

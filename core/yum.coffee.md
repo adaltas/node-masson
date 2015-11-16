@@ -148,15 +148,17 @@ property "yum.epel" to false.
           cmd: if epel_url
           then "rpm -Uvh #{epel_url}"
           else 'yum install epel-release' 
-          not_if_exec: 'yum list installed | grep epel-release'
+          unless_exec: 'yum list installed | grep epel-release'
 
     exports.push header: 'YUM # Update', timeout: -1, handler: (_, callback) ->
       {update} = @config.yum
+      # We use case-insensitive search because case change between rh 6 and 7
       @execute
-        cmd: "yum -y update | grep 'No Packages marked for Update'"
+        cmd: "yum -y update | grep -i 'no packages marked for update'"
         if: update
       , (err, executed, stdout, stderr) ->
-        callback err, executed and not /No Packages marked for Update/.test stdout
+        regex = new RegExp 'no packages marked for update', 'i'
+        callback err, executed and not regex.test stdout
 
     exports.push header: 'YUM # Packages', timeout: -1, handler: ->
       @service (

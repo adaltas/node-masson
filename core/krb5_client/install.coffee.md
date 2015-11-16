@@ -35,7 +35,7 @@ which create a Kerberos file with complementary information.
       header: 'Krb5 Client # Configure'
       timeout: -1
       # Kerberos config is also managed by the kerberos server action.
-      not_if: -> @has_module 'masson/core/krb5_server'
+      unless: -> @has_module 'masson/core/krb5_server'
       handler: ->
         @ini
           content: safe_etc_krb5_conf @config.krb5.etc_krb5_conf
@@ -123,11 +123,10 @@ configuration object. By default, we set the following properties to "yes": "Cha
 
 ## Module Dependencies
 
-    each = require 'each'
     misc = require 'mecano/lib/misc'
     {safe_etc_krb5_conf} = require './index'
 
-## Usefull Client Commands
+## Useful Client Commands
 
 *   List all the current principals in the realm: `getprincs`
 *   Login to a local kadmin: `kadmin.local`

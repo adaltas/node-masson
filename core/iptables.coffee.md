@@ -72,7 +72,7 @@ Redirect input logs in "/var/log/messages".
     exports.push
       header: 'Iptables # Log'
       timeout: -1
-      not_if: -> @config.iptables.action isnt 'start' or @config.iptables.log is false
+      unless: -> @config.iptables.action isnt 'start' or @config.iptables.log is false
       handler: ->
         @iptables
           rules: @config.iptables.log_rules
