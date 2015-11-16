@@ -116,7 +116,7 @@ existing key would be overwritten.
           next null, false
       do_bootstrap = =>
         options.log "Connection failed, bootstrap"
-        bootstrap @, (err, reboot) =>
+        bootstrap.call @, options, (err, reboot) =>
           return next err if err
           if reboot then do_wait_reboot() else do_connect_after_bootstrap()
       do_wait_reboot = =>

@@ -127,7 +127,7 @@ and when only ONE ntp server is configured
           srv_name: 'ntpd'
           action: 'restart'
           if_not: modified
-        .then callback
+        @then callback
 
 ## Start
 
@@ -165,7 +165,7 @@ synchronization the date and the `ntpd` daemon is finally restarted.
           throw err if err
           time = parseInt(stdout.trim(), 10) * 1000
           current_lag = Math.abs(new Date() - new Date(time))
-        .call ->
+        @call ->
           options.log "Lag greater than #{lag}ms: #{current_lag}"
           @service_stop
             name: 'ntpd'

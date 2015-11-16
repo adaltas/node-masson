@@ -4,8 +4,8 @@ connect = require 'ssh2-connect'
 exec = require 'ssh2-exec'
 each = require 'each'
 
-module.exports = (ctx, callback) ->
-  {public_key, bootstrap} = ctx.config.connection
+module.exports = (options, callback) ->
+  {public_key, bootstrap} = @config.connection
   # ctx.log "SSH login to #{bootstrap.username}@#{bootstrap.host}:#{bootstrap.port}"
   connect bootstrap, (err, ssh) ->
     cmd = """
@@ -30,5 +30,13 @@ module.exports = (ctx, callback) ->
         err = null
         rebooting = true
       callback err, rebooting
-    child.stdout.pipe ctx.log.out, end: false
-    child.stderr.pipe ctx.log.err, end: false
+    # child.stdout.pipe ctx.log.out, end: false
+    # child.stderr.pipe ctx.log.err, end: false
+    child.stdout.on 'data', (data) ->
+      options.log message: data, type: 'stdout'
+    child.stdout.on 'end', (data) ->
+      options.log message: null, type: 'stdout'
+    child.stderr.on 'data', (data) ->
+      options.log message: data, type: 'stderr'
+    child.stderr.on 'end', (data) ->
+      options.log message: null, type: 'stderr'
