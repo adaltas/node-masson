@@ -74,12 +74,12 @@ Prepare and deploy the kerberos schema. Upon installation, it
 is possible to check if the schema is installed by calling
 the command `ldapsearch  -D cn=admin,cn=config -w test -b "cn=config"`.
 
-    exports.push header: 'OpenLDAP Server # Krb5 Install schema', timeout: -1, handler: ->
+    exports.push header: 'OpenLDAP Server # Krb5 Install schema', timeout: -1, handler: (options) ->
       {config_dn, config_password} = @config.openldap_server
-      options.log 'Install schema'
+      options.log message: 'Install schema', level: 'DEBUG'
       @service
         name: 'krb5-server-ldap'
-      options.log 'Get schema location'
+      options.log message: 'Get schema location', level: 'DEBUG'
       schema = null
       @execute
         cmd: 'rpm -ql krb5-server-ldap | grep kerberos.schema'
@@ -136,7 +136,7 @@ Create the kerberos administrator's user.
         passwd: openldap_server.root_password,
         user: krbadmin_user
 
-    exports.push header: 'OpenLDAP Server # Krb5 User permissions', handler: ->
+    exports.push header: 'OpenLDAP Server # Krb5 User permissions', handler: (options) ->
       # We used: http://itdavid.blogspot.fr/2012/05/howto-centos-62-kerberos-kdc-with.html
       # But this is also interesting: http://web.mit.edu/kerberos/krb5-current/doc/admin/conf_ldap.html
       {kerberos_dn, krbadmin_user} = @config.openldap_server_krb5
@@ -157,7 +157,7 @@ Create the kerberos administrator's user.
             "dn.exact=\"#{krbadmin_user.dn}\" write"
           ]
         ]
-      options.log "Check it returns the entire #{kerberos_dn} subtree"
+      options.log message: "Check it returns the entire #{kerberos_dn} subtree", level: 'DEBUG'
       @execute
         cmd: "ldapsearch -H #{uri} -x -D #{krbadmin_user.dn} -w #{krbadmin_user.userPassword} -b #{kerberos_dn}"
 
