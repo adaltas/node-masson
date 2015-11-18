@@ -35,8 +35,9 @@ Run = (params, config) ->
       ctx.modules = Object.keys ctx.tree.modules
     # Catch Uncaught Exception
     process.on 'uncaughtException', (err) =>
-      for fqdn, ctx of contexts
-        ctx.emit 'error', err if ctx.listeners('error').length
+      console.log 'masson/lib/run: uncaught exception'
+      # for fqdn, ctx of contexts
+      #   ctx.emit 'error', err if ctx.listeners('error').length
       @emit 'error', err
     each(contexts)
     .parallel(true)
@@ -102,11 +103,13 @@ Run = (params, config) ->
             , middleware.timeout
           run()
         .then (err) =>
-          @emit 'server', ctx, err
-          if err 
-          then (ctx.emit 'error', err if ctx.listeners('error').length)
-          else if params.end is true then ctx.emit 'end'
-          next err
+          console.log "ERROR on #{ctx.config.host}" if err
+          next()
+          # @emit 'server', ctx, err
+          # if err 
+          # then (ctx.emit 'error', err if ctx.listeners('error').length)
+          # else if params.end is true then ctx.emit 'end'
+          # next err
     .then (err) =>
       if err
       then @emit 'error', err
