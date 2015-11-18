@@ -130,11 +130,11 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
       @service
         srv_name: 'krb5kdc'
         action: 'restart'
-        # if: -> first_time
+        if: -> @status()
       @service
         srv_name: 'kadmin'
         action: 'restart'
-        # if: -> first_time
+        if: -> @status()
 
     exports.push header: 'Krb5 Server # LDAP Insert Entries', timeout: -1, handler: ->
       {kdc_conf} = @config.krb5
