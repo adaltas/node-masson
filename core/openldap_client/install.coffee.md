@@ -48,6 +48,7 @@ the command `authconfig --update --ldaploadcacert={file}`.
 
     exports.push header: 'OpenLDAP Client # Certificate', timeout: -1, handler: ->
       {certificates, config} = @config.openldap_client
+      return unless certificates
       for certificate in certificates then do (certificate) =>
         hash = crypto.createHash('md5').update(certificate).digest('hex')
         filename = null
