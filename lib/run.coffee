@@ -102,14 +102,11 @@ Run = (params, config) ->
               disregard_done = true
             , middleware.timeout
           run()
-        .then (err) =>
-          console.log "ERROR on #{ctx.config.host}" if err
-          next()
-          # @emit 'server', ctx, err
-          # if err 
-          # then (ctx.emit 'error', err if ctx.listeners('error').length)
-          # else if params.end is true then ctx.emit 'end'
-          # next err
+        .then (err) ->
+          if err
+          then ctx.emit 'error', err
+          else ctx.emit 'end'
+          next err
     .then (err) =>
       if err
       then @emit 'error', err
