@@ -23,7 +23,7 @@ engine. All properties from the configuration are exposed to moustache with the
 additionnal "logs.fqdn_reversed" property used in the default filename to
 preserve alphanumerical ordering of files.
 
-    exports.push required: true, handler: ->
+    exports.configure = (ctx) ->
       log = @config.log ?= {}
       log.disabled ?= false
       log.prefix ?= false
@@ -36,6 +36,12 @@ preserve alphanumerical ordering of files.
       log.basedir = mustache.render log.basedir, @config
       log.filename_stdout = mustache.render log.filename_stdout, @config
       # log.filename_stderr = mustache.render log.filename_stderr, @config
+      # Elastic Search
+      log.elasticsearch ?= {}
+      log.elasticsearch.enable ?= false
+      log.elasticsearch.url ?= 'http://localhost:9200'
+      log.elasticsearch.index ?= "ryba"
+      log.elasticsearch.type ?= "install"
 
     exports.push header: 'Bootstrap Log # Text', required: true, handler: ->
       {disabled, basedir, filename_stdout} = @config.log
@@ -113,6 +119,54 @@ preserve alphanumerical ordering of files.
           then print err
           else if err.errors then for error in err.errors then print error
           close()
+
+## Elastic Search
+
+Forward log into Elastic Search. Errors will be silently ignored. Index may be
+removed with the command `curl -XDELETE 'http://localhost:9200/ryba/'`.
+
+    exports.push header: 'Bootstrap Log # Elastic Search', required: true, handler: ->
+      {elasticsearch} = @config.log
+      return unless elasticsearch.enable
+      @call (_, callback) ->
+        url = "#{elasticsearch.url}/#{elasticsearch.index}"
+        request url: url, method: 'HEAD', (err, response, body) ->
+          return callback err if err
+          return callback() if response.statusCode is 200
+          json =
+            settings: refresh_interval: '1s'
+            mappings: install: properties:
+              time:
+                type: 'date'
+                format: 'epoch_millis'
+          request url: url, method: 'PUT', json: json, (err, response, body) ->
+            callback null, response.code is 200
+      @call ->
+        put = (log) ->
+          url = "#{elasticsearch.url}/#{elasticsearch.index}/#{elasticsearch.type}"
+          log.message = log.message.toString() if Buffer.isBuffer log.message
+          request url: url, method: 'POST', json: log, (err, response, body) ->
+            console.log err if err
+        @on 'text', (log) ->
+          put log
+        @on 'header', (log) ->
+          put log
+        @on 'stdin', (log) ->
+          put log
+        @on 'stdout', (log) ->
+          put log
+        @on 'stderr', (log) ->
+          put log
+        @on 'end', ->
+          put type: 'lifecycle', level: 'INFO', message: 'Finished with success'
+        @on 'error', (err) ->
+          put type: 'lifecycle', level: 'ERROR', message: 'Finished with error'
+          print = (err) ->
+            put type: 'lifecycle', level: 'ERROR', message: err.stack or err.message
+          unless err.errors
+          then print err
+          else if err.errors then for error in err.errors then print error      
+
 ## Dependencies
 
     fs = require 'fs'
