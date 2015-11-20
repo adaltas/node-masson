@@ -9,7 +9,6 @@
     path = require 'path'
     util = require 'util'
     EventEmitter = require('events').EventEmitter
-    assign = require 'object-assign'
     CSON = require 'cson'
 
     # ./bin/ryba configure -o output_file -p JSON
