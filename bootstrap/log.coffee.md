@@ -131,7 +131,7 @@ removed with the command `curl -XDELETE 'http://localhost:9200/ryba/'`.
       @call (_, callback) ->
         url = "#{elasticsearch.url}/#{elasticsearch.index}"
         request url: url, method: 'HEAD', (err, response, body) ->
-          return callback err if err
+          return callback null if err
           return callback() if response.statusCode is 200
           json =
             settings: refresh_interval: '1s'
@@ -145,8 +145,7 @@ removed with the command `curl -XDELETE 'http://localhost:9200/ryba/'`.
         put = (log) ->
           url = "#{elasticsearch.url}/#{elasticsearch.index}/#{elasticsearch.type}"
           log.message = log.message.toString() if Buffer.isBuffer log.message
-          request url: url, method: 'POST', json: log, (err, response, body) ->
-            console.log err if err
+          request url: url, method: 'POST', json: log, (err, response, body) -> # Elastic Search doesnt have to be started
         @on 'text', (log) ->
           put log
         @on 'header', (log) ->
