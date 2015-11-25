@@ -105,7 +105,7 @@ Run = (params, config) ->
         .then (err) ->
           if err
           then ctx.emit 'error', err
-          else ctx.emit 'end'
+          else ctx.emit 'end' if params.end
           next err
     .then (err) =>
       if err
