@@ -38,7 +38,7 @@ converted to bytes.
 Here's how to use it inside a module:
 
 ```coffee
-module.export = header: 'My Module', modules: 'masson/bootstrap/info', handler: (ctx) ->
+module.export = header: 'My Module', modules: 'masson/core/info', handler: (ctx) ->
   console.log ctx.diskinfo
 ```
 
@@ -86,7 +86,7 @@ result of "/proc/cpuinfo".
 Here's how to use it inside a module:
 
 ```coffee
-module.export = header: 'My Module', modules: 'masson/bootstrap/info', handler: (ctx) ->
+module.export = header: 'My Module', modules: 'masson/core/info', handler: (ctx) ->
   console.log ctx.cpuinfo
 ```
 
@@ -139,7 +139,7 @@ result of "/proc/meminfo". All the values are in bytes.
 Here's how to use it inside a module:
 
 ```coffee
-module.export = header: 'My Module', modules: 'masson/bootstrap/info', handler: (ctx) ->
+module.export = header: 'My Module', modules: 'masson/core/info', handler: (ctx) ->
   console.log JSON.stringify ctx.meminfo
 ```
 

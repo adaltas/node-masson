@@ -13,6 +13,4 @@ See the documentation of each modules for additionnal information.
 
     exports.push 'masson/bootstrap/connection'
 
-    exports.push 'masson/bootstrap/info'
-
     exports.push 'masson/bootstrap/mecano'
