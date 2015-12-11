@@ -63,15 +63,19 @@ preserve alphanumerical ordering of files.
           else out.write "\n```stdin\n#{log.message}\n```\n\n"
           stdining = log.message isnt null
         @on 'stdout', (log) ->
-          out.write '\n```stdout\n' unless stdouting
-          out.write log.message if log.message
-          out.write '```\n\n' unless log.message
-          stdouting = log.message isnt null
+          out.write "\n```stdout\n#{log.message}```\n\n"
+        # @on 'stdout', (log) ->
+        #   out.write '\n```stdout\n' unless stdouting
+        #   out.write log.message if log.message
+        #   out.write '```\n\n' unless log.message
+        #   stdouting = log.message isnt null
         @on 'stderr', (log) ->
-          out.write '\n```stderr\n' unless stderring
-          out.write log.message if log.message
-          out.write '```\n\n' unless log.message
-          stderring = log.message isnt null
+          out.write "\n```stdout\n#{log.message}```\n\n"
+        # @on 'stderr', (log) ->
+        #   out.write '\n```stderr\n' unless stderring
+        #   out.write log.message if log.message
+        #   out.write '```\n\n' unless log.message
+        #   stderring = log.message isnt null
         close = ->
           setTimeout (-> out.close()), 100
         @on 'end', ->
