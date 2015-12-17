@@ -24,7 +24,7 @@ Dig isn't available by default on CentOS and is installed by the
 Check forward DNS lookup using the configured DNS configuration present inside
 "/etc/resolv.conf". Internally, the exectuted command uses "dig".
 
-    exports.push header: 'Network # Check DNS Forward Lookup', handler: (options) ->
+    exports.push header: 'Network # Check DNS Forward Lookup', label_true: 'CHECKED', handler: (options) ->
       # I didnt find how to restrict dig to return only A records like it
       # does for CNAME records if you append "cname" at the end of the command.
       # I assume the A record to always be printed on the last line.
@@ -43,7 +43,7 @@ Check forward DNS lookup using the configured DNS configuration present inside
 Check reverse DNS lookup using the configured DNS configuration present inside
 "/etc/resolv.conf". Internally, the exectuted command uses "dig".
 
-    exports.push header: 'Network # DNS Reverse Lookup', handler: (options) ->
+    exports.push header: 'Network # DNS Reverse Lookup', label_true: 'CHECKED', handler: (options) ->
       @execute
         cmd: "dig -x #{@config.ip} +short"
         code_skipped: 1
@@ -60,7 +60,7 @@ Check forward DNS lookup using the system configuration which take into account
 the local configuration present inside "/etc/hosts". Internally, the exectuted
 command uses "getent".
 
-    exports.push header: 'Network # Check System Forward Lookup', handler: (options) ->
+    exports.push header: 'Network # Check System Forward Lookup', label_true: 'CHECKED', handler: (options) ->
       @execute
         cmd: "getent hosts #{@config.host}"
         code_skipped: 2
@@ -79,7 +79,7 @@ Check forward DNS lookup using the system configuration which take into account
 the local configuration present inside "/etc/hosts". Internally, the exectuted
 command uses "getent".
 
-    exports.push header: 'Network # Check System Reverse Lookup', handler: (options) ->
+    exports.push header: 'Network # Check System Reverse Lookup', label_true: 'CHECKED', handler: (options) ->
       @execute
         cmd: "getent hosts #{@config.ip}"
         code_skipped: 2
@@ -97,7 +97,7 @@ command uses "getent".
 Read the server hostname and check it matches the expected FQDN. Internally, 
 the executed command is `hostname --fqdn`.
 
-    exports.push header: 'Network # Check Hostname', handler: ->
+    exports.push header: 'Network # Check Hostname', label_true: 'CHECKED', handler: ->
       @execute
         cmd: "hostname --fqdn"
         shy: true
