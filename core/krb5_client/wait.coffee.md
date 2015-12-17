@@ -15,7 +15,7 @@ Wait for all the Kerberos servers referenced by the client configuration.
       {etc_krb5_conf} = @config.krb5
       @wait_connect
         servers: for realm, config of etc_krb5_conf.realms
-          continue unless config.kadmin_principal
+          continue unless config.admin_server
           [host, port] = config.admin_server.split ':'
           host: host
           port: port or 749
@@ -27,9 +27,8 @@ Wait for the admin interface to be ready by issuing the command `listprincs`.
     exports.push header: 'Krb5 Client # Wait Admin', retry: 5, timeout: -1, label_true: 'READY', handler: ->
       {etc_krb5_conf} = @config.krb5
       for realm, config of etc_krb5_conf.realms
-        continue unless config.kadmin_principal
+        continue unless config.kadmin_principal and config.admin_server
         {kadmin_principal, kadmin_password, admin_server} = config
-        continue unless kadmin_principal
         @wait_execute cmd: misc.kadmin
           realm: realm
           kadmin_principal: kadmin_principal
