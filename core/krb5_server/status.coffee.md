@@ -4,12 +4,12 @@
     exports = module.exports = []
     exports.push 'masson/bootstrap'
 
+## Kadmin Status
+
     exports.push header: 'Kerberos Server # Status kadmin', label_true: 'STARTED', label_false: 'STOPPED', handler: ->
-      @execute
-        cmd: "service kadmin status"
-        code_skipped: 3
+      @service_status name: 'kadmin'
+
+## KDC Status
 
     exports.push header: 'Kerberos Server # Status krb5kdc', label_true: 'STARTED', label_false: 'STOPPED', handler: ->
-      @execute
-        cmd: "service krb5kdc status"
-        code_skipped: 3
+      @service_status name:'krb5kdc'
