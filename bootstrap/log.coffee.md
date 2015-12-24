@@ -53,7 +53,7 @@ preserve alphanumerical ordering of files.
         stdouting = stderring = false
         @on 'text', (log) ->
           out.write "#{log.message}"
-          out.write " (#{log.level}, writen by #{log.module})" if log.module
+          out.write " (#{log.level}, written by #{log.module})" if log.module
           out.write "\n"
         @on 'header', (log) ->
           out.write "\n#{'#'.repeat log.header_depth} #{log.message}\n\n"
