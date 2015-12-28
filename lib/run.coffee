@@ -96,7 +96,7 @@ Run = (params, config) ->
           if middleware.timeout > 0
             timeout = setTimeout ->
               retry = 0 # Dont retry on timeout or we risk to get the handler called multiple times
-              done new Error 'TIMEOUT'
+              done new Error "TIMEOUT after #{middleware.timeout}"
               disregard_done = true
             , middleware.timeout
           run()
