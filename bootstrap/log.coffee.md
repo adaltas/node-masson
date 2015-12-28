@@ -62,15 +62,15 @@ preserve alphanumerical ordering of files.
           then out.write "\nRunning Command: `#{log.message}`\n\n"
           else out.write "\n```stdin\n#{log.message}\n```\n\n"
           stdining = log.message isnt null
-        @on 'stdout', (log) ->
-          out.write "\n```stdout\n#{log.message}```\n\n"
         # @on 'stdout', (log) ->
-        #   out.write '\n```stdout\n' unless stdouting
-        #   out.write log.message if log.message
-        #   out.write '```\n\n' unless log.message
-        #   stdouting = log.message isnt null
+        #   out.write "\n```stdout\n#{log.message}```\n\n"
+        @on 'stdout_stream', (log) ->
+          out.write '\n```stdout\n' unless stdouting
+          out.write log.message if log.message
+          out.write '```\n\n' unless log.message
+          stdouting = log.message isnt null
         @on 'stderr', (log) ->
-          out.write "\n```stdout\n#{log.message}```\n\n"
+          out.write "\n```stderr\n#{log.message}```\n\n"
         # @on 'stderr', (log) ->
         #   out.write '\n```stderr\n' unless stderring
         #   out.write log.message if log.message
