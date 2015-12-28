@@ -51,6 +51,7 @@ time when the `ntpd` daemon isnt yet started.
         name: 'ntp'
         chk_name: 'ntpd'
         startup: true
+        code_stopped: [1, 3]
       # Note, no NTPD server may be available yet, no solution at the moment
       # to wait for an available NTPD server
       @execute
@@ -126,6 +127,7 @@ and when only ONE ntp server is configured
         @service
           srv_name: 'ntpd'
           action: 'restart'
+          code_stopped: [1, 3]
           if_not: modified
         @then callback
 
@@ -137,6 +139,7 @@ Start the `ntpd` daemon if it isnt yet running.
       options.log "Start the NTP service"
       @service_start
         name: 'ntpd'
+        code_stopped: [1, 3]
 
 ## Check
 
@@ -165,17 +168,18 @@ synchronization the date and the `ntpd` daemon is finally restarted.
           throw err if err
           time = parseInt(stdout.trim(), 10) * 1000
           current_lag = Math.abs(new Date() - new Date(time))
-        @call ->
-          options.log "Lag greater than #{lag}ms: #{current_lag}"
-          @service_stop
-            name: 'ntpd'
-            if: current_lag < lag
-          @execute
-            cmd: "ntpdate #{@config.ntp.servers[0]}"
-            if: current_lag < lag
-          @service_start
-            name: 'ntpd'
-            if: current_lag < lag
+        @call
+          if: current_lag > lag
+          handler: ->
+            options.log "Lag greater than #{lag}ms: #{current_lag}ms"
+            @service_stop
+              name: 'ntpd'
+              code_stopped: [1, 3]
+            @execute
+              cmd: "ntpdate #{@config.ntp.servers[0]}"
+            @service_start
+              name: 'ntpd'
+              code_stopped: [1, 3]
 
 ## Module Dependencies
 

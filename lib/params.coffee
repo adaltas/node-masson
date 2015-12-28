@@ -7,7 +7,7 @@ module.exports = parameters
     name: 'config', shortcut: 'c', type: 'array'
     description: 'One or multiple configuration files'
     required: true
-  , 
+  ,
     name: 'debug', shortcut: 'd', type: 'boolean'
     description: 'Print readable stacktrace'
   ]
@@ -28,6 +28,16 @@ module.exports = parameters
       description: 'Limit to a list of server hostnames'
     ]
   ,
+  name: 'configure',
+  description: 'Export in a file the server\'s configuration ',
+  options: [
+    name: 'output', shortcut: 'o', type: 'string'
+    description: 'Name of the output file'
+  ,
+    name: 'provider', shortcut: 'p', type: 'string'
+    description: 'JSON or CSON format '
+  ]
+  ,
     name: 'tree'
     description: "Print the execution plan"
     options: [
@@ -41,7 +51,7 @@ module.exports = parameters
     ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
-    , 
+    ,
       name: 'fast', shortcut: 'f', type: 'boolean'
       description: 'Fast mode without dependency resolution'
     ]
@@ -54,7 +64,7 @@ module.exports = parameters
     ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
-    , 
+    ,
       name: 'fast', shortcut: 'f', type: 'boolean'
       description: 'Fast mode without dependency resolution'
     ]
@@ -67,7 +77,7 @@ module.exports = parameters
     ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
-    , 
+    ,
       name: 'fast', shortcut: 'f', type: 'boolean'
       description: 'Fast mode without dependency resolution'
     ]
@@ -80,7 +90,7 @@ module.exports = parameters
     ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
-    , 
+    ,
       name: 'fast', shortcut: 'f', type: 'boolean'
       description: 'Fast mode without dependency resolution'
     ]
@@ -93,7 +103,7 @@ module.exports = parameters
     ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
-    , 
+    ,
       name: 'fast', shortcut: 'f', type: 'boolean'
       description: 'Fast mode without dependency resolution'
     ]
@@ -106,7 +116,7 @@ module.exports = parameters
     ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
-    , 
+    ,
       name: 'fast', shortcut: 'f', type: 'boolean'
       description: 'Fast mode without dependency resolution'
     ]
@@ -119,7 +129,7 @@ module.exports = parameters
     ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
-    , 
+    ,
       name: 'fast', shortcut: 'f', type: 'boolean'
       description: 'Fast mode without dependency resolution'
     ]
@@ -132,7 +142,7 @@ module.exports = parameters
     ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
-    , 
+    ,
       name: 'fast', shortcut: 'f', type: 'boolean'
       description: 'Fast mode without dependency resolution'
     ]
@@ -145,10 +155,11 @@ module.exports = parameters
     ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
-    , 
+    ,
       name: 'fast', shortcut: 'f', type: 'boolean'
       description: 'Fast mode without dependency resolution'
     ]
+
   ,
     name: 'clean'
     description: 'Clean the server'
@@ -158,7 +169,7 @@ module.exports = parameters
     ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
-    , 
+    ,
       name: 'fast', shortcut: 'f', type: 'boolean'
       description: 'Fast mode without dependency resolution'
     ]
@@ -171,9 +182,8 @@ module.exports = parameters
     ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
-    , 
+    ,
       name: 'fast', shortcut: 'f', type: 'boolean'
       description: 'Fast mode without dependency resolution'
     ]
   ]
-
