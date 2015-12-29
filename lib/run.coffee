@@ -63,34 +63,18 @@ Run = (params, config) ->
           ctx.emit 'middleware_start'
           emit_middleware = (err, status) =>
             ctx.emit 'middleware_stop', err, status
-          done = (err, statusOrMsg) =>
+          done = (err, status) =>
             return if disregard_done
             clearTimeout timeout if timeout
             if err and (retry is true or ++attempts < retry)
               ctx.log? "Get error #{err.message}, retry #{attempts} of #{retry}"
               return setTimeout run, middleware.wait
-            emit_middleware err, statusOrMsg
+            emit_middleware err, status
             next err
           run = =>
             ctx.retry = attempts
-            if ctx.call
-              ctx.call middleware
-              ctx.then done
-            else
-              try
-                if middleware.handler.length < 2 # Synchronous middleware
-                  # merge middleware, middleware.handler.call ctx, ctx
-                  middleware.handler.call ctx, ctx
-                  setImmediate ->
-                    middleware.timeout = -1
-                    done()
-                else # Asynchronous middleware
-                  # merge middleware, middleware.handler.call ctx, ctx, (err, statusOrMsg) =>
-                  middleware.handler.call ctx, ctx, (err, statusOrMsg) =>
-                    done err, statusOrMsg
-              catch e
-                retry = false # Dont retry unhandled errors
-                done e
+            ctx.call middleware
+            ctx.then done
           # Timeout, default to 100s
           middleware.timeout ?= 100000
           if middleware.timeout > 0
