@@ -33,9 +33,6 @@ module.exports = parameters
   options: [
     name: 'output', shortcut: 'o', type: 'string'
     description: 'Name of the output file'
-  ,
-    name: 'provider', shortcut: 'p', type: 'string'
-    description: 'JSON or CSON format '
   ]
   ,
     name: 'tree'
