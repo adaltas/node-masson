@@ -29,10 +29,13 @@ module.exports = parameters
     ]
   ,
   name: 'configure',
-  description: 'Export in a file the server\'s configuration ',
+  description: 'Export the server\'s configuration in a file  ',
   options: [
     name: 'output', shortcut: 'o', type: 'string'
     description: 'Name of the output file'
+  ,
+    name: 'ignore', shortcut: 'i', type: 'string'
+    description: 'Overwrite ouput file'
   ]
   ,
     name: 'tree'
