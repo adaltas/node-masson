@@ -34,7 +34,7 @@ module.exports = parameters
     name: 'output', shortcut: 'o', type: 'string'
     description: 'Name of the output file'
   ,
-    name: 'ignore', shortcut: 'i', type: 'string'
+    name: 'ignore', shortcut: 'i', type: 'boolean'
     description: 'Overwrite ouput file'
   ]
   ,

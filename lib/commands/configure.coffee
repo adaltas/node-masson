@@ -16,15 +16,17 @@
       # behave like the first pass of run command
       # creates a context perserver by executing all configure functions
       params = params.parse()
-      provider = 'JSON'
-      output = []
-      extensions = ['JSON','CSON', 'JS', 'COFFEE']
+      provider = 'json'
+      filename = ''
+      extensions = ['json','cson', 'js', 'coffee']
       if params.output?
         output =  params.output.split('.')
         if output.length > 1
-          return throw Error "Extension not support: .#{output[1]}  Available Extensions: .json, .cson, .js, .coffee" if output[1].toUpperCase() not in extensions
-          provider = output[1].toUpperCase()
-        output[1] = ".#{provider.toLowerCase()}"
+          provider = output[output.length-1]
+          throw Error "Extension not support: .#{provider}  Available Extensions: .json, .cson, .js, .coffee" unless provider in extensions
+          filename = params.output
+        else
+          filename = "#{params.output}.#{provider}"
       ctxs_output = {}
       # JSON and CSON are suported for now: by default provider is JSON
       config params.config, (err, config) =>
@@ -42,7 +44,7 @@
         return console.log ctxs_output if !params.output?
         for fqdn, ctx of ctxs_output
           delete ctx.servers
-        location = "#{path.resolve process.cwd(), "#{output[0]}#{output[1]}"}"
+        location = path.resolve process.cwd(), filename
         fs.stat location, (err, exists) ->
           return console.log err if err and err?.code != 'ENOENT'
           if exists
@@ -50,12 +52,12 @@
           console.log location
           wr_stream = fs.createWriteStream location, encoding: 'utf8'
           switch provider
-            when 'CSON'
-              wr_stream.write CSON.stringify(ctxs_output)
-            when 'JSON'
-              wr_stream.write JSON.stringify(ctxs_output,null,4)
-            when 'JS'
-              wr_stream.write "module.exports = servers = #{JSON.stringify(ctxs_output,null,4)}"
-            when 'COFFEE'
-              wr_stream.write "module.exports = servers: #{ CSON.stringify(ctxs_output)}"
+            when 'cson'
+              wr_stream.write CSON.stringify(ctxs_output, null, 2)
+            when 'json'
+              wr_stream.write JSON.stringify(ctxs_output, null, 2)
+            when 'js'
+              wr_stream.write "module.exports = servers = #{JSON.stringify ctxs_output, null, 2}"
+            when 'coffee'
+              wr_stream.write "module.exports = servers: #{CSON.stringify ctxs_output, null, 2}"
           wr_stream.end()
