@@ -16,11 +16,14 @@ Installation will fail unless prepare is called before.
         source: anaconda.archive
         destination: tmp_archive
         binary: true
-        unless_exists: "#{anaconda.install_dir}/anaconda"
+        md5: true
+        unless_exists: "#{anaconda.install_dir}/anaconda/LICENSE.txt"
       @extract
         source: tmp_archive
         destination: anaconda.install_dir
-        unless_exists: "#{anaconda.install_dir}/anaconda"
+        preserve_owner: false
+        unless_exists: "#{anaconda.install_dir}/anaconda/LICENSE.txt"
+      @remove destination: tmp_archive
 
 ## Dependencies
 
