@@ -24,6 +24,7 @@ class Context extends EventEmitter
       host_ctx.run host_ctx, module
     host_ctx
   contexts: (query={}, modules=[]) ->
+    return (for _, host of @hosts then host) unless arguments.length
     query = modules: query if typeof query is 'string' or Array.isArray query
     query.hosts ?= []
     query.hosts = [query.hosts] unless Array.isArray query.hosts
