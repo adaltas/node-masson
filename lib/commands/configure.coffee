@@ -10,6 +10,7 @@
     util = require 'util'
     EventEmitter = require('events').EventEmitter
     CSON = require 'cson'
+    string = require 'mecano/lib/misc/string'
 
     # ./bin/ryba configure -o output_file -p JSON
     module.exports = ->
@@ -59,5 +60,7 @@
             when 'js'
               wr_stream.write "module.exports = servers = #{JSON.stringify ctxs_output, null, 2}"
             when 'coffee'
-              wr_stream.write "module.exports = servers: #{CSON.stringify ctxs_output, null, 2}"
+              # adds 2 spaces to the stringified object for CSON indentation before writing it
+              content = (string.lines CSON.stringify( ctxs_output, null, 2)).map( (line) -> "  #{line}").join("\n")
+              wr_stream.write "module.exports = 'servers': \n#{content}"
           wr_stream.end()
