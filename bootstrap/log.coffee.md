@@ -11,12 +11,13 @@ TODO: look at https://github.com/trentm/node-bunyan
 
 *   `basedir` (string)   
     Directory where log files will be stored, default to "./log".   
+*   `archive` (boolean)   
+    In archive mode, logs will be saved in command/date subdir, with symlink
+    'latest' for quick access. Default to "false".   
 *   `disabled` (boolean)   
-    Disabled any log reporting, default to "true".   
-*   `filename_stdout` (string)   
-    Name of the file to redirect stdout, default to "{{shortname}}.stdout.log".   
-*   `filename_stderr` (string)   
-    Name of the file to redirect stderr, default to "{{shortname}}.stderr.log".   
+    Disable any log reporting, default to "false".   
+*   `filename` (string)   
+    Name of the file, default to "{{shortname}}.log".   
 
 All properties are optional and are integrated with the moustache templating
 engine. All properties from the configuration are exposed to moustache with the
@@ -26,30 +27,45 @@ preserve alphanumerical ordering of files.
     exports.configure = (ctx) ->
       log = @config.log ?= {}
       log.disabled ?= false
-      log.prefix ?= false
-      log.prefix = "#{Date.now()}" if log.prefix is true
+      log.archive ?= false
       log.basedir ?= './log'
+      now = ctx.runinfo.date
+      dateformat = "#{now.getFullYear()}-#{('0'+now.getMonth()).slice -2}-#{('0'+now.getDate()).slice -2}"
+      dateformat += " #{('0'+now.getHours()).slice -2}-#{('0'+now.getMinutes()).slice -2}-#{('0'+now.getSeconds()).slice -2}"
+      log.basedir = path.join log.basedir, ctx.runinfo.command if log.archive
+      log.basedir = path.join log.basedir, dateformat if log.archive
       log.fqdn_reversed = @config.host.split('.').reverse().join('.')
-      filename = if log.prefix then "#{log.prefix}-{{shortname}}" else '{{shortname}}'
-      log.filename_stdout ?= "#{filename}.stdout.log"
+      filename = '{{shortname}}'
+      log.filename ?= "#{filename}.log"
       # Rendering
       log.basedir = mustache.render log.basedir, @config
-      log.filename_stdout = mustache.render log.filename_stdout, @config
+      log.filename = mustache.render log.filename, @config
       # log.filename_stderr = mustache.render log.filename_stderr, @config
       # Elastic Search
       log.elasticsearch ?= {}
       log.elasticsearch.enable ?= false
       log.elasticsearch.url ?= 'http://localhost:9200'
-      log.elasticsearch.index ?= "ryba"
-      log.elasticsearch.type ?= "install"
+      log.elasticsearch.index ?= "masson"
+      log.elasticsearch.type ?= ctx.runinfo.command
 
     exports.push header: 'Bootstrap Log # Text', required: true, handler: ->
-      {disabled, basedir, filename_stdout} = @config.log
+      {disabled, basedir, filename, archive} = @config.log
       return if disabled
       @mkdir
-        destination: "#{basedir}"
+        destination: basedir
+      # creates relative symlink <log>/latest -> <log>/<command>/<date>
+      if archive
+        logdir = path.join basedir, '../../'
+        @link
+          source: path.relative logdir, path.resolve basedir
+          destination: path.join logdir, 'latest'
+        # creates relative symlink <log>/<command>/latest -> <log>/<command>/<date>
+        logdir = path.join basedir, '../'
+        @link
+          source: path.relative logdir, path.resolve basedir
+          destination: path.join logdir, 'latest'
       @call ->
-        out = fs.createWriteStream path.resolve basedir, filename_stdout
+        out = fs.createWriteStream path.resolve basedir, filename
         stdouting = stderring = false
         @on 'text', (log) ->
           out.write "#{log.message}"
@@ -91,15 +107,14 @@ preserve alphanumerical ordering of files.
             out.write err.message + '\n'
             for error in err.errors then print error
           close()
-    
+
     exports.push header: 'Bootstrap Log # CSV', required: true, handler: ->
-      {disabled, basedir, filename_stdout} = @config.log
+      {disabled, basedir, filename} = @config.log
       return if disabled
       @mkdir
         destination: "#{basedir}"
       @call ->
-        {basedir, filename_stdout} = @config.log
-        out = fs.createWriteStream (path.resolve basedir, filename_stdout)+'.csv'
+        out = fs.createWriteStream (path.resolve basedir, filename+'.csv')
         @on 'text', (log) ->
           out.write "#{log.type},#{log.level},#{JSON.stringify log.message},\n"
         @on 'header', (log) ->

@@ -21,6 +21,7 @@ properties which are respectively a list of "middlewares" and a list of modules.
 On the second pass, the middewares are executed.
 ###
 Run = (params, config) ->
+  now = new Date()
   params.end ?= true
   EventEmitter.call @
   @setMaxListeners 100
@@ -29,6 +30,9 @@ Run = (params, config) ->
     contexts = {}
     for fqdn, server of config.servers
       ctx = contexts[fqdn] = context (merge {}, config, server), params.command
+      ctx.runinfo = {}
+      ctx.runinfo.date = now
+      ctx.runinfo.command = params.command
       ctx.hosts = contexts
       ctx.config.modules = ctx.config.modules.reverse() if params.command is 'stop'
       ctx.tree = tree ctx.config.modules
