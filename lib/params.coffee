@@ -69,6 +69,13 @@ module.exports = parameters
       description: 'Fast mode without dependency resolution'
     ]
   ,
+    name: 'init'
+    description: 'Create a project with a default layout and configuration'
+    options: [
+      name: 'path', shortcut: 'p', type: 'string'
+      description: 'Path to the project directory'
+    ]
+  ,
     name: 'install'
     description: 'Install components and deploy configuration'
     options: [

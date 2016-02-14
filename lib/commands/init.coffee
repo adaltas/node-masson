@@ -1,0 +1,197 @@
+
+params = require '../params'
+fs = require 'fs'
+mecano = require 'mecano'
+readline = require 'readline'
+
+module.exports = ->
+  params = params.parse()
+  params.path ?= process.cwd()
+  params.name ?= 'my_project'
+  params.description ?= 'Description of my project.'
+  rl = readline.createInterface process.stdin, process.stdout
+  rl.setPrompt ''
+  rl.on 'SIGINT', process.exit
+  mecano
+  .call (_, callback) ->
+    fs.stat "#{params.path}", (err, stat) =>
+      if err?.code is 'ENOENT'
+        callback null, true
+      else if err
+        callback err
+      else if stat.isDirectory()
+        fs.stat "#{params.path}/.git", (err, stat) =>
+          if err or not stat?.isDirectory()
+            callback null, true
+          else
+            rl.write "Directory already under GIT\n" unless err
+            callback null, false
+      else
+        rl.write "Invalid directory '#{params.path}'\n" unless err
+        callback null, false
+  , (err, status) ->
+    @end() unless err or status
+  .mkdir
+    header: 'Project Directory'
+    destination: "#{params.path}"
+  , (err, status) ->
+    return if err or not status
+    rl.write "Directory '#{params.path}' created\n"
+  .write
+    destination: "#{params.path}/bin/ryba"
+    content: """
+    #!/bin/bash
+    cd `dirname "${BASH_SOURCE}"`/..
+    ./node_modules/.bin/ryba -c ./conf $@
+    """
+    mode: 0o0755
+    eof: true
+  , (err, status) ->
+    return if err or not status
+    rl.write "GIT ignore created\n"
+  .write
+    destination: "#{params.path}/bin/vagrant"
+    content: """
+    #!/bin/bash
+    cd $( dirname "${BASH_SOURCE}" )/../resources
+    vagrant $@ 
+    """
+    mode: 0o0755
+    eof: true
+  , (err, status) ->
+    return if err or not status
+    rl.write "GIT ignore created\n"
+  .write
+    destination: "#{params.path}/.gitignore"
+    content: """
+    .*
+    !.gitignore
+    /node_modules
+    """
+    eof: true
+  , (err, status) ->
+    return if err or not status
+    rl.write "GIT ignore created\n"
+  .write
+    destination: "#{params.path}/package.json"
+    content: """
+    {
+      "name": "#{params.name}",
+      "version": "0.0.0",
+      "description": "#{params.description}",
+      "dependencies": {
+        "coffee-script": "1.10.0",
+        "masson": "0.1.1",
+        "ryba": "0.0.5",
+        "ryba-repos": "0.0.2"
+      }
+    }
+    """
+    eof: true
+  , (err, status) ->
+    return if err or not status
+    rl.write "Package definition created\n"
+  .touch
+    destination: "#{params.path}/cache/.gitignore"
+  , (err, status) ->
+    return if err or not status
+    rl.write "Cache directory created\n"
+  .write
+    destination: "#{params.path}/conf/config.coffee"
+    content: """
+    module.exports =
+      mecano:
+        domain: true
+        cache_dir: "./cache"
+      servers:
+        'node1.ryba':
+          ip: '10.10.10.11'
+          modules: './lib/helloworld'
+    """
+    eof: true
+  , (err, status) ->
+    return if err or not status
+    rl.write "Configuration file created\n"
+  .write
+    destination: "lib/helloworld.coffee.md"
+    content: """
+    # Helloworld
+    
+    A simple module to write a file in the root folder and execute a command.
+    
+        module.exports = (ctx) ->
+          @config.helloword ?= {}
+          @config.helloword.content = 'Helloworld'
+          install: ->
+            @write
+              destination: "/root/helloword"
+              content: "Print #{@config.helloword.content}"
+          check: ->
+            @execute
+              cmd: "[[ `cat /root/helloword` == '@config.helloword.content' ]]"
+            
+    """
+  .write
+    destination: "#{params.path}/conf/VagrantFile"
+    content: """
+    box = "centos65-x86_64-50g"
+    Vagrant.configure("2") do |config|
+      config.vm.synced_folder ".", "/vagrant", disabled: true
+      # Virtualbox Configuration
+      config.vm.provider :virtualbox do |vb|
+        config.vbguest.no_remote = true
+        config.vbguest.auto_update = false
+      end
+      # Libvirt Configuration
+      config.vm.provider :libvirt do |libvirt|
+        libvirt.storage_pool_name="ryba-cluster"
+        libvirt.uri="qemu:///system"
+      end
+      config.vm.define :node1 do |node|
+        node.vm.box = box
+        node.vm.hostname = "node1.ryba"
+        node.vm.network :private_network, ip: "10.10.10.11"
+        node.vm.network :forwarded_port, guest: 22, host: 24011, auto_correct: true
+        node.vm.provider "virtualbox" do |d|
+          d.customize ["modifyvm", :id, "--memory", 1024]
+          d.customize ["modifyvm", :id, "--cpus", 2]
+          d.customize ["modifyvm", :id, "--ioapic", "on"]
+        end
+        node.vm.provider "libvirt" do |d|
+          d.memory = 1024
+          d.cpus = 2
+          d.graphics_port = 5911
+        end
+      end
+    end
+    """
+    eof: true
+  , (err, status) ->
+    return if err or not status
+    rl.write "Vagrant file created\n"
+  .write
+    header: 'Log Directory'
+    destination: "#{params.path}/logs/.gitignore"
+    content: """
+    *
+    !.gitignore
+    """
+    eof: true
+  , (err, status) ->
+    return if err or not status
+    rl.write "GIT initialized\n"
+  .execute
+    cmd: """
+    git init
+    git add .gitignore package.json cache/.gitignore conf/config.coffee logs/.gitignore conf/VagrantFile
+    git commit -m 'Project initialization'
+    """
+    cwd: "#{params.path}"
+  .then (err, status) ->
+    if err
+      rl.write "#{err.stack?.trim() or err.message}\n"
+    else if status
+      rl.write 'Project initialized\n'
+    rl.close()
+        
+          
