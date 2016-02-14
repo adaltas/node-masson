@@ -116,21 +116,31 @@ module.exports = ->
     destination: "lib/helloworld.coffee.md"
     content: """
     # Helloworld
-    
+
     A simple module to write a file in the root folder and execute a command.
-    
+
         module.exports = (ctx) ->
           @config.helloword ?= {}
           @config.helloword.content = 'Helloworld'
+
+    ## Install
+
+    Write a file.
+
           install: ->
             @write
               destination: "/root/helloword"
-              content: "Print #{@config.helloword.content}"
+              content: "Print \#{@config.helloword.content}"
+
+    ## Check
+
+    Compare the file content with its expected value.
+
           check: ->
             @execute
               cmd: "[[ `cat /root/helloword` == '@config.helloword.content' ]]"
-            
     """
+    eof: true
   .write
     destination: "#{params.path}/conf/VagrantFile"
     content: """
