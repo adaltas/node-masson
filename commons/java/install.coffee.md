@@ -72,41 +72,40 @@ inside the configuration. The properties "jce\_local\_policy" and
       timeout: -1
       if: -> @config.java.jdk
       handler: (options) ->
-        {proxy, jdk} = @config.java # location, version
+        {java} = @config
         options.log "Check if java is here and which version it is"
-        installed = false
+        # installed = false
+        @mkdir
+          destination: '/usr/java'
         @execute
+          shy: true
           cmd: 'ls -d /usr/java/jdk*'
-          if_exec: '[[ -d /usr/java/ ]]'
+          # if_exec: '[[ -d /usr/java/ ]]'
+          code_skipped: 2
         , (err, executed, stdout, stderr) ->
-          throw err if err and err.code isnt 2
+          throw err if err #and err.code isnt 2
           stdout = '' if err or not executed
           installed_version = stdout.trim().split('\n').pop()
           return unless installed_version
           installed_version = /jdk(.*)/.exec(installed_version)[1]
           installed_version = installed_version.replace('_', '').replace('0', '')
-          version = jdk.version.replace('_', '').replace('0', '')
+          version = java.jdk.version.replace('_', '').replace('0', '')
           installed = true unless semver.gt version, installed_version
-        tmpdir = "/tmp/masson_java_#{Date.now()}"
-        destination = "#{tmpdir}/#{path.basename jdk.location}"
+          @end() if installed
         @download
-          source: jdk.location
-          proxy: proxy
-          destination: "#{destination}"
-          binary: true
-          unless: -> installed
+          source: "#{java.jdk.location}"
+          destination: "/var/tmp/#{path.basename java.jdk.location}"
         @execute
           cmd: """
-          mkdir -p /usr/java
-          tar xzf #{destination} -C #{tmpdir}
-          rm -rf #{destination}
-          version=`ls #{tmpdir}`
-          mv #{tmpdir}/$version /usr/java
+          rand=$RANDOM
+          mkdir -p /tmp/ryba-${rand}
+          tar xzf /var/tmp/#{path.basename java.jdk.location} -C /tmp/ryba-${rand}
+          version=`ls /tmp/ryba-${rand}`
+          mv /tmp/ryba-${rand}/$version /usr/java
           ln -sf /usr/java/${version} /usr/java/latest
           ln -sf /usr/java/$version /usr/java/default
-          rm -rf #{tmpdir}
+          rm -rf /tmp/ryba-${rand}
           """
-          unless: -> installed
           trap_on_error: true
 
 ## Java JCE
@@ -125,23 +124,25 @@ reference it inside the configuration. The properties "jce\_local\_policy" and
       header: 'Java # Java JCE'
       timeout: -1
       if: [
-        -> @config.java.jce_local_policy or @config.java.jce_us_export_policy
+        -> @config.java.jce.location
         -> @config.java.jdk
       ]
       handler: (options) ->
-        {jdk, jce_local_policy, jce_us_export_policy} = @config.java
-        jdk_home = "/usr/java/jdk#{jdk.version}"
-        options.log "Download jce-6 Security JARs"
+        {java} = @config
+        jdk_home = "/usr/java/jdk#{java.jdk.version}"
         @download
-          source: jce_local_policy
+          source: "#{java.jce.location}"
+          destination: "/var/tmp/#{path.basename java.jce.location}"
+        @extract
+          source: "/var/tmp/#{path.basename java.jce.location}"
+          destination: "/var/tmp/#{path.basename java.jce.location, '.zip'}"
+          if: -> @status -1
+        @copy
+          source: "/var/tmp/#{path.basename java.jce.location, '.zip'}/UnlimitedJCEPolicy/local_policy.jar"
           destination: "#{jdk_home}/jre/lib/security/local_policy.jar"
-          binary: true
-          # sha1: true
-        @download
-          source: jce_us_export_policy
+        @copy
+          source: "/var/tmp/#{path.basename java.jce.location, '.zip'}/UnlimitedJCEPolicy/US_export_policy.jar"
           destination: "#{jdk_home}/jre/lib/security/US_export_policy.jar"
-          binary: true
-          # sha1: true
 
 ## Java # Env
 

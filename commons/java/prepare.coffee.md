@@ -15,7 +15,12 @@ Download the Oracle JDK.
       handler: ->
         @cache
           ssh: null
-          source: "http://download.oracle.com/otn-pub/java/jdk/7u79-b15/jdk-7u79-linux-x64.tar.gz"
+          source: "#{java.jdk.location}"
+          headers: ['Cookie: oraclelicense=accept-securebackup-cookie']
+          location: true
+        @cache
+          ssh: null
+          source: "#{java.jce.location}"
           headers: ['Cookie: oraclelicense=accept-securebackup-cookie']
           location: true
 
