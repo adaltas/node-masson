@@ -1,15 +1,13 @@
 
-# Install FSTAB
+# FSTAB Install
 
-    exports = module.exports = []
-    exports.push 'masson/bootstrap'
+    module.exports = header: 'FSTAB Install', handler: ->
+      {fstab} = @config
 
 ## Configure
 
 Write /etc/fstab
 
-    exports.push header: 'FSTAB # Configure', handler: ->
-      {fstab} = @config
       write = for mntpt, disk of fstab.volumes
         if fstab.exhaustive
           "#{disk.device}\t#{mntpt}\t#{disk.options}\t#{disk.dump} #{disk.pass}"
@@ -18,6 +16,7 @@ Write /etc/fstab
           replace: "#{disk.device}\t#{mntpt}\t#{disk.type}\t#{disk.options}\t#{disk.dump} #{disk.pass}"
           append: true
       @write
+        header: 'Configure'
         destination: '/etc/fstab'
         write: write
         backup: true
@@ -26,13 +25,13 @@ Write /etc/fstab
 
 ## Mount
 
-    exports.push header: 'FSTAB # Mount Volumes', handler: ->
-      {fstab} = @config
-      if fstab.enabled then for mntpt, disk of fstab.volumes
-        @execute
-          cmd: "mount #{disk.device}"
-          unless: mntpt in ['none', 'swap'] or /\/(dev|proc|sys).*/.test mntpt
-          unless_exec: "mount | grep '#{mntpt} type'"
+      @execute (
+        header: 'FSTAB # Mount Volumes'
+        if: fstab.enabled
+        cmd: "mount #{disk.device}"
+        unless: mntpt in ['none', 'swap'] or /\/(dev|proc|sys).*/.test mntpt
+        unless_exec: "mount | grep '#{mntpt} type'"
+      ) for mntpt, disk of fstab.volumes
 
 ## Dependencies
 

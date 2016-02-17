@@ -1,15 +1,12 @@
 
 # Kerberos Server Status
 
-    exports = module.exports = []
-    exports.push 'masson/bootstrap'
+Check if the kadmin and krb5kdc daemons are running.
 
-## Kadmin Status
-
-    exports.push header: 'Kerberos Server # Status kadmin', label_true: 'STARTED', label_false: 'STOPPED', handler: ->
-      @service_status name: 'kadmin'
-
-## KDC Status
-
-    exports.push header: 'Kerberos Server # Status krb5kdc', label_true: 'STARTED', label_false: 'STOPPED', handler: ->
-      @service_status name:'krb5kdc'
+    module.exports = header: 'Kerberos Server Status', label_true: 'STARTED', label_false: 'STOPPED', handler: ->
+      @service_status
+        header: 'kadmin'
+        name: 'kadmin'
+      @service_status
+        header:'krb5kdc'
+        name:'krb5kdc'

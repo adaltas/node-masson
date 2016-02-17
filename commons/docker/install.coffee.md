@@ -1,21 +1,16 @@
 
-# Docker Server
+# Docker Install
 
-    exports = module.exports = []
-    exports.push 'masson/bootstrap'
-    exports.push 'masson/core/yum'
-
-    exports.configure = (ctx) ->
-      ctx.config.docker ?= {}
-      ctx.config.docker.nsenter ?= true
-
+    module.exports = header: 'Docker Install', handler: ->
+      {docker} = @config
+    
 ## Install
 
 Install the `docker-io` package and configure it as a startup and started
 service.
 
-    exports.push header: 'Docker # Service', handler: ->
       @service
+        header: 'Docker # Service'
         name: 'docker'
         yum_name: 'docker-io'
         startup: true
@@ -25,8 +20,8 @@ service.
 
 Get the PID of a docker container by name or ID.
 
-    exports.push header: 'Docker # Install docker-pid', handler: ->
       @write
+        header: 'Docker # Install docker-pid'
         content: """
         #!/bin/sh
         exec docker inspect --format '{{ .State.Pid }}' "$@"
@@ -38,8 +33,8 @@ Get the PID of a docker container by name or ID.
 
 Get the ip address of a container by name or ID.
 
-    exports.push header: 'Docker # Install docker-ip', handler: ->
       @write
+        header: 'Docker # Install docker-ip'
         content: """
         #!/bin/sh
         exec docker inspect --format '{{ .NetworkSettings.IPAddress }}' "$@"
@@ -61,8 +56,9 @@ nsenter doesn't enter the cgroups, and therefore evades resource limitations.
 The potential benefit of this would be debugging and external audit, but for
 remote access, docker exec is the current recommended approach.
 
-    exports.push header: 'Docker # Install nsenter', handler: ->
       @execute
+        header: 'Docker # Install nsenter'
+        if: docker.nsenter
         cmd: """
         docker run -v /usr/local/bin:/target jpetazzo/nsenter
         """
@@ -74,8 +70,8 @@ Docker Registry stores and distributes images centrally. It's where you push
 images to and pull them from; Docker Registry gives team members the ability to
 share images and deploy them to testing, staging and production environments.
 
-    # exports.push header: 'Docker # Registry 2.0', handler: ->
     #   @execute
+    #     header: 'Docker # Registry 2.0'
     #     cmd: "docker run -p 5000:5000 registry:2.0"    
 
 ## Additionnal resources

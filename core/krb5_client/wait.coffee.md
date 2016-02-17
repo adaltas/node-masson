@@ -3,17 +3,14 @@
 
 Wait for all the Kerberos servers referenced by the client configuration.
 
-## Preparation
-
-    exports = module.exports = []
-    exports.push 'masson/bootstrap'
-    # exports.push require('./index').configure
-
 ## Wait TCP
 
-    exports.push header: 'Krb5 Client # Wait admin TCP', timeout: -1, label_true: 'READY', handler: ->
+    module.exports = header: 'Krb5 Client Wait', handler: ->
       {etc_krb5_conf} = @config.krb5
       @wait_connect
+        header: 'TCP Admin'
+        timeout: -1
+        label_true: 'READY'
         servers: for realm, config of etc_krb5_conf.realms
           continue unless config.admin_server
           [host, port] = config.admin_server.split ':'
@@ -24,17 +21,20 @@ Wait for all the Kerberos servers referenced by the client configuration.
 
 Wait for the admin interface to be ready by issuing the command `listprincs`.
 
-    exports.push header: 'Krb5 Client # Wait Admin', retry: 5, timeout: -1, label_true: 'READY', handler: ->
-      {etc_krb5_conf} = @config.krb5
-      for realm, config of etc_krb5_conf.realms
-        continue unless config.kadmin_principal and config.admin_server
-        {kadmin_principal, kadmin_password, admin_server} = config
-        @wait_execute cmd: misc.kadmin
-          realm: realm
-          kadmin_principal: kadmin_principal
-          kadmin_password: kadmin_password
-          kadmin_server: admin_server
-        , 'listprincs'
+      @call header: 'Command kadmin', handler: ->
+        {etc_krb5_conf} = @config.krb5
+        for realm, config of etc_krb5_conf.realms
+          continue unless config.kadmin_principal and config.admin_server
+          {kadmin_principal, kadmin_password, admin_server} = config
+          @wait_execute cmd: misc.kadmin
+            timeout: -1
+            retry: 5
+            label_true: 'READY'
+            realm: realm
+            kadmin_principal: kadmin_principal
+            kadmin_password: kadmin_password
+            kadmin_server: admin_server
+          , 'listprincs'
 
 ## Module Dependencies
 

@@ -1,5 +1,5 @@
 
-# Anaconda Build
+# Anaconda Prepare
 
     module.exports = []
     module.exports.push 'masson/bootstrap/log'

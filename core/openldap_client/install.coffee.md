@@ -6,20 +6,18 @@ file "/etc/openldap/ldap.conf" is configured by the "openldap_client.config"
 object property. The property "openldap\_client.ca\_cert" may reference a 
 certificate to upload.
 
-    exports = module.exports = []
-    exports.push 'masson/bootstrap'
-    # exports.push 'masson/bootstrap/utils'
-    exports.push 'masson/core/yum'
-    # exports.push require('./index').configure
+    module.exports = header: 'OpenLDAP Client Install', handler: ->
+    
+## Package
 
-    exports.push header: 'OpenLDAP Client # Install', timeout: -1, handler: ->
-      @service
-        name: 'openldap-clients'
+      @service 'openldap-clients'
 
-    exports.push header: 'OpenLDAP Client # Configure', timeout: -1, handler: ->
-      {config} = @config.openldap_client
+## Configuration
+
+      {openldap_client} = @config
       @write
-        write: for k, v of config
+        header: 'OpenLDAP Client # Configure'
+        write: for k, v of openldap_client.config
           v = v.join(' ') if Array.isArray v
           match: new RegExp "^#{k}.*$", 'mg'
           replace: "#{k} #{v}"
@@ -46,27 +44,25 @@ certificate, not sure why.
 Certificates are temporarily uploaded to the "/tmp" folder and registered with
 the command `authconfig --update --ldaploadcacert={file}`.
 
-    exports.push header: 'OpenLDAP Client # Certificate', timeout: -1, handler: ->
-      {certificates, config} = @config.openldap_client
-      return unless certificates
-      for certificate in certificates then do (certificate) =>
-        hash = crypto.createHash('md5').update(certificate).digest('hex')
-        filename = null
-        @download
-          source: certificate
-          destination: "/tmp/#{hash}"
-          mode: 0o0640
-          shy: true
-        @execute # openssh is executed remotely
-          cmd: "openssl x509 -noout -hash -in /tmp/#{hash}; rm -rf /tmp/#{hash}"
-          shy: true
-        , (err, _, stdout) ->
-          filename = stdout.trim() unless err
-        .call ->
-          @write 
+      @call header: 'Certificate', timeout: -1, handler: ->
+        for certificate in openldap_client.certificates then do (certificate) =>
+          hash = crypto.createHash('md5').update(certificate).digest('hex')
+          filename = null
+          @download
             source: certificate
-            local_source: true
-            destination: "#{config.TLS_CACERTDIR}/#{filename}.0"
+            destination: "/tmp/#{hash}"
+            mode: 0o0640
+            shy: true
+          @execute # openssh is executed remotely
+            cmd: "openssl x509 -noout -hash -in /tmp/#{hash}; rm -rf /tmp/#{hash}"
+            shy: true
+          , (err, _, stdout) ->
+            filename = stdout.trim() unless err
+          @call ->
+            @write 
+              source: certificate
+              local_source: true
+              destination: "#{openldap_client.config.TLS_CACERTDIR}/#{filename}.0"
 
 ## Dependencies
 

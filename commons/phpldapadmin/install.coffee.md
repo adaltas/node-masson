@@ -1,40 +1,27 @@
 
-# phpLDAPadmin
+# phpLDAPadmin Install
 
-Install the phpLDAPadmin and register it to the Apache HTTPD server. Upon
-installation, the web application will be accessible at the following URL:
-"http://localhost/ldap".
+    module.exports = header: 'phpLDAPadmin Install', handler: ->
+      {phpldapadmin} = @config
 
-    exports = module.exports = []
-    exports.push 'masson/bootstrap'
-    exports.push 'masson/core/yum'
-    exports.push 'masson/commons/httpd'
-
-    exports.configure = (ctx) ->
-      ctx.config.phpldapadmin ?= {}
-      ctx.config.phpldapadmin.config_path ?= '/etc/phpldapadmin/config.php'
-      ctx.config.phpldapadmin.config_httpd_path ?= '/etc/httpd/conf.d/phpldapadmin.conf'
-
-## Install
+## Package
 
 Install the "phpldapadmin" package.
 
-    exports.push header: 'phpLDAPadmin # Install', timeout: -1, handler: ->
-      @service
-        name: 'phpldapadmin'
+      @service 'phpldapadmin'
 
 ## Configure
 
 Configure the application. The configuration file is defined by the
 "phpldapadmin.config_path" property (default to "/etc/phpldapadmin/config.php").
 
-    exports.push header: 'phpLDAPadmin # Configure', handler: ->
       @write
+        header: 'phpLDAPadmin # Configure'
         write: [
           {match: /^(\/\/)(.*'login','attr','dn'.*)$/m, replace: '$2'}
           {match: /^(?!\/\/)(.*'login','attr','uid'.*)$/m, replace: '//$1'}
         ],
-        destination: @config.phpldapadmin.config_path
+        destination: phpldapadmin.config_path
         backup: true
       @service
         name: 'httpd'
@@ -48,9 +35,9 @@ by the "phpldapadmin.config_httpd_path" property (default to
 "/etc/httpd/conf.d/phpldapadmin.conf") and made the application visible under
 the "http://{host}/ldapadmin" URL path.
 
-    exports.push header: 'phpLDAPadmin # HTTPD', handler: ->
       @write
-        destination: @config.phpldapadmin.config_httpd_path
+        header: 'phpLDAPadmin # HTTPD'
+        destination: phpldapadmin.config_httpd_path
         write: [
           match: /^(?!#)(.*Alias \/phpldapadmin.*)$/m
           replace: '#$1'

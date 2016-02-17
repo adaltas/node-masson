@@ -1,8 +1,6 @@
 
 # OpenLDAP Client
 
-    exports = module.exports = []
-
 ## Configuration
 
 *   `openldap_client.config` (object)   
@@ -49,37 +47,14 @@ Example:
 }
 ```
 
-    exports.configure = (ctx) ->
-      config = ctx.config.openldap_client ?= {}
-      ctx.config.openldap_client.config ?= {}
-      openldap_servers = ctx.hosts_with_module 'masson/core/openldap_server'
-      # openldap_server = ctx.hosts_with_module 'masson/core/openldap_server'
-      if openldap_servers.length isnt 1
-        openldap_servers = openldap_servers.filter (server) -> server is ctx.config.host
-      openldap_server = if openldap_servers.length is 1 then openldap_servers[0] else null
-      openldap_servers_secured = ctx.hosts_with_module 'masson/core/openldap_server/install_tls'
-      uris = {}
-      for server in openldap_servers then uris[server] = "ldap://#{server}"
-      for server in openldap_servers_secured then uris[server] = "ldaps://#{server}"
-      uris = for _, uri of uris then uri
-      if openldap_server
-        ctx_server = ctx.hosts[openldap_server]
-        require('../openldap_server').configure ctx_server
-        config.config['BASE'] ?= ctx_server.config.openldap_server.suffix
-        config.suffix ?= ctx_server.config.openldap_server.suffix
-        config.root_dn ?= ctx_server.config.openldap_server.root_dn
-        config.root_password ?= ctx_server.config.openldap_server.root_password
-      config.config['URI'] ?= uris.join ' '
-      config.config['TLS_CACERTDIR'] ?= '/etc/openldap/cacerts'
-      config.config['TLS_REQCERT'] ?= 'allow' # Allow self-signed certificates, use "demand" otherwise
-      config.config['TIMELIMIT'] ?= '15'
-      config.config['TIMEOUT'] ?= '20'
-
-    exports.push commands: 'install', modules: [
-      'masson/core/openldap_client/install'
-      'masson/core/openldap_client/check'
-    ]
-
-    exports.push commands: 'check', modules: [
-      'masson/core/openldap_client/check'
-    ]
+    module.exports = ->
+      'configure':
+        'masson/core/openldap_client/configure'
+      'install': [
+        'masson/core/yum'
+        'masson/core/openldap_client/wait'
+        'masson/core/openldap_client/install'
+        'masson/core/openldap_client/check'
+      ]
+      'check':
+        'masson/core/openldap_client/check'

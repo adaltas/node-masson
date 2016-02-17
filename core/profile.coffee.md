@@ -3,9 +3,6 @@
 
 Publish scripts inside the profile directory, located in "/etc/profile.d".
 
-    exports = module.exports = []
-    exports.push 'masson/bootstrap'
-
 ## Configuration
 
 The module accept the following properties:
@@ -24,17 +21,17 @@ Example:
 }
 ```
 
-    exports.configure = (ctx) ->
+    module.exports = (ctx) ->
       @config.profile ?= {}
+      'install': header: 'Profile Install', handler: ->
 
 ## Upload
 
 Upload all the configured scripts.
-
-    exports.push header: 'Profile # Upload', handler: ->
-      for filename, content of @config.profile
-        @write
+        
+        @write (
+          header: 'Upload'
           destination: "/etc/profile.d/#{filename}"
           content: content
           eof: true
-
+        ) for filename, content of @config.profile

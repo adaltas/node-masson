@@ -4,12 +4,7 @@
 Install anaconda from previously builded archive.
 Installation will fail unless prepare is called before.
 
-    module.exports = []
-    module.exports.push 'masson/bootstrap'
-
-## Install archive
-
-    module.exports.push header: 'Anaconda # Install', timeout: -1, handler: ->
+    module.exports = header: 'Anaconda # Install', timeout: -1, handler: ->
       {anaconda} = @config
       tmp_archive = "/tmp/#{path.basename anaconda.archive}"
       @upload
@@ -28,4 +23,3 @@ Installation will fail unless prepare is called before.
 ## Dependencies
 
     path = require 'path'
-

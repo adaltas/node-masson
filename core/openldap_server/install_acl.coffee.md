@@ -1,4 +1,6 @@
 
+# NOT USED ANYWHERE, KEPT AS EXMPLE TO SET ACL
+
     exports = module.exports = []
     exports.push 'masson/bootstrap'
     exports.push 'masson/core/openldap_server/install'

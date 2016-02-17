@@ -3,12 +3,7 @@
 
 Download the Oracle JDK.
 
-    module.exports = []
-    module.exports.push 'masson/bootstrap'
-
-## Spark Users And Group
-
-    module.exports.push
+    module.exports =
       header: 'Java # Oracle JDK'
       timeout: -1
       if: -> @contexts('masson/commons/java')[0]?.config.host is @config.host

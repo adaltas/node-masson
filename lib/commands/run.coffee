@@ -50,36 +50,33 @@ module.exports = ->
     run params, config
     .on 'context', (ctx) ->
       ctx
-      .on 'middleware_skip', () ->
-        ctx.middleware.header = "#{ctx.middleware.name } WARN" if ctx.middleware.name
-        return unless ctx.middleware.header?
+      .on 'middleware_skip', (middleware) ->
+        return unless middleware.header?
         line = ''
         line += pad "#{styles.fqdn ctx.config.host}", hostlength
-        line += pad "#{styles.label ctx.middleware.header}", 40
+        line += pad "#{styles.label middleware.header}", 40
         line += pad "#{styles.status_skip 'SKIPPED'}", 20
         rl.write line
         rl.write '\n'
-      .on 'middleware_start', () ->
-        ctx.middleware.header = "#{ctx.middleware.name } WARN" if ctx.middleware.name
-        return unless ctx.middleware.header?
+      .on 'middleware_start', (middleware) ->
+        return unless middleware.header?
         times[ctx.config.host] = Date.now()
         return if multihost
         line = ''
         line += pad "#{styles.fqdn ctx.config.host}", hostlength
-        line += pad "#{styles.label ctx.middleware.header}", 40
+        line += pad "#{styles.label middleware.header}", 40
         line += pad "#{styles.status_start 'WORKING'}", 20
         rl.write line
-      .on 'middleware_stop', (err, status) ->
-        ctx.middleware.header = "#{ctx.middleware.name } WARN" if ctx.middleware.name
-        return unless ctx.middleware.header?
+      .on 'middleware_stop', (middleware, err, status) ->
+        return unless middleware.header?
         time = Date.now() - times[ctx.config.host]
         line = ''
         line += pad "#{styles.fqdn ctx.config.host}", hostlength
-        line += pad "#{styles.label ctx.middleware.header}", 40
-        statusmsg = if err then "#{styles.status_error ctx.middleware.label_error or 'ERROR'}"
+        line += pad "#{styles.label middleware.header}", 40
+        statusmsg = if err then "#{styles.status_error middleware.label_error or 'ERROR'}"
         else if typeof status is 'string' then status
-        else if status then "#{styles.status_true ctx.middleware.label_true or 'MODIFIED'}"
-        else "#{styles.status_false ctx.middleware.label_false or '--'}"
+        else if status then "#{styles.status_true middleware.label_true or 'MODIFIED'}"
+        else "#{styles.status_false middleware.label_false or '--'}"
         line += pad "#{statusmsg}", 20
         line += "#{styles.time print_time time}"
         rl.cursor = 0
@@ -88,26 +85,35 @@ module.exports = ->
         if err or status?
           rl.write line
           rl.write '\n'
-      .on 'wait', ->
+      .on 'wait', (middleware) ->
         return if multihost
         line = ''
         line += pad "#{styles.fqdn ctx.config.host}", hostlength
-        line += pad "#{styles.label ctx.middleware.header}", 40
+        line += pad "#{styles.label middleware.header}", 40
         line += pad "#{styles.status_wait 'WAIT'}", 20
         rl.cursor = 0
         rl.line = ''
         rl._refreshLine()
         rl.write line
-      .on 'waited', ->
+      .on 'waited', (middleware) ->
         return if multihost
         line = ''
         line += pad "#{ctx.config.host}", hostlength
-        line += pad "#{ctx.middleware.header}", 40
+        line += pad "#{middleware.header}", 40
         line += pad "#{styles.status_start 'WORKING'}", 20
         rl.cursor = 0
         rl.line = ''
         rl._refreshLine()
         rl.write line
+      # .on 'error', (err) ->
+      #   line = ''
+      #   line += pad "#{styles.fqdn ctx.config.host}", hostlength
+      #   line += pad "", 40
+      #   line += pad "#{styles.status_error 'ERROR'}", 20
+      #   line += '\n'
+      #   line += "#{styles.final_status_error err.stack?.trim() or err.message}\n"
+      #   rl._refreshLine() unless multihost
+      #   rl.write line
     .on 'server', (ctx, err) ->
       return unless config.servers.length
       line = ''

@@ -1,9 +1,4 @@
 
-    path = require 'path'
-    exports = module.exports = []
-    exports.push 'masson/bootstrap'
-    exports.push 'masson/core/users'
-
 # Proxy
 
 Declare proxy related environment variables as well as 
@@ -42,25 +37,25 @@ configuration will be enriched with the `http_proxy`, the
 `https_proxy`, the `http_proxy_no_auth` and the 
 `https_proxy_no_auth` urls properties.
 
-    module.exports.configure = (ctx) ->
-      ctx.config.proxy ?= {}
-      ctx.config.proxy.system ?= false
-      ctx.config.proxy.system_file ?= "phyla_proxy.sh"
-      if ctx.config.proxy.system_file
-        ctx.config.proxy.system_file = path.resolve '/etc/profile.d', ctx.config.proxy.system_file
-      ctx.config.proxy.host ?= null
-      ctx.config.proxy.port ?= null
-      ctx.config.proxy.username ?= null
-      ctx.config.proxy.password ?= null
-      ctx.config.proxy.secure ?= null
-      if not ctx.config.proxy.host and (ctx.config.proxy.port or ctx.config.proxy.username or ctx.config.proxy.password)
+    module.exports = ->
+      @config.proxy ?= {}
+      @config.proxy.system ?= false
+      @config.proxy.system_file ?= "phyla_proxy.sh"
+      if @config.proxy.system_file
+        @config.proxy.system_file = path.resolve '/etc/profile.d', @config.proxy.system_file
+      @config.proxy.host ?= null
+      @config.proxy.port ?= null
+      @config.proxy.username ?= null
+      @config.proxy.password ?= null
+      @config.proxy.secure ?= null
+      if not @config.proxy.host and (@config.proxy.port or @config.proxy.username or @config.proxy.password)
         throw Error "Invalid proxy configuration"
-      toUrl = (scheme, auth) ->
-        return null unless ctx.config.proxy.host
-        if scheme is 'https' and ctx.config.proxy.secure?.host
-          config = ctx.config.proxy.secure
+      toUrl = (scheme, auth) =>
+        return null unless @config.proxy.host
+        if scheme is 'https' and @config.proxy.secure?.host
+          config = @config.proxy.secure
         else
-          config = ctx.config.proxy
+          config = @config.proxy
         {host, port, username, password} = config
         url = "#{scheme}://"
         if auth
@@ -70,45 +65,11 @@ configuration will be enriched with the `http_proxy`, the
         url = "#{url}#{host}"
         url = "#{url}:#{port}" if port
         url
-      ctx.config.proxy.http_proxy = toUrl 'http', true
-      ctx.config.proxy.https_proxy = toUrl 'https', true
-      ctx.config.proxy.http_proxy_no_auth = toUrl 'http', false
-      ctx.config.proxy.https_proxy_no_auth = toUrl 'https', false
+      @config.proxy.http_proxy = toUrl 'http', true
+      @config.proxy.https_proxy = toUrl 'https', true
+      @config.proxy.http_proxy_no_auth = toUrl 'http', false
+      @config.proxy.https_proxy_no_auth = toUrl 'https', false
 
-## Profile
+## Dependencies
 
-Declare the http_proxy and "https_proxy" environment
-variables by declaring a shell script inside the 
-profile initialization directory.
-
-    exports.push header: 'Proxy # Profile', handler: ->
-      # There is no proxy to configure
-      return unless @config.proxy.http_proxy
-      # TODO: removed, not sure if we want it back, proxy shouldn't be 
-      # configured globally
-      # {system, http_proxy, https_proxy} = @config.proxy
-      # modified = 0
-      # write = (file, callback) ->
-      #   @write [
-      #     match: /.*http_proxy.*/
-      #     replace: "{if system and http_proxy then '' else '#'}export http_proxy=#{http_proxy}"
-      #     destination: file
-      #     append: true
-      #   ,
-      #     match: /.*https_proxy.*/
-      #     replace: "{if system and https_proxy then '' else '#'}export https_proxy=#{https_proxy}"
-      #     destination: file
-      #     append: true
-      #   ], (err, written) ->
-      #     modified++ if written
-      #     callback()
-      # # System wide
-      # write @config.proxy.system_file, (err) ->
-      #   return next err if err
-      #   each(@config.users)
-      #   .on 'item', (user, next) ->
-      #     return next() unless user.home
-      #     file = path.resolve user.home, '.bash_profile'
-      #     write file, next
-      #   .on 'both', (err) ->
-      #     next err, modified
+    path = require 'path'

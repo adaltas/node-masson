@@ -4,9 +4,6 @@
 This package cover various security related configuration for an operating
 system.
 
-    exports = module.exports = []
-    exports.push 'masson/bootstrap'
-
 ## Configuration
 
 *   `selinux` (boolean)   
@@ -28,10 +25,11 @@ Example:
 }
 ```
 
-    exports.push.configure = (ctx) ->
-      ctx.config.security ?= {}
-      ctx.config.security.selinux ?= true
-      ctx.config.security.limits ?= {}
+    module.exports = ->
+      @config.security ?= {}
+      @config.security.selinux ?= true
+      @config.security.limits ?= {}
+      'install': header: 'Security', handler: ->
 
 ## SELinux
 
@@ -40,23 +38,22 @@ mechanism implemented in the kernel.
 
 This action update the configuration file present in "/etc/selinux/config".
 
-    exports.push header: 'Security # SELinux', handler: (options) ->
-      {selinux} = @config.security
-      if selinux
-        from = 'disabled'
-        to = 'enforcing'
-      else
-        from = 'enforcing'
-        to = 'disabled'
-      @write
-        destination: '/etc/selinux/config'
-        match: /^SELINUX=.*/mg
-        replace: "SELINUX=#{to}"
-      @execute
-        cmd: 'shutdown -r now'
-        if: -> @status -1
-      , (err, executed) ->
-        options.log '[WARN masson.core.security] Reboot after SELINUX changes'
+        @write
+          header: 'SELinux'
+          destination: '/etc/selinux/config'
+          match: /^SELINUX=.*/mg
+          replace: "SELINUX=#{if @config.security.selinux then 'enforcing' else 'disabled'}"
+
+## Reboot
+
+Reboot only if SELINUX was modified.
+
+        @execute
+          header: 'Reboot'
+          cmd: 'shutdown -r now'
+          if: -> @status -1
+        , (err, executed) ->
+          options.log '[WARN masson.core.security] Reboot after SELINUX changes'
 
 # Limits
 
@@ -70,10 +67,9 @@ cat /etc/security/limits.d/90-nproc.conf
 root       soft    nproc     unlimited
 ```
 
-    exports.push header: 'Security # Limits', handler: ->
-      {limits} = @config.security
-      writes = for filename, content of limits
-        destination: "/etc/security/limits.d/#{filename}"
-        content: content
-        backup: true
-      @write writes
+        @write (
+          header: "Limits on #{filename}"
+          destination: "/etc/security/limits.d/#{filename}"
+          content: content
+          backup: true
+        ) for filename, content of @config.security.limits

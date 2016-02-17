@@ -1,12 +1,6 @@
 
 # OpenLDAP Server Backup
 
-    module.exports = []
-
-    module.exports.push 'masson/bootstrap'
-    module.exports.push 'masson/bootstrap/utils'
-    # module.exports.push require('./').configure
-
 Backup strategies largely depend on the amount of change in the database and how
 much of that change an administrator might be willing to lose in a catastrophic failure. 
 There are two basic methods that can be used:
@@ -36,7 +30,7 @@ is that the generated LDIF files can be rather large and the accumulation of the
 to a substantial amount of space.
 
 
-    module.exports.push header: 'OpenLDAP Server # Backup', timeout: -1, label_true: 'BACKUPED', handler: ->
+    module.exports = header: 'OpenLDAP Server Backup', timeout: -1, label_true: 'BACKUPED', handler: ->
       @backup
         name: 'openldap'
         cmd: 'slapcat'

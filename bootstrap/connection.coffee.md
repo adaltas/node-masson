@@ -13,8 +13,6 @@ continue as soon as an SSH connection is again available.
     connect = require 'ssh2-connect'
     collect = require './lib/collect'
     bootstrap = require './lib/bootstrap'
-    exports = module.exports = []
-    exports.push 'masson/bootstrap/log'
 
 ## Configuration
 
@@ -62,10 +60,11 @@ Example:
 }
 ```
 
-    module.exports.configure = (ctx) ->
-      connection = ctx.config.connection ?= {}
+
+    module.exports = header: 'Bootstrap # Connection', required: true, timeout: -1, handler: (options, next) ->
+      connection = @config.connection ?= {}
       connection.username ?= 'root'
-      connection.host ?= connection.ip or ctx.config.ip or ctx.config.host
+      connection.host ?= connection.ip or @config.ip or @config.host
       connection.port ?= 22
       connection.private_key ?= null
       connection.private_key_location ?= '~/.ssh/id_rsa'
@@ -81,30 +80,20 @@ Example:
       connection.bootstrap.username ?= null
       connection.bootstrap.password ?= null
       connection.bootstrap.retry = 3
-
-## Connection
-
-Masson need to connect over ssh as root and, for this, it can prepare
-its own private key by declaring the "bootstrap.private_key" option.
-However, it is important in such circumstances that we guarantee no
-existing key would be overwritten.
-
-    exports.push header: 'Bootstrap # Connection', required: true, timeout: -1, handler: (options, next) ->
-      {private_key, private_key_location, end} = @config.connection
-      close = -> @options.ssh?.end() if end
+      close = -> @options.ssh?.end() if connection.end
       @on 'error', close
       @on 'end', close
       attempts = 0
       has_rebooted = false
       modified = false
       do_private_key = =>
-        return do_connect() if private_key
-        options.log "Read private key file: #{private_key_location}"
-        misc.path.normalize private_key_location, (location) =>
+        return do_connect() if connection.private_key
+        options.log "Read private key file: #{connection.private_key_location}"
+        misc.path.normalize connection.private_key_location, (location) =>
           fs.readFile location, 'ascii', (err, content) =>
             return next Error "Private key doesnt exists: #{JSON.stringify location}" if err and err.code is 'ENOENT'
             return next err if err
-            @config.connection.private_key = content
+            connection.private_key = content
             do_connect()
       do_connect = =>
         options.log "Connect with private key"

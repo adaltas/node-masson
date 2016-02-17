@@ -1,11 +1,8 @@
 
 # OpenLDAP Server Start
 
-    exports = module.exports = []
-    exports.push 'masson/bootstrap'
+Start the slapd daemon.
 
-## Start
-
-    exports.push header: 'OpenLDAP Server # Start', label_true: 'STARTED', handler: ->
+    module.exports = header: 'OpenLDAP Server Start', label_true: 'STARTED', handler: ->
       @service_start
         name: 'slapd'

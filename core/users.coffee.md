@@ -3,35 +3,38 @@
 
 A module to create and manage unix users and groups.
 
-    exports = module.exports = []
-    exports.push 'masson/bootstrap'
-
 ## Configuration
 
-    module.exports.configure = (ctx) ->
-      ctx.config.users ?= {}
-      ctx.config.groups ?= {}
-      for name, user of ctx.config.users
+    module.exports = ->
+      @config.users ?= {}
+      @config.groups ?= {}
+      for name, user of @config.users
         user.name ?= name
         user.home ?= '/root' if name is 'root'
-      for name, group of ctx.config.groups
+      for name, group of @config.groups
         group.name ?= name
+      'install': ->
 
 ## Groups
 
 Create the users defined inside the "hdp.groups" configuration. See the
 [mecano "group" documentation][mecano_group] for additionnal information.
 
-    exports.push header: 'Groups', handler: ->
-      @group group for _, group of @config.groups
+        @group (
+          header: 'Groups'
+          name: group
+        ) for _, group of @config.groups
 
 ## Users
 
 Create the users defined inside the "hdp.users" configuration. See the
 [mecano "user" documentation][mecano_user] for additionnal information.
+        
+        for _, user of @config.users
+          user.header = 'Users'
+          @user user
 
-    exports.push header: 'Users', handler: ->
-      @user user for _, user of @config.users
+    {merge} = require '../lib/misc'
 
 [mecano_group]: https://github.com/wdavidw/node-mecano/blob/master/src/group.coffee.md
 [mecano_user]: https://github.com/wdavidw/node-mecano/blob/master/src/user.coffee.md

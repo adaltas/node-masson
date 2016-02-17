@@ -1,12 +1,7 @@
 
-# Bind server
+# Bind server Stop
 
-    exports = module.exports = []
-    exports.push 'masson/bootstrap'
+Stop the "named" service.
 
-## Stop
-
-Now the service being configured, the "named" service is started.
-
-    exports.push header: 'Bind Server # Stop', label_true: 'STOPPED', handler: ->
+    module.exports = header: 'Bind Server # Stop', label_true: 'STOPPED', handler: ->
       @service_stop name: 'named'

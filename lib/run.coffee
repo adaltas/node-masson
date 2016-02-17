@@ -1,13 +1,12 @@
 
-crypto = require 'crypto'
+path = require 'path'
 util = require 'util'
-multimatch = require 'multimatch'
-pad = require 'pad'
+multimatch = require './multimatch'
 each = require 'each'
 {EventEmitter} = require 'events'
 {flatten, merge} = require './misc'
 context = require './context'
-tree = require './tree'
+Module = require 'module'
 
 ###
 The execution is done in 2 passes.
@@ -29,75 +28,39 @@ Run = (params, config) ->
     # Work on each server
     contexts = {}
     for fqdn, server of config.servers
-      ctx = contexts[fqdn] = context (merge {}, config, server), params.command
+      ctx = contexts[fqdn] = context contexts, (merge {}, config, server), params.command
       ctx.runinfo = {}
       ctx.runinfo.date = now
       ctx.runinfo.command = params.command
-      ctx.hosts = contexts
       ctx.config.modules = ctx.config.modules.reverse() if params.command is 'stop'
-      ctx.tree = tree ctx.config.modules
-      ctx.modules = Object.keys ctx.tree.modules
-    # Catch Uncaught Exception
     process.on 'uncaughtException', (err) =>
       console.log 'masson/lib/run: uncaught exception'
-      # for fqdn, ctx of contexts
-      #   ctx.emit 'error', err if ctx.listeners('error').length
       @emit 'error', err
-    each(contexts)
-    .parallel(true)
-    .run (host, ctx, next) =>
+    # Discover module inside parent project
+    for p in Module._nodeModulePaths path.resolve '.'
+      require.main.paths.push p
+    each contexts
+    .parallel true
+    .call (ctx, next) =>
       @emit 'context', ctx
-      for module in Object.keys ctx.tree.modules
-        module = ctx.tree.modules[module]
-        module.configure.call ctx, ctx if module.configure
-      # Filter by hosts
-      return next() if params.hosts? and multimatch(host, params.hosts).indexOf(host) is -1
-      ctx.tree.middlewares params, (err, middlewares) =>
-        return next() unless middlewares?
-        middlewareRun = each(middlewares)
-        .run (middleware, next) =>
-          ctx.middleware = middleware
-          retry = if middleware.retry? then middleware.retry else 2
-          middleware.wait ?= 5000
-          attempts = 0
-          disregard_done = false
-          if middleware.skip
-            ctx.emit 'middleware_skip'
-            return next()
-          ctx.emit 'middleware_start'
-          emit_middleware = (err, status) =>
-            ctx.emit 'middleware_stop', err, status
-          done = (err, status) =>
-            return if disregard_done
-            clearTimeout timeout if timeout
-            if err and (retry is true or ++attempts < retry)
-              ctx.log? "Get error #{err.message}, retry #{attempts} of #{retry}"
-              return setTimeout run, middleware.wait
-            emit_middleware err, status
-            next err
-          run = =>
-            ctx.retry = attempts
-            ctx.call middleware
-            ctx.then done
-          # Timeout, default to 100s
-          middleware.timeout ?= 100000
-          if middleware.timeout > 0
-            timeout = setTimeout ->
-              retry = 0 # Dont retry on timeout or we risk to get the handler called multiple times
-              done new Error "TIMEOUT after #{middleware.timeout}"
-              disregard_done = true
-            , middleware.timeout
-          run()
-        .then (err) ->
-          if err
-          then ctx.emit 'error', err
-          else ctx.emit 'end' if params.end
-          next err
+      middlewares = []
+      for name in ctx.config.modules
+        m = load_module(ctx, name, 'install')
+        middlewares.push m...
+      # Export list of modules
+      ctx.middlewares = middlewares
+      ctx.modules = middlewares.map( (m) -> m.module ).reduce( (p, c) ->
+        p.push(c) if p.indexOf(c) < 0; p
+      , [] )
+      next()
+    .call (ctx, next) ->
+      call_modules ctx, command: 'configure', next
+    .call (ctx, next) ->
+      call_modules ctx, params, next
     .then (err) =>
       if err
-      then @emit 'error', err
-      else @emit 'end'
-      
+      then @emit 'error', err 
+      else @emit 'end'  
   @
 util.inherits Run, EventEmitter
 
@@ -106,6 +69,79 @@ module.exports = (options, config) ->
     config = options
     options = {}
   new Run options, config
-  # tmp = (args) -> Run.apply @, args
-  # tmp.prototype = Run.prototype
-  # new tmp arguments
+
+
+# Configuration
+load_module = (ctx, parent, default_command, filter_command) ->
+  middlewares = []
+  parent = module: parent if typeof parent is 'string'
+  plugin = false
+  if not parent.handler or typeof parent.handler is 'string'
+    absname = parent.module
+    absname = path.resolve process.cwd(), parent.module if parent.module.substr(0, 1) is '.'
+    mod = require.main.require absname
+    plugin = true if typeof mod is 'function'
+    mod = handler: mod unless mod.handler
+    throw Error "Invalid handler in #{parent.module}" if typeof mod.handler isnt 'function'
+    parent.handler = undefined
+    parent[k] ?= v for k, v of mod
+  if plugin
+    commands = parent.handler.call ctx
+    return unless commands
+    return if commands is ctx
+    for command, children of commands
+      # when a plugin reference another plugin, we need to filterout other
+      # commands while preserving configure
+      continue if filter_command and command isnt 'configure' and command isnt filter_command
+      continue unless children
+      children = [children] unless Array.isArray children
+      for child in children
+        if typeof child is 'string'
+          child = handler: child
+        else if typeof child is 'function'
+          child = handler: child
+        else if not child? or Array.isArray(child) or typeof child isnt 'object'
+          throw Error "Invalid child: #{child}"
+        if typeof child.handler is 'string'
+          child.module = child.handler
+        else if typeof child.handler is 'function'
+          child.module = parent.module
+        else
+          throw Error "Invalid handler: #{child.handler}"
+        child.command ?= command
+        middlewares.push module: parent.module, plugin: true
+        m = load_module(ctx, child, default_command, command)
+        middlewares.push m... if m
+  else
+    parent.command ?= default_command
+    middlewares.push parent
+  middlewares
+
+call_modules = (ctx, params, next) ->
+  # Filter by hosts
+  return next() if params.hosts? and (multimatch ctx.config.host, params.hosts).length is 0
+  # Action
+  called = {}
+  for middleware in ctx.middlewares then do (middleware) ->
+    return if middleware.plugin
+    # return if command isnt 'install' and middleware.command and middleware.command isnt command
+    return if middleware.command and middleware.command isnt params.command
+    return if called[middleware.module]
+    called[middleware.module] = true #if typeof middleware.module is 'string'
+    if middleware.skip
+      ctx.emit 'middleware_skip'
+      return
+    # Load handler
+    if typeof middleware.handler is 'string'
+      mod = require.main.require middleware.handler
+      mod = handler: mod unless mod.handler
+      middleware[k] = v for k, v of mod
+    # Filter by modules
+    return if not middleware.required and params.modules? and (multimatch middleware.module, params.modules).length is 0
+    ctx.call -> ctx.emit 'middleware_start', middleware
+    ctx.call middleware, (err, status) ->
+      ctx.emit 'middleware_stop', middleware, err, status
+  ctx.then (err, status) ->
+    ctx.emit 'error', err if err
+    ctx.emit 'end' if params.end
+    next err

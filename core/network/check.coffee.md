@@ -14,21 +14,21 @@ be started before checking the forward and reverse dns of the server.
 Dig isn't available by default on CentOS and is installed by the 
 "masson/core/bind_client" dependency.
 
-    ipRegex = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/
-    exports = module.exports = []
-    exports.push 'masson/bootstrap'
-    exports.push 'masson/core/bind_client'
+    
+    module.exports = header: 'Network Check', handler: ->
 
 ## Check DNS Forward Lookup
 
 Check forward DNS lookup using the configured DNS configuration present inside
 "/etc/resolv.conf". Internally, the exectuted command uses "dig".
 
-    exports.push header: 'Network # Check DNS Forward Lookup', label_true: 'CHECKED', handler: (options) ->
-      # I didnt find how to restrict dig to return only A records like it
-      # does for CNAME records if you append "cname" at the end of the command.
-      # I assume the A record to always be printed on the last line.
+Note, I didnt find how to restrict dig to return only A records like it
+does for CNAME records if you append "cname" at the end of the command.
+I assume the A record to always be printed on the last line.
+
       @execute
+        header: 'Network # Check DNS Forward Lookup'
+        label_true: 'CHECKED'
         cmd: "dig #{@config.host}. +short"
         code_skipped: 1
         shy: true
@@ -43,8 +43,9 @@ Check forward DNS lookup using the configured DNS configuration present inside
 Check reverse DNS lookup using the configured DNS configuration present inside
 "/etc/resolv.conf". Internally, the exectuted command uses "dig".
 
-    exports.push header: 'Network # DNS Reverse Lookup', label_true: 'CHECKED', handler: (options) ->
       @execute
+        header: 'DNS Reverse Lookup'
+        label_true: 'CHECKED'
         cmd: "dig -x #{@config.ip} +short"
         code_skipped: 1
         shy: true
@@ -60,8 +61,9 @@ Check forward DNS lookup using the system configuration which take into account
 the local configuration present inside "/etc/hosts". Internally, the exectuted
 command uses "getent".
 
-    exports.push header: 'Network # Check System Forward Lookup', label_true: 'CHECKED', handler: (options) ->
       @execute
+        header: 'Network # Check System Forward Lookup'
+        label_true: 'CHECKED'
         cmd: "getent hosts #{@config.host}"
         code_skipped: 2
         shy: true
@@ -71,7 +73,6 @@ command uses "getent".
         # return next null, 'WARNING' if not valid
         [ip, fqdn] = stdout.split(/\s+/).filter( (entry) -> entry)
         options.log "[WARN, masson `getent host`] Invalid host #{@config.host}" if ip isnt @config.ip or fqdn isnt @config.host
-        # next null, if ip is @config.ip and fqdn is @config.host then false else 'WARNING'
 
 ## Check System Reverse Lookup
 
@@ -79,8 +80,9 @@ Check forward DNS lookup using the system configuration which take into account
 the local configuration present inside "/etc/hosts". Internally, the exectuted
 command uses "getent".
 
-    exports.push header: 'Network # Check System Reverse Lookup', label_true: 'CHECKED', handler: (options) ->
       @execute
+        header: 'Network # Check System Reverse Lookup'
+        label_true: 'CHECKED'
         cmd: "getent hosts #{@config.ip}"
         code_skipped: 2
         shy: true
@@ -97,11 +99,16 @@ command uses "getent".
 Read the server hostname and check it matches the expected FQDN. Internally, 
 the executed command is `hostname --fqdn`.
 
-    exports.push header: 'Network # Check Hostname', label_true: 'CHECKED', handler: ->
       @execute
+        header: 'Network # Check Hostname'
+        label_true: 'CHECKED'
         cmd: "hostname --fqdn"
         shy: true
       , (err, _, stdout) ->
         throw err if err
         options.log "[WARN, masson `getent host`] Invalid hostname" if stdout.trim() isnt @config.host
         # next null, if stdout.trim() is @config.host then false else 'WARNING'
+
+## Utilities
+
+    ipRegex = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/

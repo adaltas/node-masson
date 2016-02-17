@@ -1,8 +1,6 @@
 
 # SSSD Intall
 
-    exports = module.exports = []
-
 ## Configure
 
 Option includes:
@@ -61,11 +59,11 @@ Example:
 }
 ```
 
-    exports.configure = (ctx) ->
-      ctx.config.sssd ?= {}
-      ctx.config.sssd.certificates ?= []
-      ctx.config.sssd.merge ?= false
-      ctx.config.sssd.config = merge
+    module.exports = ->
+      @config.sssd ?= {}
+      @config.sssd.certificates ?= []
+      @config.sssd.merge ?= false
+      @config.sssd.config = merge
         'sssd':
           'config_file_version' : '2'
           'reconnection_retries' : '3'
@@ -85,25 +83,33 @@ Example:
           'offline_failed_login_attempts' : '3'
           'offline_failed_login_delay' : '5'
           'debug_level': '1'
-      , ctx.config.sssd.config or {}
-      ctx.config.sssd.test_user ?= null
+      , @config.sssd.config or {}
+      @config.sssd.test_user ?= null
 
 The System Security Services Daemon (SSSD) provides access to different
 identity and authentication providers.
 
-    exports.push commands: 'check', modules: 'masson/core/sssd/check'
+      'check': 'masson/core/sssd/check'
+      'install': [
+        'masson/core/yum'
+        'masson/core/openldap_client'
+        'masson/core/sssd/install'
+        'masson/core/sssd/start'
+        'masson/core/sssd/check'
+      ]
+      'start': 'masson/core/sssd/start'
+      'status': 'masson/core/sssd/status'
+      'stop': 'masson/core/sssd/stop'
 
-    exports.push commands: 'install', modules: [
-      'masson/core/sssd/install'
-      'masson/core/sssd/start'
-      'masson/core/sssd/check'
-    ]
+## Clean "sssd" Cache
 
-    exports.push commands: 'start', modules: 'masson/core/sssd/start'
+If the command `sss_cache -E` fail, the cache may be manually removed with:
 
-    exports.push commands: 'status', modules: 'masson/core/sssd/status'
-
-    exports.push commands: 'stop', modules: 'masson/core/sssd/stop'
+```
+cp -rp /var/lib/sss/db /var/lib/sss/db.bck
+rm -rf /var/lib/sss/db/*
+service sssd restart
+```
 
 ## Dependencies
 

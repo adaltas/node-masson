@@ -1,10 +1,8 @@
 
 # Bind server Install
 
-    exports = module.exports = []
-    exports.push 'masson/bootstrap'
-    exports.push 'masson/core/yum'
-    exports.push 'masson/core/iptables'
+    module.exports = header: 'Bind Server Install', handler: ->
+      {bind_server} = @config
 
 ## Users & Groups
 
@@ -17,10 +15,8 @@ cat /etc/group | grep named
 named:x:25:
 ```
 
-    exports.push header: 'Bind Server # Users & Groups', handler: ->
-      {group, user} = @config.bind_server
-      @group group
-      @user user
+      @group bind_server.group
+      @user bind_server.user
 
 ## IPTables
 
@@ -32,8 +28,8 @@ named:x:25:
 IPTables rules are only inserted if the parameter "iptables.action" is set to 
 "start" (default value).
 
-    exports.push header: 'Bind Server # IPTables', handler: ->
       @iptables
+        header: 'IPTables'
         rules: [
           { chain: 'INPUT', jump: 'ACCEPT', dport: 53, protocol: 'tcp', state: 'NEW', comment: "Named" }
           { chain: 'INPUT', jump: 'ACCEPT', dport: 53, protocol: 'udp', state: 'NEW', comment: "Named" }
@@ -44,8 +40,8 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
 
 The packages "bind" is installed as a startup item and not yet installed.
 
-    exports.push header: 'Bind Server # Install', timeout: -1, handler: ->
       @service
+        header: 'Install'
         name: 'bind'
         srv_name: 'named'
         startup: true
@@ -55,8 +51,8 @@ The packages "bind" is installed as a startup item and not yet installed.
 Update the "/etc/named.conf" file by modifying the commenting the listen-on port
 and setting "allow-query" to any. The "named" service is restarted if modified.
 
-    exports.push header: 'Bind Server # Configure', handler: ->
       @write
+        header: 'Configure'
         destination: '/etc/named.conf'
         write: [
           # Comment listen-on port
@@ -68,6 +64,7 @@ and setting "allow-query" to any. The "named" service is restarted if modified.
           replace: '$1 any; $3'
         ]
       @service
+        header: 'Restart'
         srv_name: 'named'
         action: 'restart'
         if: -> @status -1
@@ -76,44 +73,41 @@ and setting "allow-query" to any. The "named" service is restarted if modified.
 
 Upload the zones definition files provided in the configuration file.   
 
-    exports.push header: 'Bind Server # Zones', handler: ->
-      modified = false
-      {zones} = @config.bind_server
-      @write
-        destination: '/etc/named.conf'
-        write: for zone in zones
-          # /^zone "hadoop" IN \{[\s\S]*?\n\}/gm.exec f
-          match: RegExp "^zone \"#{quote path.basename zone}\" IN \\{[\\s\\S]*?\\n\\};", 'gm'
-          replace: """
-          zone "#{path.basename zone}" IN {
-                  type master;
-                  file "#{path.basename zone}";
-                  allow-update { none; };
-          };
-          """
-          append: true
-      zones_files = for zone in zones
-        source: zone
-        destination: "/var/named/#{path.basename zone}"
-      @upload zones_files
+      @call header: 'Zones', handler: ->
+        @write
+          destination: '/etc/named.conf'
+          write: for zone in bind_server.zones
+            # /^zone "hadoop" IN \{[\s\S]*?\n\}/gm.exec f
+            match: RegExp "^zone \"#{quote path.basename zone}\" IN \\{[\\s\\S]*?\\n\\};", 'gm'
+            replace: """
+            zone "#{path.basename zone}" IN {
+                    type master;
+                    file "#{path.basename zone}";
+                    allow-update { none; };
+            };
+            """
+            append: true=
+        @upload (
+          source: zone
+          destination: "/var/named/#{path.basename zone}"
+        ) for zone in bind_server.zones
 
 ## rndc Key
 
 Generates configuration files for rndc.   
 
-    exports.push header: 'Bind Server # rndc Key', handler: ->
-      {group, user} = @config.bind_server
-      @execute
-        cmd: 'rndc-confgen -a -r /dev/urandom -c /etc/rndc.key'
-        unless_exists: '/etc/rndc.key'
-      @chown
-        destination: '/etc/rndc.key'
-        uid: user.name
-        gid: group.name
-      @service
-        srv_name: 'named'
-        action: 'restart'
-        if: -> @status()
+      @call header: 'Bind Server # rndc Key', handler: ->
+        @execute
+          cmd: 'rndc-confgen -a -r /dev/urandom -c /etc/rndc.key'
+          unless_exists: '/etc/rndc.key'
+        @chown
+          destination: '/etc/rndc.key'
+          uid: bind_server.user.name
+          gid: bind_server.group.name
+        @service
+          srv_name: 'named'
+          action: 'restart'
+          if: -> @status()
 
 ## Module Dependencies
 

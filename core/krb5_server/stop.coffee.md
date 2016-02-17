@@ -1,15 +1,12 @@
 
 # Kerberos Server Stop
 
-    exports = module.exports = []
-    exports.push 'masson/bootstrap'
+Stop the kadmin and krb5kdc daemons.
 
-    exports.push header: 'Kerberos Server # Stop kadmin', label_true: 'STOPPED', handler: ->
-      @service
-        srv_name: 'kadmin'
-        action: 'stop'
-
-    exports.push header: 'Kerberos Server # Stop krb5kdc', label_true: 'STOPPED', handler: ->
-      @service
-        srv_name: 'krb5kdc'
-        action: 'stop'
+    module.exports = header: 'Kerberos Server Stop', label_true: 'STOPPED', handler: -> 
+      @service_stop
+        name: 'kadmin'
+        name: 'kadmin'
+      @service_stop
+        header: 'krb5kdc'
+        name: 'krb5kdc'

@@ -1,14 +1,12 @@
 
 # Kerberos Server Start
 
-    exports = module.exports = []
-    exports.push 'masson/bootstrap'
-    exports.push 'masson/core/openldap_server/wait'
+Start the kadmin and krb5kdc daemons.
 
-    exports.push header: 'Kerberos Server # Start kadmin', label_true: 'STARTED', handler: ->
+    module.exports = header: 'Kerberos Server Start', label_true: 'STARTED', handler: ->
       @service_start
+        header: 'kadmin'
         name: 'kadmin'
-
-    exports.push header: 'Kerberos Server # Start krb5kdc', label_true: 'STARTED', handler: ->
       @service_start
+        header: 'krb5kdc'
         name: 'krb5kdc'

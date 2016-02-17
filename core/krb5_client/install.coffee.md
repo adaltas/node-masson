@@ -8,19 +8,14 @@ by using secret-key cryptography.
 This module install the client tools written by the [Massachusetts 
 Institute of Technology](http://web.mit.edu).
 
-    exports = module.exports = []
-    exports.push 'masson/bootstrap'
-    exports.push 'masson/core/yum'
-    exports.push 'masson/core/ssh'
-    exports.push 'masson/core/ntp'
-    # exports.push require('./index').configure
-
 ## Install
 
 The package "krb5-workstation" is installed.
 
-    exports.push header: 'Krb5 Client # Install', timeout: -1, handler: ->
+    module.exports = header: 'Krb5 Client', handler: ->
       @service
+        header: 'Package'
+        timeout: -1
         name: 'krb5-workstation'
 
 ## Configure
@@ -31,23 +26,15 @@ This is to avoid any conflict where both modules would try to write
 their own configuration one. We give the priority to the server module 
 which create a Kerberos file with complementary information.
 
-    exports.push
-      header: 'Krb5 Client # Configure'
-      timeout: -1
-      # Kerberos config is also managed by the kerberos server action.
-      unless: -> @has_module 'masson/core/krb5_server'
-      handler: ->
-        @ini
-          content: safe_etc_krb5_conf @config.krb5.etc_krb5_conf
-          destination: '/etc/krb5.conf'
-          stringify: misc.ini.stringify_square_then_curly
-          backup: true
-
-## Wait
-
-Servers need to be ready to create principals.
-
-    exports.push 'masson/core/krb5_client/wait'
+      @ini
+        header: 'Configuration'
+        timeout: -1
+        # Kerberos config is also managed by the kerberos server action.
+        unless: -> @has_module 'masson/core/krb5_server'
+        content: safe_etc_krb5_conf @config.krb5.etc_krb5_conf
+        destination: '/etc/krb5.conf'
+        stringify: misc.ini.stringify_square_then_curly
+        backup: true
 
 ## Host Principal
 
@@ -56,30 +43,30 @@ Create a user principal for this host. The principal is named like
 ("krb5.etc\_krb5\_conf.libdefaults.default_realm") unless the property
 "etc_krb5_conf[realm].create\_hosts" is set.
 
-    exports.push header: 'Krb5 Client # Host Principal', timeout: -1, handler: ->
-      {etc_krb5_conf} = @config.krb5
-      default_realm = etc_krb5_conf.libdefaults.default_realm
-      modified = false
-      for realm, config of etc_krb5_conf.realms
-        # Note:
-        # The doc above say "apply if default realm unless create_hosts"
-        # but this isnt what we do bellow
-        # As a consequence, we never enter here, which might be acceptable
-        # but doc and code need to be aligned.
-        continue if default_realm isnt realm or not config.create_hosts
-        @wait_execute
-          cmd: misc.kadmin
-            realm: realm
+      @call header: 'Host Principal', timeout: -1, handler: ->
+        {etc_krb5_conf} = @config.krb5
+        default_realm = etc_krb5_conf.libdefaults.default_realm
+        modified = false
+        for realm, config of etc_krb5_conf.realms
+          # Note:
+          # The doc above say "apply if default realm unless create_hosts"
+          # but this isnt what we do bellow
+          # As a consequence, we never enter here, which might be acceptable
+          # but doc and code need to be aligned.
+          continue if default_realm isnt realm or not config.create_hosts
+          @wait_execute
+            cmd: misc.kadmin
+              realm: realm
+              kadmin_principal: config.kadmin_principal
+              kadmin_password: config.kadmin_password
+              kadmin_server: config.admin_server
+            , 'listprincs'
+          @krb5_addprinc
+            principal: "host/#{@config.host}@#{realm}"
+            randkey: true
             kadmin_principal: config.kadmin_principal
             kadmin_password: config.kadmin_password
             kadmin_server: config.admin_server
-          , 'listprincs'
-        @krb5_addprinc
-          principal: "host/#{@config.host}@#{realm}"
-          randkey: true
-          kadmin_principal: config.kadmin_principal
-          kadmin_password: config.kadmin_password
-          kadmin_server: config.admin_server
 
 ## principals
 
@@ -87,16 +74,16 @@ Populate the Kerberos database with new principals. The "wait" property is
 set to 10s because multiple instance of this handler may try to create the same
 principals and generate concurrency errors.
 
-    exports.push header: 'Krb5 Client # Principals', wait: 10000, handler: ->
-      {etc_krb5_conf} = @config.krb5
-      for realm, config of etc_krb5_conf.realms
-        continue unless config.principals
-        for principal in config.principals  
-          @krb5_addprinc misc.merge
-            kadmin_principal: config.kadmin_principal
-            kadmin_password: config.kadmin_password
-            kadmin_server: config.admin_server
-          , principal
+      @call header: 'Principals', wait: 10000, handler: ->
+        {etc_krb5_conf} = @config.krb5
+        for realm, config of etc_krb5_conf.realms
+          continue unless config.principals
+          for principal in config.principals  
+            @krb5_addprinc misc.merge
+              kadmin_principal: config.kadmin_principal
+              kadmin_password: config.kadmin_password
+              kadmin_server: config.admin_server
+            , principal
 
 ## Configure SSHD
 
@@ -105,21 +92,21 @@ configuration object. By default, we set the following properties to "yes": "Cha
 "KerberosAuthentication", "KerberosOrLocalPasswd", "KerberosTicketCleanup", "GSSAPIAuthentication", 
 "GSSAPICleanupCredentials". The "sshd" service will be restarted if a change to the configuration is detected.
 
-    exports.push
-      header: 'Krb5 Client # Configure SSHD'
-      if: -> @config.krb5.sshd
-      handler: ->
-        {sshd} = @config.krb5
-        @write
-          write: for k, v of sshd
-            match: new RegExp "^#{k}.*$", 'mg'
-            replace: "#{k} #{v}"
-            append: true
-          destination: '/etc/ssh/sshd_config'
-        @service
-          srv_name: 'sshd'
-          action: 'restart'
-          if: -> @status -1
+      @call
+        header: 'Configure SSHD'
+        if: -> @config.krb5.sshd
+        handler: ->
+          {sshd} = @config.krb5
+          @write
+            write: for k, v of sshd
+              match: new RegExp "^#{k}.*$", 'mg'
+              replace: "#{k} #{v}"
+              append: true
+            destination: '/etc/ssh/sshd_config'
+          @service
+            srv_name: 'sshd'
+            action: 'restart'
+            if: -> @status -1
 
 ## Module Dependencies
 

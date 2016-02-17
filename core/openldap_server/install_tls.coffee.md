@@ -361,72 +361,61 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=ryba
 
 ###
 
-    exports.configure = (ctx) ->
-      ctx.config.openldap_server ?= {}
 
-    exports.push header: 'OpenLDAP Server # TLS Deploy', handler: ->
-      { tls, tls_ca_cert_file, tls_cert_file, tls_key_file } = @config.openldap_server
-      return next() unless tls
-      tls_ca_cert_filename = path.basename tls_ca_cert_file
-      tls_cert_filename = path.basename tls_cert_file
-      tls_key_filename = path.basename tls_key_file
+    module.exports = header: 'OpenLDAP Server # TLS Deploy', handler: ->
+      {openldap_server} = @config
+      return unless openldap_server.tls
       @upload
-        source: tls_ca_cert_file
+        header: 'Certificate Authority'
+        source: openldap_server.tls_ca_cert_file
         local_source: true
-        destination: "/etc/pki/tls/certs/#{tls_ca_cert_filename}"
+        destination: "/etc/pki/tls/certs/#{path.basename openldap_server.tls_ca_cert_file}"
         uid: 'ldap'
         gid: 'ldap'
         mode: 0o0400
       @upload
-        source: tls_cert_file
+        header: 'Public Certificate'
+        source: openldap_server.tls_cert_file
         local_source: true
-        destination: "/etc/pki/tls/certs/#{tls_cert_filename}"
+        destination: "/etc/pki/tls/certs/#{path.basename openldap_server.tls_cert_file}"
         uid: 'ldap'
         gid: 'ldap'
         mode: 0o0400
       @upload
-        source: tls_key_file
+        header: 'Private Key'
+        source: openldap_server.tls_key_file
         local_source: true
-        destination: "/etc/pki/tls/certs/#{tls_key_filename}"
+        destination: "/etc/pki/tls/certs/#{path.basename openldap_server.tls_key_file}"
         uid: 'ldap'
         gid: 'ldap'
         mode: 0o0400
       @write
+        header: 'Configuration'
         destination: '/etc/openldap/slapd.d/cn=config.ldif'
         write: [
           match: /^olcTLSCACertificatePath.*$/mg
-          replace: "olcTLSCACertificatePath: /etc/pki/tls/certs/#{tls_ca_cert_filename}"
+          replace: "olcTLSCACertificatePath: /etc/pki/tls/certs/#{path.basename openldap_server.tls_ca_cert_file}"
           # append: 'olcRootPW'
         ,
           match: /^olcTLSCertificateFile.*$/mg
-          replace: "olcTLSCertificateFile: /etc/pki/tls/certs/#{tls_cert_filename}"
+          replace: "olcTLSCertificateFile: /etc/pki/tls/certs/#{path.basename openldap_server.tls_cert_file}"
           # append: 'olcRootPW'
         ,
           match: /^olcTLSCertificateKeyFile.*$/mg
-          replace: "olcTLSCertificateKeyFile: /etc/pki/tls/certs/#{tls_key_filename}"
+          replace: "olcTLSCertificateKeyFile: /etc/pki/tls/certs/#{path.basename openldap_server.tls_key_file}"
           # append: 'olcTLSCertificateFile'
         ]
-      @service
-        srv_name: 'slapd'
-        action: 'restart'
-        if: -> @status()
-
-    exports.push header: 'OpenLDAP Server # TLS Activate LDAPS', handler: ->
       @write
+        header: 'Activation'
         match: /^SLAPD_LDAPS.*/mg
         replace: 'SLAPD_LDAPS=yes'
         destination: '/etc/sysconfig/ldap'
-      @service
-        srv_name: 'slapd'
-        action: 'restart'
-        if: -> @status -1
+      @service_restart
+        header: 'Restart'
+        name: 'slapd'
+        if: -> @status()
 
     exports.push 'masson/core/openldap_client'
-
-    exports.push header: 'OpenLDAP Server # TLS Check', label_true: 'CHECKED', timeout: -1, handler: ->
-      {suffix, root_dn, root_password} = @config.openldap_server
-      @execute
-        cmd: "ldapsearch -x -H ldaps://#{@config.host} -b #{suffix} -D #{root_dn} -w #{root_password}"
 
 ## Dependencies
 

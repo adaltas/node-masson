@@ -1,13 +1,8 @@
 
 # Kerberos Server Backup
 
-    module.exports = []
-    
-    module.exports.push 'masson/bootstrap'
-    module.exports.push 'masson/bootstrap/utils'
-    # module.exports.push require('./').configure
-
-    module.exports.push name: "Kerberos Server # Backup Database", timeout: -1, label_true: 'BACKUPED', handler: ->
+    module.exports = name: "Kerberos Server Backup", timeout: -1, label_true: 'BACKUPED', handler: ->
       @backup
+        header: 'Database'
         name: 'kerberos'
         cmd: 'kdb5_util dump'
