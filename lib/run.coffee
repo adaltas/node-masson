@@ -70,7 +70,6 @@ module.exports = (options, config) ->
     options = {}
   new Run options, config
 
-
 # Configuration
 load_module = (ctx, parent, default_command, filter_command) ->
   middlewares = []
@@ -86,6 +85,7 @@ load_module = (ctx, parent, default_command, filter_command) ->
     parent.handler = undefined
     parent[k] ?= v for k, v of mod
   if plugin
+    middlewares.push module: parent.module, plugin: true
     commands = parent.handler.call ctx
     return unless commands
     return if commands is ctx
@@ -109,7 +109,6 @@ load_module = (ctx, parent, default_command, filter_command) ->
         else
           throw Error "Invalid handler: #{child.handler}"
         child.command ?= command
-        middlewares.push module: parent.module, plugin: true
         m = load_module(ctx, child, default_command, command)
         middlewares.push m... if m
   else
