@@ -28,7 +28,8 @@ Run = (params, config) ->
     # Work on each server
     contexts = {}
     for fqdn, server of config.servers
-      ctx = contexts[fqdn] = context contexts, (merge {}, config, server), params.command
+      ctx = contexts[fqdn] = context contexts, (merge {}, config, server)
+      ctx.params = params
       ctx.runinfo = {}
       ctx.runinfo.date = now
       ctx.runinfo.command = params.command
@@ -112,21 +113,22 @@ load_module = (ctx, parent, default_command, filter_command) ->
         m = load_module(ctx, child, default_command, command)
         middlewares.push m... if m
   else
-    parent.command ?= default_command
+    # parent.command ?= default_command
     middlewares.push parent
   middlewares
 
 call_modules = (ctx, params, next) ->
   # Filter by hosts
-  return next() if params.hosts? and (multimatch ctx.config.host, params.hosts).length is 0
+  return if params.hosts? and (multimatch ctx.config.host, params.hosts).length is 0
   # Action
-  called = {}
+  ctx.called ?= {}
   for middleware in ctx.middlewares then do (middleware) ->
     return if middleware.plugin
     # return if command isnt 'install' and middleware.command and middleware.command isnt command
     return if middleware.command and middleware.command isnt params.command
-    return if called[middleware.module]
-    called[middleware.module] = true #if typeof middleware.module is 'string'
+    return if not middleware.command and params.command in ['configure', 'prepare']
+    return if ctx.called[middleware.module]
+    ctx.called[middleware.module] = true
     if middleware.skip
       ctx.emit 'middleware_skip'
       return

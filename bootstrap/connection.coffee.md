@@ -60,8 +60,10 @@ Example:
 }
 ```
 
-
-    module.exports = header: 'Bootstrap # Connection', required: true, timeout: -1, handler: (options, next) ->
+    # module.exports = header: 'Bootstrap # Connection', required: true, timeout: -1, handler: (options, next) ->
+    module.exports = ->
+      return if @params.hosts? and (multimatch @config.host, params.hosts).length is 0
+      return if @params.command in ['configure', 'prepare']
       connection = @config.connection ?= {}
       connection.username ?= 'root'
       connection.host ?= connection.ip or @config.ip or @config.host
@@ -80,50 +82,53 @@ Example:
       connection.bootstrap.username ?= null
       connection.bootstrap.password ?= null
       connection.bootstrap.retry = 3
-      close = -> @options.ssh?.end() if connection.end
-      @on 'error', close
-      @on 'end', close
-      attempts = 0
-      has_rebooted = false
-      modified = false
-      do_private_key = =>
-        return do_connect() if connection.private_key
-        options.log "Read private key file: #{connection.private_key_location}"
-        misc.path.normalize connection.private_key_location, (location) =>
-          fs.readFile location, 'ascii', (err, content) =>
-            return next Error "Private key doesnt exists: #{JSON.stringify location}" if err and err.code is 'ENOENT'
+      
+      @call header: 'Connection', (_, next) ->
+        close = -> @options.ssh?.end() if connection.end
+        @on 'error', close
+        @on 'end', close
+        attempts = 0
+        has_rebooted = false
+        modified = false
+        do_private_key = =>
+          return do_connect() if connection.private_key
+          # options.log "Read private key file: #{connection.private_key_location}"
+          misc.path.normalize connection.private_key_location, (location) =>
+            fs.readFile location, 'ascii', (err, content) =>
+              return next Error "Private key doesnt exists: #{JSON.stringify location}" if err and err.code is 'ENOENT'
+              return next err if err
+              connection.private_key = content
+              do_connect()
+        do_connect = =>
+          # options.log "Connect with private key"
+          config = misc.merge {}, @config.connection
+          connect config, (err, connection) =>
+            return do_bootstrap() if err
+            # options.log "SSH connected"
+            @options.ssh = connection
+            next null, false
+        do_bootstrap = =>
+          # options.log "Connection failed, bootstrap"
+          bootstrap.call @, options, (err, reboot) =>
             return next err if err
-            connection.private_key = content
-            do_connect()
-      do_connect = =>
-        options.log "Connect with private key"
-        config = misc.merge {}, @config.connection
-        connect config, (err, connection) =>
-          return do_bootstrap() if err
-          options.log "SSH connected"
-          @options.ssh = connection
-          next null, false
-      do_bootstrap = =>
-        options.log "Connection failed, bootstrap"
-        bootstrap.call @, options, (err, reboot) =>
-          return next err if err
-          if reboot then do_wait_reboot() else do_connect_after_bootstrap()
-      do_wait_reboot = =>
-        options.log 'Wait for reboot'
-        config = misc.merge {}, @config.connection,
-          retry: 3
-        connect config, (err, conn) =>
-          return do_connect_after_bootstrap() if err
-          conn.end()
-          conn.on 'error', do_wait_reboot
-          conn.on 'end', do_wait_reboot
-      do_connect_after_bootstrap = =>
-        options.log 'Connect when rebooted'
-        config = misc.merge {}, @config.connection,
-          retry: true
-        connect config, (err, conn) =>
-          return next err if err
-          options.log "SSH connected"
-          @options.ssh = conn
-          next null, true
-      do_private_key()
+            if reboot then do_wait_reboot() else do_connect_after_bootstrap()
+        do_wait_reboot = =>
+          # options.log 'Wait for reboot'
+          config = misc.merge {}, @config.connection,
+            retry: 3
+          connect config, (err, conn) =>
+            return do_connect_after_bootstrap() if err
+            conn.end()
+            conn.on 'error', do_wait_reboot
+            conn.on 'end', do_wait_reboot
+        do_connect_after_bootstrap = =>
+          # options.log 'Connect when rebooted'
+          config = misc.merge {}, @config.connection,
+            retry: true
+          connect config, (err, conn) =>
+            return next err if err
+            # options.log "SSH connected"
+            @options.ssh = conn
+            next null, true
+        do_private_key()
+      null
