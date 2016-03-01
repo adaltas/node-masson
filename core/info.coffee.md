@@ -3,9 +3,7 @@
 
 Gather various information relative to the targeted system.
 
-    exports = module.exports = []
-    exports.push 'masson/bootstrap/connection'
-    exports.push 'masson/bootstrap/log'
+    module.exports = header: 'Info', required: true, handler: ->
 
 ## Server Info
 
@@ -13,8 +11,8 @@ Expose system information. On execution, the context is enriched with the
 properties "kernel\_name", "nodename", "kernel\_release", "kernel\_version", 
 "processor" and "operating_system".
 
-    exports.push header: 'Bootstrap # Server Info', required: true, handler: ->
       @execute
+        header: 'Server'
         cmd: 'uname -snrvmo'
         stdout: null
         stderr: null
@@ -59,9 +57,9 @@ It will output:
     mountpoint: '/dev/shm' } ]
 ```
 
-    exports.push header: 'Bootstrap # Disk Info', required: true, handler: ->
       properties = ['filesystem', 'total', 'used', 'available', 'available_pourcent', 'mountpoint']
       @execute
+        header: 'Disk'
         cmd: 'df'
       , (err, executed, stdout) ->
         throw err if err
@@ -114,8 +112,8 @@ It will output:
 ]
 ```
 
-    exports.push header: 'Bootstrap # CPU Info', required: true, handler: ->
       @execute
+        header: 'CPU'
         cmd: 'cat /proc/cpuinfo'
       , (err, executed, stdout, stderr) ->
         return next err if err
@@ -161,8 +159,8 @@ It will output:
   "Hugepagesize":2048000,"DirectMap4k":8128000,"DirectMap2M":1040384000}
 ```
 
-    exports.push header: 'Bootstrap # Mem Info', required: true, handler: ->
       @execute
+        header: 'Mem'
         cmd: 'cat /proc/meminfo'
         stdout: null
         stderr: null
@@ -182,5 +180,4 @@ It will output:
 
 ## Dependencies
 
-    mecano = require 'mecano'
     string = require 'mecano/lib/misc/string'
