@@ -4,7 +4,7 @@ mecano = require 'mecano'
 {flatten, merge} = require './misc'
 
 class Context extends EventEmitter
-  constructor: (contexts, @config, @command)->
+  constructor: (contexts, @config)->
     @_contexts = contexts
     options = {}
     options.cache = true
@@ -74,6 +74,6 @@ class Context extends EventEmitter
     return if has_module.length then has_module else false
     
 
-module.exports = (config, command) ->
-  return new Context config, command
+module.exports = (contexts, config) ->
+  return new Context contexts, config
 module.exports.Context = Context
