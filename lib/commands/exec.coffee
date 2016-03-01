@@ -13,7 +13,7 @@ module.exports = ->
   config params.config, (err, config) ->
     each config.servers
     .parallel true
-    .on 'item', (server, next) ->
+    .call (server, next) ->
       return next() if params.hosts? and multimatch(server.host, params.hosts).indexOf(server.host) is -1
       connection = merge {}, config.connection, server.connection
       connection.username ?= 'root'
@@ -32,5 +32,5 @@ module.exports = ->
           write "\x1b[35m#{stderr.trim()}\x1b[39m\n" if stderr.length
           write "\n"
           ssh.end()
-    .on 'both', (err) ->
+    .then (err) ->
       # Done
