@@ -12,6 +12,8 @@ continue as soon as an SSH connection is again available.
     misc = require 'mecano/lib/misc'
     connect = require 'ssh2-connect'
     collect = require './lib/collect'
+    multimatch = require '../lib/multimatch'
+    params = require '../lib/params'
     bootstrap = require './lib/bootstrap'
 
 ## Configuration
@@ -62,7 +64,7 @@ Example:
 
     # module.exports = header: 'Bootstrap # Connection', required: true, timeout: -1, handler: (options, next) ->
     module.exports = ->
-      return if @params.hosts? and (multimatch @config.host, params.hosts).length is 0
+      return if @params.hosts? and (multimatch( @config.host, @params.hosts)).length is 0
       return if @params.command in ['configure', 'prepare']
       connection = @config.connection ?= {}
       connection.username ?= 'root'

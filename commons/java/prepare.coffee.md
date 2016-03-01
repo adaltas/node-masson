@@ -10,12 +10,12 @@ Download the Oracle JDK.
       handler: ->
         @cache
           ssh: null
-          source: "#{java.jdk.location}"
+          source: "#{@config.java.jdk.location}"
           headers: ['Cookie: oraclelicense=accept-securebackup-cookie']
           location: true
         @cache
           ssh: null
-          source: "#{java.jce.location}"
+          source: "#{@config.java.jce.location}"
           headers: ['Cookie: oraclelicense=accept-securebackup-cookie']
           location: true
 
