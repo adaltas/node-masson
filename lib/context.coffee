@@ -14,7 +14,7 @@ class Context extends EventEmitter
     @
   run: (ctx, module) ->
     if typeof module is 'function'
-      module.call ctx, @
+      module.call ctx
     else
       throw new Error 'Only accept functions for now'
   context: (host, modules=[]) ->
