@@ -11,7 +11,7 @@
         disk.dump ?= '0'
         disk.pass ?= '0'
         disk.dump = "#{disk.dump}" if typeof disk.dump isnt 'string'
-        disk.dump = "#{disk.dump}" if typeof disk.pass isnt 'string'
+        disk.pass = "#{disk.pass}" if typeof disk.pass isnt 'string'
         throw Error "Please specify device property for mountpoint #{mntpt} or disable fstab" unless disk.device?
         throw Error "Invalid device format. Please provide a string (device path or UUID='<uuid>')" unless typeof disk.device is 'string'
         throw Error "Please specify 'type' property for mountpoint #{mntpt} or disable fstab" unless disk.type?
