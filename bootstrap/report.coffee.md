@@ -1,17 +1,14 @@
 
 # Bootstrap Report
 
-    exports = module.exports = []
-
-    exports.push required: true, handler: ->
+    module.exports = ->
       report = @config.report ?= {}
       report.writer ?= {}
       report.writer.write ?= (data) ->
         process.stdout.write data
-      # report.writer ?= new stream.PassThrough
-      # report.writer.pipe process.stdout
 
-    exports.push header: 'Bootstrap # Report Console', required: true, handler: ->
+## Report Console
+
       {writer} = @config.report
       reports = []
       @on 'report', (report) ->
