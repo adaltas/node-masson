@@ -1,7 +1,7 @@
 
 # Users Locale Install
 
-    module.exports = header: 'Users Locale Install', handler: ->
+    module.exports = header: 'Locale Install', handler: ->
       {users, locale} = @config
 
 ## LC_* Properties
