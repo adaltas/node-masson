@@ -45,22 +45,27 @@ preserve alphanumerical ordering of files.
       log.elasticsearch.url ?= 'http://localhost:9200'
       log.elasticsearch.index ?= "masson"
       log.elasticsearch.type ?= @runinfo.command
-      @call header: 'Bootstrap Log # Text', required: true, handler: ->
-        {disabled, basedir, filename, archive} = @config.log
-        return if disabled
-        @mkdir
-          destination: basedir
-        # creates relative symlink <log>/latest -> <log>/<command>/<date>
-        if archive
-          logdir = path.join basedir, '../../'
-          @link
-            source: path.relative logdir, path.resolve basedir
-            destination: path.join logdir, 'latest'
-          # creates relative symlink <log>/<command>/latest -> <log>/<command>/<date>
-          logdir = path.join basedir, '../'
-          @link
-            source: path.relative logdir, path.resolve basedir
-            destination: path.join logdir, 'latest'
+      @call unless: @config.log.disabled, header: 'Bootstrap Log # Text', required: true, handler: ->
+        {basedir, filename, archive} = @config.log
+        @call header: 'Prepare Log dir', handler: ->
+          if @contexts()[0].config.host is @config.host
+            @mkdir
+              destination: basedir
+            # creates relative symlink <log>/latest -> <log>/<command>/<date>
+            if archive
+              logdir = path.join basedir, '../../'
+              @link
+                source: path.relative logdir, path.resolve basedir
+                destination: path.join logdir, 'latest'
+              # creates relative symlink <log>/<command>/latest -> <log>/<command>/<date>
+              logdir = path.join basedir, '../'
+              @link
+                source: path.relative logdir, path.resolve basedir
+                destination: path.join logdir, 'latest'
+          else
+            # Avoid a race condition by waiting that the first node finish to
+            # create log dir
+            @wait_execute cmd: "[ -d '#{basedir}' ]"
         @call ->
           out = fs.createWriteStream path.resolve basedir, filename
           stdouting = stderring = false
