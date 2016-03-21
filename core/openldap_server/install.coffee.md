@@ -182,7 +182,7 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
       @call header: 'SUDO schema', timeout: -1, handler: ->
         @service
           name: 'sudo'
-        schema = null
+        schema = '/tmp/ldap.schema'
         @execute
           cmd: """
           schema=`rpm -ql sudo | grep -i schema.openldap`
@@ -197,12 +197,14 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
           destination: '/tmp/ldap.schema'
           mode: 0o0640
           unless: -> @status -1
-        @ldap_schema
-          name: 'sudo'
-          schema: '/tmp/ldap.schema'
-          binddn: openldap_server.config_dn
-          passwd: openldap_server.config_password
-          uri: true
+        @call ->
+          @ldap_schema
+            name: 'sudo'
+            schema: schema
+            binddn: openldap_server.config_dn
+            passwd: openldap_server.config_password
+            uri: true
+
 ## Delete ldif data
 
       @call header: 'Delete ldif data', handler: ->
