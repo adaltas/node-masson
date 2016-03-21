@@ -40,6 +40,7 @@ Example:
       'check':
         'masson/core/ntp/check'
       'install': [
+        'masson/core/yum'
         'masson/core/ntp/install'
         'masson/core/ntp/start'
         'masson/core/ntp/check'
