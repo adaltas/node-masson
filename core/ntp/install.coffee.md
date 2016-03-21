@@ -19,7 +19,7 @@ time when the `ntpd` daemon isnt yet started.
         header: 'Synchronize'
         cmd: "ntpdate #{ntp.servers[0]}"
         if: ->
-          @status -1 and ntp.servers?.length and ntp.servers[0] isnt @config.host
+          @status -1 and ntp.servers?.length and ( ntp.servers[0] isnt @config.host )
 
 ## Configure
 
