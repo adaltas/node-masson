@@ -208,7 +208,7 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
       @call header: 'Delete ldif data', handler: ->
         for path in openldap_server.ldapdelete
           destination = "/tmp/ryba_#{Date.now()}"
-          @upload
+          @download
             source: path
             destination: destination
             mode: 0o0640
