@@ -4,7 +4,7 @@
 ## Configuration
 
     module.exports = ->
-      require('./index').call @
+      require('./configure').handler.call @
       # Normalization
       @config.openldap_server_krb5 ?= {}
       {openldap_server, openldap_server_krb5} = @config

@@ -14,7 +14,7 @@
         'masson/core/openldap_server/install'
         'masson/core/openldap_server/install_tls'
         'masson/core/openldap_server/start'
-        'masson/core/openldap_client'
+        'masson/core/openldap_client/install'
         'masson/core/openldap_server/check'
       ]
       'start':
