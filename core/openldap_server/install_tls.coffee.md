@@ -1,10 +1,4 @@
 
-    exports = module.exports = []
-    exports.push 'masson/bootstrap'
-    exports.push 'masson/core/openldap_server/install'
-    # We cant require openldap_client here, since it will deploy
-    # and test a secure connection on a server not yet configured
-
 # OpenLDAP TLS
 
 Note, by default, openldap comes with ldaps support. The default value are:
@@ -361,7 +355,6 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=ryba
 
 ###
 
-
     module.exports = header: 'OpenLDAP Server # TLS Deploy', handler: ->
       {openldap_server} = @config
       return unless openldap_server.tls
@@ -414,8 +407,6 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=ryba
         header: 'Restart'
         name: 'slapd'
         if: -> @status()
-
-    exports.push 'masson/core/openldap_client'
 
 ## Dependencies
 
