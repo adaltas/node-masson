@@ -112,6 +112,11 @@ It will output:
 ]
 ```
 
+Note, nodes with CPUs that support AES encryption at the hardware level will
+provide superior performance on encryption tasks. You can determine if a node's
+CPU supports the AES instruction set by running the following command: 
+`cat /proc/cpuinfo | grep flags | grep aes`
+
       @execute
         header: 'CPU'
         cmd: 'cat /proc/cpuinfo'
