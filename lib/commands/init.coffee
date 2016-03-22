@@ -219,7 +219,7 @@ module.exports = ->
     rl.write "Vagrant file created\n"
   .write
     header: 'Log Directory'
-    destination: "#{params.path}/logs/.gitignore"
+    destination: "#{params.path}/log/.gitignore"
     content: """
     *
     !.gitignore
@@ -231,7 +231,7 @@ module.exports = ->
   .execute
     cmd: """
     git init
-    git add .gitignore package.json cache/.gitignore conf/config.coffee logs/.gitignore conf/VagrantFile
+    git add .gitignore package.json cache/.gitignore conf/config.coffee log/.gitignore conf/VagrantFile
     git commit -m 'Project initialization'
     """
     cwd: "#{params.path}"
