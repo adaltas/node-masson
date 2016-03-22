@@ -10,7 +10,7 @@ certificate to upload.
     
 ## Package
 
-      @service 'openldap-clients'
+      @service name: 'openldap-clients'
 
 ## Configuration
 

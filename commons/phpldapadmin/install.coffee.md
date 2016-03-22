@@ -8,7 +8,8 @@
 
 Install the "phpldapadmin" package.
 
-      @service 'phpldapadmin'
+      @service
+        name: 'phpldapadmin'
 
 ## Configure
 

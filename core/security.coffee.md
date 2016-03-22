@@ -29,7 +29,7 @@ Example:
       @config.security ?= {}
       @config.security.selinux ?= true
       @config.security.limits ?= {}
-      'install': header: 'Security', handler: ->
+      'install': header: 'Security', handler: (options) ->
 
 ## SELinux
 
