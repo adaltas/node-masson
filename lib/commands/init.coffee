@@ -42,7 +42,7 @@ module.exports = ->
     content: """
     #!/bin/bash
     cd `dirname "${BASH_SOURCE}"`/..
-    ./node_modules/.bin/ryba -c ./conf $@
+    ./node_modules/.bin/ryba -c ./conf/*.coffee $@
     """
     mode: 0o0755
     eof: true
