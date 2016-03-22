@@ -12,6 +12,7 @@
         'masson/bootstrap/fs'
         'masson/core/iptables'
         'masson/core/openldap_server/install'
+        'masson/core/openldap_server/install_acl'
         'masson/core/openldap_server/install_tls'
         'masson/core/openldap_server/start'
         'masson/core/openldap_client/install'

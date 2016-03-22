@@ -137,14 +137,6 @@ Create the kerberos administrator's user.
         @ldap_acl
           suffix: openldap_server.suffix
           acls: [
-            to: 'attrs=userPassword,userPKCS12'
-            by: [
-              'dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage'
-              'self write'
-              'anonymous auth'
-              '* none'
-            ]
-          ,
             before: "dn.subtree=\"#{openldap_server.suffix}\""
             to: "dn.subtree=\"#{kerberos_dn}\""
             by: [
