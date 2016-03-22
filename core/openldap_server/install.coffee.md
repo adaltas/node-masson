@@ -71,7 +71,7 @@ http://itdavid.blogspot.ca/2012/05/howto-centos-6.html
 http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
 ###
 
-      @call header: 'OpenLDAP Server # Config Access', timeout: -1, handler: (options) ->
+      @call header: 'Config Access', timeout: -1, handler: (options) ->
         @call (_, callback) ->
           return callback null, false if openldap_server.config_slappasswd
           options.log "Extract password from #{openldap_server.config_file}"
@@ -177,10 +177,12 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
         """
         code_skipped: 68
 
-      @call header: 'OpenLDAP Server # SUDO schema', timeout: -1, handler: ->
+## Sudo Schema
+
+      @call header: 'SUDO schema', timeout: -1, handler: ->
         @service
           name: 'sudo'
-        schema = null
+        schema = '/tmp/ldap.schema'
         @execute
           cmd: """
           schema=`rpm -ql sudo | grep -i schema.openldap`
@@ -195,17 +197,20 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
           destination: '/tmp/ldap.schema'
           mode: 0o0640
           unless: -> @status -1
-        @ldap_schema
-          name: 'sudo'
-          schema: '/tmp/ldap.schema'
-          binddn: openldap_server.config_dn
-          passwd: openldap_server.config_password
-          uri: true
+        @call ->
+          @ldap_schema
+            name: 'sudo'
+            schema: schema
+            binddn: openldap_server.config_dn
+            passwd: openldap_server.config_password
+            uri: true
 
-      @call header: 'OpenLDAP Server # Delete ldif data', handler: ->
+## Delete ldif data
+
+      @call header: 'Delete ldif data', handler: ->
         for path in openldap_server.ldapdelete
           destination = "/tmp/ryba_#{Date.now()}"
-          @upload
+          @download
             source: path
             destination: destination
             mode: 0o0640
@@ -215,7 +220,9 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
           @remove
             destination: destination
 
-      @call header: 'OpenLDAP Server # Add ldif data', timeout: 100000, handler: ->
+## Add ldif data
+
+      @call header: 'Add ldif data', timeout: 100000, handler: ->
         status = false
         for path in openldap_server.ldapadd
           destination = "/tmp/ryba_#{Date.now()}"

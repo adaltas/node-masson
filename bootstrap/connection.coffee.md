@@ -84,8 +84,8 @@ Example:
       connection.bootstrap.username ?= null
       connection.bootstrap.password ?= null
       connection.bootstrap.retry = 3
-      
-      @call header: 'Connection', (_, next) ->
+
+      @call header: 'Connection', (options, next) ->
         close = -> @options.ssh?.end() if connection.end
         @on 'error', close
         @on 'end', close

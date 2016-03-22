@@ -2,6 +2,7 @@
 # HTTPD Web Server Install
 
     module.exports = header: 'HTTPD Install', handler: ->
+      {httpd} = @config
 
 ## IPTables
 
@@ -30,19 +31,17 @@ cat /etc/group | grep hadoop
 apache:x:48:
 ```
 
-      {group, user} = @config.httpd
-      @call header: 'HTTPD # Users & Groups', ->
-        @group group
-        @user user
+      @call header: 'Users & Groups', handler: ->
+        @group httpd.group
+        @user httpd.user
 
 ## Install
 
 Install the HTTPD service and declare it as a startup service.
 
-      {startup, action} = @config.httpd
       @service
-        header: 'HTTPD # Install'
+        header: 'Install'
         name: 'httpd'
-        startup: startup
-        action: action
+        startup: httpd.startup
+        action: httpd.action
         timeout: -1
