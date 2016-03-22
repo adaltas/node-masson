@@ -53,7 +53,7 @@ module.exports = ->
     destination: "#{params.path}/bin/vagrant"
     content: """
     #!/bin/bash
-    cd $( dirname "${BASH_SOURCE}" )/../resources
+    cd $( dirname "${BASH_SOURCE}" )/../conf
     vagrant $@ 
     """
     mode: 0o0755
