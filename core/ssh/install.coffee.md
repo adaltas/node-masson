@@ -3,6 +3,13 @@
 
     module.exports = header: 'SSH Install', handler: ->
 
+## Package
+
+      @service
+        name: "openssh-server"
+      @service
+        name: "openssh-clients"
+
 ## Authorized Keys
 
 Update the "~/.ssh/authorized_keys" file for each users and add the public SSH keys
@@ -41,9 +48,8 @@ properties found in the "ssh.sshd_config" object.
               replace: "#{k} #{v}"
               append: true
             destination: '/etc/ssh/sshd_config'
-          @service
-            srv_name: 'sshd'
-            action: 'restart'
+          @service_restart
+            name: 'sshd'
             timeout: -1
             if: -> @status -1
 
