@@ -48,7 +48,6 @@ two new properties "sshd\_config" and "banner".
     module.exports = ->
       'configure': [
         'masson/core/users'
-        
         'masson/core/ssh/configure'
       ]
       'install': [
