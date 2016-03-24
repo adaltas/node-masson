@@ -101,7 +101,7 @@ inside the configuration. The properties "jce\_local\_policy" and
             ln -sf /usr/java/$version /usr/java/default
             rm -rf /tmp/ryba-${rand}
             """
-            trap_on_error: true
+            trap: true
 
 ## Java JCE
 
