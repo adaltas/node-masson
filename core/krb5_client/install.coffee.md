@@ -26,7 +26,7 @@ This is to avoid any conflict where both modules would try to write
 their own configuration one. We give the priority to the server module 
 which create a Kerberos file with complementary information.
 
-      @ini
+      @write_ini
         header: 'Configuration'
         timeout: -1
         # Kerberos config is also managed by the kerberos server action.

@@ -83,7 +83,7 @@ the user must have a `user.home` property.
       handler: ->
         {merge, config} = @config.curl
         for user in ctx.config.users then do (user) =>
-          @ini
+          @write_ini
             content: config
             destination: "#{user.home}/.curlrc"
             uid: user.username

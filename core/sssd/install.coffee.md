@@ -53,7 +53,7 @@ default overwritten unless the "sssd.merge" is `true`.
 
       @call header: 'Configure', timeout: -1, handler: ->
         {merge, config} = @config.sssd
-        @ini
+        @write_ini
           content: config
           destination: '/etc/sssd/sssd.conf'
           merge: merge

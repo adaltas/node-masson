@@ -83,7 +83,7 @@ merge server configuration and write the content back.
 More information about configuring the proxy settings 
 is available on [the centos website](http://www.centos.org/docs/5/html/yum/sn-yum-proxy-server.html)
 
-      @ini
+      @write_ini
         header: 'Configuration'
         content: @config.yum.config
         destination: '/etc/yum.conf'

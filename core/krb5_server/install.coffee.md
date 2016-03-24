@@ -90,7 +90,7 @@ The following files are updated:
       @call header: 'Configuration', handler: ->
         {realm, etc_krb5_conf, kdc_conf} = @config.krb5
         any_realm = Object.keys(kdc_conf.realms)[0]
-        @ini
+        @write_ini
           content: safe_etc_krb5_conf etc_krb5_conf
           destination: '/etc/krb5.conf'
           stringify: misc.ini.stringify_square_then_curly
@@ -102,7 +102,7 @@ The following files are updated:
             append: true
           destination: '/var/kerberos/krb5kdc/kadm5.acl'
           backup: true
-        @ini
+        @write_ini
           content: safe_etc_krb5_conf kdc_conf
           destination: '/var/kerberos/krb5kdc/kdc.conf'
           stringify: misc.ini.stringify_square_then_curly
