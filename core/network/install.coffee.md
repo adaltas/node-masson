@@ -13,10 +13,10 @@ this file.
 
       {hosts, hosts_auto} = @config.network
       write = []
-      if hosts_auto then for _, server of @config.servers
+      if hosts_auto then for ctx in @contexts()
         write.push 
-          match: RegExp "^#{quote server.ip}\\s.*$", 'gm'
-          replace: "#{server.ip} #{server.host} #{server.shortname}"
+          match: RegExp "^#{quote ctx.config.ip}\\s.*$", 'gm'
+          replace: "#{ctx.config.ip} #{ctx.config.host} #{ctx.config.shortname}"
           append: true
       for ip, hostnames of hosts
         write.push 
