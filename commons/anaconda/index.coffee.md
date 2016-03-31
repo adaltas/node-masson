@@ -7,7 +7,7 @@ for science, math, engineering, and data analysis. See the packages included wit
 Anaconda and the Anaconda changelog.
 
     module.exports = ->
-      'configure'
+      'configure':
         'masson/commons/anaconda/configure'
       'install':
         'masson/commons/anaconda/install'
