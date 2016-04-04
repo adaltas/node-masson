@@ -32,10 +32,19 @@ module.exports = parameters
   description: 'Export the server\'s configuration in a file  ',
   options: [
     name: 'output', shortcut: 'o', type: 'string'
-    description: 'Name of the output file'
+    description: 'Name of the output file/directory'
   ,
     name: 'ignore', shortcut: 'i', type: 'boolean'
     description: 'Overwrite ouput file'
+  ,
+    name: 'format', shortcut: 'f', type: 'string'
+    description: 'Format of the output file'
+  ,
+    name: 'explode', shortcut: 'd', type: 'boolean'
+    description: 'Explode configuration by host. Output option then refers to the directory name'
+  ,
+    name: 'hosts', shortcut: 'h', type: 'array'
+    description: 'Limit to a list of server hostnames'
   ]
   ,
     name: 'tree'

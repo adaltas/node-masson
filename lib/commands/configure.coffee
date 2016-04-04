@@ -16,23 +16,43 @@
     module.exports = ->
       # behave like the first pass of run command
       # creates a context perserver by executing all configure functions
+      valid_extensions = ['json','cson', 'js', 'coffee']
       now = new Date()
       params = params.parse()
-      provider = 'json'
+      provider = params.format or 'json'
       filename = ''
-      extensions = ['json','cson', 'js', 'coffee']
+      params.hosts = [params.hosts] if typeof params.hosts is 'string'
       if params.output?
-        output =  params.output.split('.')
-        if output.length > 1
-          provider = output[output.length-1]
-          throw Error "Extension not support: .#{provider}  Available Extensions: .json, .cson, .js, .coffee" unless provider in extensions
-          filename = params.output
-        else
-          filename = "#{params.output}.#{provider}"
+        filename = params.output
+        # If we have one file specified, but no format, we try to autodiscover
+        unless params.format? or params.explode
+          # Autodiscover format from filename
+          output =  params.output.split('.')
+          if output.length > 1
+            provider = output[output.length-1]
+      throw Error "Extension not supported: #{provider}.  Available Extensions: json, cson, js, coffee" unless provider in valid_extensions
+      print_export = (obj, path) ->
+        wr_stream = fs.createWriteStream path, encoding: 'utf8'
+        switch provider
+          when 'cson'
+            wr_stream.write CSON.stringify(obj, null, 2)
+          when 'json'
+            wr_stream.write JSON.stringify(obj, null, 2)
+          when 'js'
+            wr_stream.write "module.exports = #{JSON.stringify obj, null, 2}"
+          when 'coffee'
+            # adds 2 spaces to the stringified object for CSON indentation before writing it
+            content = (string.lines CSON.stringify(obj, null, 2)).join("\n  ")
+            wr_stream.write "module.exports =\n  #{content}"
+        wr_stream.end()
+        console.log path
       ctxs_output = {}
       # JSON and CSON are suported for now: by default provider is JSON
       config params.config, (err, config) =>
         contexts = {}
+        if params.hosts?
+          for host in params.hosts
+            throw Error "Host #{host} not found" unless host in Object.keys config.servers
         for fqdn, server of config.servers
           ctx = contexts[fqdn] = context contexts, (merge {}, config, server)
           ctx.params = params
@@ -65,26 +85,17 @@
           throw err if err
           return console.log ctxs_output if !params.output?
           for fqdn, ctx of ctxs_output
+            delete ctxs_output[fqdn] if params.hosts? and fqdn not in params.hosts
             delete ctx.servers
           location = path.resolve process.cwd(), filename
           fs.stat location, (err, exists) ->
             return console.log err if err and err?.code != 'ENOENT'
             if exists
-              return throw Error 'File already exist: Use --ignore option if you wan\'t to overwrite file' unless params.ignore
-            console.log location
-            wr_stream = fs.createWriteStream location, encoding: 'utf8'
-            switch provider
-              when 'cson'
-                wr_stream.write CSON.stringify(ctxs_output, null, 2)
-              when 'json'
-                wr_stream.write JSON.stringify(ctxs_output, null, 2)
-              when 'js'
-                wr_stream.write "module.exports = servers = #{JSON.stringify ctxs_output, null, 2}"
-              when 'coffee'
-                # adds 2 spaces to the stringified object for CSON indentation before writing it
-                content = (string.lines CSON.stringify( ctxs_output, null, 2)).map( (line) -> "  #{line}").join("\n")
-                wr_stream.write "module.exports = 'servers': \n#{content}"
-            wr_stream.end()
+              throw Error 'File already exist: Use --ignore option if you wan\'t to overwrite file' unless params.ignore
+            if params.explode
+              fs.mkdirSync location
+              print_export ctx, "#{location}/#{hostname}.#{provider}" for hostname, ctx of ctxs_output
+            else print_export(ctxs_output, location)
 
     # Configuration
     load_module = (ctx, parent, default_command, filter_command) ->
