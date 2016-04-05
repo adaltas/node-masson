@@ -226,7 +226,7 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
         status = false
         for path in openldap_server.ldapadd
           destination = "/tmp/ryba_#{Date.now()}"
-          @upload
+          @download
             source: path
             destination: destination
             shy: true

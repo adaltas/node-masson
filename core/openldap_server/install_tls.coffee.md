@@ -358,26 +358,23 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=ryba
     module.exports = header: 'OpenLDAP Server # TLS Deploy', handler: ->
       {openldap_server} = @config
       return unless openldap_server.tls
-      @upload
+      @download
         header: 'Certificate Authority'
         source: openldap_server.tls_ca_cert_file
-        local_source: true
         destination: "/etc/pki/tls/certs/#{path.basename openldap_server.tls_ca_cert_file}"
         uid: 'ldap'
         gid: 'ldap'
         mode: 0o0400
-      @upload
+      @download
         header: 'Public Certificate'
         source: openldap_server.tls_cert_file
-        local_source: true
         destination: "/etc/pki/tls/certs/#{path.basename openldap_server.tls_cert_file}"
         uid: 'ldap'
         gid: 'ldap'
         mode: 0o0400
-      @upload
+      @download
         header: 'Private Key'
         source: openldap_server.tls_key_file
-        local_source: true
         destination: "/etc/pki/tls/certs/#{path.basename openldap_server.tls_key_file}"
         uid: 'ldap'
         gid: 'ldap'

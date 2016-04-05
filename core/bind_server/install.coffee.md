@@ -87,8 +87,9 @@ Upload the zones definition files provided in the configuration file.
             };
             """
             append: true=
-        @upload (
+        @write (
           source: zone
+          local_source: true
           destination: "/var/named/#{path.basename zone}"
         ) for zone in bind_server.zones
 

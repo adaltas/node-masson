@@ -7,10 +7,9 @@ Installation will fail unless prepare is called before.
     module.exports = header: 'Anaconda # Install', timeout: -1, handler: ->
       {anaconda} = @config
       tmp_archive = "/tmp/#{path.basename anaconda.archive}"
-      @upload
+      @download
         source: anaconda.archive
         destination: tmp_archive
-        binary: true
         md5: true
         unless_exists: "#{anaconda.install_dir}/anaconda/LICENSE.txt"
       @extract
