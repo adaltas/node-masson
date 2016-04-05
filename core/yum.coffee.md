@@ -158,7 +158,7 @@ property "yum.epel" to false.
         timeout: -1
         cmd: "yum -y update"
         if: @config.yum.update
-        if_exec: '[[ `yum check-update | egrep ‘(.i386|.x86_64|.noarch|.src)’ | wc -l` > 0 ]]'
+        if_exec: '[[ `yum check-update | egrep "(.i386|.x86_64|.noarch|.src)" | wc -l` > 0 ]]'
 
 ## User Packages
 
