@@ -1,12 +1,7 @@
 
 # Anaconda Prepare
 
-    module.exports = []
-    module.exports.push 'masson/bootstrap/log'
-
-## Build Prepare
-
-    module.exports.push header: 'Anaconda # Build Archive', timeout: -1,  handler: ->
+    module.exports = header: 'Anaconda Build Archive', timeout: -1,  handler: ->
       {anaconda} = @config
       script = "/tmp/#{path.basename anaconda.source}"
       @download
