@@ -41,7 +41,7 @@ and when only ONE ntp server is configured
           lines = string.lines content
           modified = false
           position = 0
-          #The fudge property is only appliable on NTP servers
+          # The fudge property is only applicable on NTP servers
           found = []
           found_fudge = false
           for line, i in lines

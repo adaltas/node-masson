@@ -101,8 +101,8 @@ Example:
       , kdc_conf
       # Multiple kerberos servers accross the cluster are defined in server
       # specific configuration
-      # realms = @config.servers[@config.host].krb5?.etc_krb5_conf?.realms
-      realms = @config.krb5?.etc_krb5_conf?.realms
+      realms = @config.servers[@config.host].krb5?.etc_krb5_conf?.realms
+      # realms = @config.krb5?.etc_krb5_conf?.realms
       realms = etc_krb5_conf.realms if not realms or realms.length is 0
       for realm, i of realms
         kdc_conf.realms[realm] ?= {}
