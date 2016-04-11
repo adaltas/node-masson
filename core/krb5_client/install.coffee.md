@@ -12,7 +12,7 @@ Institute of Technology](http://web.mit.edu).
 
 The package "krb5-workstation" is installed.
 
-    module.exports = header: 'Krb5 Client', handler: ->
+    module.exports = header: 'Krb5 Client Install', handler: ->
       @service
         header: 'Package'
         timeout: -1
