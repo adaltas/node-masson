@@ -5,7 +5,7 @@ mecano = require 'mecano'
 
 class Context extends EventEmitter
   constructor: (contexts, @config)->
-    delete @config.servers
+    # delete @config.servers
     @_contexts = contexts
     options = {}
     # options.cache = true
