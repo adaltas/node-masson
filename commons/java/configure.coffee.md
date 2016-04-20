@@ -1,10 +1,25 @@
 
 # Java Configure
 
+Open JDK require the "java-1.7.0-openjdk-devel" package or Java will default
+to gij.
+
+Java home:
+
+*  Open JDK or gij: "/usr/lib/jvm/java"
+*  Oracle JDK: "/usr/java/default"
+
+Example for using Oracle JDK:
+
+```
+{ "java": {
+    "java_home": "/usr/java/default/",
+    "jre_home": "/usr/java/default/jre"
+}}
+```
+
     module.exports = handler: ->
       @config.java ?= {}
-      # @config.java['openjdk-1.7.0'] ?= true
-      # @config.java.java_home ?= '/usr/java/default'
       # Shared
       @config.java.java_home ?= '/usr/lib/jvm/java'
       @config.java.jre_home ?= '/usr/lib/jvm/java/jre'
