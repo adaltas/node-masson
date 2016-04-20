@@ -82,9 +82,9 @@ module.exports = ->
       "description": "#{params.description}",
       "dependencies": {
         "coffee-script": "1.10.0",
-        "masson": "0.1.1",
-        "ryba": "0.0.5",
-        "ryba-repos": "0.0.2"
+        "masson": "#{unless params.latest then '0.1.3' else 'https://github.com/adaltas/node-masson.git#HEAD'}",
+        "ryba": "#{unless params.latest then '0.0.6' else 'https://github.com/ryba-io/ryba.git#HEAD'}",
+        "ryba-repos": "#{unless params.latest then '0.0.2' else 'https://github.com/ryba-io/ryba-repos.git#HEAD'}"
       }
     }
     """
@@ -152,7 +152,7 @@ module.exports = ->
     return if err or not status
     rl.write "Configuration file created\n"
   .write
-    destination: "lib/helloworld.coffee.md"
+    destination: "#{params.path}/lib/helloworld.coffee.md"
     content: """
     # Helloworld
 
@@ -237,9 +237,7 @@ module.exports = ->
     """
     cwd: "#{params.path}"
   .execute
-    cmd: """
-    npm install
-    """
+    cmd: "npm install"
     cwd: "#{params.path}"
   .then (err, status) ->
     if err

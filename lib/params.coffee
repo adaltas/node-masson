@@ -84,8 +84,17 @@ module.exports = parameters
       name: 'debug', shortcut: 'd', type: 'boolean'
       description: 'Print debug output'
     ,
+      name: 'description', shortcut: 'i', type: 'string'
+      description: 'Project description'
+    ,
+      name: 'latest', shortcut: 'l', type: 'boolean'
+      description: 'Enable a development environment such as using latest git for package dependencies.'
+    ,
+      name: 'name', shortcut: 'n', type: 'string'
+      description: 'Project name'
+    ,
       name: 'path', shortcut: 'p', type: 'string'
-      description: 'Path to the project directory'
+      description: 'Path to the project directory, default to the current directory.'
     ]
   ,
     name: 'install'
