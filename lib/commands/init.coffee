@@ -13,6 +13,7 @@ module.exports = ->
   rl.setPrompt ''
   rl.on 'SIGINT', process.exit
   mecano
+    debug: params.debug
   .call (_, callback) ->
     fs.stat "#{params.path}", (err, stat) =>
       if err?.code is 'ENOENT'

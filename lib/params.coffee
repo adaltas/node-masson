@@ -81,6 +81,9 @@ module.exports = parameters
     name: 'init'
     description: 'Create a project with a default layout and configuration'
     options: [
+      name: 'debug', shortcut: 'd', type: 'boolean'
+      description: 'Print debug output'
+    ,
       name: 'path', shortcut: 'p', type: 'string'
       description: 'Path to the project directory'
     ]
