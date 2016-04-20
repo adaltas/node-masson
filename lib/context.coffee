@@ -33,7 +33,6 @@ class Context extends EventEmitter
     query.modules ?= []
     query.modules = [query.modules] unless Array.isArray query.modules
     hosts = {}
-    # console.log 'contexts', query
     for host in query.hosts then hosts[host] = null
     for host in @hosts_with_module(query.modules) then hosts[host] = null
     hosts = Object.keys hosts
@@ -52,10 +51,8 @@ class Context extends EventEmitter
   hosts_with_module: (modules, qtt, strict, null_if_empty) ->
     servers = []
     modules = [modules] unless Array.isArray modules
-    # console.log 'hosts_with_module modules', modules
     for module in modules
       for host, ctx of @_contexts
-        # console.log 'hosts_with_module', ctx.modules
         servers.push host if ctx.modules.indexOf(module) isnt -1
     throw new Error "Expect #{qtt} host(s) for module #{module} but got #{servers.length}" if strict and qtt? and servers.length isnt qtt
     return null if servers.length is 0 and null_if_empty
