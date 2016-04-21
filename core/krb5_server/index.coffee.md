@@ -17,7 +17,7 @@ provides a good description on how Kerberos is negotiated by GSSAPI and SSPI.
       ]
       'install': [
         'masson/core/openldap_client'
-        'masson/core/openldap_client/wait'
+        # 'masson/core/openldap_client/wait'
         'masson/core/iptables'
         'masson/core/krb5_server/install'
         'masson/core/krb5_server/start'

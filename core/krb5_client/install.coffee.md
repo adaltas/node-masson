@@ -13,6 +13,18 @@ Institute of Technology](http://web.mit.edu).
 The package "krb5-workstation" is installed.
 
     module.exports = header: 'Krb5 Client Install', handler: ->
+      {krb5} = @config
+
+## Wait
+
+Wait for the Kerberos servers to be started.
+
+      @call once: true, 'masson/core/krb5_server/wait'
+
+## Package
+
+Install the "krb5-workstation" dependency.
+
       @service
         header: 'Package'
         timeout: -1

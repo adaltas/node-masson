@@ -20,6 +20,10 @@ Resources:
 
     module.exports = header: 'Krb5 Server Install', handler: ->
       {kdc_conf} = @config.krb5
+
+## Wait
+  
+      @call once: true, 'masson/core/openldap_client/wait'
       
 ## IPTables
 

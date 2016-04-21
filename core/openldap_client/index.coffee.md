@@ -52,7 +52,6 @@ Example:
         'masson/core/openldap_client/configure'
       'install': [
         'masson/core/yum'
-        'masson/core/openldap_client/wait'
         'masson/core/openldap_client/install'
         'masson/core/openldap_client/check'
       ]

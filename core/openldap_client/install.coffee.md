@@ -7,7 +7,11 @@ object property. The property "openldap\_client.ca\_cert" may reference a
 certificate to upload.
 
     module.exports = header: 'OpenLDAP Client Install', handler: ->
-    
+
+## Wait
+
+      @call once: true, 'masson/core/openldap_client/wait'
+
 ## Package
 
       @service name: 'openldap-clients'

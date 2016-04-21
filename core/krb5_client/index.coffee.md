@@ -9,9 +9,8 @@
         'masson/core/yum'
         'masson/core/ssh'
         'masson/core/ntp'
-        'masson/core/krb5_server/wait'
         'masson/core/krb5_client/install'
-        'masson/core/krb5_client/wait'
+        # 'masson/core/krb5_client/wait'
       ]
 
 ## Safe krb5 configuration
