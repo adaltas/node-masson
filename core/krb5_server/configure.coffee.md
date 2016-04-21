@@ -115,7 +115,7 @@ Example:
           'max_renewable_life': '7d 0h 0m 0s'
           #'master_key_type': 'aes256-cts'
           'master_key_type': 'aes256-cts-hmac-sha1-96'
-          'default_principal_flags': '+preauth'
+          'default_principal_flags': '+preauth, +renewable, +forwardable'
           'acl_file': '/var/kerberos/krb5kdc/kadm5.acl'
           'dict_file': '/usr/share/dict/words'
           'admin_keytab': '/var/kerberos/krb5kdc/kadm5.keytab'
