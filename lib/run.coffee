@@ -33,7 +33,7 @@ Run = (params, config) ->
       ctx.runinfo = {}
       ctx.runinfo.date = now
       ctx.runinfo.command = params.command
-      ctx.config.modules = ctx.config.modules.reverse() if params.command is 'stop'
+      # ctx.config.modules = ctx.config.modules.reverse() if params.command is 'stop'
     process.on 'uncaughtException', (err) =>
       console.log 'masson/lib/run: uncaught exception'
       @emit 'error', err
@@ -47,7 +47,11 @@ Run = (params, config) ->
       middlewares = []
       for name in ctx.config.modules
         m = load_module(ctx, name, 'install')
-        middlewares.push m...
+        if m then for middleware in m
+          if middleware.irreversible or params.command isnt 'stop' 
+          then middlewares.push middleware
+          else middlewares.unshift middleware
+        # middlewares.push m...
       # Export list of modules
       ctx.middlewares = middlewares
       ctx.modules = middlewares.map( (m) -> m.module ).reduce( (p, c) ->

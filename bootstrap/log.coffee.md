@@ -45,7 +45,8 @@ preserve alphanumerical ordering of files.
       log.elasticsearch.url ?= 'http://localhost:9200'
       log.elasticsearch.index ?= "masson"
       log.elasticsearch.type ?= @runinfo.command
-      @call unless: @config.log.disabled, header: 'Bootstrap Log # Text', required: true, handler: ->
+      
+      @call unless: @config.log.disabled, header: 'Bootstrap Log # Text', required: true, irreversible: true, handler: ->
         {basedir, filename, archive} = @config.log
         @call header: 'Prepare Log dir', handler: ->
           if @contexts()[0].config.host is @config.host
@@ -103,7 +104,7 @@ preserve alphanumerical ordering of files.
               for error in err.errors then print error
             close()
 
-      @call header: 'Bootstrap Log # CSV', required: true, handler: ->
+      @call header: 'Bootstrap Log # CSV', required: true, irreversible: true, handler: ->
         {disabled, basedir, filename} = @config.log
         return if disabled
         @mkdir
@@ -139,7 +140,7 @@ preserve alphanumerical ordering of files.
 Forward log into Elastic Search. Errors will be silently ignored. Index may be
 removed with the command `curl -XDELETE 'http://localhost:9200/ryba/'`.
 
-      @call header: 'Bootstrap Log # Elastic Search', required: true, handler: ->
+      @call header: 'Bootstrap Log # Elastic Search', required: true, irreversible: true, handler: ->
         {elasticsearch} = @config.log
         return unless elasticsearch.enable
         @call (_, callback) ->
