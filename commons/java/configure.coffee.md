@@ -12,9 +12,16 @@ Java home:
 Example for using Oracle JDK:
 
 ```
-{ "java": {
+{ 
+  "java": {
     "java_home": "/usr/java/default/",
-    "jre_home": "/usr/java/default/jre"
+    "jre_home": "/usr/java/default/jre",
+    "openjdk": true,
+    "jdk": {
+      "version": "1.7.0_79",
+      "location": "http://download.oracle.com/otn-pub/java/jdk/7u79-b15/jdk-7u79-linux-x64.tar.gzz"
+    },
+    "jce": "http://download.oracle.com/otn-pub/java/jce/7/UnlimitedJCEPolicyJDK7.zip"
 }}
 ```
 

@@ -7,22 +7,6 @@ an implementation of either one of the Java SE, Java EE or Java ME platforms[1]
 released by Oracle Corporation in the form of a binary product aimed at Java 
 developers on Solaris, Linux, Mac OS X or Windows.
 
-```json
-{
-"java": {
-"java_home": "/usr/java/default",
-"jdk": {
-  "version": "1.7.0_60",
-  "location": "./resources/jdk-7u60-linux-x64.tar.gz"
-},
-"open_jdk": false,
-"oracle_jdk": "./resources/jdk-6u45-linux-x64-rpm.bin"
-"jce_local_policy": "./resources/jce_policy-7/local_policy.jar"
-"jce_us_export_policy": "./resources/jce_policy-7/US_export_policy.jar"
-}
-}
-```
-
 TODO: leverage /etc/alternative to switch between multiple JDKs.
 
     module.exports = header: 'JAVA Install', handler: ->
