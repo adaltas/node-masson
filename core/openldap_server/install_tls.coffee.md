@@ -333,6 +333,8 @@ SSL-Session:
 ---
 ```
 
+You can disable CA validation with the command `export LDAPTLS_REQCERT=never`.
+
 We will now setup the OpenLDAP client environment. Note, this could be done from openldap client server. Start by editing "/etc/openldap/ldap.conf".
 
 ```
