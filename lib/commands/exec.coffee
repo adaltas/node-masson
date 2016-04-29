@@ -1,7 +1,7 @@
 
 util = require 'util'
 each = require 'each'
-multimatch = require 'multimatch'
+multimatch = require '../multimatch'
 connect = require 'ssh2-connect'
 exec = require 'ssh2-exec'
 {merge} = require '../misc'
