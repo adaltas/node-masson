@@ -24,15 +24,14 @@ Wait for the admin interface to be ready by issuing the command `listprincs`.
       @call header: 'Command kadmin', handler: ->
         for realm, config of krb5.etc_krb5_conf.realms
           continue unless config.kadmin_principal and config.admin_server
-          {kadmin_principal, kadmin_password, admin_server} = config
           @wait_execute cmd: misc.kadmin
             timeout: -1
             retry: 5
             label_true: 'READY'
             realm: realm
-            kadmin_principal: kadmin_principal
-            kadmin_password: kadmin_password
-            kadmin_server: admin_server
+            kadmin_principal: config.kadmin_principal
+            kadmin_password: config.kadmin_password
+            kadmin_server: config.admin_server
           , 'listprincs'
 
 ## Module Dependencies

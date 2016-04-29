@@ -17,16 +17,20 @@ provides a good description on how Kerberos is negotiated by GSSAPI and SSPI.
       ]
       'install': [
         'masson/core/openldap_client'
-        # 'masson/core/openldap_client/wait'
         'masson/core/iptables'
         'masson/core/krb5_server/install'
         'masson/core/krb5_server/start'
       ]
-      'reload': 'masson/core/krb5_server/install'
-      'start': 'masson/core/krb5_server/start'
-      'status': 'masson/core/krb5_server/status'
-      'stop': 'masson/core/krb5_server/stop'
-      'backup': 'masson/core/krb5_server/backup'
+      'reload':
+        'masson/core/krb5_server/install'
+      'start':
+        'masson/core/krb5_server/start'
+      'status':
+        'masson/core/krb5_server/status'
+      'stop':
+        'masson/core/krb5_server/stop'
+      'backup':
+        'masson/core/krb5_server/backup'
 
     module.exports.safe_etc_krb5_conf = (etc_krb5_conf) ->
       etc_krb5_conf = misc.merge {}, etc_krb5_conf

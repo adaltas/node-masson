@@ -15,12 +15,6 @@ The package "krb5-workstation" is installed.
     module.exports = header: 'Krb5 Client Install', handler: ->
       {krb5} = @config
 
-## Wait
-
-Wait for the Kerberos servers to be started.
-
-      @call once: true, 'masson/core/krb5_server/wait'
-
 ## Package
 
 Install the "krb5-workstation" dependency.
@@ -43,10 +37,17 @@ which create a Kerberos file with complementary information.
         timeout: -1
         # Kerberos config is also managed by the kerberos server action.
         unless: -> @has_module 'masson/core/krb5_server'
-        content: safe_etc_krb5_conf @config.krb5.etc_krb5_conf
+        content: safe_etc_krb5_conf krb5.etc_krb5_conf
         destination: '/etc/krb5.conf'
         stringify: misc.ini.stringify_square_then_curly
         backup: true
+
+## Wait
+
+Wait for the Kerberos servers to be started.
+
+      @call once: true, 'masson/core/krb5_server/wait'
+      @call once: true, 'masson/core/krb5_client/wait'
 
 ## Host Principal
 
@@ -56,23 +57,15 @@ Create a user principal for this host. The principal is named like
 "etc_krb5_conf[realm].create\_hosts" is set.
 
       @call header: 'Host Principal', timeout: -1, handler: ->
-        {etc_krb5_conf} = @config.krb5
-        default_realm = etc_krb5_conf.libdefaults.default_realm
+        default_realm = krb5.etc_krb5_conf.libdefaults.default_realm
         modified = false
-        for realm, config of etc_krb5_conf.realms
+        for realm, config of krb5.etc_krb5_conf.realms
           # Note:
           # The doc above say "apply if default realm unless create_hosts"
           # but this isnt what we do bellow
           # As a consequence, we never enter here, which might be acceptable
           # but doc and code need to be aligned.
           continue if default_realm isnt realm or not config.create_hosts
-          @wait_execute
-            cmd: misc.kadmin
-              realm: realm
-              kadmin_principal: config.kadmin_principal
-              kadmin_password: config.kadmin_password
-              kadmin_server: config.admin_server
-            , 'listprincs'
           @krb5_addprinc
             principal: "host/#{@config.host}@#{realm}"
             randkey: true
@@ -87,8 +80,7 @@ set to 10s because multiple instance of this handler may try to create the same
 principals and generate concurrency errors.
 
       @call header: 'Principals', wait: 10000, handler: ->
-        {etc_krb5_conf} = @config.krb5
-        for realm, config of etc_krb5_conf.realms
+        for realm, config of krb5.etc_krb5_conf.realms
           continue unless config.principals
           for principal in config.principals  
             @krb5_addprinc misc.merge
