@@ -8,10 +8,6 @@ certificate to upload.
 
     module.exports = header: 'OpenLDAP Client Install', handler: ->
 
-## Wait
-
-      @call once: true, 'masson/core/openldap_client/wait'
-
 ## Package
 
       @service name: 'openldap-clients'

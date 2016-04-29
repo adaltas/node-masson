@@ -6,6 +6,15 @@ inside "/etc/openldap/ldap.conf". The success of the test rely on the command
 exit code.
 
     module.exports = header: 'OpenLDAP Client Check', label_true: 'CHECKED', handler: ->
+
+## Wait
+
+Wait for OpenLDAP servers to start.
+
+      @call once: true, 'masson/core/openldap_client/wait'
+
+## Check Search
+
       {suffix, root_dn, root_password} = @config.openldap_client
       @execute
         header: 'Check Search'
