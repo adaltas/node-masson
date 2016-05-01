@@ -109,7 +109,7 @@ Example:
       # Set default values each realm
       for realm, config of kdc_conf.realms
         kdc_conf.realms[realm] = misc.merge
-          # 'kadmind_port': 749
+          'kadmind_port': 749
           # 'kpasswd_port': 464 # http://www.opensource.apple.com/source/Kerberos/Kerberos-47/KerberosFramework/Kerberos5/Documentation/kadmin/kpasswd.protocol
           'max_life': '10h 0m 0s'
           'max_renewable_life': '7d 0h 0m 0s'
