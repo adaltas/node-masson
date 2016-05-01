@@ -5,7 +5,6 @@
       'configure':
         'masson/core/krb5_client/configure'
       'install': [
-        'masson/core/yum'
         'masson/core/ssh'
         'masson/core/ntp'
         'masson/core/krb5_client/install'
