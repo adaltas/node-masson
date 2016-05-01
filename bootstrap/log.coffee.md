@@ -69,7 +69,7 @@ preserve alphanumerical ordering of files.
             @wait_execute cmd: "[ -d '#{basedir}' ]"
         @call ->
           out = fs.createWriteStream path.resolve basedir, filename
-          stdouting = stderring = false
+          stdouting = 0
           @on 'text', (log) ->
             out.write "#{log.message}"
             out.write " (#{log.level}, written by #{log.module})" if log.module
@@ -81,11 +81,16 @@ preserve alphanumerical ordering of files.
             then out.write "\nRunning Command: `#{log.message}`\n\n"
             else out.write "\n```stdin\n#{log.message}\n```\n\n"
             stdining = log.message isnt null
+          @on 'diff', (log) ->
+            out.write '\n```diff\n#{log.message}```\n\n' unless log.message
           @on 'stdout_stream', (log) ->
-            out.write '\n```stdout\n' unless stdouting
-            out.write log.message if log.message
-            out.write '```\n\n' unless log.message
-            stdouting = log.message isnt null
+            # return if log.message is null and stdouting is 0
+            if log.message is null
+            then stdouting = 0
+            else stdouting++
+            out.write '\n```stdout\n' if stdouting is 1
+            out.write log.message if stdouting > 0
+            out.write '```\n\n' if stdouting is 0
           @on 'stderr', (log) ->
             out.write "\n```stderr\n#{log.message}```\n\n"
           close = ->
@@ -111,7 +116,7 @@ preserve alphanumerical ordering of files.
           destination: "#{basedir}"
         @call ->
           out = fs.createWriteStream (path.resolve basedir, filename+'.csv')
-          @on 'text', (log) ->
+          @on 'diff', (log) ->
             out.write "#{log.type},#{log.level},#{JSON.stringify log.message},\n"
           @on 'header', (log) ->
             out.write "#{log.type},,,#{log.header}\n"
@@ -120,6 +125,8 @@ preserve alphanumerical ordering of files.
           @on 'stdout', (log) ->
             out.write "#{log.type},#{log.level},#{JSON.stringify log.message},\n"
           @on 'stderr', (log) ->
+            out.write "#{log.type},#{log.level},#{JSON.stringify log.message},\n"
+          @on 'text', (log) ->
             out.write "#{log.type},#{log.level},#{JSON.stringify log.message},\n"
           close = ->
             setTimeout (-> out.close()), 100
