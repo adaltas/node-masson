@@ -17,7 +17,8 @@ Wait for OpenLDAP servers to start.
 
       {suffix, root_dn, root_password} = @config.openldap_client
       @execute
-        header: 'Check Search'
+        retry: 3
+        header: 'Search'
         if: -> suffix
         cmd: "ldapsearch -x -D #{root_dn} -w #{root_password} -b '#{suffix}'"
         stdout: null # Desactive stdout output in logs
