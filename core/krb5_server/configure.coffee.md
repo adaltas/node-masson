@@ -68,7 +68,7 @@ Example:
       for ctx_krb5 in openldap_ctxs
         {kerberos_dn, kdc_user, krbadmin_user, manager_dn, manager_password} = ctx_krb5.config.openldap_server_krb5
         name = "openldap_#{ctx_krb5.config.shortname}"
-        scheme = if ctx_krb5.has_module 'masson/core/openldap_server/install_tls' then "ldap://" else "ldaps://"
+        scheme = if ctx_krb5.has_module 'masson/core/openldap_server/install_tls' then "ldaps://" else "ldap://"
         ldap_server =  "#{scheme}#{ctx_krb5.config.host}"
         kdc_conf.dbmodules[name] = misc.merge
           'db_library': 'kldap'
