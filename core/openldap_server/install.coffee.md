@@ -247,8 +247,8 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
 
     check_password = (password, shahash) ->
       buf = new Buffer shahash, 'base64'
-      hash = buf.slice 0, 20
-      salt = buf.slice 20, 24
+      hash = (new Buffer shahash, 'base64').slice 0, 20
+      salt = (new Buffer shahash, 'base64').slice 20, 24
       return hash.toString('base64') is crypto
       .createHash('sha1')
       .update(password)
