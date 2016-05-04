@@ -20,10 +20,6 @@ Resources:
 
     module.exports = header: 'Krb5 Server Install', handler: ->
       {kdc_conf} = @config.krb5
-
-## Wait
-  
-      @call once: true, 'masson/core/openldap_client/wait'
       
 ## IPTables
 
@@ -121,15 +117,22 @@ The following files are updated:
           match: /^KRB5REALM=.*$/mg
           replace: "KRB5REALM=#{any_realm}"
           backup: true
-        @service
-          srv_name: 'krb5kdc'
-          action: 'restart'
+        @call 
           if: -> @status()
-        @service
-          srv_name: 'kadmin'
-          action: 'restart'
-          if: -> @status()
+          handler: ->
+            @call 'masson/core/openldap_client/wait'
+            @service
+              srv_name: 'krb5kdc'
+              action: 'restart'
+            @service
+              srv_name: 'kadmin'
+              action: 'restart'
+## Wait
+    
+      @call 'masson/core/openldap_client/wait'
 
+## Ldap Krb5 entries
+      
       @call header: 'LDAP Insert Entries', timeout: -1, handler: ->
         {kdc_conf} = @config.krb5
         for realm, config of kdc_conf.realms

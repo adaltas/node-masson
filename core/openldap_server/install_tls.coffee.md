@@ -357,7 +357,7 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=ryba
 
 ###
 
-    module.exports = header: 'OpenLDAP Server # TLS Deploy', handler: ->
+    module.exports = header: 'OpenLDAP Server TLS Deploy', handler: ->
       {openldap_server} = @config
       return unless openldap_server.tls
       @download

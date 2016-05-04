@@ -46,8 +46,8 @@ which create a Kerberos file with complementary information.
 
 Wait for the Kerberos servers to be started.
 
-      @call once: true, 'masson/core/krb5_server/wait'
-      @call once: true, 'masson/core/krb5_client/wait'
+      @call 'masson/core/krb5_server/wait'
+      @call 'masson/core/krb5_client/wait'
 
 ## Host Principal
 
