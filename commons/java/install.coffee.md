@@ -31,15 +31,9 @@ come with the OpenJDK installed and to avoid any ambiguity, we simply remove the
       #   cmd: 'yum -y remove *openjdk*'
       
       # @execute
-      #   cmd: 'yum list installed | grep openjdk'
-      #   code_skipped: 1
-      # , (err, installed, stdout, stderr) ->
-      #   return callback err if err
-      #   packages = for l in stdout.trim().split('\n') then /(.*?) .*$/.exec(l)?[1] or l
-      #   ctx.execute
-      #     cmd: "yum remove -y #{packages.join ' '}"
-      #     if: installed
-      #   , callback
+      #   header: 'Java # Remove OpenJDK'
+      #   unless: -> @config.java.openjdk
+      #   cmd: 'yum -y remove *openjdk*'
 
 ## Install Oracle JDK
 

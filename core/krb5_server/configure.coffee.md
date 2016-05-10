@@ -68,7 +68,7 @@ Example:
       for ctx_krb5 in openldap_ctxs
         {kerberos_dn, kdc_user, krbadmin_user, manager_dn, manager_password} = ctx_krb5.config.openldap_server_krb5
         name = "openldap_#{ctx_krb5.config.shortname}"
-        scheme = if ctx_krb5.has_module 'masson/core/openldap_server/install_tls' then "ldap://" else "ldaps://"
+        scheme = if ctx_krb5.has_module 'masson/core/openldap_server/install_tls' then "ldaps://" else "ldap://"
         ldap_server =  "#{scheme}#{ctx_krb5.config.host}"
         kdc_conf.dbmodules[name] = misc.merge
           'db_library': 'kldap'
@@ -109,7 +109,7 @@ Example:
       # Set default values each realm
       for realm, config of kdc_conf.realms
         kdc_conf.realms[realm] = misc.merge
-          # 'kadmind_port': 749
+          'kadmind_port': 749
           # 'kpasswd_port': 464 # http://www.opensource.apple.com/source/Kerberos/Kerberos-47/KerberosFramework/Kerberos5/Documentation/kadmin/kpasswd.protocol
           'max_life': '10h 0m 0s'
           'max_renewable_life': '7d 0h 0m 0s'
