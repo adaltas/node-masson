@@ -86,7 +86,7 @@ Upload the zones definition files provided in the configuration file.
                     allow-update { none; };
             };
             """
-            append: true=
+            append: true
         @write (
           source: zone
           local_source: true
