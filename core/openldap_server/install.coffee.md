@@ -70,7 +70,7 @@ Interesting posts also include
 http://itdavid.blogspot.ca/2012/05/howto-centos-6.html
 http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
 ###
-
+      
       @call header: 'Config Access', timeout: -1, handler: (options) ->
         @call (_, callback) ->
           return callback null, false if openldap_server.config_slappasswd
@@ -78,9 +78,8 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
           @fs.readFile openldap_server.config_file, 'ascii', (err, content) ->
             return callback err if err
             if match = /^olcRootPW: {SSHA}(.*)$/m.exec content
-              if check_password openldap_server.config_password, match[1]
-              then callback null, false
-              else callback null, true # Password has changed
+              password_ok =  check_password(openldap_server.config_password, match[1])
+              return if password_ok then  callback null, false else callback null, true
             else # First installation, password not yet defined
               callback null, true
         @execute
@@ -121,10 +120,10 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
           options.log "Extract password from #{openldap_server.bdb_file}"
           @fs.readFile openldap_server.bdb_file, 'ascii', (err, content) ->
             return callback err if err
+            match = /^olcRootPW: {SSHA}(.*)$/m.exec content
             if match = /^olcRootPW: {SSHA}(.*)$/m.exec content
-              if check_password openldap_server.root_password, match[1]
-              then callback null, false
-              else callback null, true # Password has changed
+              password_ok =  check_password openldap_server.root_password, match[1]
+              return if password_ok then  callback null, false else callback null, true
             else # First installation, password not yet defined
               callback null, true
         @execute
@@ -151,6 +150,30 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
             action: 'restart'
             if: -> @status -1
           @then callback
+          
+          
+      @call header: "ACLs", handler: (options) ->
+        # We used: http://itdavid.blogspot.fr/2012/05/howto-centos-62-kerberos-kdc-with.html
+        # But this is also interesting: http://web.mit.edu/kerberos/krb5-current/doc/admin/conf_ldap.html
+        @ldap_acl
+          header: 'Global Rules'
+          suffix: openldap_server.suffix
+          acls: [
+            to: 'attrs=userPassword,userPKCS12'
+            by: [
+              'dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage'
+              'self write'
+              'anonymous auth'
+              '* none'
+            ]
+          ,
+            to: 'attrs=shadowLastChange'
+            by: [
+              'self write'
+              'dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage'
+              '* none'
+            ]
+          ]
     
       [_, suffix_k, suffix_v] = /(\w+)=([^,]+)/.exec openldap_server.suffix
       @execute
@@ -247,8 +270,8 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
 
     check_password = (password, shahash) ->
       buf = new Buffer shahash, 'base64'
-      hash = buf.slice 0, 20
-      salt = buf.slice 20, 24
+      hash = (new Buffer shahash, 'base64').slice 0, 20
+      salt = (new Buffer shahash, 'base64').slice 20, 24
       return hash.toString('base64') is crypto
       .createHash('sha1')
       .update(password)

@@ -1,10 +1,10 @@
 
 # Java Install
 
-Install the Oracle Java JRE and JDK. The Java Runtime Environment is the code 
-execution component of the Java platform. The Java Development Kit (JDK) is 
-an implementation of either one of the Java SE, Java EE or Java ME platforms[1] 
-released by Oracle Corporation in the form of a binary product aimed at Java 
+Install the Oracle Java JRE and JDK. The Java Runtime Environment is the code
+execution component of the Java platform. The Java Development Kit (JDK) is
+an implementation of either one of the Java SE, Java EE or Java ME platforms[1]
+released by Oracle Corporation in the form of a binary product aimed at Java
 developers on Solaris, Linux, Mac OS X or Windows.
 
 TODO: leverage /etc/alternative to switch between multiple JDKs.
@@ -21,9 +21,15 @@ TODO: leverage /etc/alternative to switch between multiple JDKs.
 
 ## Remove OpenJDK
 
-At this time, it is recommanded to run Hadoop against the Oracle Java JDK. Since RHEL and CentOS 
+At this time, it is recommanded to run Hadoop against the Oracle Java JDK. Since RHEL and CentOS
 come with the OpenJDK installed and to avoid any ambiguity, we simply remove the OpenJDK.
 
+      # TODO: move below 4 lines into ./masson remove -m 'masson/commons/java'
+      # @execute
+      #   header: 'Java # Remove OpenJDK'
+      #   unless: -> @config.java.openjdk
+      #   cmd: 'yum -y remove *openjdk*'
+      
       # @execute
       #   header: 'Java # Remove OpenJDK'
       #   unless: -> @config.java.openjdk
@@ -32,8 +38,8 @@ come with the OpenJDK installed and to avoid any ambiguity, we simply remove the
 ## Install Oracle JDK
 
 For licensing reason, the Oracle Java JDK is not available from a Yum repository. It is the
-phyla integrator responsibility to download the jdk manually and reference it 
-inside the configuration. The properties "jce\_local\_policy" and 
+masson integrator responsibility to download the jdk manually and reference it
+inside the configuration. The properties "jce\_local\_policy" and
 "jce\_us\_export_policy" must be modified accordingly with an appropriate location.
 
       @call
@@ -79,14 +85,14 @@ inside the configuration. The properties "jce\_local\_policy" and
 
 ## Java JCE
 
-The Java Cryptography Extension (JCE) provides a framework and implementation for encryption, 
-key generation and key agreement, and Message Authentication Code (MAC) algorithms. JCE 
-supplements the Java platform, which already includes interfaces and implementations of 
+The Java Cryptography Extension (JCE) provides a framework and implementation for encryption,
+key generation and key agreement, and Message Authentication Code (MAC) algorithms. JCE
+supplements the Java platform, which already includes interfaces and implementations of
 message digests and digital signatures.
 
-Like for the Oracle Java JDK, for licensing reason, the JCE is not available from a Yum 
-repository. It is the phyla integrator responsibility to download the jdk manually and 
-reference it inside the configuration. The properties "jce\_local\_policy" and 
+Like for the Oracle Java JDK, for licensing reason, the JCE is not available from a Yum
+repository. It is the phyla integrator responsibility to download the jdk manually and
+reference it inside the configuration. The properties "jce\_local\_policy" and
 "jce\_us\_export_policy" must be modified accordingly with an appropriate location.
 
       @call
@@ -138,4 +144,4 @@ and removing the GCJ package also remove the MySQL connector package.
 
 ## Resources
 
-*   [Instructions to install Oracle JDK with alternative](http://www.if-not-true-then-false.com/2010/install-sun-oracle-java-jdk-jre-6-on-fedora-centos-red-hat-rhel/) 
+*   [Instructions to install Oracle JDK with alternative](http://www.if-not-true-then-false.com/2010/install-sun-oracle-java-jdk-jre-6-on-fedora-centos-red-hat-rhel/)

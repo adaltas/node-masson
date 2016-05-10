@@ -131,28 +131,28 @@ Create the kerberos administrator's user.
 
 ## Krb5 User permissions
 
-      @call header: 'User permissions', handler: (options) ->
-        # We used: http://itdavid.blogspot.fr/2012/05/howto-centos-62-kerberos-kdc-with.html
-        # But this is also interesting: http://web.mit.edu/kerberos/krb5-current/doc/admin/conf_ldap.html
-        @ldap_acl
-          suffix: openldap_server.suffix
-          acls: [
-            before: "dn.subtree=\"#{openldap_server.suffix}\""
-            to: "dn.subtree=\"#{kerberos_dn}\""
-            by: [
-              "dn.exact=\"#{krbadmin_user.dn}\" write"
-              "dn.base=\"gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth\" read"
-              "* none"
+      @call
+        header: 'User permissions'
+        handler: (options) ->
+          @ldap_acl
+            suffix: openldap_server.suffix
+            acls: [
+              before: "dn.subtree=\"#{openldap_server.suffix}\""
+              to: "dn.subtree=\"#{kerberos_dn}\""
+              by: [
+                "dn.exact=\"#{krbadmin_user.dn}\" write"
+                "dn.base=\"gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth\" read"
+                "* none"
+              ]
+            ,
+              to: "dn.subtree=\"#{openldap_server.suffix}\""
+              by: [
+                "dn.exact=\"#{krbadmin_user.dn}\" write"
+              ]
             ]
-          ,
-            to: "dn.subtree=\"#{openldap_server.suffix}\""
-            by: [
-              "dn.exact=\"#{krbadmin_user.dn}\" write"
-            ]
-          ]
-        options.log message: "Check it returns the entire #{kerberos_dn} subtree", level: 'DEBUG'
-        @execute
-          cmd: "ldapsearch -H #{openldap_server.uri} -x -D #{krbadmin_user.dn} -w #{krbadmin_user.userPassword} -b #{kerberos_dn}"
+          options.log message: "Check it returns the entire #{kerberos_dn} subtree", level: 'DEBUG'
+          @execute
+            cmd: "ldapsearch -H #{openldap_server.uri} -x -D #{krbadmin_user.dn} -w #{krbadmin_user.userPassword} -b #{kerberos_dn}"
 
 ## Krb5 Index
 

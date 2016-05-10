@@ -11,7 +11,7 @@ exit code.
 
 Wait for OpenLDAP servers to start.
 
-      @call once: true, 'masson/core/openldap_client/wait'
+      @call 'masson/core/openldap_client/wait'
 
 ## Check Search
 
