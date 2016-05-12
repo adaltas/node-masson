@@ -25,10 +25,10 @@ module.exports = ->
       rl = readline.createInterface process.stdin, process.stdout
       rl.setPrompt ''
       rl.on 'SIGINT', process.exit
-    write = (msg) ->
+    write = (msg, err) ->
       unless rl
       then process.stdout.write msg
-      else rl.write "#{styles.final_status_error err.stack?.trim() or err.message}\n"
+      else msg
     refresh = (multi) ->
       return unless rl
       rl.cursor = 0
@@ -96,7 +96,7 @@ module.exports = ->
         line += "#{styles.time print_time time}"
         refresh(true)
         if err or status?
-          write line + '\n'
+          write line + '\n', err
       .on 'wait', (middleware) ->
         return if multihost
         line = ''
