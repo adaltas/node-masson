@@ -28,8 +28,8 @@ Run = (params, config) ->
     # Work on each server
     contexts = {}
     for fqdn, server of config.servers
-      ctx = contexts[fqdn] = context contexts, (merge {}, config, server)
-      ctx.params = params
+      ctx = contexts[fqdn] = context contexts, params, (merge {}, config, server)
+      # ctx.params = params
       ctx.runinfo = {}
       ctx.runinfo.date = now
       ctx.runinfo.command = params.command

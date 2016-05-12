@@ -27,10 +27,11 @@ preserve alphanumerical ordering of files.
       log.disabled ?= false
       log.archive ?= false
       log.basedir ?= './log'
-      now = @runinfo.date
+      now = @runinfo?.date or new Date
+      command = @params.command
       dateformat = "#{now.getFullYear()}-#{('0'+now.getMonth()).slice -2}-#{('0'+now.getDate()).slice -2}"
       dateformat += " #{('0'+now.getHours()).slice -2}-#{('0'+now.getMinutes()).slice -2}-#{('0'+now.getSeconds()).slice -2}"
-      log.basedir = path.join log.basedir, @runinfo.command if log.archive
+      log.basedir = path.join log.basedir, command if log.archive
       log.basedir = path.join log.basedir, dateformat if log.archive
       log.fqdn_reversed = @config.host.split('.').reverse().join('.')
       filename = '{{shortname}}'
@@ -44,12 +45,12 @@ preserve alphanumerical ordering of files.
       log.elasticsearch.enable ?= false
       log.elasticsearch.url ?= 'http://localhost:9200'
       log.elasticsearch.index ?= "masson"
-      log.elasticsearch.type ?= @runinfo.command
+      log.elasticsearch.type ?= command
       
       @call unless: @config.log.disabled, header: 'Bootstrap Log # Text', required: true, irreversible: true, handler: ->
         {basedir, filename, archive} = @config.log
         @call header: 'Prepare Log dir', handler: ->
-          if @contexts()[0].config.host is @config.host
+          if not @contexts().length or @contexts()[0].config.host is @config.host
             @mkdir
               destination: basedir
             # creates relative symlink <log>/latest -> <log>/<command>/<date>
