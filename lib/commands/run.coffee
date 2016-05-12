@@ -25,15 +25,15 @@ module.exports = ->
       rl = readline.createInterface process.stdin, process.stdout
       rl.setPrompt ''
       rl.on 'SIGINT', process.exit
-    write = (msg, err) ->
+    write = (msg) ->
       unless rl
       then process.stdout.write msg
-      else msg
-    refresh = (multi) ->
+      else rl.write msg
+    refresh = ->
       return unless rl
       rl.cursor = 0
       rl.line = ''
-      rl._refreshLine() if multi and not multihost
+      rl._refreshLine()
     close = ->
       return unless rl
       rl.close()
@@ -94,9 +94,9 @@ module.exports = ->
         else "#{styles.status_false middleware.label_false or '--'}"
         line += pad "#{statusmsg}", 20
         line += "#{styles.time print_time time}"
-        refresh(true)
+        refresh() if multihost
         if err or status?
-          write line + '\n', err
+          write line + '\n'
       .on 'wait', (middleware) ->
         return if multihost
         line = ''
