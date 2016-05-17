@@ -12,29 +12,37 @@ Java home:
 Example for using Oracle JDK:
 
 ```
-{ 
-  "java": {
-    "java_home": "/usr/java/default/",
-    "jre_home": "/usr/java/default/jre",
-    "openjdk": true,
-    "jdk": {
-      "version": "1.7.0_79",
-      "location": "http://download.oracle.com/otn-pub/java/jdk/7u79-b15/jdk-7u79-linux-x64.tar.gzz"
-    },
-    "jce": "http://download.oracle.com/otn-pub/java/jce/7/UnlimitedJCEPolicyJDK7.zip"
-}}
+  java:
+    java_home: '/usr/java/default/'
+    jre_home: '/usr/java/default/jre'
+    java_home: '/usr/java/default/'
+    jre_home: '/usr/java/default/jre'
+    version: '1.7.0_79'
+    jdks:
+      '1.7.0_79':
+        jce_location: "http://download.oracle.com/otn-pub/java/jce/7/UnlimitedJCEPolicyJDK7.zip"
+        jdk_location: "http://download.oracle.com/otn-pub/java/jdk/7u79-b15/jdk-7u79-linux-x64.tar.gz"
+      '1.8.0_91':
+        jce_location: "http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip"
+        jdk_location: "http://download.oracle.com/otn-pub/java/jdk/8u91-b14/jdk-8u91-linux-x64.tar.gz"
 ```
 
     module.exports = handler: ->
-      @config.java ?= {}
-      # Shared
-      @config.java.java_home ?= '/usr/lib/jvm/java'
-      @config.java.jre_home ?= '/usr/lib/jvm/java/jre'
+      {java} = @config ?= {}
       # OpenJDK
-      @config.java.openjdk ?= true
-      # JCE
-      @config.java.jdk ?= {}
-      @config.java.jdk.version ?= '1.7.0_79'
-      @config.java.jdk.location ?= "http://download.oracle.com/otn-pub/java/jdk/7u79-b15/jdk-7u79-linux-x64.tar.gz"
-      @config.java.jce ?= {}
-      @config.java.jce.location ?= "http://download.oracle.com/otn-pub/java/jce/7/UnlimitedJCEPolicyJDK7.zip"
+      java.openjdk ?= true
+      # Oracle JDK
+      java.root_dir ?= '/usr/java'
+      java.jdk ?=
+        version: '1.7.0_79'
+        location: "http://download.oracle.com/otn-pub/java/jdk/7u79-b15/jdk-7u79-linux-x64.tar.gz"
+      # remove trailing slashes
+      java.java_home ?= "#{java.root_dir}/default"
+      java.java_home = java.java_home.replace /\/+$/, ""
+      java.jre_home ?= "#{java.java_home}/jre"
+      java.jre_home = java.jre_home.replace /\/+$/, ""
+      java.version ?= '1.7.0_79'
+      java.jdks ?=
+        '1.7.0_79':
+          jce_location: "http://download.oracle.com/otn-pub/java/jce/7/UnlimitedJCEPolicyJDK7.zip"
+          jdk_location: "http://download.oracle.com/otn-pub/java/jdk/7u79-b15/jdk-7u79-linux-x64.tar.gz"

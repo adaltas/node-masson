@@ -10,7 +10,10 @@ developers on Solaris, Linux, Mac OS X or Windows.
 TODO: leverage /etc/alternative to switch between multiple JDKs.
 
     module.exports = header: 'JAVA Install', handler: ->
-
+      {java} = @config
+      {java_home} = @config.java
+      
+      
 ## Install OpenJDK
 
       @service
@@ -36,49 +39,48 @@ phyla integrator responsibility to download the jdk manually and reference it
 inside the configuration. The properties "jce\_local\_policy" and 
 "jce\_us\_export_policy" must be modified accordingly with an appropriate location.
 
+
+
       @call
-        header: 'Java # Install Oracle JDK'
+        header: 'Java Install Oracle JDKs'
         timeout: -1
         if: -> @config.java.jdk
         handler: (options) ->
-          {java} = @config
-          options.log "Check if java is here and which version it is"
-          # installed = false
+          installed_versions = null
           @mkdir
-            destination: '/usr/java'
-          @execute
-            shy: true
-            cmd: 'ls -d /usr/java/jdk*'
-            # if_exec: '[[ -d /usr/java/ ]]'
-            code_skipped: 2
-          , (err, executed, stdout, stderr) ->
-            throw err if err #and err.code isnt 2
-            stdout = '' if err or not executed
-            installed_version = stdout.trim().split('\n').pop()
-            return unless installed_version
-            installed_version = /jdk(.*)/.exec(installed_version)[1]
-            installed_version = installed_version.replace('_', '').replace('0', '')
-            version = java.jdk.version.replace('_', '').replace('0', '')
-            installed = true unless semver.gt version, installed_version
-            @end() if installed
-          @download
-            source: "#{java.jdk.location}"
-            destination: "/var/tmp/#{path.basename java.jdk.location}"
-          @execute
-            cmd: """
-            rand=$RANDOM
-            mkdir -p /tmp/ryba-${rand}
-            tar xzf /var/tmp/#{path.basename java.jdk.location} -C /tmp/ryba-${rand}
-            version=`ls /tmp/ryba-${rand}`
-            mv /tmp/ryba-${rand}/$version /usr/java
-            ln -sf /usr/java/${version} /usr/java/latest
-            ln -sf /usr/java/$version /usr/java/default
-            rm -rf /tmp/ryba-${rand}
-            """
-            trap: true
+            destination: java.root_dir
+          for version, jdk of @config.java.jdks 
+            temp_dir = "/tmp/java.#{Date.now()}"
+            @call 
+              header: "Java JDK Check Installed #{version}"
+              handler: (options, callback) ->
+                @execute
+                  cmd: "ls -d #{java.root_dir}/*"
+                  code_skipped: 2
+                , (err, executed, stdout, stderr) ->
+                  return callback err if err
+                  stdout = '' if err or not executed
+                  installed_versions = (string.lines stdout.trim())
+                    .filter (out) -> out if /jdk(.*)/.exec out
+                    .map (abs) -> "#{path.basename abs}" 
+                  return callback null, true if installed_versions.indexOf("jdk#{version}") == -1
+                  callback null, false
+            @download
+              source: jdk.jdk_location
+              destination: "#{temp_dir}/#{path.basename jdk.jdk_location}"
+              if : -> @status -1
+            @mkdir
+              destination: "#{java.root_dir}/jdk#{version}"
+            @extract
+              source: "#{temp_dir}/#{path.basename jdk.jdk_location}"
+              destination: "#{java.root_dir}/jdk#{version}"
+              strip: 1
+              if: -> @status -2
+            @remove
+              destination: "#{temp_dir}/#{path.basename jdk.jdk_location}"
+              if: -> @status -3
 
-## Java JCE
-
+## Java Cryptography Extension
 The Java Cryptography Extension (JCE) provides a framework and implementation for encryption, 
 key generation and key agreement, and Message Authentication Code (MAC) algorithms. JCE 
 supplements the Java platform, which already includes interfaces and implementations of 
@@ -89,35 +91,108 @@ repository. It is the phyla integrator responsibility to download the jdk manual
 reference it inside the configuration. The properties "jce\_local\_policy" and 
 "jce\_us\_export_policy" must be modified accordingly with an appropriate location.
 
+Modified status is only needed on the last two copy commands, which means the jars 
+have been copied or not (in case they already exist).  
+            
       @call
-        header: 'Java # Java JCE'
-        timeout: -1
-        if: [
-          -> @config.java.jce.location
-          -> @config.java.jdk
-        ]
-        handler: (options) ->
-          {java} = @config
-          jdk_home = "/usr/java/jdk#{java.jdk.version}"
-          @download
-            source: "#{java.jce.location}"
-            destination: "/var/tmp/#{path.basename java.jce.location}"
-          @extract
-            source: "/var/tmp/#{path.basename java.jce.location}"
-            destination: "/var/tmp/#{path.basename java.jce.location, '.zip'}"
-            if: -> @status -1
-          @copy
-            source: "/var/tmp/#{path.basename java.jce.location, '.zip'}/UnlimitedJCEPolicy/local_policy.jar"
-            destination: "#{jdk_home}/jre/lib/security/local_policy.jar"
-          @copy
-            source: "/var/tmp/#{path.basename java.jce.location, '.zip'}/UnlimitedJCEPolicy/US_export_policy.jar"
-            destination: "#{jdk_home}/jre/lib/security/US_export_policy.jar"
+        header: "Java JCE"
+        handler: ->
+          for version, jdk of @config.java.jdks
+            return unless jdk.jce_location
+            now = Date.now()
+            path_name = "#{path.basename jdk.jce_location, '.zip'}"
+            @download
+              source: "#{jdk.jce_location}"
+              destination: "/var/tmp/#{path.basename jdk.jce_location}"
+              shy: true
+            @mkdir 
+              destination: "/var/tmp/#{path_name}.#{now}"
+              shy: true
+            @mkdir 
+              destination: "/var/tmp/#{path_name}"
+              shy: true
+            @extract
+              source: "/var/tmp/#{path.basename jdk.jce_location}"
+              destination: "/var/tmp/#{path_name}.#{now}"
+              shy: true
+            @execute
+              cmd: "mv  /var/tmp/#{path_name}.#{now}/*/* /var/tmp/#{path_name}/"
+              shy: true
+            @copy
+              source: "/var/tmp/#{path_name}/local_policy.jar"
+              destination: "#{java.root_dir}/jdk#{version}/jre/lib/security/local_policy.jar"
+            @copy
+              source: "/var/tmp/#{path_name}/US_export_policy.jar"
+              destination: "#{java.root_dir}/jdk#{version}/jre/lib/security/US_export_policy.jar"        
 
-## Java # Env
+## Java Paths
 
-      {java_home} = @config.java
+      @execute 
+        header: 'Set JDK Version (default)'
+        cmd: """
+            if [ -L  "#{java.root_dir}/default" ] || [ -e "#{java.root_dir}/default" ] ; 
+              then 
+                source=`readlink #{java.root_dir}/default`
+                if [ "$source" == "#{java.root_dir}/jdk#{java.version}" ];
+                  then exit 3 ;
+                  else
+                    rm -f #{java.root_dir}/default;
+                    ln -sf #{java.root_dir}/jdk#{java.version} #{java.root_dir}/default;
+                    exit 0;
+                fi;
+              else
+                rm -f #{java.root_dir}/default
+                ln -sf #{java.root_dir}/jdk#{java.version} #{java.root_dir}/default;
+                exit 0;
+            fi;
+          """
+        code_skipped: 3
+        trap: true
+      @execute 
+        header: 'Set JDK Version (latest)'
+        cmd: """
+            if [ -L  "#{java.root_dir}/latest" ] || [ -e "#{java.root_dir}/latest" ] ; 
+              then 
+                source=`readlink #{java.root_dir}/latest`
+                if [ "$source" == "#{java.root_dir}/jdk#{java.version}" ];
+                  then exit 3;
+                  else
+                    rm -f #{java.root_dir}/latest;
+                    ln -sf #{java.root_dir}/jdk#{java.version} #{java.root_dir}/latest;
+                    exit 0;
+                fi;
+              else
+                rm -f #{java.root_dir}/latest;
+                ln -sf #{java.root_dir}/jdk#{java.version} #{java.root_dir}/latest;
+                exit 0;
+            fi;
+          """
+        code_skipped: 3
+        trap: true
+      @execute 
+        header: 'Link Java home'
+        unless: java_home is "#{java.root_dir}/default"
+        cmd: """
+            if [ -L  "#{java_home}" ] || [ -e "#{java_home}" ] ; 
+              then 
+                source=`readlink #{java_home}`
+                if [ "$source" == "#{java_home}" ];
+                  then exit 3;
+                  else
+                    rm -f #{java_home};
+                    ln -sf #{java.root_dir}/default #{java_home};
+                    exit 0;
+                fi;
+              else
+                rm -f #{java_home};
+                ln -sf #{java.root_dir}/default #{java_home};
+                exit 0;
+            fi;
+          """
+        code_skipped: 3
+        trap: true
       @write
-        header: 'Java # Env'
+        header: 'Java Env'
         timeout: -1
         destination: '/etc/profile.d/java.sh'
         mode: 0o0644
@@ -130,6 +205,8 @@ reference it inside the configuration. The properties "jce\_local\_policy" and
 
     path = require 'path'
     semver = require 'semver'
+    string = require 'mecano/lib/misc/string'
+    
 
 ## Notes
 
