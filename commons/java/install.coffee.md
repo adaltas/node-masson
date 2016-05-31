@@ -32,55 +32,13 @@ come with the OpenJDK installed and to avoid any ambiguity, we simply remove the
       #   unless: -> @config.java.openjdk
       #   cmd: 'yum -y remove *openjdk*'
 
-## Install Oracle JDK
+## Install Oracle JDK && Java Cryptography Extension
 
 For licensing reason, the Oracle Java JDK is not available from a Yum repository. It is the
 phyla integrator responsibility to download the jdk manually and reference it 
 inside the configuration. The properties "jce\_local\_policy" and 
 "jce\_us\_export_policy" must be modified accordingly with an appropriate location.
 
-
-
-      @call
-        header: 'Java Install Oracle JDKs'
-        timeout: -1
-        if: -> @config.java.jdk
-        handler: (options) ->
-          installed_versions = null
-          @mkdir
-            destination: java.root_dir
-          for version, jdk of @config.java.jdks 
-            temp_dir = "/tmp/java.#{Date.now()}"
-            @call 
-              header: "Java JDK Check Installed #{version}"
-              handler: (options, callback) ->
-                @execute
-                  cmd: "ls -d #{java.root_dir}/*"
-                  code_skipped: 2
-                , (err, executed, stdout, stderr) ->
-                  return callback err if err
-                  stdout = '' if err or not executed
-                  installed_versions = (string.lines stdout.trim())
-                    .filter (out) -> out if /jdk(.*)/.exec out
-                    .map (abs) -> "#{path.basename abs}" 
-                  return callback null, true if installed_versions.indexOf("jdk#{version}") == -1
-                  callback null, false
-            @download
-              source: jdk.jdk_location
-              destination: "#{temp_dir}/#{path.basename jdk.jdk_location}"
-              if : -> @status -1
-            @mkdir
-              destination: "#{java.root_dir}/jdk#{version}"
-            @extract
-              source: "#{temp_dir}/#{path.basename jdk.jdk_location}"
-              destination: "#{java.root_dir}/jdk#{version}"
-              strip: 1
-              if: -> @status -2
-            @remove
-              destination: "#{temp_dir}/#{path.basename jdk.jdk_location}"
-              if: -> @status -3
-
-## Java Cryptography Extension
 The Java Cryptography Extension (JCE) provides a framework and implementation for encryption, 
 key generation and key agreement, and Message Authentication Code (MAC) algorithms. JCE 
 supplements the Java platform, which already includes interfaces and implementations of 
@@ -93,38 +51,78 @@ reference it inside the configuration. The properties "jce\_local\_policy" and
 
 Modified status is only needed on the last two copy commands, which means the jars 
 have been copied or not (in case they already exist).  
-            
-      @call
-        header: "Java JCE"
-        handler: ->
-          for version, jdk of @config.java.jdks
-            return unless jdk.jce_location
-            now = Date.now()
-            path_name = "#{path.basename jdk.jce_location, '.zip'}"
-            @download
-              source: "#{jdk.jce_location}"
-              destination: "/var/tmp/#{path.basename jdk.jce_location}"
-              shy: true
-            @mkdir 
-              destination: "/var/tmp/#{path_name}.#{now}"
-              shy: true
-            @mkdir 
-              destination: "/var/tmp/#{path_name}"
-              shy: true
-            @extract
-              source: "/var/tmp/#{path.basename jdk.jce_location}"
-              destination: "/var/tmp/#{path_name}.#{now}"
-              shy: true
-            @execute
-              cmd: "mv  /var/tmp/#{path_name}.#{now}/*/* /var/tmp/#{path_name}/"
-              shy: true
-            @copy
-              source: "/var/tmp/#{path_name}/local_policy.jar"
-              destination: "#{java.root_dir}/jdk#{version}/jre/lib/security/local_policy.jar"
-            @copy
-              source: "/var/tmp/#{path_name}/US_export_policy.jar"
-              destination: "#{java.root_dir}/jdk#{version}/jre/lib/security/US_export_policy.jar"        
 
+      @call
+        header: 'Java Install Oracle JDKs'
+        timeout: -1
+        if: -> @config.java.jdk
+        handler: (options) ->          
+          do_install = (version, jdk) =>
+            installed_versions = null
+            now = Date.now()
+            temp_dir = "/tmp/java.#{now}"
+            path_name = "#{path.basename jdk.jce_location, '.zip'}"
+            @mkdir
+              destination: java.root_dir
+            @call
+              header: "Java JDK Install #{version}"
+              handler: ->
+                @call 
+                  header: "Java JDK Check Installed #{version}"
+                  handler: (options, callback) ->
+                    @execute
+                      cmd: "ls -d #{java.root_dir}/*"
+                      code_skipped: 2
+                    , (err, executed, stdout, stderr) ->
+                      return callback err if err
+                      stdout = '' if err or not executed
+                      installed_versions = (string.lines stdout.trim())
+                        .filter (out) -> out if /jdk(.*)/.exec out
+                        .map (abs) -> "#{path.basename abs}" 
+                      return callback null, true if installed_versions.indexOf("jdk#{version}") == -1
+                      callback null, false
+                @download
+                  source: jdk.jdk_location
+                  destination: "#{temp_dir}/#{path.basename jdk.jdk_location}"
+                  if : -> @status -1
+                @mkdir
+                  destination: "#{java.root_dir}/jdk#{version}"
+                @extract
+                  source: "#{temp_dir}/#{path.basename jdk.jdk_location}"
+                  destination: "#{java.root_dir}/jdk#{version}"
+                  strip: 1
+                  if: -> @status -2
+                @remove
+                  destination: "#{temp_dir}/#{path.basename jdk.jdk_location}"
+                  if: -> @status -3
+            @call
+              header: "Java JCE Install #{version}"
+              handler: ->
+                @download
+                  source: "#{jdk.jce_location}"
+                  destination: "/var/tmp/#{path.basename jdk.jce_location}"
+                  shy: true
+                @mkdir 
+                  destination: "/var/tmp/#{path_name}.#{now}"
+                  shy: true
+                @mkdir 
+                  destination: "/var/tmp/#{path_name}"
+                  shy: true
+                @extract
+                  source: "/var/tmp/#{path.basename jdk.jce_location}"
+                  destination: "/var/tmp/#{path_name}.#{now}"
+                  shy: true
+                @execute
+                  cmd: "mv  /var/tmp/#{path_name}.#{now}/*/* /var/tmp/#{path_name}/"
+                  shy: true
+                @copy
+                  source: "/var/tmp/#{path_name}/local_policy.jar"
+                  destination: "#{java.root_dir}/jdk#{version}/jre/lib/security/local_policy.jar"
+                @copy
+                  source: "/var/tmp/#{path_name}/US_export_policy.jar"
+                  destination: "#{java.root_dir}/jdk#{version}/jre/lib/security/US_export_policy.jar"
+          do_install(version, jdk) for version, jdk of @config.java.jdks 
+            
 ## Java Paths
 
       @execute 
