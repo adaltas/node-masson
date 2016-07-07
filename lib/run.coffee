@@ -80,6 +80,7 @@ load_module = (ctx, parent, default_command, filter_command) ->
   middlewares = []
   parent = module: parent if typeof parent is 'string'
   plugin = false
+  # load the module unless it has an handler
   if not parent.handler or typeof parent.handler is 'string'
     absname = parent.module
     absname = path.resolve process.cwd(), parent.module if parent.module.substr(0, 1) is '.'
@@ -93,7 +94,8 @@ load_module = (ctx, parent, default_command, filter_command) ->
     middlewares.push module: parent.module, plugin: true
     commands = parent.handler.call ctx
     return unless commands
-    return if commands is ctx
+    return if commands.registry
+    # return if commands is ctx
     for command, children of commands
       # when a plugin reference another plugin, we need to filterout other
       # commands while preserving configure
@@ -112,7 +114,7 @@ load_module = (ctx, parent, default_command, filter_command) ->
         else if typeof child.handler is 'function'
           child.module = parent.module
         else
-          throw Error "Invalid handler: #{child.handler}"
+          throw Error "Invalid handler: #{child.handler}, in module #{parent.module}"
         child.command ?= command
         m = load_module(ctx, child, default_command, command)
         middlewares.push m... if m
