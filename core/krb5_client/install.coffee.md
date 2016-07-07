@@ -38,7 +38,7 @@ which create a Kerberos file with complementary information.
         # Kerberos config is also managed by the kerberos server action.
         unless: -> @has_module 'masson/core/krb5_server'
         content: safe_etc_krb5_conf krb5.etc_krb5_conf
-        destination: '/etc/krb5.conf'
+        target: '/etc/krb5.conf'
         stringify: misc.ini.stringify_square_then_curly
         backup: true
 
@@ -106,7 +106,7 @@ configuration object. By default, we set the following properties to "yes": "Cha
               match: new RegExp "^#{k}.*$", 'mg'
               replace: "#{k} #{v}"
               append: true
-            destination: '/etc/ssh/sshd_config'
+            target: '/etc/ssh/sshd_config'
           @service
             srv_name: 'sshd'
             action: 'restart'

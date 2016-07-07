@@ -22,7 +22,7 @@ Configure the application. The configuration file is defined by the
           {match: /^(\/\/)(.*'login','attr','dn'.*)$/m, replace: '$2'}
           {match: /^(?!\/\/)(.*'login','attr','uid'.*)$/m, replace: '//$1'}
         ],
-        destination: phpldapadmin.config_path
+        target: phpldapadmin.config_path
         backup: true
       @service
         name: 'httpd'
@@ -38,7 +38,7 @@ the "http://{host}/ldapadmin" URL path.
 
       @write
         header: 'phpLDAPadmin # HTTPD'
-        destination: phpldapadmin.config_httpd_path
+        target: phpldapadmin.config_httpd_path
         write: [
           match: /^(?!#)(.*Alias \/phpldapadmin.*)$/m
           replace: '#$1'

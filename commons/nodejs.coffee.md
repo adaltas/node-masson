@@ -96,7 +96,7 @@ module.
       {merge, config} = @config.nodejs
       for user in @config.users do (user) ->
         @write_ini
-          destination: "#{user.home}/.npmrc"
+          target: "#{user.home}/.npmrc"
           content: config
           merge: merge
           uid: user.username

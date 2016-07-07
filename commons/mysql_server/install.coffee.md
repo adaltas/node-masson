@@ -31,12 +31,12 @@ Install the Mysql database server. Secure the temporary directory.
           chk_name: 'mysqld'
           startup: '235'
         @mkdir
-          destination: '/tmp/mysql'
+          target: '/tmp/mysql'
           uid: mysql.server.user.name
           gid: mysql.server.group.name
           mode: 0o0744
         @write_ini
-          destination: '/etc/my.cnf'
+          target: '/etc/my.cnf'
           content: mysql.server.my_cnf
           merge: true
           backup: true
@@ -50,7 +50,7 @@ Install the Mysql database server. Secure the temporary directory.
       #   if: -> @error -1
       #   handler: ->
       #     @remove
-      #       destination: "/var/lib/mysql/mysql.sock"
+      #       target: "/var/lib/mysql/mysql.sock"
       #     , (err, removed) ->
       #       throw err if err
       #       throw Error 'Failed to install mysqld' unless removed

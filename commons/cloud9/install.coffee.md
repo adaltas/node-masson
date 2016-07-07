@@ -13,7 +13,7 @@ Download source code from github.
 
       @git
         source: cloud9.github
-        destination: "/usr/lib/cloud9"
+        target: "/usr/lib/cloud9"
 
 Run package installation.
 

@@ -54,12 +54,12 @@ masson init \
         @end() unless err or status
       .mkdir
         header: 'Project Directory'
-        destination: "#{params.path}"
+        target: "#{params.path}"
       , (err, status) ->
         return if err or not status
         rl.write "Directory '#{params.path}' created\n"
       .write
-        destination: "#{params.path}/bin/ryba"
+        target: "#{params.path}/bin/ryba"
         content: """
         #!/bin/bash
         cd `dirname "${BASH_SOURCE}"`/..
@@ -71,7 +71,7 @@ masson init \
         return if err or not status
         rl.write "GIT ignore created\n"
       .write
-        destination: "#{params.path}/bin/vagrant"
+        target: "#{params.path}/bin/vagrant"
         content: """
         #!/bin/bash
         cd $( dirname "${BASH_SOURCE}" )/../conf
@@ -83,7 +83,7 @@ masson init \
         return if err or not status
         rl.write "GIT ignore created\n"
       .write
-        destination: "#{params.path}/.gitignore"
+        target: "#{params.path}/.gitignore"
         content: """
         .*
         !.gitignore
@@ -94,7 +94,7 @@ masson init \
         return if err or not status
         rl.write "GIT ignore created\n"
       .write
-        destination: "#{params.path}/package.json"
+        target: "#{params.path}/package.json"
         content: """
         {
           "name": "#{params.name}",
@@ -113,12 +113,12 @@ masson init \
         return if err or not status
         rl.write "Package definition created\n"
       .touch
-        destination: "#{params.path}/cache/.gitignore"
+        target: "#{params.path}/cache/.gitignore"
       , (err, status) ->
         return if err or not status
         rl.write "Cache directory created\n"
       .write
-        destination: "#{params.path}/conf/config.coffee"
+        target: "#{params.path}/conf/config.coffee"
         content: """
         module.exports =
           connection:
@@ -172,7 +172,7 @@ masson init \
         return if err or not status
         rl.write "Configuration file created\n"
       .write
-        destination: "#{params.path}/lib/helloworld.coffee.md"
+        target: "#{params.path}/lib/helloworld.coffee.md"
         content: """
         # Helloworld
 
@@ -188,7 +188,7 @@ masson init \
 
               install: ->
                 @write
-                  destination: "/root/helloword"
+                  target: "/root/helloword"
                   content: "Print \#{@config.helloword.content}"
 
         ## Check
@@ -201,7 +201,7 @@ masson init \
         """
         eof: true
       .write
-        destination: "#{params.path}/conf/VagrantFile"
+        target: "#{params.path}/conf/VagrantFile"
         content: """
         box = "centos65-x86_64-50g"
         Vagrant.configure("2") do |config|
@@ -240,7 +240,7 @@ masson init \
         rl.write "Vagrant file created\n"
       .write
         header: 'Log Directory'
-        destination: "#{params.path}/log/.gitignore"
+        target: "#{params.path}/log/.gitignore"
         content: """
         *
         !.gitignore

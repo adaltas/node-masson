@@ -26,15 +26,15 @@ Deploy the git configuration.
         @git_config
           uid: 'root'
           gid: 'root'
-          destination: '/etc/gitconfig'
+          target: '/etc/gitconfig'
           config: global
           if: global
         @remove
           if: global is false
-          destination: '/etc/gitconfig'
+          target: '/etc/gitconfig'
         for user in @config.users then do (user) ->
           @git_config
-            destination: file
+            target: file
             uid: user.name or user.uid
             gid: user.gid
 

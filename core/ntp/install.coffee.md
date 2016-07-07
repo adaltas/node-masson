@@ -18,6 +18,8 @@ time when the `ntpd` daemon isnt yet started.
       @execute
         header: 'Synchronize'
         cmd: "ntpdate #{ntp.servers[0]}"
+        # retry: 20
+        # wait: 3000
         if: ->
           @status(-1) and ntp.servers?.length and ( ntp.servers[0] isnt @config.host )
 
@@ -82,7 +84,7 @@ and when only ONE ntp server is configured
             modified = true
           return callback null, false unless modified
           @write
-            destination: '/etc/ntp.conf'
+            target: '/etc/ntp.conf'
             content: lines.join('\n')
             backup: true
           @service

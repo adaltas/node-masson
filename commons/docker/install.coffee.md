@@ -26,7 +26,7 @@ Get the PID of a docker container by name or ID.
         #!/bin/sh
         exec docker inspect --format '{{ .State.Pid }}' "$@"
         """
-        destination: '/usr/local/bin/docker-pid'
+        target: '/usr/local/bin/docker-pid'
         mode: 0o0755
 
 ## Install docker-ip
@@ -39,7 +39,7 @@ Get the ip address of a container by name or ID.
         #!/bin/sh
         exec docker inspect --format '{{ .NetworkSettings.IPAddress }}' "$@"
         """
-        destination: '/usr/local/bin/docker-ip'
+        target: '/usr/local/bin/docker-ip'
         mode: 0o0755
 
 ## Install nsenter

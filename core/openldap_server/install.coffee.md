@@ -48,7 +48,7 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
           name: 'rsyslog'
         options.log 'Declare local4 in rsyslog configuration'
         @write
-          destination: '/etc/rsyslog.conf'
+          target: '/etc/rsyslog.conf'
           match: /^local4.*/mg
           replace: 'local4.*                                                /var/log/slapd.log'
           append: 'RULES'
@@ -58,7 +58,7 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
           action: 'restart'
           if: -> @status -1
         @write
-          destination: openldap_server.config_file
+          target: openldap_server.config_file
           match: /^olcLogLevel:.*$/mg
           replace: "olcLogLevel: #{openldap_server.log_level}"
           before: 'olcRootDN'
@@ -96,7 +96,7 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
               replace: "olcRootPW: #{openldap_server.config_slappasswd}"
               append: 'olcRootDN'
           @write
-            destination: openldap_server.config_file
+            target: openldap_server.config_file
             write: write
           @service
             srv_name: 'slapd'
@@ -108,7 +108,7 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
 
       @write
         header: 'DB monitor root DN'
-        destination: openldap_server.monitor_file
+        target: openldap_server.monitor_file
         match: /^(.*)dc=my-domain,dc=com(.*)$/m
         replace: "$1#{openldap_server.suffix}$2"
 
@@ -143,7 +143,7 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
               replace: "olcRootPW: #{openldap_server.root_slappasswd}"
               append: 'olcRootDN'
           @write
-            destination: openldap_server.bdb_file
+            target: openldap_server.bdb_file
             write: write
           @service
             srv_name: 'slapd'
@@ -217,7 +217,7 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
           schema = stdout.trim() if installed
         @download
           source: "#{__dirname}/resources/ldap.schema"
-          destination: '/tmp/ldap.schema'
+          target: '/tmp/ldap.schema'
           mode: 0o0640
           unless: -> @status -1
         @call ->
@@ -232,36 +232,36 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
 
       @call header: 'Delete ldif data', handler: ->
         for path in openldap_server.ldapdelete
-          destination = "/tmp/ryba_#{Date.now()}"
+          target = "/tmp/ryba_#{Date.now()}"
           @download
             source: path
-            destination: destination
+            target: target
             mode: 0o0640
           @execute
-            cmd: "ldapdelete -c -H ldapi:/// -f #{destination} -D #{openldap_server.root_dn} -w #{openldap_server.root_password}"
+            cmd: "ldapdelete -c -H ldapi:/// -f #{target} -D #{openldap_server.root_dn} -w #{openldap_server.root_password}"
             code_skipped: 32
           @remove
-            destination: destination
+            target: target
 
 ## Add ldif data
 
       @call header: 'Add ldif data', timeout: 100000, handler: ->
         status = false
         for path in openldap_server.ldapadd
-          destination = "/tmp/ryba_#{Date.now()}"
+          target = "/tmp/ryba_#{Date.now()}"
           @download
             source: path
-            destination: destination
+            target: target
             shy: true
           @execute
-            cmd: "ldapadd -c -H ldapi:/// -D #{openldap_server.root_dn} -w #{openldap_server.root_password} -f #{destination}"
+            cmd: "ldapadd -c -H ldapi:/// -D #{openldap_server.root_dn} -w #{openldap_server.root_password} -f #{target}"
             code_skipped: 68
             shy: true
           , (err, executed, stdout, stderr) ->
             return if err
             status = true if stdout.match(/Already exists/g)?.length isnt stdout.match(/adding new entry/g).length
           @remove
-            destination: destination
+            target: target
             shy: true
         @call (_, callback) ->
           callback null, status

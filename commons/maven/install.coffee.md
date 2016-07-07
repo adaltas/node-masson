@@ -5,15 +5,15 @@
       {maven} = @config
       @download
         source: maven.source
-        destination: '/var/tmp/maven.tar.gz'
+        target: '/var/tmp/maven.tar.gz'
       @mkdir
-        destination: "/usr/ryba"
+        target: "/usr/ryba"
       @extract
         source: '/var/tmp/maven.tar.gz'
-        destination: '/usr/ryba'
+        target: '/usr/ryba'
       @link
         source: "/usr/ryba/#{maven.dirname}"
-        destination: '/usr/ryba/maven'
+        target: '/usr/ryba/maven'
       @link
         source: '/usr/ryba/maven/bin/mvn'
-        destination: '/usr/ryba/bin/mvn'
+        target: '/usr/ryba/bin/mvn'

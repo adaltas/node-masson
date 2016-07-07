@@ -40,7 +40,7 @@ This action update the configuration file present in "/etc/selinux/config".
 
         @write
           header: 'SELinux'
-          destination: '/etc/selinux/config'
+          target: '/etc/selinux/config'
           match: /^SELINUX=.*/mg
           replace: "SELINUX=#{if @config.security.selinux then 'enforcing' else 'disabled'}"
 
@@ -69,7 +69,7 @@ root       soft    nproc     unlimited
 
         @write (
           header: "Limits on #{filename}"
-          destination: "/etc/security/limits.d/#{filename}"
+          target: "/etc/security/limits.d/#{filename}"
           content: content
           backup: true
         ) for filename, content of @config.security.limits

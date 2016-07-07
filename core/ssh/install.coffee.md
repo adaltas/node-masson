@@ -18,12 +18,12 @@ defined inside "users.[].authorized_keys".
       @call header: 'SSH # Authorized Keys', handler: ->
         for _, user of @config.users
           @mkdir
-            destination: "#{user.home or '/home/'+user.name}/.ssh"
+            target: "#{user.home or '/home/'+user.name}/.ssh"
             uid: user.name
             gid: null
             mode: 0o0700 # was "permissions: 16832"
           @write
-            destination: "#{user.home or '/home/'+user.name}/.ssh/authorized_keys"
+            target: "#{user.home or '/home/'+user.name}/.ssh/authorized_keys"
             write: for key in user.authorized_keys
               match: new RegExp ".*#{misc.regexp.escape key}.*", 'mg'
               replace: key
@@ -47,7 +47,7 @@ properties found in the "ssh.sshd_config" object.
               match: new RegExp "^#{k}.*$", 'mg'
               replace: "#{k} #{v}"
               append: true
-            destination: '/etc/ssh/sshd_config'
+            target: '/etc/ssh/sshd_config'
           @service_restart
             name: 'sshd'
             timeout: -1
@@ -66,14 +66,14 @@ the "users.[].rsa\_pub" propery and is written in "~/.ssh/id\_rsa.pub".
           throw Error "Property rsa required if rsa_pub defined" if user.rsa_pub and not user.rsa
           @write
             if: user.rsa
-            destination: "#{user.home or '/home/'+user.name}/.ssh/id_rsa"
+            target: "#{user.home or '/home/'+user.name}/.ssh/id_rsa"
             content: user.rsa
             uid: user.name
             gid: null
             mode: 0o600
           @write
             if: user.rsa
-            destination: "#{user.home or '/home/'+user.name}/.ssh/id_rsa.pub"
+            target: "#{user.home or '/home/'+user.name}/.ssh/id_rsa.pub"
             content: user.rsa_pub
             uid: user.name
             gid: null
@@ -94,13 +94,13 @@ service will be restarted if this action had any effect.
           {banner} = @config.ssh
           banner.content += '\n\n' if banner.content
           @write
-            destination: banner.destination
+            target: banner.target
             content: banner.content
           @write
             match: new RegExp "^Banner.*$", 'mg'
-            replace: "Banner #{banner.destination}"
+            replace: "Banner #{banner.target}"
             append: true
-            destination: '/etc/ssh/sshd_config'
+            target: '/etc/ssh/sshd_config'
           @service_restart
             name: 'sshd'
             if: -> @status()

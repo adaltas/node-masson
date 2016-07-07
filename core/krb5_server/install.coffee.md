@@ -92,7 +92,7 @@ The following files are updated:
         any_realm = Object.keys(kdc_conf.realms)[0]
         @write_ini
           content: safe_etc_krb5_conf etc_krb5_conf
-          destination: '/etc/krb5.conf'
+          target: '/etc/krb5.conf'
           stringify: misc.ini.stringify_square_then_curly
           backup: true
         @write 
@@ -100,20 +100,20 @@ The following files are updated:
             match: ///^\*/\w+@#{misc.regexp.escape realm}\s+\*///mg
             replace: "*/admin@#{realm}     *"
             append: true
-          destination: '/var/kerberos/krb5kdc/kadm5.acl'
+          target: '/var/kerberos/krb5kdc/kadm5.acl'
           backup: true
         @write_ini
           content: safe_etc_krb5_conf kdc_conf
-          destination: '/var/kerberos/krb5kdc/kdc.conf'
+          target: '/var/kerberos/krb5kdc/kdc.conf'
           stringify: misc.ini.stringify_square_then_curly
           backup: true
         @write
-          destination: '/etc/sysconfig/kadmin'
+          target: '/etc/sysconfig/kadmin'
           match: /^KRB5REALM=.*$/mg
           replace: "KRB5REALM=#{any_realm}"
           backup: true
         @write
-          destination: '/etc/sysconfig/krb5kdc'
+          target: '/etc/sysconfig/krb5kdc'
           match: /^KRB5REALM=.*$/mg
           replace: "KRB5REALM=#{any_realm}"
           backup: true
@@ -179,7 +179,7 @@ The following files are updated:
               keyfileContent = content
               callback null, false
           @mkdir
-            destination: path.dirname(ldap_service_password_file)
+            target: path.dirname(ldap_service_password_file)
             if: -> @status -1
           @call (_, callback) ->
             options.log 'Stash password into local file for kadmin dn'
@@ -211,11 +211,11 @@ The following files are updated:
 
       @call header: 'Krb5 Server # Log', timeout: 100000, handler: ->
         @touch
-          destination: '/var/log/krb5kdc.log'
+          target: '/var/log/krb5kdc.log'
         @touch
-          destination: '/var/log/kadmind.log'
+          target: '/var/log/kadmind.log'
         @write
-          destination: '/etc/rsyslog.conf'
+          target: '/etc/rsyslog.conf'
           write: [
             match: /.*krb5kdc.*/mg
             replace: 'if $programname == \'krb5kdc\' then /var/log/krb5kdc.log'
@@ -279,7 +279,7 @@ The following files are updated:
     #     replace: "        daemon ${kadmind} -r"
     #     append: /\s+#daemon\s+.*/
     #   @write
-    #     destination: '/etc/init.d/kadmin'
+    #     target: '/etc/init.d/kadmin'
     #     write: write
     #   , next
 

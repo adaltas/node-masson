@@ -6,17 +6,17 @@
       script = "/tmp/#{path.basename anaconda.source}"
       @download
         source: anaconda.source
-        destination: script
+        target: script
       @chmod
-        destination: script
+        target: script
         mode: 0o755
       @execute
         cmd: "#{script} -b -p #{anaconda.build_dir}"
       @compress
         source: anaconda.build_dir
-        destination: anaconda.archive
-      @remove destination: script
-      @remove destination: anaconda.build_dir
+        target: anaconda.archive
+      @remove target: script
+      @remove target: anaconda.build_dir
 
 ## Dependencies
 

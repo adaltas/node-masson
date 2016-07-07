@@ -363,27 +363,27 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=ryba
       @download
         header: 'Certificate Authority'
         source: openldap_server.tls_ca_cert_file
-        destination: "/etc/pki/tls/certs/#{path.basename openldap_server.tls_ca_cert_file}"
+        target: "/etc/pki/tls/certs/#{path.basename openldap_server.tls_ca_cert_file}"
         uid: 'ldap'
         gid: 'ldap'
         mode: 0o0400
       @download
         header: 'Public Certificate'
         source: openldap_server.tls_cert_file
-        destination: "/etc/pki/tls/certs/#{path.basename openldap_server.tls_cert_file}"
+        target: "/etc/pki/tls/certs/#{path.basename openldap_server.tls_cert_file}"
         uid: 'ldap'
         gid: 'ldap'
         mode: 0o0400
       @download
         header: 'Private Key'
         source: openldap_server.tls_key_file
-        destination: "/etc/pki/tls/certs/#{path.basename openldap_server.tls_key_file}"
+        target: "/etc/pki/tls/certs/#{path.basename openldap_server.tls_key_file}"
         uid: 'ldap'
         gid: 'ldap'
         mode: 0o0400
       @write
         header: 'Configuration'
-        destination: '/etc/openldap/slapd.d/cn=config.ldif'
+        target: '/etc/openldap/slapd.d/cn=config.ldif'
         write: [
           match: /^olcTLSCACertificatePath.*$/mg
           replace: "olcTLSCACertificatePath: /etc/pki/tls/certs/#{path.basename openldap_server.tls_ca_cert_file}"
@@ -401,7 +401,7 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=ryba
         header: 'Activation'
         match: /^SLAPD_LDAPS.*/mg
         replace: 'SLAPD_LDAPS=yes'
-        destination: '/etc/sysconfig/ldap'
+        target: '/etc/sysconfig/ldap'
       @service_restart
         header: 'Restart'
         name: 'slapd'

@@ -31,7 +31,7 @@ such as LC_ALL= . We set all variable to `en_US.UTF-8` by default.
         header: 'SSH Env'
         handler: ->
           @write (
-            destination: "#{user.home or '/home/'+user.name}/.ssh/environment"
+            target: "#{user.home or '/home/'+user.name}/.ssh/environment"
             write: for k, v of props
               match: RegExp "^#{k}.*$", 'mg'
               replace: "#{k}=#{v}"

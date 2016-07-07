@@ -27,12 +27,12 @@
           cmd: """
             yum install -y gcc kernel-* # might need to reboot
             source="http://download.virtualbox.org/virtualbox/#{version_target}/VBoxGuestAdditions_#{version_target}.iso"
-            destination="/tmp/VBoxGuestAdditions_#{version_target}.iso"
-            curl -L #{source} -o #{destination}
-            mount #{destination} -o loop /mnt
+            target="/tmp/VBoxGuestAdditions_#{version_target}.iso"
+            curl -L #{source} -o #{target}
+            mount #{target} -o loop /mnt
             cd /mnt
             sh VBoxLinuxAdditions.run --nox11
-            rm #{destination}
+            rm #{target}
             /etc/init.d/vboxadd setup
             chkconfig --add vboxadd
             chkconfig vboxadd on

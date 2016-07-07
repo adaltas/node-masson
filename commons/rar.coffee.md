@@ -18,7 +18,7 @@
       {proxy, rar_url} = ctx.config.rar
       @download
         source: rar_url
-        destination: '/tmp/rar.rpm'
+        target: '/tmp/rar.rpm'
         proxy: proxy
         binary: true
         unless_exec: 'which rar'
@@ -26,21 +26,21 @@
         cmd: "rpm -Uvh /tmp/rar.rpm"
         if: -> @status -1
       @remove
-        destination: '/tmp/rar.rpm'
+        target: '/tmp/rar.rpm'
         if: -> @status -2
 
     exports.push header: 'Rar # install unrar', handler: ->
       {proxy, unrar_url} = ctx.config.rar
       @download
         source: unrar_url
-        destination: '/tmp/unrar.rpm'
+        target: '/tmp/unrar.rpm'
         proxy: proxy
         binary: true
         unless_exec: 'which unrar'
       @execute
         cmd: "rpm -Uvh /tmp/unrar.rpm"
       @remove
-        destination: '/tmp/unrar.rpm'
+        target: '/tmp/unrar.rpm'
 
 ## Dependencies
 

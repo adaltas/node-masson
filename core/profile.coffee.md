@@ -31,7 +31,7 @@ Upload all the configured scripts.
         
         @write (
           header: 'Upload'
-          destination: "/etc/profile.d/#{filename}"
+          target: "/etc/profile.d/#{filename}"
           content: content
           eof: true
         ) for filename, content of @config.profile

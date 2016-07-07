@@ -52,18 +52,18 @@ preserve alphanumerical ordering of files.
         @call header: 'Prepare Log dir', handler: ->
           if not @contexts().length or @contexts()[0].config.host is @config.host
             @mkdir
-              destination: basedir
+              target: basedir
             # creates relative symlink <log>/latest -> <log>/<command>/<date>
             if archive
               logdir = path.join basedir, '../../'
               @link
                 source: path.relative logdir, path.resolve basedir
-                destination: path.join logdir, 'latest'
+                target: path.join logdir, 'latest'
               # creates relative symlink <log>/<command>/latest -> <log>/<command>/<date>
               logdir = path.join basedir, '../'
               @link
                 source: path.relative logdir, path.resolve basedir
-                destination: path.join logdir, 'latest'
+                target: path.join logdir, 'latest'
           else
             # Avoid a race condition by waiting that the first node finish to
             # create log dir
@@ -114,7 +114,7 @@ preserve alphanumerical ordering of files.
         {disabled, basedir, filename} = @config.log
         return if disabled
         @mkdir
-          destination: "#{basedir}"
+          target: "#{basedir}"
         @call ->
           out = fs.createWriteStream (path.resolve basedir, filename+'.csv')
           @on 'diff', (log) ->

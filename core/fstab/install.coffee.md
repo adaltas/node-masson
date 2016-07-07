@@ -17,7 +17,7 @@ Write /etc/fstab
           append: true
       @write
         header: 'Configure'
-        destination: '/etc/fstab'
+        target: '/etc/fstab'
         write: write
         backup: true
         eof: true

@@ -51,7 +51,7 @@ inside the configuration. The properties "jce\_local\_policy" and
           options.log "Check if java is here and which version it is"
           # installed = false
           @mkdir
-            destination: '/usr/java'
+            target: '/usr/java'
           @execute
             shy: true
             cmd: 'ls -d /usr/java/jdk*'
@@ -69,7 +69,7 @@ inside the configuration. The properties "jce\_local\_policy" and
             @end() if installed
           @download
             source: "#{java.jdk.location}"
-            destination: "/var/tmp/#{path.basename java.jdk.location}"
+            target: "/var/tmp/#{path.basename java.jdk.location}"
           @execute
             cmd: """
             rand=$RANDOM
@@ -107,17 +107,17 @@ reference it inside the configuration. The properties "jce\_local\_policy" and
           jdk_home = "/usr/java/jdk#{java.jdk.version}"
           @download
             source: "#{java.jce.location}"
-            destination: "/var/tmp/#{path.basename java.jce.location}"
+            target: "/var/tmp/#{path.basename java.jce.location}"
           @extract
             source: "/var/tmp/#{path.basename java.jce.location}"
-            destination: "/var/tmp/#{path.basename java.jce.location, '.zip'}"
+            target: "/var/tmp/#{path.basename java.jce.location, '.zip'}"
             if: -> @status -1
           @copy
             source: "/var/tmp/#{path.basename java.jce.location, '.zip'}/UnlimitedJCEPolicy/local_policy.jar"
-            destination: "#{jdk_home}/jre/lib/security/local_policy.jar"
+            target: "#{jdk_home}/jre/lib/security/local_policy.jar"
           @copy
             source: "/var/tmp/#{path.basename java.jce.location, '.zip'}/UnlimitedJCEPolicy/US_export_policy.jar"
-            destination: "#{jdk_home}/jre/lib/security/US_export_policy.jar"
+            target: "#{jdk_home}/jre/lib/security/US_export_policy.jar"
 
 ## Java # Env
 
@@ -125,7 +125,7 @@ reference it inside the configuration. The properties "jce\_local\_policy" and
       @write
         header: 'Java # Env'
         timeout: -1
-        destination: '/etc/profile.d/java.sh'
+        target: '/etc/profile.d/java.sh'
         mode: 0o0644
         content: """
         export JAVA_HOME=#{java_home}

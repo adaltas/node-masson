@@ -25,7 +25,7 @@ this file.
           append: true
       @write
         header: 'Network # Hosts'
-        destination: '/etc/hosts'
+        target: '/etc/hosts'
         write: write
         backup: true
         eof: true
@@ -44,7 +44,7 @@ relevant file is "/etc/sysconfig/network".
           @write
             match: /^HOSTNAME=.*/mg
             replace: "HOSTNAME=#{hostname}"
-            destination: '/etc/sysconfig/network'
+            target: '/etc/sysconfig/network'
           , (err, replaced) ->
             restart = true if replaced
           @execute
@@ -68,7 +68,7 @@ configuration file is considered a trusted source of DNS information.
         handler: ->
           @write
             content:  @config.network.resolv
-            destination: '/etc/resolv.conf'
+            target: '/etc/resolv.conf'
             backup: true
             eof: true
           @wait_connect
@@ -86,7 +86,7 @@ Customize the network interfaces configured present inside the
         header: 'Network # Interfaces'
         timeout: -1
         if: -> @config.network.ifcg
-        destination: "/etc/sysconfig/network-scripts/ifcfg-#{name}"
+        target: "/etc/sysconfig/network-scripts/ifcfg-#{name}"
         write: for k, v of config
           match: ///^#{quote k}=.*$///mg
           replace: "#{k}=#{v}"

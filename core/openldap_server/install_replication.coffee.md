@@ -23,7 +23,7 @@
       #   code_skipped: 255
       @write
         if: -> @config.host is active_host
-        destination: bdb_file
+        target: bdb_file
         write: [
           match: /^olcOverlay:.*syncprov$/m
           replace: "olcOverlay: {0}syncprov"
@@ -32,7 +32,7 @@
         ]
       @write
         unless: -> @config.host is active_host
-        destination: bdb_file
+        target: bdb_file
         write: [
           match: /^olcSyncrepl:.*$/m
           replace: "olcSyncrepl: {0}rid=31 provider=\"#{master_uri}\" searchbase=\"#{suffix}\" type=\"refreshAndPersist\" retry=\"120 +\" timeout=\"5\" bindmethod=\"simple\" tls_cacertdir=\"/etc/openldap/cacerts\" binddn=\"#{replication_binddn}\" credentials=\"#{replication_bindpw}\""
@@ -43,7 +43,7 @@
           append: true
         ]
       @write
-        destination: config_file
+        target: config_file
         write: [
           match: /^olcModulePath:.*$/m
           replace: "olcModulePath: /usr/lib64/openldap"

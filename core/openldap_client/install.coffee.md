@@ -22,7 +22,7 @@ certificate to upload.
           match: new RegExp "^#{k}.*$", 'mg'
           replace: "#{k} #{v}"
           append: true
-        destination: '/etc/openldap/ldap.conf'
+        target: '/etc/openldap/ldap.conf'
         eof: true
 
 ## Upload certificate
@@ -50,7 +50,7 @@ the command `authconfig --update --ldaploadcacert={file}`.
           filename = null
           @download
             source: certificate
-            destination: "/tmp/#{hash}"
+            target: "/tmp/#{hash}"
             mode: 0o0640
             shy: true
           @execute # openssh is executed remotely
@@ -62,7 +62,7 @@ the command `authconfig --update --ldaploadcacert={file}`.
             @write 
               source: certificate
               local_source: true
-              destination: "#{openldap_client.config.TLS_CACERTDIR}/#{filename}.0"
+              target: "#{openldap_client.config.TLS_CACERTDIR}/#{filename}.0"
 
 ## Dependencies
 

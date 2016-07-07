@@ -38,7 +38,7 @@ two new properties "sshd\_config" and "banner".
       "Port": 2222
     },
     "banner": {
-      "destination": "/etc/banner",
+      "target": "/etc/banner",
       "content": "Welcome to Hadoop!"
     }
   }

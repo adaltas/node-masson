@@ -31,7 +31,7 @@ the command `authconfig --update --ldaploadcacert={file}`.
           filename = null
           @download
             source: certificate
-            destination: "/tmp/#{hash}"
+            target: "/tmp/#{hash}"
             shy: true
           @execute # openssh is executed remotely
             cmd: "openssl x509 -noout -hash -in /tmp/#{hash}; rm -rf /tmp/#{hash}"
@@ -42,21 +42,21 @@ the command `authconfig --update --ldaploadcacert={file}`.
             # TODO: use move to speed this up, improve status handling
             @download 
               source: certificate
-              destination: "/etc/openldap/cacerts/#{filename}.0"
-              # destination: "#{config.TLS_CACERTDIR}/#{filename}.0"
+              target: "/etc/openldap/cacerts/#{filename}.0"
+              # target: "#{config.TLS_CACERTDIR}/#{filename}.0"
               unless_exists: true
 
 ## Configure
 
 Update the SSSD configuration file present in "/etc/sssd/sssd.conf" with the
-values defined in the "sssd.config" property. The destination file is by
+values defined in the "sssd.config" property. The target file is by
 default overwritten unless the "sssd.merge" is `true`.
 
       @call header: 'Configure', timeout: -1, handler: ->
         {merge, config} = @config.sssd
         @write_ini
           content: config
-          destination: '/etc/sssd/sssd.conf'
+          target: '/etc/sssd/sssd.conf'
           merge: merge
           mode: 0o0600
           backup: true

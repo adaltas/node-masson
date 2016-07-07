@@ -53,7 +53,7 @@ and setting "allow-query" to any. The "named" service is restarted if modified.
 
       @write
         header: 'Configure'
-        destination: '/etc/named.conf'
+        target: '/etc/named.conf'
         write: [
           # Comment listen-on port
           match: /^(\s+)(listen\-on port.*)$/mg
@@ -75,7 +75,7 @@ Upload the zones definition files provided in the configuration file.
 
       @call header: 'Zones', handler: ->
         @write
-          destination: '/etc/named.conf'
+          target: '/etc/named.conf'
           write: for zone in bind_server.zones
             # /^zone "hadoop" IN \{[\s\S]*?\n\}/gm.exec f
             match: RegExp "^zone \"#{quote path.basename zone}\" IN \\{[\\s\\S]*?\\n\\};", 'gm'
@@ -90,7 +90,7 @@ Upload the zones definition files provided in the configuration file.
         @write (
           source: zone
           local_source: true
-          destination: "/var/named/#{path.basename zone}"
+          target: "/var/named/#{path.basename zone}"
         ) for zone in bind_server.zones
 
 ## rndc Key
@@ -102,7 +102,7 @@ Generates configuration files for rndc.
           cmd: 'rndc-confgen -a -r /dev/urandom -c /etc/rndc.key'
           unless_exists: '/etc/rndc.key'
         @chown
-          destination: '/etc/rndc.key'
+          target: '/etc/rndc.key'
           uid: bind_server.user.name
           gid: bind_server.group.name
         @service

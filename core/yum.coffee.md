@@ -86,7 +86,7 @@ is available on [the centos website](http://www.centos.org/docs/5/html/yum/sn-yu
       @write_ini
         header: 'Configuration'
         content: @config.yum.config
-        destination: '/etc/yum.conf'
+        target: '/etc/yum.conf'
         merge: true
         backup: true
 
@@ -121,14 +121,14 @@ in "/etc/yum.repos.d"
             .filter (file) -> # Only keep file not present locally
               not local_files.some (local_file) -> path.basename(file) is path.basename(local_file)
             .map (file) -> # Transform to object
-              destination: file
+              target: file
           @remove remote_files
         @call (_, callback) ->
           options.log "Upload #{local_files.length} files", level: 'INFO', module: 'masson/core/yum'
           @write (
             source: file
             local_source: true
-            destination: "/etc/yum.repos.d/#{path.basename file}"
+            target: "/etc/yum.repos.d/#{path.basename file}"
           ) for file in local_files
           @execute
             cmd: 'yum clean metadata; yum -y update'
