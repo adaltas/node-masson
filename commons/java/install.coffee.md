@@ -50,8 +50,7 @@ inside the configuration. The properties "jce\_local\_policy" and
           {java} = @config
           options.log "Check if java is here and which version it is"
           # installed = false
-          @mkdir
-            target: '/usr/java'
+          @mkdir '/usr/java'
           @execute
             shy: true
             cmd: 'ls -d /usr/java/jdk*'

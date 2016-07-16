@@ -51,8 +51,7 @@ preserve alphanumerical ordering of files.
         {basedir, filename, archive} = @config.log
         @call header: 'Prepare Log dir', handler: ->
           if not @contexts().length or @contexts()[0].config.host is @config.host
-            @mkdir
-              target: basedir
+            @mkdir basedir
             # creates relative symlink <log>/latest -> <log>/<command>/<date>
             if archive
               logdir = path.join basedir, '../../'
@@ -113,8 +112,7 @@ preserve alphanumerical ordering of files.
       @call header: 'Bootstrap Log # CSV', required: true, irreversible: true, handler: ->
         {disabled, basedir, filename} = @config.log
         return if disabled
-        @mkdir
-          target: "#{basedir}"
+        @mkdir "#{basedir}"
         @call ->
           out = fs.createWriteStream (path.resolve basedir, filename+'.csv')
           @on 'diff', (log) ->
