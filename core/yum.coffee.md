@@ -127,7 +127,7 @@ in "/etc/yum.repos.d"
           options.log "Upload #{local_files.length} files", level: 'INFO', module: 'masson/core/yum'
           @write (
             source: file
-            local_source: true
+            local: true
             target: "/etc/yum.repos.d/#{path.basename file}"
           ) for file in local_files
           @execute

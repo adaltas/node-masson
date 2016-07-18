@@ -61,7 +61,7 @@ the command `authconfig --update --ldaploadcacert={file}`.
           @call ->
             @write 
               source: certificate
-              local_source: true
+              local: true
               target: "#{openldap_client.config.TLS_CACERTDIR}/#{filename}.0"
 
 ## Dependencies
