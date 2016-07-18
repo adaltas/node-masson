@@ -1,23 +1,23 @@
 
 # Anaconda Install
 
-Install anaconda from previously builded archive.
-Installation will fail unless prepare is called before.
+Install anaconda.
 
     module.exports = header: 'Anaconda # Install', timeout: -1, handler: ->
       {anaconda} = @config
-      tmp_archive = "/tmp/#{path.basename anaconda.archive}"
-      @download
-        source: anaconda.archive
-        target: tmp_archive
-        md5: true
-        unless_exists: "#{anaconda.install_dir}/anaconda/LICENSE.txt"
-      @extract
-        source: tmp_archive
-        target: anaconda.install_dir
-        preserve_owner: false
-        unless_exists: "#{anaconda.install_dir}/anaconda/LICENSE.txt"
-      @remove target: tmp_archive
+      @call unless_exec: "#{anaconda.install_dir}/bin/python --version | grep #{anaconda.version}", handler: ->
+        script = "#{anaconda.tmp_dir}/Anaconda3-#{anaconda.version}-Linux-x86_64.sh"
+        @download
+          source: anaconda.source
+          target: script
+          md5: true
+          unless_exec: 
+        @chmod
+          target: script
+          mode: 0o755
+        @execute
+          cmd: "#{script} -b -f -p #{anaconda.install_dir}"
+        @remove target: script
 
 ## Dependencies
 

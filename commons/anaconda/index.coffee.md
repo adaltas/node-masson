@@ -11,5 +11,4 @@ Anaconda and the Anaconda changelog.
         'masson/commons/anaconda/configure'
       'install':
         'masson/commons/anaconda/install'
-      'prepare':
-        'masson/commons/anaconda/prepare'
+
