@@ -18,8 +18,8 @@ time when the `ntpd` daemon isnt yet started.
       @execute
         header: 'Synchronize'
         cmd: "ntpdate #{ntp.servers[0]}"
-        # retry: 20
-        # wait: 3000
+        retry: 20
+        wait: 3000
         if: ->
           @status(-1) and ntp.servers?.length and ( ntp.servers[0] isnt @config.host )
 
