@@ -34,12 +34,10 @@ preserve alphanumerical ordering of files.
       log.basedir = path.join log.basedir, command if log.archive
       log.basedir = path.join log.basedir, dateformat if log.archive
       log.fqdn_reversed = @config.host.split('.').reverse().join('.')
-      filename = '{{shortname}}'
-      log.filename ?= "#{filename}.log"
+      log.filename ?= "{{shortname}}.log"
       # Rendering
       log.basedir = mustache.render log.basedir, @config
       log.filename = mustache.render log.filename, @config
-      # log.filename_stderr = mustache.render log.filename_stderr, @config
       # Elastic Search
       log.elasticsearch ?= {}
       log.elasticsearch.enable ?= false
@@ -80,7 +78,6 @@ preserve alphanumerical ordering of files.
             if log.message.indexOf('\n') is -1
             then out.write "\nRunning Command: `#{log.message}`\n\n"
             else out.write "\n```stdin\n#{log.message}\n```\n\n"
-            stdining = log.message isnt null
           @on 'diff', (log) ->
             out.write '\n```diff\n#{log.message}```\n\n' unless log.message
           @on 'stdout_stream', (log) ->
