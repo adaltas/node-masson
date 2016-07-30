@@ -13,17 +13,12 @@ class Context extends EventEmitter
     options[k] = v for k, v of @config.mecano
     mecano @, options
     @
-  run: (ctx, module) ->
-    if typeof module is 'function'
-      module.call ctx
-    else
-      throw new Error 'Only accept functions for now'
   context: (host, modules=[]) ->
     host_ctx = @_contexts[host]
     throw Error "Invalid host: #{JSON.stringify host}" unless host? and host_ctx?
     modules = [modules] unless Array.isArray modules
     for module in modules
-      host_ctx.run host_ctx, module
+      module.call host_ctx
     host_ctx
   contexts: (query={}, modules=[]) ->
     return (for _, host of @_contexts then host) unless arguments.length
