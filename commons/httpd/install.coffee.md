@@ -25,7 +25,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
 By default, the "httpd" package create the following entries:
 
 ```bash
-cat /etc/passwd | grep pig
+cat /etc/passwd | grep apache
 apache:x:48:48:Apache HTTPD User:/var/www:/sbin/nologin
 cat /etc/group | grep hadoop
 apache:x:48:
