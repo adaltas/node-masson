@@ -48,7 +48,7 @@ Example:
       'start':
         'masson/core/ntp/start'
       'stop':
-        'masson/core/ntp/start'
+        'masson/core/ntp/stop'
 
 ## Server configuration
 
