@@ -18,6 +18,9 @@ module.exports = ->
     .call (server, next) ->
       return next() if params.hosts? and multimatch(server.host, params.hosts).indexOf(server.host) is -1
       context {}, params, (merge {}, config, server)
+      .call ->
+        @config.runinfo ?= {}
+        @config.runinfo.date ?= new Date
       .call 'masson/bootstrap/log'
       .call 'masson/bootstrap/connection'
       .call (options, callback)->

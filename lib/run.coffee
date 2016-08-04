@@ -20,20 +20,18 @@ properties which are respectively a list of "middlewares" and a list of modules.
 On the second pass, the middewares are executed.
 ###
 Run = (params, config) ->
-  now = new Date()
   params.end ?= true
   EventEmitter.call @
   @setMaxListeners 100
   setImmediate =>
     # Work on each server
+    now = new Date()
     contexts = {}
     for fqdn, server of config.servers
       ctx = contexts[fqdn] = context contexts, params, (merge {}, config, server)
       # ctx.params = params
-      ctx.runinfo = {}
-      ctx.runinfo.date = now
-      ctx.runinfo.command = params.command
-      # ctx.config.modules = ctx.config.modules.reverse() if params.command is 'stop'
+      ctx.config.runinfo = {}
+      ctx.config.runinfo.date = now
     process.on 'uncaughtException', (err) =>
       console.log 'masson/lib/run: uncaught exception'
       @emit 'error', err

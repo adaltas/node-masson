@@ -27,7 +27,7 @@ preserve alphanumerical ordering of files.
       log.disabled ?= false
       log.archive ?= false
       log.basedir ?= './log'
-      now = @runinfo?.date or new Date
+      now = @config.runinfo?.date or new Date
       command = @params.command
       dateformat = "#{now.getFullYear()}-#{('0'+now.getMonth()).slice -2}-#{('0'+now.getDate()).slice -2}"
       dateformat += " #{('0'+now.getHours()).slice -2}-#{('0'+now.getMinutes()).slice -2}-#{('0'+now.getSeconds()).slice -2}"

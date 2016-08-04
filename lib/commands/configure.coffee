@@ -56,9 +56,8 @@
         for fqdn, server of config.servers
           ctx = contexts[fqdn] = context contexts, (merge {}, config, server)
           ctx.params = params
-          ctx.runinfo = {}
-          ctx.runinfo.date = now
-          ctx.runinfo.command = params.command
+          ctx.config.runinfo = {}
+          ctx.config.runinfo.date = now
         process.on 'uncaughtException', (err) =>
           throw err
         # Discover module inside parent project
