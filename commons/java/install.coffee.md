@@ -69,6 +69,8 @@ inside the configuration. The properties "jce\_local\_policy" and
           @download
             source: "#{java.jdk.location}"
             target: "/var/tmp/#{path.basename java.jdk.location}"
+            headers: ['Cookie: oraclelicense=accept-securebackup-cookie']
+            location: true
           @execute
             cmd: """
             rand=$RANDOM
@@ -107,6 +109,8 @@ reference it inside the configuration. The properties "jce\_local\_policy" and
           @download
             source: "#{java.jce.location}"
             target: "/var/tmp/#{path.basename java.jce.location}"
+            headers: ['Cookie: oraclelicense=accept-securebackup-cookie']
+            location: true
           @extract
             source: "/var/tmp/#{path.basename java.jce.location}"
             target: "/var/tmp/#{path.basename java.jce.location, '.zip'}"
