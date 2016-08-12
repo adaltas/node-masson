@@ -12,14 +12,14 @@ It is fully ACID compliant, has full support for foreign keys, joins, views, tri
 
     module.exports = -> 
       'configure': [
-        'masson/commons/postgres_server_docker/configure'
+        'masson/commons/postgres/server/configure'
       ]
       'install': [
         'masson/core/iptables'
-        'masson/commons/postgres_server_docker/install'
-        'masson/commons/postgres_server_docker/start'
-        'masson/commons/postgres_server_docker/check'
+        'masson/commons/postgres/server/install'
+        'masson/commons/postgres/server/start'
+        'masson/commons/postgres/server/check'
       ]
       'prepare': [
-        'masson/commons/postgres_server_docker/prepare'
+        'masson/commons/postgres/server/prepare'
       ]

@@ -5,7 +5,7 @@ Download the PostgreSQL Container
     module.exports =
       header: 'PostgreSQL'
       timeout: -1
-      if: -> @contexts('masson/commons/postgres')[0]?.config.host is @config.host
+      if: -> @contexts('masson/commons/postgres/server')[0]?.config.host is @config.host
       handler: ->
         {postgres} = @config
         @docker.pull
