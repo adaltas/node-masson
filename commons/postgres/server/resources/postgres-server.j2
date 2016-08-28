@@ -10,62 +10,59 @@
 
 CONTAINER={{container}}
 NAME=postgres-server-docker
-DESC="Hue server dockerized startup script"
+DESC="Postgres server dockerized startup script"
 set -e
 
-set -e
-if ! service docker status;
-  then
-    printf "%s\n" "Service startup failed\n"
-    printf "%s\n" "docker service should be started\n"
-    exit 1
+if ! service docker status; then
+  printf "%s\n" "Service startup failed\n"
+  printf "%s\n" "docker service should be started\n"
+  exit 1
 fi
 case "$1" in
 start)
-    printf "%-50s" "Starting $NAME..."
-    if [ "`docker ps | grep ${CONTAINER}`" ]; then
-      printf "%s\n" "Service already running"
+  printf "%-50s" "Starting $NAME..."
+  if [ "`docker ps | grep ${CONTAINER}`" ]; then
+    printf "%s\n" "Service already running"
+    exit 0
+  else
+    if docker start ${CONTAINER}  ; then
+      printf "%s\n"
+      printf "%s\n" "Service started [Ok]"
+      printf "%s\n" "Container started [${CONTAINER}]"
+      echo ''
       exit 0
     else
-      if docker start ${CONTAINER}  ; then
-        printf "%s\n"
-        printf "%s\n" "Service started [Ok]"
-        printf "%s\n" "Container started [${CONTAINER}]"
-        echo ''
-        exit 0
-      else
-        printf "%s\n" "Fail to start container [${CONTAINER}]"
-        exit 1
-      fi
+      printf "%s\n" "Fail to start container [${CONTAINER}]"
+      exit 1
     fi
+  fi
 ;;
 status)
-        printf "%-50s" "Checking $NAME..."
-        if ! [ "`docker ps | grep ${CONTAINER}`" ]; then
-            printf "%s\n" "Service not running"
-            exit 3
-        else
-            echo "Service running"
-            exit 0
-        fi
-
+  printf "%-50s" "Checking $NAME..."
+  if ! [ "`docker ps | grep ${CONTAINER}`" ]; then
+    printf "%s\n" "Service not running"
+    exit 3
+  else
+    echo "Service running"
+    exit 0
+  fi
 ;;
 stop)
-        printf "%-50s" "Stopping $NAME"
-        if ! [ "`docker ps | grep ${CONTAINER}`" ]; then
-            printf "%s\n" "Service already stopped"
-            exit 1
-        else
-            docker stop ${CONTAINER}
-            printf "%s\n" "Service stopped [Ok]"
-            printf "%s\n" "Container stopped [${CONTAINER}]"
-            exit 0
-        fi
+  printf "%-50s" "Stopping $NAME"
+  if ! [ "`docker ps | grep ${CONTAINER}`" ]; then
+    printf "%s\n" "Service already stopped"
+    exit 1
+  else
+    docker stop ${CONTAINER}
+    printf "%s\n" "Service stopped [Ok]"
+    printf "%s\n" "Container stopped [${CONTAINER}]"
+    exit 0
+  fi
 ;;
 
 restart)
-    $0 stop
-    $0 start
+  $0 stop
+  $0 start
 ;;
 
 # remove)
