@@ -1,8 +1,7 @@
 
 # Docker Install
 
-    module.exports = header: 'Docker Install', handler: ->
-      {docker} = @config
+    module.exports = handler: (options) ->
     
 ## Install
 
@@ -15,6 +14,17 @@ service.
         yum_name: 'docker-io'
         startup: true
         action: 'start'
+
+## Configuration
+
+      other_args = for k, v of options.other_args then "--#{k}=#{v}"
+      @write
+        target: '/etc/sysconfig/docker'
+        write: [
+          match: /^other_args=.*$/m
+          replace: "other_args=\"#{other_args.join ' '}\""
+        ]
+        backup: true
 
 ## Install docker-pid
 
@@ -58,7 +68,7 @@ remote access, docker exec is the current recommended approach.
 
       @execute
         header: 'Docker # Install nsenter'
-        if: docker.nsenter
+        if: options.nsenter
         cmd: """
         docker run -v /usr/local/bin:/target jpetazzo/nsenter
         """
