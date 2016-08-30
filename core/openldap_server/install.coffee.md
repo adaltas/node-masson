@@ -61,7 +61,7 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
           target: openldap_server.config_file
           match: /^olcLogLevel:.*$/mg
           replace: "olcLogLevel: #{openldap_server.log_level}"
-          before: 'olcRootDN'
+          place_before: 'olcRootDN'
 
 ###
 Borrowed from

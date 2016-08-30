@@ -137,7 +137,7 @@ Create the kerberos administrator's user.
           @ldap_acl
             suffix: openldap_server.suffix
             acls: [
-              before: "dn.subtree=\"#{openldap_server.suffix}\""
+              place_before: "dn.subtree=\"#{openldap_server.suffix}\""
               to: "dn.subtree=\"#{kerberos_dn}\""
               by: [
                 "dn.exact=\"#{krbadmin_user.dn}\" write"

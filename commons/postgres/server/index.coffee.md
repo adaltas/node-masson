@@ -9,7 +9,7 @@ and stored procedures (in multiple languages).
 Run this command on the host to enter psql:
 
 ```
-dodcker exec -it -u postgres postgres_server psql
+docker exec -it -u postgres postgres_server psql
 ```
 
 

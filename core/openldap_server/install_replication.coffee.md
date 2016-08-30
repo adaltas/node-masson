@@ -27,7 +27,7 @@
         write: [
           match: /^olcOverlay:.*syncprov$/m
           replace: "olcOverlay: {0}syncprov"
-          before: "structuralObjectClass"
+          place_before: "structuralObjectClass"
           append: true
         ]
       @write
