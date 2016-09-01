@@ -11,7 +11,7 @@ environment it is running in.
     module.exports = ->
       'configure':
         'masson/commons/docker/configure'
-      'install': header: 'Docker Install', handler: ->
+      'install': handler: ->
         @call 'masson/commons/docker/install', @config.docker
         @call 'masson/commons/docker/stop', if: -> @status -1
         @call 'masson/commons/docker/start'

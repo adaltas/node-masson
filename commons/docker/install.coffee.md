@@ -1,7 +1,7 @@
 
 # Docker Install
 
-    module.exports = handler: (options) ->
+    module.exports = header: 'Docker Install', handler: (options) ->
     
 ## Install
 
