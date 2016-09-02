@@ -402,7 +402,7 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=ryba
         match: /^SLAPD_LDAPS.*/mg
         replace: 'SLAPD_LDAPS=yes'
         target: '/etc/sysconfig/ldap'
-      @service_restart
+      @service.restart
         header: 'Restart'
         name: 'slapd'
         if: -> @status()

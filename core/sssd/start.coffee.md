@@ -2,5 +2,5 @@
 # SSSD Start
 
     module.exports = header: 'SSSD # Start', handler: ->
-      @service_start
+      @service.start
         name: 'sssd'

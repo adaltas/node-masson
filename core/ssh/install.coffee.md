@@ -48,7 +48,7 @@ properties found in the "ssh.sshd_config" object.
               replace: "#{k} #{v}"
               append: true
             target: '/etc/ssh/sshd_config'
-          @service_restart
+          @service.restart
             name: 'sshd'
             timeout: -1
             if: -> @status -1
@@ -101,7 +101,7 @@ service will be restarted if this action had any effect.
             replace: "Banner #{banner.target}"
             append: true
             target: '/etc/ssh/sshd_config'
-          @service_restart
+          @service.restart
             name: 'sshd'
             if: -> @status()
 

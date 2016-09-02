@@ -30,11 +30,11 @@ synchronization the date and the `ntpd` daemon is finally restarted.
           if: current_lag > lag
           handler: ->
             options.log "Lag greater than #{lag}ms: #{current_lag}ms"
-            @service_stop
+            @service.stop
               name: 'ntpd'
               code_stopped: [1, 3]
             @execute
               cmd: "ntpdate #{@config.ntp.servers[0]}"
-            @service_start
+            @service.start
               name: 'ntpd'
               code_stopped: [1, 3]

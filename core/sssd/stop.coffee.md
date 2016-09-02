@@ -2,5 +2,5 @@
 # SSSD Stop
 
     module.exports = header: 'SSSD # Stop', label_true: 'STOPPED', handler: ->
-      @service_stop
+      @service.stop
         name: 'sssd'

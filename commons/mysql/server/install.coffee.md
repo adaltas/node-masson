@@ -41,7 +41,7 @@ Install the Mysql database server. Secure the temporary directory.
           merge: true
           backup: true
 
-      @service_start
+      @service.start
         header: 'Mysql Server # Start'
         name: 'mysqld'
         relax: true
@@ -54,7 +54,7 @@ Install the Mysql database server. Secure the temporary directory.
       #     , (err, removed) ->
       #       throw err if err
       #       throw Error 'Failed to install mysqld' unless removed
-      #     @service_start
+      #     @service.start
       #       name: 'mysqld'
 
       for sql, i in mysql.server.sql_on_install

@@ -225,10 +225,10 @@ The following files are updated:
             replace: 'if $programname == \'kadmind\' then /var/log/kadmind.log'
             append: '### RULES ###'
           ]
-        @service_start
+        @service.start
           name: 'krb5kdc'
           if: -> @status -1
-        @service_start
+        @service.start
           name: 'kadmin'
           if: -> @status -2
         @service
@@ -284,9 +284,9 @@ The following files are updated:
     #   , next
 
       # exports.push header: 'Krb5 Server # Start', timeout: 100000, handler: ->
-      #   @service_start
+      #   @service.start
       #     name: 'krb5kdc'
-      #   @service_start
+      #   @service.start
       #     name: 'kadmin'
 
 ## Dependencies
