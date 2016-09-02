@@ -30,7 +30,7 @@ such as LC_ALL= . We set all variable to `en_US.UTF-8` by default.
       @call 
         header: 'SSH Env'
         handler: ->
-          @write (
+          @file (
             target: "#{user.home or '/home/'+user.name}/.ssh/environment"
             write: for k, v of props
               match: RegExp "^#{k}.*$", 'mg'

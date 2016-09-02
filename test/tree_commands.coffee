@@ -14,7 +14,7 @@ describe 'tree commands', ->
   describe 'default', ->
 
     it 'find default commands', (next) ->
-      mecano.write [
+      mecano.file [
         destination: "#{tmp}/module_1.coffee"
         content: """
         module.exports = [
@@ -41,7 +41,7 @@ describe 'tree commands', ->
   describe 'user', ->
 
     it 'find user commands', (next) ->
-      mecano.write [
+      mecano.file [
         destination: "#{tmp}/module_1.coffee"
         content: """
         module.exports = [

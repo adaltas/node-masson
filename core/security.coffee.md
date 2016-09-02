@@ -38,7 +38,7 @@ mechanism implemented in the kernel.
 
 This action update the configuration file present in "/etc/selinux/config".
 
-        @write
+        @file
           header: 'SELinux'
           target: '/etc/selinux/config'
           match: /^SELINUX=.*/mg
@@ -67,7 +67,7 @@ cat /etc/security/limits.d/90-nproc.conf
 root       soft    nproc     unlimited
 ```
 
-        @write (
+        @file (
           header: "Limits on #{filename}"
           target: "/etc/security/limits.d/#{filename}"
           content: content

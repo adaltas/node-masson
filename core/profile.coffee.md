@@ -29,7 +29,7 @@ Example:
 
 Upload all the configured scripts.
         
-        @write (
+        @file (
           header: 'Upload'
           target: "/etc/profile.d/#{filename}"
           content: content

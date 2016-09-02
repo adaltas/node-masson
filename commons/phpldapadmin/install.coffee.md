@@ -16,7 +16,7 @@ Install the "phpldapadmin" package.
 Configure the application. The configuration file is defined by the
 "phpldapadmin.config_path" property (default to "/etc/phpldapadmin/config.php").
 
-      @write
+      @file
         header: 'phpLDAPadmin # Configure'
         write: [
           {match: /^(\/\/)(.*'login','attr','dn'.*)$/m, replace: '$2'}
@@ -36,7 +36,7 @@ by the "phpldapadmin.config_httpd_path" property (default to
 "/etc/httpd/conf.d/phpldapadmin.conf") and made the application visible under
 the "http://{host}/ldapadmin" URL path.
 
-      @write
+      @file
         header: 'phpLDAPadmin # HTTPD'
         target: phpldapadmin.config_httpd_path
         write: [

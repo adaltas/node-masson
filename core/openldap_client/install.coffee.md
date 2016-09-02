@@ -15,7 +15,7 @@ certificate to upload.
 ## Configuration
 
       {openldap_client} = @config
-      @write
+      @file
         header: 'OpenLDAP Client # Configure'
         write: for k, v of openldap_client.config
           v = v.join(' ') if Array.isArray v
@@ -59,7 +59,7 @@ the command `authconfig --update --ldaploadcacert={file}`.
           , (err, _, stdout) ->
             filename = stdout.trim() unless err
           @call ->
-            @write 
+            @file 
               source: certificate
               local: true
               target: "#{openldap_client.config.TLS_CACERTDIR}/#{filename}.0"

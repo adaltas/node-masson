@@ -187,7 +187,7 @@ masson init \
         Write a file.
 
               install: ->
-                @write
+                @file
                   target: "/root/helloword"
                   content: "Print \#{@config.helloword.content}"
 

@@ -14,7 +14,7 @@ describe 'tree dependencies', ->
   describe 'default command', ->
 
     it 'find dependencies without a command', (next) ->
-      mecano.write [
+      mecano.file [
         destination: "#{tmp}/module_1.coffee"
         content: """
         module.exports = [
@@ -42,7 +42,7 @@ describe 'tree dependencies', ->
           next()
 
     it 'find dependencies and filter other commands', (next) ->
-      mecano.write [
+      mecano.file [
         destination: "#{tmp}/module_1.coffee"
         content: """
         module.exports = [
@@ -71,7 +71,7 @@ describe 'tree dependencies', ->
     it 'filter commands inside filtered out modules', (next) ->
       # We need to recompute module dependencies after module are filtered out
       # or the ordering may be wrong
-      mecano.write [
+      mecano.file [
         destination: "#{tmp}/module_1.coffee"
         content: """
         module.exports = [
@@ -108,7 +108,7 @@ describe 'tree dependencies', ->
   describe 'custom command', ->
 
     it 'find dependencies', (next) ->
-      mecano.write [
+      mecano.file [
         destination: "#{tmp}/module_1.coffee"
         content: """
         module.exports = [
@@ -143,7 +143,7 @@ describe 'tree dependencies', ->
           next()
 
     it 'find dependencies and filter other commands', (next) ->
-      mecano.write [
+      mecano.file [
         destination: "#{tmp}/module_1.coffee"
         content: """
         module.exports = [
@@ -169,5 +169,3 @@ describe 'tree dependencies', ->
           middlewares[0].should.have.properties name: 'middleware 2'
           middlewares[1].should.have.properties name: 'middleware 1.2'
           next()
-
-

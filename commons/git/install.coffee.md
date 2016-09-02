@@ -22,7 +22,7 @@ Deploy the git configuration.
             throw Error unless options.config
             options.content = misc.merge {}, properties, options.config
             options.merge ?= merge
-            @write_ini options
+            @file.ini options
         @git_config
           uid: 'root'
           gid: 'root'

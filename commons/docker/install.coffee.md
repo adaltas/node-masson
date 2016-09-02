@@ -18,7 +18,7 @@ service.
 ## Configuration
 
       other_args = for k, v of options.other_args then "--#{k}=#{v}"
-      @write
+      @file
         target: '/etc/sysconfig/docker'
         write: [
           match: /^other_args=.*$/m
@@ -30,7 +30,7 @@ service.
 
 Get the PID of a docker container by name or ID.
 
-      @write
+      @file
         header: 'Docker # Install docker-pid'
         content: """
         #!/bin/sh
@@ -43,7 +43,7 @@ Get the PID of a docker container by name or ID.
 
 Get the ip address of a container by name or ID.
 
-      @write
+      @file
         header: 'Docker # Install docker-ip'
         content: """
         #!/bin/sh

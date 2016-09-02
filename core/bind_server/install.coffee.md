@@ -51,7 +51,7 @@ The packages "bind" is installed as a startup item and not yet installed.
 Update the "/etc/named.conf" file by modifying the commenting the listen-on port
 and setting "allow-query" to any. The "named" service is restarted if modified.
 
-      @write
+      @file
         header: 'Configure'
         target: '/etc/named.conf'
         write: [
@@ -74,7 +74,7 @@ and setting "allow-query" to any. The "named" service is restarted if modified.
 Upload the zones definition files provided in the configuration file.   
 
       @call header: 'Zones', handler: ->
-        @write
+        @file
           target: '/etc/named.conf'
           write: for zone in bind_server.zones
             # /^zone "hadoop" IN \{[\s\S]*?\n\}/gm.exec f
@@ -87,7 +87,7 @@ Upload the zones definition files provided in the configuration file.
             };
             """
             append: true
-        @write (
+        @file (
           source: zone
           local: true
           target: "/var/named/#{path.basename zone}"

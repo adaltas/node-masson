@@ -23,7 +23,7 @@ this file.
           match: RegExp "^#{quote ip}\\s.*$", 'gm'
           replace: "#{ip} #{hostnames}"
           append: true
-      @write
+      @file
         header: 'Network # Hosts'
         target: '/etc/hosts'
         write: write
@@ -41,7 +41,7 @@ relevant file is "/etc/sysconfig/network".
         handler: ->
           {hostname, network} = @config
           restart = false
-          @write
+          @file
             match: /^HOSTNAME=.*/mg
             replace: "HOSTNAME=#{hostname}"
             target: '/etc/sysconfig/network'
@@ -66,7 +66,7 @@ configuration file is considered a trusted source of DNS information.
         timeout: -1
         if: -> @config.network.resolv
         handler: ->
-          @write
+          @file
             content:  @config.network.resolv
             target: '/etc/resolv.conf'
             backup: true
@@ -82,7 +82,7 @@ configuration file is considered a trusted source of DNS information.
 Customize the network interfaces configured present inside the
 "/etc/sysconfig/network-scripts" folder.
 
-      @write (
+      @file (
         header: 'Network # Interfaces'
         timeout: -1
         if: -> @config.network.ifcg

@@ -32,7 +32,7 @@ This is to avoid any conflict where both modules would try to write
 their own configuration one. We give the priority to the server module 
 which create a Kerberos file with complementary information.
 
-      @write_ini
+      @file.ini
         header: 'Configuration'
         timeout: -1
         # Kerberos config is also managed by the kerberos server action.
@@ -101,7 +101,7 @@ configuration object. By default, we set the following properties to "yes": "Cha
         if: -> @config.krb5.sshd
         handler: ->
           {sshd} = @config.krb5
-          @write
+          @file
             write: for k, v of sshd
               match: new RegExp "^#{k}.*$", 'mg'
               replace: "#{k} #{v}"

@@ -15,7 +15,7 @@ Write /etc/fstab
           match: new RegExp "^.*[ \\t]+#{regexp.escape mntpt}[ \\t]+.*$"
           replace: "#{disk.device}\t#{mntpt}\t#{disk.type}\t#{disk.options}\t#{disk.dump} #{disk.pass}"
           append: true
-      @write
+      @file
         header: 'Configure'
         target: '/etc/fstab'
         write: write

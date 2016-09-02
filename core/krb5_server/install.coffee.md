@@ -90,29 +90,29 @@ The following files are updated:
       @call header: 'Configuration', handler: ->
         {realm, etc_krb5_conf, kdc_conf} = @config.krb5
         any_realm = Object.keys(kdc_conf.realms)[0]
-        @write_ini
+        @file.ini
           content: safe_etc_krb5_conf etc_krb5_conf
           target: '/etc/krb5.conf'
           stringify: misc.ini.stringify_square_then_curly
           backup: true
-        @write 
+        @file 
           write: for realm of etc_krb5_conf.realms
             match: ///^\*/\w+@#{misc.regexp.escape realm}\s+\*///mg
             replace: "*/admin@#{realm}     *"
             append: true
           target: '/var/kerberos/krb5kdc/kadm5.acl'
           backup: true
-        @write_ini
+        @file.ini
           content: safe_etc_krb5_conf kdc_conf
           target: '/var/kerberos/krb5kdc/kdc.conf'
           stringify: misc.ini.stringify_square_then_curly
           backup: true
-        @write
+        @file
           target: '/etc/sysconfig/kadmin'
           match: /^KRB5REALM=.*$/mg
           replace: "KRB5REALM=#{any_realm}"
           backup: true
-        @write
+        @file
           target: '/etc/sysconfig/krb5kdc'
           match: /^KRB5REALM=.*$/mg
           replace: "KRB5REALM=#{any_realm}"
@@ -214,7 +214,7 @@ The following files are updated:
           target: '/var/log/krb5kdc.log'
         @touch
           target: '/var/log/kadmind.log'
-        @write
+        @file
           target: '/etc/rsyslog.conf'
           write: [
             match: /.*krb5kdc.*/mg
@@ -278,7 +278,7 @@ The following files are updated:
     #   for realm, _ of kdc_conf
     #     replace: "        daemon ${kadmind} -r"
     #     append: /\s+#daemon\s+.*/
-    #   @write
+    #   @file
     #     target: '/etc/init.d/kadmin'
     #     write: write
     #   , next

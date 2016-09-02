@@ -125,7 +125,7 @@ reference it inside the configuration. The properties "jce\_local\_policy" and
 ## Java # Env
 
       {java_home} = @config.java
-      @write
+      @file
         header: 'Java # Env'
         timeout: -1
         target: '/etc/profile.d/java.sh'

@@ -35,7 +35,7 @@ Install the Mysql database server. Secure the temporary directory.
           uid: mysql.server.user.name
           gid: mysql.server.group.name
           mode: 0o0744
-        @write_ini
+        @file.ini
           target: '/etc/my.cnf'
           content: mysql.server.my_cnf
           merge: true

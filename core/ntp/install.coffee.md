@@ -83,7 +83,7 @@ and when only ONE ntp server is configured
             position++
             modified = true
           return callback null, false unless modified
-          @write
+          @file
             target: '/etc/ntp.conf'
             content: lines.join('\n')
             backup: true

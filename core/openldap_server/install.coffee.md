@@ -47,7 +47,7 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
         @service
           name: 'rsyslog'
         options.log 'Declare local4 in rsyslog configuration'
-        @write
+        @file
           target: '/etc/rsyslog.conf'
           match: /^local4.*/mg
           replace: 'local4.*                                                /var/log/slapd.log'
@@ -57,7 +57,7 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
           name: 'rsyslog'
           action: 'restart'
           if: -> @status -1
-        @write
+        @file
           target: openldap_server.config_file
           match: /^olcLogLevel:.*$/mg
           replace: "olcLogLevel: #{openldap_server.log_level}"
@@ -95,7 +95,7 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
               match: /^olcRootPW:.*$/m
               replace: "olcRootPW: #{openldap_server.config_slappasswd}"
               append: 'olcRootDN'
-          @write
+          @file
             target: openldap_server.config_file
             write: write
           @service
@@ -106,7 +106,7 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
 
 ## DB monitor root DN
 
-      @write
+      @file
         header: 'DB monitor root DN'
         target: openldap_server.monitor_file
         match: /^(.*)dc=my-domain,dc=com(.*)$/m
@@ -142,7 +142,7 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
               match: /^olcRootPW:.*$/m
               replace: "olcRootPW: #{openldap_server.root_slappasswd}"
               append: 'olcRootDN'
-          @write
+          @file
             target: openldap_server.bdb_file
             write: write
           @service

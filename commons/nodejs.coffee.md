@@ -95,7 +95,7 @@ module.
     exports.push header: 'Node.js # Npm Configuration', timeout: -1, handler: ->
       {merge, config} = @config.nodejs
       for user in @config.users do (user) ->
-        @write_ini
+        @file.ini
           target: "#{user.home}/.npmrc"
           content: config
           merge: merge
@@ -110,4 +110,3 @@ module.
 
     mecano = require 'mecano'
     misc = require 'mecano/lib/misc'
-

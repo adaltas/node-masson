@@ -381,7 +381,7 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=ryba
         uid: 'ldap'
         gid: 'ldap'
         mode: 0o0400
-      @write
+      @file
         header: 'Configuration'
         target: '/etc/openldap/slapd.d/cn=config.ldif'
         write: [
@@ -397,7 +397,7 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=ryba
           replace: "olcTLSCertificateKeyFile: /etc/pki/tls/certs/#{path.basename openldap_server.tls_key_file}"
           # append: 'olcTLSCertificateFile'
         ]
-      @write
+      @file
         header: 'Activation'
         match: /^SLAPD_LDAPS.*/mg
         replace: 'SLAPD_LDAPS=yes'

@@ -21,7 +21,7 @@
       #   ldapsearch -H "#{master_uri}" -D "#{replication_binddn}" -w "#{replication_bindpw}" -b "#{suffix}"
       #   """
       #   code_skipped: 255
-      @write
+      @file
         if: -> @config.host is active_host
         target: bdb_file
         write: [
@@ -30,7 +30,7 @@
           place_before: "structuralObjectClass"
           append: true
         ]
-      @write
+      @file
         unless: -> @config.host is active_host
         target: bdb_file
         write: [
@@ -42,7 +42,7 @@
           replace: "olcUpdateRef: #{master_uri}"
           append: true
         ]
-      @write
+      @file
         target: config_file
         write: [
           match: /^olcModulePath:.*$/m

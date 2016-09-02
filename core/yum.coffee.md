@@ -83,7 +83,7 @@ merge server configuration and write the content back.
 More information about configuring the proxy settings 
 is available on [the centos website](http://www.centos.org/docs/5/html/yum/sn-yum-proxy-server.html)
 
-      @write_ini
+      @file.ini
         header: 'Configuration'
         content: @config.yum.config
         target: '/etc/yum.conf'
@@ -125,7 +125,7 @@ in "/etc/yum.repos.d"
           @remove remote_files
         @call (_, callback) ->
           options.log "Upload #{local_files.length} files", level: 'INFO', module: 'masson/core/yum'
-          @write (
+          @file (
             source: file
             local: true
             target: "/etc/yum.repos.d/#{path.basename file}"
