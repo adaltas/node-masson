@@ -10,7 +10,8 @@ developers on Solaris, Linux, Mac OS X or Windows.
 TODO: leverage /etc/alternative to switch between multiple JDKs.
 
     module.exports = header: 'JAVA Install', handler: ->
-
+      {java} = @config
+      
 ## Install OpenJDK
 
       @service
@@ -19,126 +20,171 @@ TODO: leverage /etc/alternative to switch between multiple JDKs.
         if: -> @config.java.openjdk
         name: 'java-1.7.0-openjdk-devel'
 
-## Remove OpenJDK
+## Install Oracle JDK && Java Cryptography Extension
 
 At this time, it is recommanded to run Hadoop against the Oracle Java JDK. Since RHEL and CentOS
 come with the OpenJDK installed and to avoid any ambiguity, we simply remove the OpenJDK.
 
-      # TODO: move below 4 lines into ./masson remove -m 'masson/commons/java'
-      # @execute
-      #   header: 'Java # Remove OpenJDK'
-      #   unless: -> @config.java.openjdk
-      #   cmd: 'yum -y remove *openjdk*'
-      
-      # @execute
-      #   header: 'Java # Remove OpenJDK'
-      #   unless: -> @config.java.openjdk
-      #   cmd: 'yum -y remove *openjdk*'
-
-## Install Oracle JDK
-
 For licensing reason, the Oracle Java JDK is not available from a Yum repository. It is the
-masson integrator responsibility to download the jdk manually and reference it
+integrator responsibility to download the jdk manually and reference it
 inside the configuration. The properties "jce\_local\_policy" and
 "jce\_us\_export_policy" must be modified accordingly with an appropriate location.
 
-      @call
-        header: 'Java # Install Oracle JDK'
-        timeout: -1
-        if: -> @config.java.jdk
-        handler: (options) ->
-          {java} = @config
-          options.log "Check if java is here and which version it is"
-          # installed = false
-          @mkdir '/usr/java'
-          @execute
-            shy: true
-            cmd: 'ls -d /usr/java/jdk*'
-            # if_exec: '[[ -d /usr/java/ ]]'
-            code_skipped: 2
-          , (err, executed, stdout, stderr) ->
-            throw err if err #and err.code isnt 2
-            stdout = '' if err or not executed
-            installed_version = stdout.trim().split('\n').pop()
-            return unless installed_version
-            installed_version = /jdk(.*)/.exec(installed_version)[1]
-            installed_version = installed_version.replace('_', '').replace('0', '')
-            version = java.jdk.version.replace('_', '').replace('0', '')
-            installed = true unless semver.gt version, installed_version
-            @end() if installed
-          @download
-            source: "#{java.jdk.location}"
-            target: "/var/tmp/#{path.basename java.jdk.location}"
-            headers: ['Cookie: oraclelicense=accept-securebackup-cookie']
-            location: true
-          @execute
-            cmd: """
-            rand=$RANDOM
-            mkdir -p /tmp/ryba-${rand}
-            tar xzf /var/tmp/#{path.basename java.jdk.location} -C /tmp/ryba-${rand}
-            version=`ls /tmp/ryba-${rand}`
-            mv /tmp/ryba-${rand}/$version /usr/java
-            ln -sf /usr/java/${version} /usr/java/latest
-            ln -sf /usr/java/$version /usr/java/default
-            rm -rf /tmp/ryba-${rand}
-            """
-            trap: true
-
-## Java JCE
-
-The Java Cryptography Extension (JCE) provides a framework and implementation for encryption,
-key generation and key agreement, and Message Authentication Code (MAC) algorithms. JCE
-supplements the Java platform, which already includes interfaces and implementations of
+The Java Cryptography Extension (JCE) provides a framework and implementation for encryption, 
+key generation and key agreement, and Message Authentication Code (MAC) algorithms. JCE 
+supplements the Java platform, which already includes interfaces and implementations of 
 message digests and digital signatures.
 
-Like for the Oracle Java JDK, for licensing reason, the JCE is not available from a Yum
-repository. It is the phyla integrator responsibility to download the jdk manually and
-reference it inside the configuration. The properties "jce\_local\_policy" and
+Like for the Oracle Java JDK, for licensing reason, the JCE is not available from a Yum 
+repository. It is the phyla integrator responsibility to download the jdk manually and 
+reference it inside the configuration. The properties "jce\_local\_policy" and 
 "jce\_us\_export_policy" must be modified accordingly with an appropriate location.
 
+Modified status is only needed on the last two copy commands, which means the jars 
+have been copied or not (in case they already exist).  
+
       @call
-        header: 'Java # Java JCE'
+        header: 'Oracle JDKs'
         timeout: -1
-        if: [
-          -> @config.java.jce.location
-          -> @config.java.jdk
-        ]
-        handler: (options) ->
-          {java} = @config
-          jdk_home = "/usr/java/jdk#{java.jdk.version}"
-          @download
-            source: "#{java.jce.location}"
-            target: "/var/tmp/#{path.basename java.jce.location}"
-            headers: ['Cookie: oraclelicense=accept-securebackup-cookie']
-            location: true
-          @extract
-            source: "/var/tmp/#{path.basename java.jce.location}"
-            target: "/var/tmp/#{path.basename java.jce.location, '.zip'}"
-            if: -> @status -1
-          @copy
-            source: "/var/tmp/#{path.basename java.jce.location, '.zip'}/UnlimitedJCEPolicy/local_policy.jar"
-            target: "#{jdk_home}/jre/lib/security/local_policy.jar"
-          @copy
-            source: "/var/tmp/#{path.basename java.jce.location, '.zip'}/UnlimitedJCEPolicy/US_export_policy.jar"
-            target: "#{jdk_home}/jre/lib/security/US_export_policy.jar"
+        if: -> @config.java.jdk
+      , (options) ->
+        installed_versions = null
+        @execute
+          header: "List Installed JDK"
+          cmd: "ls -d #{java.jdk.root_dir}/*"
+          code_skipped: 2
+          shy: true
+        , (err, executed, stdout, stderr) ->
+          return callback err if err
+          stdout = '' if err or not executed
+          installed_versions = (string.lines stdout.trim())
+            .filter (out) -> out if /jdk(.*)/.exec out
+            .map (abs) -> "#{path.basename abs}" 
+        @mkdir java.jdk.root_dir
+        @each java.jdk.versions, (options, callback) =>
+          version = options.key
+          jdk = options.value
+          installed = installed_versions.indexOf("jdk#{version}") isnt -1
+          path_name = "#{path.basename jdk.jce_location, '.zip'}"
+          now = Date.now()
+          @call
+            header: "Install #{version}"
+            unless: -> installed
+          , ->
+            @download
+              source: jdk.jdk_location
+              target: "/tmp/java.#{now}/#{path.basename jdk.jdk_location}"
+            @mkdir "#{java.jdk.root_dir}/jdk#{version}"
+            @extract
+              source: "/tmp/java.#{now}/#{path.basename jdk.jdk_location}"
+              target: "#{java.jdk.root_dir}/jdk#{version}"
+              strip: 1
+            @remove "/tmp/java.#{now}/#{path.basename jdk.jdk_location}"
+          @call
+            header: "Java JCE Install #{version}"
+          , ->
+            @download
+              source: "#{jdk.jce_location}"
+              target: "/var/tmp/#{path.basename jdk.jce_location}"
+              shy: true
+            @mkdir "/tmp/#{path_name}.#{now}", shy: true
+            @mkdir "/tmp/#{path_name}", shy: true
+            @extract
+              source: "/var/tmp/#{path.basename jdk.jce_location}"
+              target: "/tmp/#{path_name}.#{now}"
+              shy: true
+            @execute
+              cmd: "mv  /tmp/#{path_name}.#{now}/*/* /tmp/#{path_name}/"
+              shy: true
+            @copy
+              source: "/tmp/#{path_name}/local_policy.jar"
+              target: "#{java.jdk.root_dir}/jdk#{version}/jre/lib/security/local_policy.jar"
+            @copy
+              source: "/tmp/#{path_name}/US_export_policy.jar"
+              target: "#{java.jdk.root_dir}/jdk#{version}/jre/lib/security/US_export_policy.jar"
+            @remove "/tmp/#{path_name}", shy: true
+          @then callback
+            
+## Java Paths
 
-## Java # Env
-
-      {java_home} = @config.java
+      @execute 
+        header: 'Set JDK Version (default)'
+        cmd: """
+        if [ -L  "#{java.jdk.root_dir}/default" ] || [ -e "#{java.jdk.root_dir}/default" ] ; then 
+          source=`readlink #{java.jdk.root_dir}/default`
+          if [ "$source" == "#{java.jdk.root_dir}/jdk#{java.jdk.version}" ]; then
+            exit 3
+          else
+            rm -f #{java.jdk.root_dir}/default
+            ln -sf #{java.jdk.root_dir}/jdk#{java.jdk.version} #{java.jdk.root_dir}/default
+            exit 0
+          fi
+        else
+          rm -f #{java.jdk.root_dir}/default
+          ln -sf #{java.jdk.root_dir}/jdk#{java.jdk.version} #{java.jdk.root_dir}/default
+          exit 0
+        fi
+        """
+        code_skipped: 3
+        trap: true
+      @execute 
+        header: 'Set JDK Version (latest)'
+        cmd: """
+        if [ -L  "#{java.jdk.root_dir}/latest" ] || [ -e "#{java.jdk.root_dir}/latest" ] ; then
+          source=`readlink #{java.jdk.root_dir}/latest`
+          if [ "$source" == "#{java.jdk.root_dir}/jdk#{java.jdk.version}" ]; then
+            exit 3
+          else
+            rm -f #{java.jdk.root_dir}/latest
+            ln -sf #{java.jdk.root_dir}/jdk#{java.jdk.version} #{java.jdk.root_dir}/latest
+            exit 0
+          fi
+        else
+          rm -f #{java.jdk.root_dir}/latest
+          ln -sf #{java.jdk.root_dir}/jdk#{java.jdk.version} #{java.jdk.root_dir}/latest
+          exit 0
+        fi
+        """
+        code_skipped: 3
+        trap: true
+      @execute 
+        header: 'Link Java home'
+        unless: java.java_home is "#{java.jdk.root_dir}/default"
+        cmd: """
+        if [ -L  "#{java.java_home}" ] || [ -e "#{java.java_home}" ] ; then
+          source=`readlink #{java.java_home}`
+          if [ "$source" == "#{java.java_home}" ]; then
+            exit 3
+          else
+            rm -f #{java.java_home}
+            ln -sf #{java.jdk.root_dir}/default #{java.java_home}
+            exit 0
+          fi
+        else
+          rm -f #{java.java_home}
+          ln -sf #{java.jdk.root_dir}/default #{java.java_home}
+          exit 0
+        fi
+        """
+        code_skipped: 3
+        trap: true
       @file
-        header: 'Java # Env'
+        header: 'Java Env'
         timeout: -1
         target: '/etc/profile.d/java.sh'
         mode: 0o0644
         content: """
-        export JAVA_HOME=#{java_home}
-        export PATH=#{java_home}/bin:$PATH
+        export JAVA_HOME=#{java.java_home}
+        export PATH=#{java.java_home}/bin:$PATH
         """
 
 ## Dependencies
 
+    each = require 'each'
     path = require 'path'
     semver = require 'semver'
+    string = require 'mecano/lib/misc/string'
+    
 
 ## Notes
 
@@ -147,4 +193,4 @@ and removing the GCJ package also remove the MySQL connector package.
 
 ## Resources
 
-*   [Instructions to install Oracle JDK with alternative](http://www.if-not-true-then-false.com/2010/install-sun-oracle-java-jdk-jre-6-on-fedora-centos-red-hat-rhel/)
+*   [Instructions to install Oracle JDK with alternative](http://www.if-not-true-then-false.com/2010/install-sun-oracle-java-jdk-jre-6-on-fedora-centos-red-hat-rhel/) 
