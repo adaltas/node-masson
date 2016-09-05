@@ -7,8 +7,28 @@
   "author": "David Worms <david@adaltas.com>",
   "repository": {
     "type": "git",
-    "url": "git://github.com/wdavidw/node-masson.git"
+    "url": "git://github.com/adaltas/node-masson.git"
   },
+  "homepage": "https://github.com/adaltas/node-masson",
+  "license": "BSD-3-Clause",
+  "keywords": [
+    "deployment",
+    "os"
+  ],
+  "contributors": [
+    {
+      "name": "David Worms",
+      "email": "david@adaltas.com"
+    },
+    {
+      "name": "Pierre Sauvage",
+      "email": "pierre@adaltas.com"
+    },
+    {
+      "name": "Lucas Bakalian",
+      "email": "lucas@adaltas.com"
+    }
+  ],
   "dependencies": {
     "coffee-script": "~1.10.0",
     "colors": "~1.1.2",
