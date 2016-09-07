@@ -15,8 +15,6 @@ Example for using Oracle JDK:
   java:
     java_home: '/usr/java/default/'
     jre_home: '/usr/java/default/jre'
-    java_home: '/usr/java/default/'
-    jre_home: '/usr/java/default/jre'
     openjdk: true
     jdk:
       version: '1.7.0_79'
