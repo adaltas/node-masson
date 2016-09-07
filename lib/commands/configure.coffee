@@ -54,7 +54,7 @@
           for host in params.hosts
             throw Error "Host #{host} not found" unless host in Object.keys config.servers
         for fqdn, server of config.servers
-          ctx = contexts[fqdn] = context contexts, (merge {}, config, server)
+          ctx = contexts[fqdn] = context contexts, params, (merge {}, config, server)
           ctx.params = params
           ctx.config.runinfo = {}
           ctx.config.runinfo.date = now
