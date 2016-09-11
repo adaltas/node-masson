@@ -61,14 +61,14 @@ have been copied or not (in case they already exist).
             .filter (out) -> out if /jdk(.*)/.exec out
             .map (abs) -> "#{path.basename abs}" 
         @mkdir java.jdk.root_dir
-        @each java.jdk.versions, (options, callback) =>
+        @each java.jdk.versions, (options, callback) ->
           version = options.key
           jdk = options.value
           installed = installed_versions.indexOf("jdk#{version}") isnt -1
           path_name = "#{path.basename jdk.jce_location, '.zip'}"
           now = Date.now()
           @call
-            header: "Install #{version}"
+            header: "JDK #{version}"
             unless: -> installed
           , ->
             @download
@@ -81,7 +81,7 @@ have been copied or not (in case they already exist).
               strip: 1
             @remove "/tmp/java.#{now}/#{path.basename jdk.jdk_location}"
           @call
-            header: "Java JCE Install #{version}"
+            header: "JCE #{version}"
           , ->
             @download
               source: "#{jdk.jce_location}"
