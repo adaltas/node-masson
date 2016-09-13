@@ -1,13 +1,15 @@
 
 # Java
 
-    module.exports = ->
-      'configure':
+    module.exports =
+      Header: 'JAVA'
+      configure:
         'masson/commons/java/configure'
-      'prepare':
-        'masson/commons/java/prepare'
-      'install':
-        'masson/commons/java/install'
+      commands:
+        'prepare':
+          'masson/commons/java/prepare'
+        'install':
+          'masson/commons/java/install'
 
 ## Resources
 
