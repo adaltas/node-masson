@@ -13,21 +13,19 @@ module.exports = ->
   params = params.parse()
   write = (msg) -> process.stdout.write msg
   config params.config, (err, config) ->
-    each config.servers
+    each config.nodes
     .parallel true
-    .call (server, next) ->
-      return next() if params.hosts? and multimatch(server.host, params.hosts).indexOf(server.host) is -1
-      context {}, params, (merge {}, config, server)
-      .call ->
-        @config.runinfo ?= {}
-        @config.runinfo.date ?= new Date
-      .call 'masson/bootstrap/log'
-      .call 'masson/bootstrap/connection'
+    .call (host, node, next) ->
+      node.config ?= {}
+      node.config.host = host
+      return next() if params.hosts? and multimatch(node.config.host, params.hosts).indexOf(node.config.host) is -1
+      context [], params, merge {}, config.config, node.config
+      .call 'masson/bootstrap/connection/install'
       .call (options, callback)->
         exec options.ssh, params.subcommand, (err, stdout, stderr) ->
           write if err
-          then "\x1b[31m#{server.host} (exit code #{err.code})\x1b[39m\n"
-          else "\x1b[32m#{server.host}\x1b[39m\n"
+          then "\x1b[31m#{node.config.host} (exit code #{err.code})\x1b[39m\n"
+          else "\x1b[32m#{node.config.host}\x1b[39m\n"
           write "\n" if stdout.length or stderr.length
           write "\x1b[36m#{stdout.trim()}\x1b[39m\n" if stdout.length
           write "\x1b[35m#{stderr.trim()}\x1b[39m\n" if stderr.length

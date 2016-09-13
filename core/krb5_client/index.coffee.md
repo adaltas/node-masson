@@ -1,14 +1,16 @@
 
 # Krb5 Client
 
-    module.exports = ->
-      'configure':
+    module.exports =
+      use:
+        krb5_server: 'masson/core/krb5_server'
+        ntp: 'masson/core/ntp'
+        ssh: 'masson/core/ssh'
+      configure:
         'masson/core/krb5_client/configure'
-      'install': [
-        'masson/core/ssh'
-        'masson/core/ntp'
-        'masson/core/krb5_client/install'
-      ]
+      commands:
+        install:
+          'masson/core/krb5_client/install'
 
 ## Safe krb5 configuration
 

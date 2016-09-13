@@ -1,5 +1,5 @@
 
-    module.exports = handler: ->
+    module.exports = ->
       @config.iptables ?= {}
       @config.iptables.action ?= 'start'
       # Service supports chkconfig, but is not referenced in any runlevel

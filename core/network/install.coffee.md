@@ -2,6 +2,8 @@
 # Network 
 
     module.exports = header: 'Network Install', handler: ->
+      {network} = @config
+      network_ctxs = @contexts 'masson/core/network'
 
 ## Hosts
 
@@ -11,20 +13,19 @@ enriched with the cluster hostname if the property "network.hosts_auto" is
 set. Set the "network.hosts_disabled" to "true" if you dont wish to overwrite
 this file.
 
-      {hosts, hosts_auto} = @config.network
       write = []
-      if hosts_auto then for ctx in @contexts()
+      if network.hosts_auto then for ctx in network_ctxs
         write.push 
           match: RegExp "^#{quote ctx.config.ip}\\s.*$", 'gm'
           replace: "#{ctx.config.ip} #{ctx.config.host} #{ctx.config.shortname}"
           append: true
-      for ip, hostnames of hosts
+      for ip, hostnames of network.hosts
         write.push 
           match: RegExp "^#{quote ip}\\s.*$", 'gm'
           replace: "#{ip} #{hostnames}"
           append: true
       @file
-        header: 'Network # Hosts'
+        header: 'Hosts'
         target: '/etc/hosts'
         write: write
         backup: true
@@ -36,7 +37,7 @@ Declare the server hostname. On CentOs like system, the
 relevant file is "/etc/sysconfig/network".
 
       @call
-        header: 'Network # Hostname'
+        header: 'Hostname'
         unless: -> @config.network.hostname_disabled
         handler: ->
           {hostname, network} = @config
@@ -62,7 +63,7 @@ access to the Internet Domain Name System (DNS). The
 configuration file is considered a trusted source of DNS information.
 
       @call
-        header: 'Network # DNS Resolver'
+        header: 'DNS Resolver'
         timeout: -1
         if: -> @config.network.resolv
         handler: ->
@@ -83,7 +84,7 @@ Customize the network interfaces configured present inside the
 "/etc/sysconfig/network-scripts" folder.
 
       @file (
-        header: 'Network # Interfaces'
+        header: 'Interfaces'
         timeout: -1
         if: -> @config.network.ifcg
         target: "/etc/sysconfig/network-scripts/ifcfg-#{name}"

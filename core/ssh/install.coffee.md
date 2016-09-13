@@ -5,18 +5,23 @@
 
 ## Package
 
-      @service
-        name: "openssh-server"
-      @service
-        name: "openssh-clients"
+      @call
+        header: 'Packages'
+      , ->
+        @service
+          name: "openssh-server"
+        @service
+          name: "openssh-clients"
 
 ## Authorized Keys
 
 Update the "~/.ssh/authorized_keys" file for each users and add the public SSH keys
 defined inside "users.[].authorized_keys".
 
-      @call header: 'SSH # Authorized Keys', handler: ->
-        for _, user of @config.users
+      @call
+        header: 'Authorized Keys'
+      , ->
+        for _, user of @config.system.users
           @mkdir
             target: "#{user.home or '/home/'+user.name}/.ssh"
             uid: user.name
@@ -39,19 +44,19 @@ Configure the SSH daemon by updated the "/etc/ssh/sshd_config" file with the
 properties found in the "ssh.sshd_config" object.
 
       @call
-        header: 'SSH # Configure'
+        header: 'Configure'
         if: -> @config.ssh.sshd_config
-        handler: ->
-          @file
-            write: for k, v of @config.ssh.sshd_config
-              match: new RegExp "^#{k}.*$", 'mg'
-              replace: "#{k} #{v}"
-              append: true
-            target: '/etc/ssh/sshd_config'
-          @service.restart
-            name: 'sshd'
-            timeout: -1
-            if: -> @status -1
+      , ->
+        @file
+          write: for k, v of @config.ssh.sshd_config
+            match: new RegExp "^#{k}.*$", 'mg'
+            replace: "#{k} #{v}"
+            append: true
+          target: '/etc/ssh/sshd_config'
+        @service.restart
+          name: 'sshd'
+          timeout: -1
+          if: -> @status -1
 
 ## Public and Private Key
 
@@ -59,7 +64,10 @@ Deploy user SSH keys. The private key is defined by the "users.[].rsa"
 propery and is written in "~/.ssh/id\_rsa". The public key is defined by
 the "users.[].rsa\_pub" propery and is written in "~/.ssh/id\_rsa.pub".
 
-      @call header: 'SSH # Public and Private Key', timeout: -1, handler: ->
+      @call
+        header: 'Public and Private Key'
+        timeout: -1
+      , ->
         users = for _, user of @config.users then user
         for _, user of users
           throw Error "Property rsa_pub required if rsa defined" if user.rsa and not user.rsa_pub
@@ -87,23 +95,23 @@ on the console once a user successfull logged-in with SSH. The "sshd"
 service will be restarted if this action had any effect.
 
       @call
-        header: 'SSH # Banner'
+        header: 'Banner'
         timeout: 100000
         if: -> @config.ssh.banner
-        handler: ->
-          {banner} = @config.ssh
-          banner.content += '\n\n' if banner.content
-          @file
-            target: banner.target
-            content: banner.content
-          @file
-            match: new RegExp "^Banner.*$", 'mg'
-            replace: "Banner #{banner.target}"
-            append: true
-            target: '/etc/ssh/sshd_config'
-          @service.restart
-            name: 'sshd'
-            if: -> @status()
+      , ->
+        {banner} = @config.ssh
+        banner.content += '\n\n' if banner.content
+        @file
+          target: banner.target
+          content: banner.content
+        @file
+          match: new RegExp "^Banner.*$", 'mg'
+          replace: "Banner #{banner.target}"
+          append: true
+          target: '/etc/ssh/sshd_config'
+        @service.restart
+          name: 'sshd'
+          if: -> @status()
 
 ## Dependencies
 

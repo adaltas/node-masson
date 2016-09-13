@@ -39,7 +39,7 @@ Example:
 }
 ```
 
-    module.exports = handler: ->
+    module.exports = ->
       @config.hostname ?= @config.host
       @config.network ?= {}
       @config.network.hostname_disabled ?= false

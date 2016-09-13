@@ -1,5 +1,5 @@
 
-## Start
+# NTP Start
 
 Start the `ntpd` daemon if it isnt yet running.
 

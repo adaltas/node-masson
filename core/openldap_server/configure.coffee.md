@@ -4,8 +4,7 @@
 The property "openldap_server.config_slappasswd" may be generated with the command `slappasswd` 
 and should correspond to "openldap_server.config_password".
 
-    module.exports = handler: ->
-      # require('../openldap_client').call @
+    module.exports = ->
       # Todo: Generate '*_slappasswd' with command `slappasswd -s $password`, but only the first time, we
       # need a mechanism to store configuration properties before.
       openldap_server = @config.openldap_server ?= {}
@@ -31,3 +30,91 @@ and should correspond to "openldap_server.config_password".
         openldap_server.uri = "ldaps://#{@config.host}"
       else
         openldap_server.uri = "ldap://#{@config.host}"
+
+## ACL
+
+
+      throw Error 'Missing required "openldap_server.users_dn" property' unless openldap_server.users_dn
+      throw Error 'Missing required "openldap_server.groups_dn" property' unless openldap_server.groups_dn
+      openldap_server.proxy_user ?= {}
+      openldap_server.proxy_user.dn ?= "cn=nssproxy,#{openldap_server.users_dn}"
+      openldap_server.proxy_user.uid ?= 'nssproxy'
+      openldap_server.proxy_user.gecos ?= 'Network Service Switch Proxy User'
+      openldap_server.proxy_user.objectClass ?= ['top', 'account', 'posixAccount', 'shadowAccount']
+      openldap_server.proxy_user.userPassword ?= 'test'
+      openldap_server.proxy_user.shadowLastChange ?= '15140'
+      openldap_server.proxy_user.shadowMin ?= '0'
+      openldap_server.proxy_user.shadowMax ?= '99999'
+      openldap_server.proxy_user.shadowWarning ?= '7'
+      openldap_server.proxy_user.loginShell ?= '/bin/false'
+      openldap_server.proxy_user.uidNumber ?= '801'
+      openldap_server.proxy_user.gidNumber ?= '801'
+      openldap_server.proxy_user.homeDirectory ?= '/home/nssproxy'
+      openldap_server.proxy_group ?= {}
+      openldap_server.proxy_group.dn ?= "cn=nssproxy,#{openldap_server.groups_dn}"
+      openldap_server.proxy_group.objectClass ?= ['top', 'posixGroup']
+      openldap_server.proxy_group.gidNumber ?= '801'
+      openldap_server.proxy_group.description ?= 'Network Service Switch Proxy'
+
+## Kerberos Schema
+
+      # Normalization
+      @config.openldap_server_krb5 ?= {}
+      {openldap_server, openldap_server_krb5} = @config
+      openldap_server_krb5.kerberos_dn ?= "ou=kerberos,#{openldap_server.suffix}"
+      # Configure openldap_server_krb5
+      # {admin_group, users_dn, groups_dn, admin_user} = openldap_server_krb5
+      # User for kdc
+      # Example: "dn: cn=krbadmin,ou=groups,dc=adaltas,dc=com"
+      openldap_server_krb5.kdc_user ?= {}
+      openldap_server_krb5.kdc_user = misc.merge {},
+        dn: "cn=krbadmin,#{openldap_server.users_dn}"
+        objectClass: [
+          'top', 'inetOrgPerson', 'organizationalPerson',
+          'person', 'posixAccount'
+        ]
+        givenName: 'Kerberos Administrator'
+        mail: 'kerberos.admin@company.com'
+        sn: 'krbadmin'
+        uid: 'krbadmin'
+        uidNumber: '800'
+        gidNumber: '800'
+        homeDirectory: '/home/krbadmin'
+        loginShell: '/bin/false'
+        displayname: 'Kerberos Administrator'
+        userPassword: 'test'
+      , openldap_server_krb5.kdc_user
+      # User for krbadmin
+      # Example: "dn: cn=krbadmin,ou=groups,dc=adaltas,dc=com"
+      openldap_server_krb5.krbadmin_user ?= {}
+      openldap_server_krb5.krbadmin_user = misc.merge {},
+        dn: "cn=krbadmin,#{openldap_server.users_dn}"
+        objectClass: [
+          'top', 'inetOrgPerson', 'organizationalPerson',
+          'person', 'posixAccount'
+        ]
+        givenName: 'Kerberos Administrator'
+        mail: 'kerberos.admin@company.com'
+        sn: 'krbadmin'
+        uid: 'krbadmin'
+        uidNumber: '800'
+        gidNumber: '800'
+        homeDirectory: '/home/krbadmin'
+        loginShell: '/bin/false'
+        displayname: 'Kerberos Administrator'
+        userPassword: 'test'
+      , openldap_server_krb5.krbadmin_user
+      # Group for krbadmin
+      # Example: "dn: cn=krbadmin,ou=groups,dc=adaltas,dc=com"
+      openldap_server_krb5.krbadmin_group ?= {}
+      openldap_server_krb5.krbadmin_group = misc.merge {},
+        dn: "cn=krbadmin,#{openldap_server.groups_dn}"
+        # cn: 'krbadmin'
+        objectClass: [ 'top', 'posixGroup' ]
+        gidNumber: '800'
+        description: 'Kerberos administrator\'s group.'
+      , openldap_server_krb5.krbadmin_group
+
+## Dependencies
+
+    misc = require 'mecano/lib/misc'

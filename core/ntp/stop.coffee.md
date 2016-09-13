@@ -1,5 +1,5 @@
 
-## Stop
+# NTP Stop
 
 Stop the `ntpd` daemon if it is running.
 

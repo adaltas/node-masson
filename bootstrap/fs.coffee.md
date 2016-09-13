@@ -9,7 +9,7 @@ File System functionnalities are imported from the [Node.js `fs`][nodefs] API wi
 transparent SSH2 transport thanks to the [ssh2-fs] package.
 
     module.exports = ->
-      @fs ?= {}
+      @fs = {}
       [ 'rename', 'chown', 'chmod', 'stat', 'lstat', 'unlink', 'symlink',
         'readlink', 'unlink', 'mkdir', 'readdir', 'readFile', 'writeFile',
         'exists', 'createReadStream', 'createWriteStream' ].forEach (fn) =>
