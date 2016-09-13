@@ -3,67 +3,7 @@
 
 ## Configuration
 
-    module.exports = ->
-      require('./configure').handler.call @
-      # Normalization
-      @config.openldap_server_krb5 ?= {}
-      {openldap_server, openldap_server_krb5} = @config
-      openldap_server_krb5.kerberos_dn ?= "ou=kerberos,#{openldap_server.suffix}"
-      # Configure openldap_server_krb5
-      # {admin_group, users_dn, groups_dn, admin_user} = openldap_server_krb5
-      # User for kdc
-      # Example: "dn: cn=krbadmin,ou=groups,dc=adaltas,dc=com"
-      openldap_server_krb5.kdc_user ?= {}
-      openldap_server_krb5.kdc_user = misc.merge {},
-        dn: "cn=krbadmin,#{openldap_server.users_dn}"
-        objectClass: [
-          'top', 'inetOrgPerson', 'organizationalPerson',
-          'person', 'posixAccount'
-        ]
-        givenName: 'Kerberos Administrator'
-        mail: 'kerberos.admin@company.com'
-        sn: 'krbadmin'
-        uid: 'krbadmin'
-        uidNumber: '800'
-        gidNumber: '800'
-        homeDirectory: '/home/krbadmin'
-        loginShell: '/bin/false'
-        displayname: 'Kerberos Administrator'
-        userPassword: 'test'
-      , openldap_server_krb5.kdc_user
-      # User for krbadmin
-      # Example: "dn: cn=krbadmin,ou=groups,dc=adaltas,dc=com"
-      openldap_server_krb5.krbadmin_user ?= {}
-      openldap_server_krb5.krbadmin_user = misc.merge {},
-        dn: "cn=krbadmin,#{openldap_server.users_dn}"
-        objectClass: [
-          'top', 'inetOrgPerson', 'organizationalPerson',
-          'person', 'posixAccount'
-        ]
-        givenName: 'Kerberos Administrator'
-        mail: 'kerberos.admin@company.com'
-        sn: 'krbadmin'
-        uid: 'krbadmin'
-        uidNumber: '800'
-        gidNumber: '800'
-        homeDirectory: '/home/krbadmin'
-        loginShell: '/bin/false'
-        displayname: 'Kerberos Administrator'
-        userPassword: 'test'
-      , openldap_server_krb5.krbadmin_user
-      # Group for krbadmin
-      # Example: "dn: cn=krbadmin,ou=groups,dc=adaltas,dc=com"
-      openldap_server_krb5.krbadmin_group ?= {}
-      openldap_server_krb5.krbadmin_group = misc.merge {},
-        dn: "cn=krbadmin,#{openldap_server.groups_dn}"
-        # cn: 'krbadmin'
-        objectClass: [ 'top', 'posixGroup' ]
-        gidNumber: '800'
-        description: 'Kerberos administrator\'s group.'
-      , openldap_server_krb5.krbadmin_group
-      'install': install
-      
-    install = header: 'OpenLDAP Server Krb5', handler: ->
+    module.exports = header: 'OpenLDAP Server Krb5', handler: ->
       {kerberos_dn, krbadmin_user, krbadmin_group} = @config.openldap_server_krb5
       {openldap_server} = @config
 
@@ -166,7 +106,6 @@ Create the kerberos administrator's user.
 
     ssha = require 'ssha'
     {check_password} = require './index'
-    misc = require 'mecano/lib/misc'
 
 ## Resources
 

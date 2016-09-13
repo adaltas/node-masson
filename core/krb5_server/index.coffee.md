@@ -9,28 +9,30 @@ Massachusetts Institute of Technology.
 The article [SSH Kerberos Authentication Using GSSAPI and SSPI][gss_sspi]
 provides a good description on how Kerberos is negotiated by GSSAPI and SSPI.
 
-    module.exports = ->
-      'configure': [
-        'masson/core/krb5_client'
-        'masson/core/iptables/configure'
+    module.exports =
+      use:
+        iptables: 'masson/core/iptables/configure'
+        openldap_client: implicit: true, module: 'masson/core/openldap_client'
+        openldap_server: 'masson/core/openldap_server'
+        # krb5_client: 'masson/core/krb5_client'
+      configure:
         'masson/core/krb5_server/configure'
-      ]
-      'install': [
-        'masson/core/openldap_client'
-        'masson/core/iptables'
-        'masson/core/krb5_server/install'
-        'masson/core/krb5_server/start'
-      ]
-      'reload':
-        'masson/core/krb5_server/install'
-      'start':
-        'masson/core/krb5_server/start'
-      'status':
-        'masson/core/krb5_server/status'
-      'stop':
-        'masson/core/krb5_server/stop'
-      'backup':
-        'masson/core/krb5_server/backup'
+      commands:
+        'install': [
+          'masson/bootstrap/fs'
+          'masson/core/krb5_server/install'
+          'masson/core/krb5_server/start'
+        ]
+        'reload':
+          'masson/core/krb5_server/install'
+        'start':
+          'masson/core/krb5_server/start'
+        'status':
+          'masson/core/krb5_server/status'
+        'stop':
+          'masson/core/krb5_server/stop'
+        'backup':
+          'masson/core/krb5_server/backup'
 
     module.exports.safe_etc_krb5_conf = (etc_krb5_conf) ->
       etc_krb5_conf = misc.merge {}, etc_krb5_conf

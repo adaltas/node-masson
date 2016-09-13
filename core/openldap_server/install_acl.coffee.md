@@ -1,30 +1,8 @@
 
 # OpenLDAP ACL
 
-    module.exports =  ->
-      {openldap_server} = @config
-      throw Error 'Missing required "openldap_server.users_dn" property' unless openldap_server.users_dn
-      throw Error 'Missing required "openldap_server.groups_dn" property' unless openldap_server.groups_dn
-      openldap_server.proxy_user ?= {}
-      openldap_server.proxy_user.dn ?= "cn=nssproxy,#{openldap_server.users_dn}"
-      openldap_server.proxy_user.uid ?= 'nssproxy'
-      openldap_server.proxy_user.gecos ?= 'Network Service Switch Proxy User'
-      openldap_server.proxy_user.objectClass ?= ['top', 'account', 'posixAccount', 'shadowAccount']
-      openldap_server.proxy_user.userPassword ?= 'test'
-      openldap_server.proxy_user.shadowLastChange ?= '15140'
-      openldap_server.proxy_user.shadowMin ?= '0'
-      openldap_server.proxy_user.shadowMax ?= '99999'
-      openldap_server.proxy_user.shadowWarning ?= '7'
-      openldap_server.proxy_user.loginShell ?= '/bin/false'
-      openldap_server.proxy_user.uidNumber ?= '801'
-      openldap_server.proxy_user.gidNumber ?= '801'
-      openldap_server.proxy_user.homeDirectory ?= '/home/nssproxy'
-      openldap_server.proxy_group ?= {}
-      openldap_server.proxy_group.dn ?= "cn=nssproxy,#{openldap_server.groups_dn}"
-      openldap_server.proxy_group.objectClass ?= ['top', 'posixGroup']
-      openldap_server.proxy_group.gidNumber ?= '801'
-      openldap_server.proxy_group.description ?= 'Network Service Switch Proxy'
-      'install': install
+    module.exports = header: 'OpenLDAP Server ACL', handler: ->
+
       
 After this call, the follwing command should execute with success:
 
@@ -32,7 +10,6 @@ After this call, the follwing command should execute with success:
 ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=com -w test
 ```
 
-    install = header: 'OpenLDAP Server ACL', handler: ->
       {kerberos_dn, krbadmin_user, krbadmin_group} = @config.openldap_server_krb5
       {openldap_server} = @config
 

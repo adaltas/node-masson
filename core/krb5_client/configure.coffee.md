@@ -32,21 +32,21 @@ Example:
 }
 ```
 
-    module.exports = handler: ->
+    module.exports = ->
+      krb5_ctxs = @contexts "masson/core/krb5_server"
       @config.krb5 ?= {}
       @config.krb5.sshd ?= {}
       @config.krb5.kinit ?= '/usr/bin/kinit'
       etc_krb5_conf = misc.merge {}, module.exports.etc_krb5_conf, @config.krb5.etc_krb5_conf
       @config.krb5.etc_krb5_conf = etc_krb5_conf
       # Merge global with server-based configuration
-      krb5_srv_ctxs = @contexts "masson/core/krb5_server"
-      for krb5_srv_ctx in krb5_srv_ctxs
-        {realms} = misc.merge {}, krb5_srv_ctx.config.krb5.etc_krb5_conf
+      for krb5_ctx in krb5_ctxs
+        {realms} = misc.merge {}, krb5_ctx.config.krb5.etc_krb5_conf
         for realm, config of realms
           delete config.database_module
-          realms[realm].kdc ?= krb5_srv_ctx.config.host
+          realms[realm].kdc ?= krb5_ctx.config.host
           realms[realm].kdc = [realms[realm].kdc] unless Array.isArray realms[realm].kdc
-          realms[realm].admin_server ?= krb5_srv_ctx.config.host
+          realms[realm].admin_server ?= krb5_ctx.config.host
           realms[realm].default_domain ?= realm.toLowerCase()
         etc_krb5_conf.realms = misc.merge {}, realms, etc_krb5_conf.realms
       # Generate the "domain_realm" property

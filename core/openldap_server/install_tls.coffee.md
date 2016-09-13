@@ -355,8 +355,6 @@ ldapsearch -H ldaps://master3.hadoop:636 -x -D cn=Manager,dc=ryba -w test -b dc=
 ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=ryba
 ```
 
-###
-
     module.exports = header: 'OpenLDAP Server TLS Deploy', handler: ->
       {openldap_server} = @config
       return unless openldap_server.tls

@@ -58,18 +58,19 @@ Example:
 }
 ```
 
-    module.exports = handler: ->
+    module.exports = ->
+      openldap_ctxs = @contexts 'masson/core/openldap_server'
       {etc_krb5_conf} = @config.krb5
-      openldap_ctxs = @contexts 'masson/core/openldap_server/install_krb5'
-      throw new Error "Expect at least one server with action \"masson/core/openldap_server/install_krb5\"" if openldap_ctxs.length is 0
+      throw new Error "Expect at least one server with action \"masson/core/openldap_server\"" if openldap_ctxs.length is 0
       # Prepare configuration for "kdc.conf"
       kdc_conf = @config.krb5.kdc_conf ?= {}
       # Generate dynamic "krb5.dbmodules" object
       for ctx_krb5 in openldap_ctxs
         {kerberos_dn, kdc_user, krbadmin_user, manager_dn, manager_password} = ctx_krb5.config.openldap_server_krb5
         name = "openldap_#{ctx_krb5.config.shortname}"
-        scheme = if ctx_krb5.has_module 'masson/core/openldap_server/install_tls' then "ldaps://" else "ldap://"
-        ldap_server =  "#{scheme}#{ctx_krb5.config.host}"
+        # scheme = if ctx_krb5.has_service 'masson/core/openldap_server/install_tls' then "ldaps://" else "ldap://"
+        # ldap_server =  "#{scheme}#{ctx_krb5.config.host}"
+        ldap_server = ctx_krb5.config.openldap_server.uri
         kdc_conf.dbmodules[name] = misc.merge
           'db_library': 'kldap'
           'ldap_kerberos_container_dn': kerberos_dn
@@ -101,7 +102,7 @@ Example:
       , kdc_conf
       # Multiple kerberos servers accross the cluster are defined in server
       # specific configuration
-      realms = @config.servers[@config.host].krb5?.etc_krb5_conf?.realms
+      # realms = @config.servers[@config.host].krb5?.etc_krb5_conf?.realms
       # realms = @config.krb5?.etc_krb5_conf?.realms
       realms = etc_krb5_conf.realms if not realms or realms.length is 0
       for realm, i of realms
@@ -129,15 +130,20 @@ Example:
           dbmodules = Object.keys(kdc_conf.dbmodules).join ','
           valid = kdc_conf.dbmodules[config.database_module]?
           throw new Error "Property database_module \"#{config.database_module}\" not in list: \"#{dbmodules}\"" unless valid
-        # Set a database module if we manage the realm locally
-        else if etc_krb5_conf.realms[realm].admin_server is @config.host
-          # Valid if
-          # *   only one OpenLDAP server accross the cluster or
-          # *   an OpenLDAP server in this host
-          openldap_index = openldap_ctxs.map((ctx) -> ctx.config.host).indexOf @config.host
-          openldap_ctx = if openldap_ctxs.length is 1 then openldap_ctxs[0] else if openldap_index isnt -1 then openldap_ctxs[openldap_index]
-          throw new Error "Could not find a suitable OpenLDAP server" unless openldap_ctx
-          config.database_module = "openldap_#{openldap_ctx.config.shortname}"
+        # # Set a database module if we manage the realm locally
+        # else if etc_krb5_conf.realms[realm].admin_server is @config.host
+        #   # Valid if
+        #   # *   only one OpenLDAP server accross the cluster or
+        #   # *   an OpenLDAP server in this host
+        #   openldap_index = openldap_ctxs.map((ctx) -> ctx.config.host).indexOf @config.host
+        #   openldap_ctx = if openldap_ctxs.length is 1 then openldap_ctxs[0] else if openldap_index isnt -1 then openldap_ctxs[openldap_index]
+        #   throw new Error "Could not find a suitable OpenLDAP server" unless openldap_ctx
+        #   config.database_module = "openldap_#{openldap_ctx.config.shortname}"
+        else if Object.keys(kdc_conf.dbmodules).length is 1
+          database_module = Object.keys(kdc_conf.dbmodules)[0]
+          config.database_module = database_module
+        else
+          throw Error "Cannot associate realm with a database_module"
         config.principals ?= []
       # Now that we have db_modules and realms, filter and validate the used db_modules
       database_modules = for realm, config of kdc_conf.realms

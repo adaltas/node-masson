@@ -35,8 +35,10 @@ Example:
 }
 ```
 
-    module.exports = ->
-      'configure': 'masson/core/iptables/configure'
-      'install': 'masson/core/iptables/install'
-      'start': 'masson/core/iptables/start'
-      'stop': 'masson/core/iptables/stop'
+    module.exports =
+      configure:
+        'masson/core/iptables/configure'
+      commands:
+        'install': 'masson/core/iptables/install'
+        'start': 'masson/core/iptables/start'
+        'stop': 'masson/core/iptables/stop'

@@ -47,13 +47,16 @@ Example:
 }
 ```
 
-    module.exports = ->
-      'configure':
+    module.exports =
+      use:
+        yum: implicit: true, module: 'masson/core/yum'
+        openldap_server: 'masson/core/openldap_server'
+      configure:
         'masson/core/openldap_client/configure'
-      'install': [
-        'masson/core/yum'
-        'masson/core/openldap_client/install'
-        'masson/core/openldap_client/check'
-      ]
-      'check':
-        'masson/core/openldap_client/check'
+      commands:
+        'install': [
+          'masson/core/openldap_client/install'
+          'masson/core/openldap_client/check'
+        ]
+        'check':
+          'masson/core/openldap_client/check'

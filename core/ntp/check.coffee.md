@@ -1,5 +1,5 @@
 
-## Check
+# NTP Check
 
 This action compare the date on the remote server with the one where Masson is
 being exectued. If the gap is greater than the one defined by the "ntp.lag"
@@ -7,7 +7,7 @@ property, the `ntpd` daemon is stop, the `ntpdate` command is used to
 synchronization the date and the `ntpd` daemon is finally restarted.
 
     module.exports =
-      header: 'NTP # Check'
+      header: 'NTP Check'
       label_true: 'CHECKED'
       unless: [
          -> @config.ntp.servers[0] is @config.host

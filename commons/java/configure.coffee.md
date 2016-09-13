@@ -27,7 +27,7 @@ Example for using Oracle JDK:
           jdk_location: "http://download.oracle.com/otn-pub/java/jdk/8u101-b14/jdk-8u101-linux-x64.tar.gz"
 ```
 
-    module.exports = handler: ->
+    module.exports = ->
       java = @config.java ?= {}
       # OpenJDK
       java.openjdk ?= true

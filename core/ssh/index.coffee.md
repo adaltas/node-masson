@@ -45,12 +45,12 @@ two new properties "sshd\_config" and "banner".
 }
 ```
 
-    module.exports = ->
-      'configure': [
-        'masson/core/users'
+    module.exports =
+      use:
+        system: 'masson/core/system'
+        yum: 'masson/core/yum'
+      configure:
         'masson/core/ssh/configure'
-      ]
-      'install': [
-        'masson/core/yum'
-        'masson/core/ssh/install'
-        ]
+      commands:
+        'install':
+          'masson/core/ssh/install'
