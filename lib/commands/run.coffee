@@ -56,8 +56,8 @@ module.exports = ->
       write "#{styles.final_status_error err.stack?.trim() or err.message}\n"
       process.exit()
     hostlength = 20
-    for s in config.servers then hostlength = Math.max(hostlength, (s.shortname or s.host).length+2)
-    multihost = params.hosts?.length isnt 1 and config.servers.length isnt 1
+    for s in config.nodes then hostlength = Math.max(hostlength, (s.shortname or s.host).length+2)
+    multihost = params.hosts?.length isnt 1 and config.nodes.length isnt 1
     times = {}
     multihost = true
     init()
