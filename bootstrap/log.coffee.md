@@ -25,14 +25,16 @@ preserve alphanumerical ordering of files.
     module.exports = ->
       log = @config.log ?= {}
       log.disabled ?= false
-      log.archive ?= false
       log.basedir ?= './log'
+      log.archive ?= false
+      log.rotate ?= false
+      rotate_size = if log.rotate is true then 10 else log.rotate
       now = @config.runinfo?.date or new Date
       command = @params.command
       dateformat = "#{now.getFullYear()}-#{('0'+now.getMonth()).slice -2}-#{('0'+now.getDate()).slice -2}"
       dateformat += " #{('0'+now.getHours()).slice -2}-#{('0'+now.getMinutes()).slice -2}-#{('0'+now.getSeconds()).slice -2}"
-      log.basedir = path.join log.basedir, command if log.archive
-      log.basedir = path.join log.basedir, dateformat if log.archive
+      cmddir = path.join log.basedir, command if log.archive
+      log.basedir = path.join cmddir, dateformat if log.archive
       log.fqdn_reversed = @config.host.split('.').reverse().join('.')
       log.filename ?= "{{shortname}}.log"
       # Rendering
@@ -44,11 +46,17 @@ preserve alphanumerical ordering of files.
       log.elasticsearch.url ?= 'http://localhost:9200'
       log.elasticsearch.index ?= "masson"
       log.elasticsearch.type ?= command
-      
+
       @call unless: @config.log.disabled, header: 'Bootstrap Log # Text', required: true, irreversible: true, handler: ->
         {basedir, filename, archive} = @config.log
         @call header: 'Prepare Log dir', handler: ->
           if not @contexts().length or @contexts()[0].config.host is @config.host
+            if log.rotate
+              fs.readdir cmddir, (err, files) =>
+                return if err
+                if files.length > rotate_size
+                  for i in [0...(files.length-rotate_size)]
+                    @remove target: path.join cmddir, files[i]
             @mkdir basedir
             # creates relative symlink <log>/latest -> <log>/<command>/<date>
             if archive
