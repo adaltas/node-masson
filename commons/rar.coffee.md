@@ -16,7 +16,7 @@
 
     exports.push header: 'Rar # install rar', handler: ->
       {proxy, rar_url} = ctx.config.rar
-      @download
+      @file.download
         source: rar_url
         target: '/tmp/rar.rpm'
         proxy: proxy
@@ -31,7 +31,7 @@
 
     exports.push header: 'Rar # install unrar', handler: ->
       {proxy, unrar_url} = ctx.config.rar
-      @download
+      @file.download
         source: unrar_url
         target: '/tmp/unrar.rpm'
         proxy: proxy

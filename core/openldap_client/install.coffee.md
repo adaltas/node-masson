@@ -48,7 +48,7 @@ the command `authconfig --update --ldaploadcacert={file}`.
         for certificate in openldap_client.certificates then do (certificate) =>
           hash = crypto.createHash('md5').update(certificate).digest('hex')
           filename = null
-          @download
+          @file.download
             source: certificate
             target: "/tmp/#{hash}"
             mode: 0o0640

@@ -71,7 +71,7 @@ configuration file is considered a trusted source of DNS information.
             target: '/etc/resolv.conf'
             backup: true
             eof: true
-          @wait_connect
+          @connection.wait
             servers: for bs_ctx in @contexts 'masson/core/bind_server'
               continue if bs_ctx is @
               host: bs_ctx.config.ip or bs_ctx.config.host

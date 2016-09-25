@@ -29,7 +29,7 @@ the command `authconfig --update --ldaploadcacert={file}`.
         for certificate in certificates then do =>
           hash = crypto.createHash('md5').update(certificate).digest('hex')
           filename = null
-          @download
+          @file.download
             source: certificate
             target: "/tmp/#{hash}"
             shy: true
@@ -40,7 +40,7 @@ the command `authconfig --update --ldaploadcacert={file}`.
             filename = stdout.trim() unless err
           @call ->
             # TODO: use move to speed this up, improve status handling
-            @download 
+            @file.download 
               source: certificate
               target: "/etc/openldap/cacerts/#{filename}.0"
               # target: "#{config.TLS_CACERTDIR}/#{filename}.0"

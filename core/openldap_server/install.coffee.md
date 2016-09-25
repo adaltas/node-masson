@@ -215,7 +215,7 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
           code_skipped: 2
         , (err, installed, stdout) ->
           schema = stdout.trim() if installed
-        @download
+        @file.download
           source: "#{__dirname}/resources/ldap.schema"
           target: '/tmp/ldap.schema'
           mode: 0o0640
@@ -233,7 +233,7 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
       @call header: 'Delete ldif data', handler: ->
         for path in openldap_server.ldapdelete
           target = "/tmp/ryba_#{Date.now()}"
-          @download
+          @file.download
             source: path
             target: target
             mode: 0o0640
@@ -249,7 +249,7 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
         status = false
         for path in openldap_server.ldapadd
           target = "/tmp/ryba_#{Date.now()}"
-          @download
+          @file.download
             source: path
             target: target
             shy: true

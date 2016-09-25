@@ -3,7 +3,7 @@
 
     module.exports = header: 'Maven Install', handler: ->
       {maven} = @config
-      @download
+      @file.download
         source: maven.source
         target: '/var/tmp/maven.tar.gz'
       @mkdir

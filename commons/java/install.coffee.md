@@ -71,7 +71,7 @@ have been copied or not (in case they already exist).
             header: "JDK #{version}"
             unless: -> installed
           , ->
-            @download
+            @file.download
               source: jdk.jdk_location
               target: "/tmp/java.#{now}/#{path.basename jdk.jdk_location}"
             @mkdir "#{java.jdk.root_dir}/jdk#{version}"
@@ -83,7 +83,7 @@ have been copied or not (in case they already exist).
           @call
             header: "JCE #{version}"
           , ->
-            @download
+            @file.download
               source: "#{jdk.jce_location}"
               target: "/var/tmp/#{path.basename jdk.jce_location}"
               shy: true

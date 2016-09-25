@@ -51,7 +51,7 @@ Install the PostgreSQL database server.
             checksum = chk
             opts.log "Found image with checksum: #{checksum}" unless !checksum
             if !checksum then callback null, true else callback null, false
-      @download
+      @file.download
         if: -> @status -1
         binary: true
         md5: true

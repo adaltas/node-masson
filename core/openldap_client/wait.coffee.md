@@ -9,7 +9,7 @@
           uri.port ?= switch uri.protocol
             when 'ldap:' then 389
             when 'ldaps:' then 636
-          @wait_connect
+          @connection.wait
             host: uri.hostname
             port: uri.port
 

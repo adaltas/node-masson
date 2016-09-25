@@ -7,7 +7,7 @@ Wait for all the Kerberos servers referenced by the client configuration.
 
     module.exports = header: 'Krb5 Client Wait', handler: ->
       {krb5} = @config
-      @wait_connect
+      @connection.wait
         header: 'TCP Admin'
         timeout: -1
         label_true: 'READY'
