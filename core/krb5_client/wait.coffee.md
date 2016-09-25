@@ -20,8 +20,10 @@ Wait for all the Kerberos servers referenced by the client configuration.
 ## Wait Admin
 
 Wait for the admin interface to be ready by issuing the command `listprincs`.
+Option "retry" is set to "2" because we get a lot of "null exit code" errors
+and we couldnt dig the exact nature of this error.
 
-      @call header: 'Command kadmin', handler: ->
+      @call header: 'Command kadmin', retry: 2, handler: ->
         for realm, config of krb5.etc_krb5_conf.realms
           continue unless config.kadmin_principal and config.admin_server
           @wait_execute cmd: misc.kadmin
