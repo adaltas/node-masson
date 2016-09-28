@@ -26,7 +26,7 @@ Resources:
 | Service    | Port | Proto | Parameter                            |
 |------------|------|-------|--------------------------------------|
 | kadmin     | 749  | tcp   | `kdc_conf.kdcdefaults.kadmind_port`  |
-| kadmin     | 88   | upd   | `kdc_conf.kdcdefaults.kdc_ports`     |
+| krb5kdc    | 88   | upd   | `kdc_conf.kdcdefaults.kdc_ports`     |
 | krb5kdc    | 88   | tcp   | `kdc_conf.kdcdefaults.kdc_tcp_ports` |
 
 IPTables rules are only inserted if the parameter "iptables.action" is set to 
