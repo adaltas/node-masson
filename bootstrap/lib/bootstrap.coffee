@@ -5,8 +5,9 @@ exec = require 'ssh2-exec'
 
 module.exports = (options, callback) ->
   {public_key, bootstrap} = @config.connection
-  # ctx.log "SSH login to #{bootstrap.username}@#{bootstrap.host}:#{bootstrap.port}"
+  options.log "SSH login to #{bootstrap.username}@#{bootstrap.host}:#{bootstrap.port}"
   connect bootstrap, (err, ssh) ->
+    return callback err if err
     cmd = """
       sed -i.back 's/.*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config;
       mkdir -p /root/.ssh; chmod 700 /root/.ssh;
