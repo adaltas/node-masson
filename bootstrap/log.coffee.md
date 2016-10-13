@@ -50,29 +50,43 @@ preserve alphanumerical ordering of files.
       @call unless: @config.log.disabled, header: 'Bootstrap Log # Text', required: true, irreversible: true, handler: ->
         {basedir, filename, archive} = @config.log
         @call header: 'Prepare Log dir', handler: ->
-          if not @contexts().length or @contexts()[0].config.host is @config.host
-            if log.rotate
-              fs.readdir cmddir, (err, files) =>
-                return if err
-                if files.length > rotate_size
-                  for i in [0...(files.length-rotate_size)]
-                    @remove target: path.join cmddir, files[i]
-            @mkdir basedir
-            # creates relative symlink <log>/latest -> <log>/<command>/<date>
-            if archive
-              logdir = path.join basedir, '../../'
-              @link
-                source: path.relative logdir, path.resolve basedir
-                target: path.join logdir, 'latest'
-              # creates relative symlink <log>/<command>/latest -> <log>/<command>/<date>
-              logdir = path.join basedir, '../'
-              @link
-                source: path.relative logdir, path.resolve basedir
-                target: path.join logdir, 'latest'
-          else
+          @call 
+            if: not @contexts().length or @contexts()[0].config.host is @config.host
+            handler: ->
+              @call 
+                if: log.rotate
+              , ->
+                  list = []
+                  count = 0
+                  @call handler: (_,callback) ->
+                    fs.readdir cmddir, (err, files) =>
+                      throw err if err
+                      list = files
+                      return callback null, (files.length > rotate_size )
+                  @call -> 
+                    @each list, (options, callback) ->
+                      @remove   
+                        if: -> (list.length-count) > rotate_size
+                        target: path.join cmddir, options.key
+                      @call
+                        if: -> @status -1
+                        handler: -> count = count+1
+                      @then callback
+              @mkdir basedir
+              @call
+                if: archive
+                handler: ->
+                  logdir = path.join basedir, '../../' # creates relative symlink <log>/latest -> <log>/<command>/<date>
+                  logdirlatest = path.join basedir, '../' # creates relative symlink <log>/<command>/latest -> <log>/<command>/<date>
+                  @link 
+                    source: path.relative logdir, path.resolve basedir
+                    target: path.join logdir, 'latest'
+                  @link 
+                    source: path.relative logdirlatest, path.resolve basedir
+                    target: path.join logdirlatest, 'latest'
             # Avoid a race condition by waiting that the first node finish to
             # create log dir
-            @wait_execute cmd: "[ -d '#{basedir}' ]"
+          @wait_execute cmd: "[ -d '#{basedir}' ]"
         @call ->
           out = fs.createWriteStream path.resolve basedir, filename
           stdouting = 0
