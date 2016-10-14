@@ -53,8 +53,10 @@ preserve alphanumerical ordering of files.
           @call 
             if: not @contexts().length or @contexts()[0].config.host is @config.host
             handler: ->
-              @call 
+              @call
+                if_exists: cmddir
                 if: log.rotate
+                if: archive
               , ->
                   list = []
                   count = 0
@@ -73,11 +75,13 @@ preserve alphanumerical ordering of files.
                         handler: -> count = count+1
                       @then callback
               @mkdir basedir
+              
               @call
                 if: archive
                 handler: ->
                   logdir = path.join basedir, '../../' # creates relative symlink <log>/latest -> <log>/<command>/<date>
                   logdirlatest = path.join basedir, '../' # creates relative symlink <log>/<command>/latest -> <log>/<command>/<date>
+                  @mkdir cmddir
                   @link 
                     source: path.relative logdir, path.resolve basedir
                     target: path.join logdir, 'latest'
