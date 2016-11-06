@@ -26,6 +26,18 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
         ]
         if: @config.iptables.action is 'start'
 
+
+## Users & Groups
+
+By default, the "openldap-servers" package create the following entries:
+
+```bash
+cat /etc/passwd | grep ldap
+ldap:x:55:55:LDAP User:/var/lib/ldap:/sbin/nologin
+cat /etc/group | grep ldap
+ldap:x:55:
+```
+
 ## Packages
 
       @service

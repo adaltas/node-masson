@@ -13,6 +13,21 @@ and should correspond to "openldap_server.config_password".
       # throw new Error "Missing \"openldap_server.root_slappasswd\" property" unless openldap_server.root_slappasswd
       throw new Error "Missing \"openldap_server.config_dn\" property" unless openldap_server.config_dn
       throw new Error "Missing \"openldap_server.config_password\" property" unless openldap_server.config_password
+      # User
+      openldap_server.user = name: openldap_server.user if typeof openldap_server.user is 'string'
+      openldap_server.user ?= {}
+      openldap_server.user.name ?= 'ldap'
+      openldap_server.user.system ?= true
+      openldap_server.user.gid = 'ldap'
+      openldap_server.user.shell = false
+      openldap_server.user.comment ?= 'LDAP User'
+      openldap_server.user.home = '/var/lib/ldap'
+      # Group
+      openldap_server.group = name: openldap_server.group if typeof openldap_server.group is 'string'
+      openldap_server.group ?= {}
+      openldap_server.group.name ?= 'ldap'
+      openldap_server.group.system ?= true
+      # Configuration
       {suffix} = openldap_server
       openldap_server.root_dn ?= "cn=Manager,#{openldap_server.suffix}"
       openldap_server.log_level ?= 256
@@ -32,7 +47,6 @@ and should correspond to "openldap_server.config_password".
         openldap_server.uri = "ldap://#{@config.host}"
 
 ## ACL
-
 
       throw Error 'Missing required "openldap_server.users_dn" property' unless openldap_server.users_dn
       throw Error 'Missing required "openldap_server.groups_dn" property' unless openldap_server.groups_dn
