@@ -102,9 +102,13 @@ Run = (params, config) ->
     for context in contexts
       continue unless service_id in context.services
       for configure, i in service.configure
-        configure = service.configure[i] = require.main.require configure if typeof configure is 'string'
+        switch typeof configure
+          when 'string' then configure_fn = service.configure[i] = require.main.require configure
+          when 'function' then configure_fn = configure
+          else throw Error "Invalid configure defined by: #{JSON.stringify service_id}"
         try
-          configure.call context
+          throw Error "Invalid configure module: #{JSON.stringify configure}" if typeof configure_fn.call isnt 'function'
+          configure_fn.call context
         catch e
           console.log 'Catch error: ', e
           return
@@ -121,7 +125,7 @@ Run = (params, config) ->
         if service.commands['']
           @call service.commands[''], (err) ->
             console.log 'ERROR', context.config.host, id, err if err
-        if service.commands[params.command]
+        if service.commands[params.command] 
           @call service.commands[params.command], (err) ->
             console.log 'ERROR', context.config.host, id, err if err
     context.then callback
