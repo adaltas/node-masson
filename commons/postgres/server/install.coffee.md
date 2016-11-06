@@ -32,7 +32,7 @@ Write startup script to /etc/init.d/service-hue-docker
           source: "#{__dirname}/resources/postgres-server.j2"
           local: true
           target: "/etc/init.d/postgres-server"
-          context: container: postgres.container_name
+          context: container: postgres.server.container_name
         @chmod
           target: "/etc/init.d/postgres-server"
           mode: 0o755
@@ -78,4 +78,4 @@ Run the PostgreSQL server container
         ]
         port: "#{postgres.server.port}:5432"
         service: true
-        name: postgres.container_name
+        name: postgres.server.container_name

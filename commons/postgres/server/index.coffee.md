@@ -13,20 +13,23 @@ docker exec -it -u postgres postgres_server psql
 ```
 
 
-    module.exports = ->
-      'configure':
+    module.exports =
+      use:
+        iptables: implicit: true, module: 'masson/core/iptables'
+        docker: implicit: true, module: 'masson/commons/docker'
+      configure:
         'masson/commons/postgres/server/configure'
-      'check':
-        'masson/commons/postgres/server/check'
-      'install': [
-        'masson/core/iptables'
-        'masson/commons/postgres/server/install'
-        'masson/commons/postgres/server/start'
-        'masson/commons/postgres/server/check'
-      ]
-      'prepare':
-        'masson/commons/postgres/server/prepare'
-      "start":
-        'masson/commons/postgres/server/start'
-      "stop":
-        'masson/commons/postgres/server/stop'
+      commands:
+        'check':
+          'masson/commons/postgres/server/check'
+        'install': [
+          'masson/commons/postgres/server/install'
+          'masson/commons/postgres/server/start'
+          'masson/commons/postgres/server/check'
+        ]
+        'prepare':
+          'masson/commons/postgres/server/prepare'
+        "start":
+          'masson/commons/postgres/server/start'
+        "stop":
+          'masson/commons/postgres/server/stop'
