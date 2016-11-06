@@ -23,7 +23,7 @@ See the the "resources section" for additional information.
       ctx.config.bind_server.user.comment ?= 'Named'
       ctx.config.bind_server.user.home = '/var/named'
       # Group
-      ctx.config.bind_server.group = name: ctx.config.ryba.bind_server if typeof ctx.config.ryba.bind_server is 'string'
+      ctx.config.bind_server.group = name: ctx.config.bind_server.group if typeof ctx.config.bind_server.group is 'string'
       ctx.config.bind_server.group ?= {}
       ctx.config.bind_server.group.name ?= 'named'
       ctx.config.bind_server.group.system ?= true
