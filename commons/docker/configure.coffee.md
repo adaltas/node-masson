@@ -1,8 +1,8 @@
 
 # Docker Configure
 
-    module.exports = handler: ->
-      ctx_iptables = @contexts('masson/core/iptables', require('../../core/iptables/configure').handler).filter (ctx) => ctx.config.host is @config.host 
+    module.exports = ->
+      ctx_iptables = @contexts('masson/core/iptables').filter (ctx) => ctx.config.host is @config.host 
       docker = @config.docker ?= {}
       docker.nsenter ?= true
       # Command-line options only supplied to the Docker server when it starts 

@@ -8,16 +8,19 @@ code, runtime, system tools, system libraries – anything you can install on a
 server. This guarantees that it will always run the same, regardless of the
 environment it is running in. 
 
-    module.exports = ->
-      'configure':
+    module.exports =
+      use:
+        iptables: implicit: true, module: 'masson/core/iptables'
+      configure:
         'masson/commons/docker/configure'
-      'install': handler: ->
-        @call 'masson/commons/docker/install', @config.docker
-        @call 'masson/commons/docker/stop', if: -> @status -1
-        @call 'masson/commons/docker/start'
-      'start':
-        'masson/commons/docker/start'
-      'status':
-        'masson/commons/docker/status'
-      'stop':
-        'masson/commons/docker/stop'
+      commands:
+        'install': handler: ->
+          @call 'masson/commons/docker/install', @config.docker
+          @call 'masson/commons/docker/stop', if: -> @status -1
+          @call 'masson/commons/docker/start'
+        'start':
+          'masson/commons/docker/start'
+        'status':
+          'masson/commons/docker/status'
+        'stop':
+          'masson/commons/docker/stop'
