@@ -19,7 +19,8 @@ normalize_service = (service) ->
     v = service.use[id] = module: v if typeof v is 'string'
     v.id ?= v.module
   service.commands ?= {}
-  context.config ?= {}
+  service.config ?= {}
+  service.config = merge {}, service.config... if Array.isArray service.config
   service.configure ?= []
   service.configure = [service.configure] unless Array.isArray service.configure
   service.constraints ?= {}
@@ -46,13 +47,11 @@ Run = (params, config) ->
   @setMaxListeners 100
   process.on 'uncaughtException', (err) =>
     @emit 'error', err
+  config.config = merge {}, config.config... if Array.isArray config.config
   # Normalize nodes
   for id, node of config.nodes
     node.id ?= id
-    # node.host ?= id
-    # node.shortname ?= node.host.split('.')[0]
     node.config ?= {}
-    # node.config.id = id
     node.config.host ?= id
     node.config.shortname ?= node.config.host.split('.')[0]
   # Discover module inside parent project
@@ -65,12 +64,16 @@ Run = (params, config) ->
     normalize_service service
     merge service, normalize_service service.module
   # Add auto loaded services
-  for _, service of config.services
+  load_children = (service) ->
     for id, use of service.use
       if use.implicit
-        use = merge require.main.require(use.module), use
+        module = config.services[use.id] or require.main.require(use.module)
+        use = merge module, use
         child = config.services[use.id] = normalize_service use
         merge child.constraints, service.constraints
+        load_children child
+  for _, service of config.services
+    load_children service
   # Graph ordering
   graph = tsort()
   for _, service of config.services
