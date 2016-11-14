@@ -11,20 +11,25 @@ Java home:
 
 Example for using Oracle JDK:
 
-```
-  java:
-    java_home: '/usr/java/default/'
-    jre_home: '/usr/java/default/jre'
-    openjdk: true
-    jdk:
-      version: '1.7.0_79'
-      versions:
-        '1.7.0_79':
-          jce_location: "http://download.oracle.com/otn-pub/java/jce/7/UnlimitedJCEPolicyJDK7.zip"
-          jdk_location: "http://download.oracle.com/otn-pub/java/jdk/7u79-b15/jdk-7u79-linux-x64.tar.gz"
-        '1.8.0_101':
-          jce_location: "http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip"
-          jdk_location: "http://download.oracle.com/otn-pub/java/jdk/8u101-b14/jdk-8u101-linux-x64.tar.gz"
+```json
+{ "java": {
+    "java_home": "/usr/java/default",
+    "jre_home": "/usr/java/default/jre",
+    "openjdk": true,
+    "jdk": {
+      "version": "1.7.0_79",
+      "versions": {
+        "1.7.0_79": {
+          "jdk_location": "http://download.oracle.com/otn-pub/java/jdk/7u79-b15/jdk-7u79-linux-x64.tar.gz",
+          "jce_location": "http://download.oracle.com/otn-pub/java/jce/7/UnlimitedJCEPolicyJDK7.zip"
+        },
+        "1.8.0_101": {
+          "jdk_location": "http://download.oracle.com/otn-pub/java/jdk/8u111-b14/jdk-8u111-linux-x64.tar.gz",
+          "jce_location": "http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip"
+        }
+      }
+    }
+}}
 ```
 
     module.exports = ->
