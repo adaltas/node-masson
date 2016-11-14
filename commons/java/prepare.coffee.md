@@ -10,14 +10,12 @@ Download the Oracle JDK.
       handler: ->
         @cache
           ssh: null
-          source: "#{@config.java.jdk.location}"
-          headers: ['Cookie: oraclelicense=accept-securebackup-cookie']
           location: true
-        @cache
-          ssh: null
-          source: "#{@config.java.jce.location}"
           headers: ['Cookie: oraclelicense=accept-securebackup-cookie']
-          location: true
+        , ([
+          "#{urls.jdk_location}"
+          "#{urls.jce_location}"
+        ]) for version, urls of java.jdk.versions
 
 ## Resources
 
