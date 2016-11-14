@@ -8,6 +8,7 @@ Download the Oracle JDK.
       timeout: -1
       if: -> @contexts('masson/commons/java')[0]?.config.host is @config.host
       handler: ->
+        {java} = @config.java
         @cache
           ssh: null
           location: true
