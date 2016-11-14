@@ -8,15 +8,18 @@ Download the Oracle JDK.
       timeout: -1
       if: -> @contexts('masson/commons/java')[0]?.config.host is @config.host
       handler: ->
-        {java} = @config.java
+      {java} = @config
+      for version, urls of java.jdk.versions
         @cache
           ssh: null
           location: true
           headers: ['Cookie: oraclelicense=accept-securebackup-cookie']
-        , ([
-          "#{urls.jdk_location}"
-          "#{urls.jce_location}"
-        ]) for version, urls of java.jdk.versions
+        , "#{urls.jdk_location}"
+        @cache
+          ssh: null
+          location: true
+          headers: ['Cookie: oraclelicense=accept-securebackup-cookie']
+        , "#{urls.jce_location}"
 
 ## Resources
 
