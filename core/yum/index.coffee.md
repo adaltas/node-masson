@@ -5,8 +5,10 @@
       use:
         proxy: 'masson/core/proxy'
         ntp: 'masson/core/ntp'
-      configure:
+      configure: [
+        'masson/bootstrap/fs'
         'masson/core/yum/configure'
+      ]
       commands:
         'install':
           'masson/core/yum/install'

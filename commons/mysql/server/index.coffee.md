@@ -7,6 +7,5 @@
       configure:
         'masson/commons/mysql/server/configure'
       commands:
-        'install': [
+        'install':
           'masson/commons/mysql/server/install'
-        ]
