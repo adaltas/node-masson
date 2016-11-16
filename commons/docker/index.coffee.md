@@ -18,6 +18,8 @@ environment it is running in.
           @call 'masson/commons/docker/install', @config.docker
           @call 'masson/commons/docker/stop', if: -> @status -1
           @call 'masson/commons/docker/start'
+        'prepare':
+          'masson/commons/docker/prepare'
         'start':
           'masson/commons/docker/start'
         'status':

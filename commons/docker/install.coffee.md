@@ -84,6 +84,19 @@ share images and deploy them to testing, staging and production environments.
     #     header: 'Docker # Registry 2.0'
     #     cmd: "docker run -p 5000:5000 registry:2.0"    
 
+## Docker Compose
+Compose is a tool for defining and running multi-container Docker applications.
+
+      @file.download
+        header: 'Install Docker Compose'
+        source: "#{@config.mecano.cache_dir}/docker-compose"
+        target: "/usr/local/bin/docker-compose"
+        local: true
+        unless_exec: 'which docker-compose'
+      @chmod
+        target: '/usr/local/bin/docker-compose'
+        mode: 0o750
+
 ## Additionnal resources
 
 *   [Setup your own bridge](http://jpetazzo.github.io/2013/10/16/configure-docker-bridge-network/)
