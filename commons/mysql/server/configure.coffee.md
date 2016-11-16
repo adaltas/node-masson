@@ -32,7 +32,7 @@ Default configuration:
 }
 ```
 
-    module.exports = handler: ->
+    module.exports = ->
       mysql = @config.mysql ?= {}
       mysql.server ?= {}
       # User SQL
