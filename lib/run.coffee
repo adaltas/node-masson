@@ -140,7 +140,7 @@ Run = (params, config) ->
           error = true
           throw err
     context.then (err) ->
-      console.log 'ERROR', err unless error
+      console.log 'ERROR', err if err and not error
       callback()
   .then (err) =>
     @emit 'end'
