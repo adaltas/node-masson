@@ -9,5 +9,4 @@
       commands:
         'install': [
           'masson/commons/mysql/server/install'
-          'masson/commons/mysql/client'
         ]
