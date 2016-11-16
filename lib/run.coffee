@@ -119,19 +119,29 @@ Run = (params, config) ->
   .parallel true
   .call (context, callback) ->
     return callback() if params.hosts and multimatch(context.config.host, params.hosts).length is 0
+    error = false
     context.call ->
       @log.cli host: context.config.host, pad: host: 20, header: 60
       @log.md filename: context.config.host, basedir: './log'
       for id in context.services then do (id) =>
         service = config.services[id]
         return if !service.required and params.modules and multimatch(service.module, params.modules).length is 0
-        if service.commands['']
-          @call service.commands[''], (err) ->
-            console.log 'ERROR', context.config.host, id, err if err
-        if service.commands[params.command] 
-          @call service.commands[params.command], (err) ->
-            console.log 'ERROR', context.config.host, id, err if err
-    context.then callback
+        try
+          if service.commands['']
+            @call service.commands[''], (err) ->
+              console.log 'ERROR', context.config.host, id, err if err
+              error = true if err
+          if service.commands[params.command] 
+            @call service.commands[params.command], (err) ->
+              console.log 'ERROR', context.config.host, id, err if err
+              error = true if err
+        catch err
+          console.log 'ERROR', context.config.host, id, err if err
+          error = true
+          throw err
+    context.then (err) ->
+      console.log 'ERROR', err unless error
+      callback()
   .then (err) =>
     @emit 'end'
   @
