@@ -2,27 +2,26 @@
 # GIT Install
 
     module.exports = header: 'Git Install', handler: ->
-    
+
 ## Package
 
 Install the git package.
 
       @service
-        header: 'Git # Package'
+        header: 'Package'
         name: 'git'
 
 ## Config
 
 Deploy the git configuration.
 
-      @call header: 'Git # Config', ->
-        {merge, properties, global} = @config.git
-        unless @registered 'git_config'
-          @register 'git_config', (options) ->
-            throw Error unless options.config
-            options.content = misc.merge {}, properties, options.config
-            options.merge ?= merge
-            @file.ini options
+      @call header: 'Config', ->
+        {merge, properties, global, users} = @config.git
+        @registry.register 'git_config', (options) ->
+          throw Error unless options.config
+          options.content = misc.merge {}, properties, options.config
+          options.merge ?= merge
+          @file.ini options
         @git_config
           uid: 'root'
           gid: 'root'
@@ -32,11 +31,12 @@ Deploy the git configuration.
         @remove
           if: global is false
           target: '/etc/gitconfig'
-        for user in @config.users then do (user) ->
-          @git_config
-            target: file
-            uid: user.name or user.uid
-            gid: user.gid
+        @git_config (
+          target: @config.users[user].home or "/home/#{user}"
+          uid: @config.users[user].uid or @config.users[user].name
+          gid: @config.users[user].gid or @config.users[user].group
+          config: config
+        ) for user, config in users
 
 ## Dependencies
 
