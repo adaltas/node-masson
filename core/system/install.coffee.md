@@ -6,7 +6,7 @@
 
 ## SELinux
 
-Security-Enhanced Linux (SELinux) is a mandatory access control (MAC) security 
+Security-Enhanced Linux (SELinux) is a mandatory access control (MAC) security
 mechanism implemented in the kernel.
 
 This action update the configuration file present in "/etc/selinux/config". The
@@ -34,12 +34,12 @@ cat /etc/security/limits.d/90-nproc.conf
 root       soft    nproc     unlimited
 ```
 
-      @file (
-        header: "Limits on #{filename}"
-        target: "/etc/security/limits.d/#{filename}"
-        content: content
+      @system_limits merge
+        header: "Global System Limits"
+        target: "/etc/security/limits.conf"
         backup: true
-      ) for filename, content of system.limits
+        system: true
+      , system.limits
 
 ## Groups
 
@@ -53,20 +53,24 @@ Create the users defined inside the "hdp.groups" configuration. See the
 
 Create the users defined inside the "hdp.users" configuration. See the
 [mecano "user" documentation][mecano_user] for additionnal information.
-        
+
       @call header: 'Users', ->
         @user user for _, user of system.users
 
 ## Profile
 
 Publish scripts inside the profile directory, located in "/etc/profile.d".
-      
+
       @call header: 'Profile', ->
         @file (
           target: "/etc/profile.d/#{filename}"
           content: content
           eof: true
         ) for filename, content of @config.profile
+
+## Dependencies
+
+    {merge} = require 'mecano/lib/misc'
 
 [mecano_group]: https://github.com/wdavidw/node-mecano/blob/master/src/group.coffee.md
 [mecano_user]: https://github.com/wdavidw/node-mecano/blob/master/src/user.coffee.md

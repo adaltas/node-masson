@@ -46,6 +46,8 @@ Example:
       system.selinux ?= true
       # Limits
       system.limits ?= {}
+      system.limits.memlock ?= {}
+      system.limits.memlock.hard ?= 130
       # Groups
       system.groups ?= {}
       for name, group of system.groups
