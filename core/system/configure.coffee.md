@@ -27,7 +27,7 @@ Example:
     "profile": {
       "tmout.sh": "export TMOUT=0"
     },
-    "selinux": false,,
+    "selinux": false,
     "users": {
       "my_user": {
         "uid": 2301,
