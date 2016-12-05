@@ -1,4 +1,4 @@
-  
+
 # OpenLDAP Server Install
 
 The default ports used by OpenLdap server are 389 and 636.
@@ -15,7 +15,7 @@ todo: add migrationtools
 | slapd      | 389  | tcp/ldap  | -               |
 | slapd      | 636  | tcp/ldaps | -               |
 
-IPTables rules are only inserted if the parameter "iptables.action" is set to 
+IPTables rules are only inserted if the parameter "iptables.action" is set to
 "start" (default value).
 
       @iptables
@@ -89,7 +89,7 @@ Interesting posts also include
 http://itdavid.blogspot.ca/2012/05/howto-centos-6.html
 http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
 ###
-      
+
       @call header: 'Config Access', timeout: -1, handler: (options) ->
         @call (_, callback) ->
           return callback null, false if openldap_server.config_slappasswd
@@ -189,8 +189,8 @@ Note: `openldap_server.bdb_file` default value is now configured at runtime. Che
             action: 'restart'
             if: -> @status -1
           @then callback
-          
-          
+
+
       @call header: "ACLs", handler: (options) ->
         # We used: http://itdavid.blogspot.fr/2012/05/howto-centos-62-kerberos-kdc-with.html
         # But this is also interesting: http://web.mit.edu/kerberos/krb5-current/doc/admin/conf_ldap.html
@@ -328,8 +328,8 @@ Note: `openldap_server.bdb_file` default value is now configured at runtime. Che
 ldapsearch -LLLY EXTERNAL -H ldapi:/// -b cn=schema,cn=config dn
 
 # Search from remote:
-ldapsearch -x -LLL -H ldap://master3.hadoop:389 -D cn=Manager,dc=ryba -w test -b "dc=ryba" "objectClass=*" 
-ldapsearch -H ldaps://master3.hadoop:636 -x -D cn=Manager,dc=ryba -w test -b dc=ryba
+ldapsearch -x -LLL -H ldap://master3.hadoop:389 -D cn=Manager,dc=ryba -w test -b "dc=ryba" "objectClass=*"
+ldapsearch -x -H ldaps://master3.hadoop:636 -D cn=Manager,dc=ryba -w test -b dc=ryba
 ldapsearch -D cn=admin,cn=config -w test -d 1 -b "cn=config"
 ldapsearch -D cn=Manager,dc=ryba -w test -b "dc=ryba"
 ldapsearch -ZZ -d 5 -D cn=Manager,dc=ryba -w test -b "dc=ryba"
