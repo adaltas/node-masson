@@ -5,6 +5,7 @@ Download different Docker packages
     module.exports =
       timeout: -1
       if: -> @contexts('masson/commons/docker')[0]?.config.host is @config.host
+      header: 'Docker'
       handler: ->
         @cache
           ssh: null
