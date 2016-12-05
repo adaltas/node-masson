@@ -16,4 +16,4 @@
         'start': 'masson/core/sssd/start'
         'status': 'masson/core/sssd/status'
         'stop': 'masson/core/sssd/stop'
-        
+
