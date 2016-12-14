@@ -122,7 +122,7 @@ Run = (params, config) ->
     error = false
     context.call ->
       @log.cli host: context.config.host, pad: host: 20, header: 60
-      @log.md filename: context.config.host, basedir: './log'
+      @log.md basename: context.config.shortname
       for id in context.services then do (id) =>
         service = config.services[id]
         return if !service.required and params.modules and multimatch(service.module, params.modules).length is 0
