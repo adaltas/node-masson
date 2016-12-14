@@ -24,7 +24,7 @@ module.exports = parameters
       name: 'subcommand'
       description: 'The subcommand to execute'
     options: [
-      name: 'hosts', shortcut: 'h'
+      name: 'hosts', shortcut: 'h', type: 'array'
       description: 'Limit to a list of server hostnames'
     ]
   ,
