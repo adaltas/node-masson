@@ -1,7 +1,7 @@
 
 # FSTAB Configure
 
-    module.exports = handler: ->
+    module.exports = ->
       fstab = @config.fstab ?= {}
       fstab.enabled ?= false
       fstab.exhaustive ?= false
