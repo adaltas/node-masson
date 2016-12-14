@@ -54,6 +54,7 @@ and setting "allow-query" to any. The "named" service is restarted if modified.
       @file
         header: 'Configure'
         target: '/etc/named.conf'
+        mode: 0o644
         write: [
           # Comment listen-on port
           match: /^(\s+)(listen\-on port.*)$/mg
@@ -87,9 +88,13 @@ Upload the zones definition files provided in the configuration file.
             };
             """
             append: true
+            mode: 0o750
         @file (
           source: zone
           local: true
+          mode: 0o644
+          uid: bind_server.user.name
+          gid: bind_server.group.name
           target: "/var/named/#{path.basename zone}"
         ) for zone in bind_server.zones
 
