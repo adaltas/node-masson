@@ -8,6 +8,7 @@ rom ISC.
     module.exports =
       use: 
         iptables: implicit: true, module: 'masson/core/iptables'
+        yum: module: 'masson/core/yum'
       configure:
         'masson/core/bind_server/configure'
       commands:
