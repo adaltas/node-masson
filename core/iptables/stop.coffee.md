@@ -3,5 +3,5 @@
 
 Start the Iptables service by executing the command `service iptables stop`.
 
-    module.exports = header: 'Iptables # Stop', label_true: 'STOPPED', handler: ->
+    module.exports = header: 'Iptables Stop', label_true: 'STOPPED', handler: ->
       @service.stop name: 'iptables'

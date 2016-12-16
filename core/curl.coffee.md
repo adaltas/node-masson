@@ -77,7 +77,7 @@ false to disable this action to run. For the configuration file to be uploaded,
 the user must have a `user.home` property.
 
     exports.push
-      header: 'Curl # User Configuration'
+      header: 'Curl User Configuration'
       if: -> @config.curl.users
       handler: ->
         {merge, config} = @config.curl
@@ -95,7 +95,7 @@ the user must have a `user.home` property.
 Install the "curl" package. Note, on some plateform like CentOS, `curl` is 
 already installed.
 
-    exports.push header: 'Curl # Install', timeout: -1, handler: ->
+    exports.push header: 'Curl Install', timeout: -1, handler: ->
       # On centOS, curl is already here
       @service name: 'curl'
 
@@ -105,7 +105,7 @@ Check a remote call. This action is commonly activated to validate the Internet
 connection.
 
     exports.push
-      header: 'Curl # Connection Check'
+      header: 'Curl Connection Check'
       if: -> @config.curl.check
       handler: ->
         {check, check_match, config} = @config.curl

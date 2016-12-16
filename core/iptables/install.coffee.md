@@ -34,7 +34,7 @@ Redirect input logs in "/var/log/messages".
 Add user defined rules to IPTables.
 
       @iptables
-        header: 'Iptables # Rules'
+        header: 'Rules'
         timeout: -1
         if: @config.iptables.action is 'start'
         rules: @config.iptables.rules

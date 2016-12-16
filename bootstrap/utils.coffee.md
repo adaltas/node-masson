@@ -4,7 +4,7 @@
 The `utils` module enriches the bootstraping process with commonly used functions.
 
     exports = module.exports = []
-    exports.push header: 'Bootstrap # Utils', required: true, handler: ->
+    exports.push header: 'Bootstrap Utils', required: true, handler: ->
 
 ## Reboot
 

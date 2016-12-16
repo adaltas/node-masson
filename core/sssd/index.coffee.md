@@ -4,7 +4,7 @@
     module.exports = 
       use:
         yum:  module: 'masson/core/yum'
-        openldap_client: implicit: true, module: 'masson/core/openldap_client'
+        openldap_client: 'masson/core/openldap_client'
       configure: 'masson/core/sssd/configure'
       commands:
         'check': 'masson/core/sssd/check'

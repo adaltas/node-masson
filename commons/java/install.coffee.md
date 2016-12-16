@@ -15,7 +15,7 @@ TODO: leverage /etc/alternative to switch between multiple JDKs.
 ## Install OpenJDK
 
       @service
-        header: 'Java # Install OpenJDK'
+        header: 'OpenJDK'
         timeout: -1
         if: -> @config.java.openjdk
         name: 'java-1.7.0-openjdk-devel'

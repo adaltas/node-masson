@@ -209,7 +209,7 @@ The following files are updated:
               modified = if keyfileContent is content then false else true
               callback null, keyfileContent isnt content
 
-      @call header: 'Krb5 Server # Log', timeout: 100000, handler: ->
+      @call header: 'Log', timeout: 100000, handler: ->
         @touch
           target: '/var/log/krb5kdc.log'
         @touch
@@ -236,7 +236,7 @@ The following files are updated:
           action: 'restart'
           if: -> @status -3
 
-      @call header: 'Krb5 Server # Admin principal', timeout: -1, handler: ->
+      @call header: 'Admin principal', timeout: -1, handler: ->
         {etc_krb5_conf, kdc_conf} = @config.krb5
         for realm, config of etc_krb5_conf.realms
           continue unless kdc_conf.realms[realm]?.database_module
@@ -271,7 +271,7 @@ The following files are updated:
     # script to handle multiple kadmin server. Note, for `killproc` to stop
     # all instances, it seems that we need to set multiple pid files, here
     # a exemple: `/usr/sbin/kadmind -r USERS.ADALTAS.COM -P /var/run/kadmind1.pid`
-    # exports.push name: 'Krb5 Server # Startup', timeout: 100000, handler: ->
+    # exports.push name: 'Startup', timeout: 100000, handler: ->
     #   {kdc_conf} = @config.krb5
     #   write = []
     #   write.push match: /^(\s+)(daemon\s+.*)/mg, replace: "$1#$2"
@@ -283,7 +283,7 @@ The following files are updated:
     #     write: write
     #   , next
 
-      # exports.push header: 'Krb5 Server # Start', timeout: 100000, handler: ->
+      # exports.push header: 'Start', timeout: 100000, handler: ->
       #   @service.start
       #     name: 'krb5kdc'
       #   @service.start

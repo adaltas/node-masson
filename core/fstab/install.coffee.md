@@ -26,7 +26,7 @@ Write /etc/fstab
 ## Mount
 
       @execute (
-        header: 'FSTAB # Mount Volumes'
+        header: 'Mount Volumes'
         if: fstab.enabled
         cmd: "mount #{disk.device}"
         unless: mntpt in ['none', 'swap'] or /\/(dev|proc|sys).*/.test mntpt

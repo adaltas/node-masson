@@ -15,7 +15,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
 "start" (default value).
 
       @iptables
-        header: 'Mysql Server # IPTables'
+        header: 'IPTables'
         rules: [
           { chain: 'INPUT', jump: 'ACCEPT', dport: 3306, protocol: 'tcp', state: 'NEW', comment: "MySQL" }
         ]
@@ -25,7 +25,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
 
 Install the Mysql database server. Secure the temporary directory.
 
-      @call header: 'Mysql Server # Package', timeout: -1, handler: ->
+      @call header: 'Package', timeout: -1, handler: ->
         @service
           name: 'mysql-server'
           chk_name: 'mysqld'
@@ -42,7 +42,7 @@ Install the Mysql database server. Secure the temporary directory.
           backup: true
 
       @service.start
-        header: 'Mysql Server # Start'
+        header: 'Start'
         name: 'mysqld'
         relax: true
       # TODO: wait for error in mecano
@@ -59,7 +59,7 @@ Install the Mysql database server. Secure the temporary directory.
 
       for sql, i in mysql.server.sql_on_install
         @execute
-          header: "Mysql Server # Populate #{i}"
+          header: "Populate #{i}"
           cmd: "mysql -uroot -e \"#{escape sql}\""
           code_skipped: 1
 
@@ -73,7 +73,7 @@ Remove anonymous users? [Y/n] y
 Disallow root login remotely? [Y/n] n
 Remove test database and access to it? [Y/n] y
 
-      @call header: 'Mysql Server # Secure', handler: (options, callback) ->
+      @call header: 'Secure', handler: (options, callback) ->
         {current_password, password, remove_anonymous, disallow_remote_root_login, remove_test_db, reload_privileges} = mysql.server
         test_password = true
         modified = false

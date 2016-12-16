@@ -5,14 +5,14 @@ Install the MySQL command-line tool.
 
     module.exports =
       commands:
-        'install': handler: ->
+        'install': header: 'MySQL Client Install', handler: ->
 
 ## Package
 
 Install the Mysql client.
 
           @service
-            header: 'Mysql Client # Package'
+            header: 'Package'
             name: 'mysql'
 
 ## Connector
@@ -20,5 +20,5 @@ Install the Mysql client.
 Install the Mysql JDBC driver.
 
           @service
-            header: 'Mysql Client # Connector'
+            header: 'Connector'
             name: 'mysql-connector-java'

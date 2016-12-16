@@ -3,7 +3,7 @@
 
 Install anaconda.
 
-    module.exports = header: 'Anaconda # Install', timeout: -1, handler: ->
+    module.exports = header: 'Anaconda Install', timeout: -1, handler: ->
       {anaconda} = @config
       @call unless_exec: "#{anaconda.install_dir}/python#{anaconda.python_version}/bin/python --version | grep #{anaconda.version}", handler: ->
         script = "#{anaconda.tmp_dir}/Anaconda-#{anaconda.version}-Linux-x86_64.sh"

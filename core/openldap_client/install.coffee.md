@@ -16,7 +16,7 @@ certificate to upload.
 
       {openldap_client} = @config
       @file
-        header: 'OpenLDAP Client # Configure'
+        header: 'Configure'
         write: for k, v of openldap_client.config
           v = v.join(' ') if Array.isArray v
           match: new RegExp "^#{k}.*$", 'mg'

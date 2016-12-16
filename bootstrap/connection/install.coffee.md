@@ -62,7 +62,7 @@ Example:
 }
 ```
 
-    # module.exports = header: 'Bootstrap # Connection', required: true, timeout: -1, handler: (options, next) ->
+    # module.exports = header: 'Bootstrap Connection', required: true, timeout: -1, handler: (options, next) ->
     module.exports = ->
       # return if @params.hosts? and (multimatch( @config.host, @params.hosts)).length is 0
       return if @params.command in ['configure', 'prepare']

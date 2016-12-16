@@ -5,7 +5,7 @@
     exports.push 'masson/bootstrap'
     exports.push 'masson/core/curl'
 
-    exports.push header: 'VirtualBox # Guest Additions', timeout: -1, handler: (options) ->
+    exports.push header: 'VirtualBox Guest Additions', timeout: -1, handler: (options) ->
       version_target, version_current
       @execute
         ssh: false

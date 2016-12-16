@@ -9,7 +9,7 @@ Install the `docker-io` package and configure it as a startup and started
 service.
 
       @service
-        header: 'Docker # Service'
+        header: 'Service'
         name: 'docker'
         yum_name: 'docker-io'
         startup: true
@@ -31,7 +31,7 @@ service.
 Get the PID of a docker container by name or ID.
 
       @file
-        header: 'Docker # Install docker-pid'
+        header: 'docker-pid'
         content: """
         #!/bin/sh
         exec docker inspect --format '{{ .State.Pid }}' "$@"
@@ -44,7 +44,7 @@ Get the PID of a docker container by name or ID.
 Get the ip address of a container by name or ID.
 
       @file
-        header: 'Docker # Install docker-ip'
+        header: 'docker-ip'
         content: """
         #!/bin/sh
         exec docker inspect --format '{{ .NetworkSettings.IPAddress }}' "$@"
@@ -67,7 +67,7 @@ The potential benefit of this would be debugging and external audit, but for
 remote access, docker exec is the current recommended approach.
 
       @execute
-        header: 'Docker # Install nsenter'
+        header: 'nsenter'
         if: options.nsenter
         cmd: """
         docker run -v /usr/local/bin:/target jpetazzo/nsenter
@@ -81,14 +81,14 @@ images to and pull them from; Docker Registry gives team members the ability to
 share images and deploy them to testing, staging and production environments.
 
     #   @execute
-    #     header: 'Docker # Registry 2.0'
+    #     header: 'Registry 2.0'
     #     cmd: "docker run -p 5000:5000 registry:2.0"    
 
 ## Docker Compose
 Compose is a tool for defining and running multi-container Docker applications.
 
       @file.download
-        header: 'Install Docker Compose'
+        header: 'Docker Compose'
         source: "#{@config.mecano.cache_dir}/docker-compose"
         target: "/usr/local/bin/docker-compose"
         local: true

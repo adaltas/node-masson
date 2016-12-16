@@ -27,7 +27,7 @@ does for CNAME records if you append "cname" at the end of the command.
 I assume the A record to always be printed on the last line.
 
       @execute
-        header: 'Network # Check DNS Forward Lookup'
+        header: 'DNS Forward Lookup'
         label_true: 'CHECKED'
         cmd: "dig #{@config.host}. +short"
         code_skipped: 1
@@ -62,7 +62,7 @@ the local configuration present inside "/etc/hosts". Internally, the exectuted
 command uses "getent".
 
       @execute
-        header: 'Network # Check System Forward Lookup'
+        header: 'System Forward Lookup'
         label_true: 'CHECKED'
         cmd: "getent hosts #{@config.host}"
         code_skipped: 2
@@ -81,7 +81,7 @@ the local configuration present inside "/etc/hosts". Internally, the exectuted
 command uses "getent".
 
       @execute
-        header: 'Network # Check System Reverse Lookup'
+        header: 'System Reverse Lookup'
         label_true: 'CHECKED'
         cmd: "getent hosts #{@config.ip}"
         code_skipped: 2
@@ -100,7 +100,7 @@ Read the server hostname and check it matches the expected FQDN. Internally,
 the executed command is `hostname --fqdn`.
 
       @execute
-        header: 'Network # Check Hostname'
+        header: 'Hostname'
         label_true: 'CHECKED'
         cmd: "hostname --fqdn"
         shy: true

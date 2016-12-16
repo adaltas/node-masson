@@ -3,7 +3,7 @@
 
 [Master-Master](http://easylinuxtutorials.blogspot.fr/2013/11/multi-master-replication-of-openldap.html)
 
-    module.exports = header: 'OpenLDAP Server # Replication', timeout: -1, handler: ->
+    module.exports = header: 'OpenLDAP Server Replication', timeout: -1, handler: ->
       {suffix, config_file, bdb_file, active_host, root_dn, root_password} = @config.openldap_server
       master_uri = @contexts('masson/core/openldap_server').filter((ctx) ->
         ctx.config.host is active_host

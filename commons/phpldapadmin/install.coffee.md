@@ -17,7 +17,7 @@ Configure the application. The configuration file is defined by the
 "phpldapadmin.config_path" property (default to "/etc/phpldapadmin/config.php").
 
       @file
-        header: 'phpLDAPadmin # Configure'
+        header: 'Configure'
         write: [
           {match: /^(\/\/)(.*'login','attr','dn'.*)$/m, replace: '$2'}
           {match: /^(?!\/\/)(.*'login','attr','uid'.*)$/m, replace: '//$1'}
@@ -37,7 +37,7 @@ by the "phpldapadmin.config_httpd_path" property (default to
 the "http://{host}/ldapadmin" URL path.
 
       @file
-        header: 'phpLDAPadmin # HTTPD'
+        header: 'HTTPD'
         target: phpldapadmin.config_httpd_path
         write: [
           match: /^(?!#)(.*Alias \/phpldapadmin.*)$/m

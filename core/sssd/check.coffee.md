@@ -8,7 +8,7 @@ $user`. The command is only executed if a test user is defined by the
 "sssd.test_user" property.
 
       @call
-        header: 'SSSD # Check NSS'
+        header: 'NSS'
         if: -> @config.sssd.test_user
         handler: ->
           {test_user} = ctx.config.sssd
@@ -22,7 +22,7 @@ Check if PAM is correctly configured by executing the command
 user is defined by the "sssd.test_user" property.
 
       @call
-        header: 'SSSD # Check PAM'
+        header: 'PAM'
         if: -> @config.sssd.test_user
         handler: ->
           {test_user} = ctx.config.sssd
