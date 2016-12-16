@@ -13,7 +13,7 @@ List all the actions to execute
 module.exports = ->
   params = params.parse()
   config params.config, (err, config) ->
-    hosts = Object.keys config.servers
+    hosts = Object.keys config.nodes
     server = config.servers[params.host]
     return util.print "\x1b[31mInvalid server \"#{params.host}\"\x1b[39m\n" unless server
     # modules = server.run[params.run]
