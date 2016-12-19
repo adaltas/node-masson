@@ -85,8 +85,8 @@ property "yum.epel" to false.
         if: -> @config.yum.epel
         cmd: if @config.yum.epel_url
         then "rpm -Uvh #{@config.yum.epel_url}"
-        else 'yum install epel-release' 
-        unless_exec: 'yum list installed epel-release'
+        else 'yum install -y epel-release' 
+        unless_exec: 'yum list installed | grep epel-release'
 
 ## Package Update
 
