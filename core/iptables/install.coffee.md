@@ -5,11 +5,17 @@
 
 The package "iptables" is installed.
 
-    module.exports = header: 'Iptables Install', handler: ->
+    module.exports = header: 'Iptables Install', handler: (options) ->
       {action, startup} = @config.iptables
+      
       @service
-        header: 'Package'
         timeout: -1
+        name: 'iptables'
+      @service 
+        if: -> (options.store['mecano:system:type'] in ['redhat','centos']) and options.store['mecano:system:release'][0] is '7'
+        header: 'Iptable Service'
+        name: 'iptables-services'
+      @service.startup
         name: 'iptables'
         startup: startup
         action: action
