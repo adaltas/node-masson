@@ -27,41 +27,34 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
 
 Write startup script to /etc/init.d/service-hue-docker
 
-      @call header: 'Startup Script', handler:  ->
-        @render
-          source: "#{__dirname}/resources/postgres-server.j2"
-          local: true
-          target: "/etc/init.d/postgres-server"
-          context: container: postgres.server.container_name
-        @chmod
-          target: "/etc/init.d/postgres-server"
-          mode: 0o755
+      @service.init
+        header: 'Startup Script'
+        source: "#{__dirname}/resources/postgres-server.j2"
+        local: true
+        target: "/etc/init.d/postgres-server"
+        context: container: postgres.server.container_name
 
 ## Package
 Install the PostgreSQL database server.
 
-      @call 
-        header: 'Check container', handler: (opts, callback) =>
-          checksum  = ''
-          @docker_checksum
-            image: 'postgres'
-            tag: postgres.version
-          , (err, status, chk) ->
-            return callback err if err
-            checksum = chk
-            opts.log "Found image with checksum: #{checksum}" unless !checksum
-            if !checksum then callback null, true else callback null, false
-      @file.download
-        if: -> @status -1
-        binary: true
-        md5: true
-        header: 'Download Container'
-        source: "#{@config.mecano.cache_dir}/postgres.tar"
-        target: "#{tmp}/postgres.tar"
-      @docker.load
-        header: 'Load Container'
-        if: -> (@status -1 and @status -2)
-        source: "#{tmp}/postgres.tar"
+      @call header: 'Download Container', handler: ->
+        exists = false
+        @docker.checksum
+          image: 'postgres'
+          tag: postgres.version
+        , (err, status, checksum) ->
+          throw err if err
+          exists = checksum
+        @file.download
+          unless: -> exists
+          binary: true
+          md5: true
+          source: "#{@config.mecano.cache_dir}/postgres.tar"
+          target: "#{tmp}/postgres.tar"
+        @docker.load
+          header: 'Load Container'
+          unless: -> exists
+          source: "#{tmp}/postgres.tar"
       
 ## Run Container
 Run the PostgreSQL server container
