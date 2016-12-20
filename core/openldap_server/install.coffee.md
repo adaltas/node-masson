@@ -73,7 +73,7 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
           target: openldap_server.config_file
           match: /^olcLogLevel:.*$/mg
           replace: "olcLogLevel: #{openldap_server.log_level}"
-          place_before: 'olcRootDN'
+          place_before: 'structuralObjectClass'
 
 ###
 Borrowed from
@@ -101,7 +101,7 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
           openldap_server.config_slappasswd = stdout.trim() if not err and executed
         @call (_, callback) ->
           options.log 'Database config: root DN & PW'
-          write = [match: /^olcRootDN:.*$/m, replace: "olcRootDN: #{openldap_server.config_dn}"]
+          write = [match: /^olcRootDN:.*$/m, replace: "olcRootDN: #{openldap_server.config_dn}", append: true, place_before: 'structuralObjectClass']
           if openldap_server.config_slappasswd
             write.push
               match: /^olcRootPW:.*$/m
@@ -116,6 +116,24 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
             if: -> @status -1
           @then callback
 
+## Import Basic Schema
+On Redhat/Centos 7, Basic schema must be manually imported.
+Check section[3](https://www.server-world.info/en/note?os=CentOS_7&p=openldap).
+
+      @call
+        header: 'Import Schema'
+        handler: ->
+          @each ['cosine','inetorgperson','nis'], (options) ->
+            name = options.key
+            @execute
+              cmd: " ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/#{name}.ldif "
+              unless_exec: """
+                ldapsearch -LLL -D #{openldap_server.config_dn} \
+                -w #{openldap_server.config_password} -H ldapi:/// \
+                -b "cn=schema,cn=config" | \
+                grep -E cn=\{[0-9]+\}#{name},cn=schema,cn=config
+              """
+
 ## DB monitor root DN
 
       @file
@@ -125,6 +143,8 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
         replace: "$1#{openldap_server.suffix}$2"
 
 ## DB bdb
+Note: `openldap_server.bdb_file` default value is now configured at runtime. Check
+`masson/core/openldap_server/configure` to support multiple OS installation.
 
       @call header: 'DB bdb', timeout: -1, handler: (options) ->
         @call (_, callback) ->
@@ -167,6 +187,7 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
       @call header: "ACLs", handler: (options) ->
         # We used: http://itdavid.blogspot.fr/2012/05/howto-centos-62-kerberos-kdc-with.html
         # But this is also interesting: http://web.mit.edu/kerberos/krb5-current/doc/admin/conf_ldap.html
+        # says that a user with the group id and user id of 0 (root), matched using EXTERNAL SASL on localhost
         @ldap_acl
           header: 'Global Rules'
           suffix: openldap_server.suffix
@@ -186,7 +207,6 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
               '* none'
             ]
           ]
-    
       [_, suffix_k, suffix_v] = /(\w+)=([^,]+)/.exec openldap_server.suffix
       @execute
         header: 'Users and Groups'

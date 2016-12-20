@@ -34,8 +34,9 @@ the command `ldapsearch  -D cn=admin,cn=config -w test -b "cn=config"`.
 
 ## Insert Container
 
-Create the kerberos organisational unit, for example 
-"ou=kerberos,dc=adaltas,dc=com".
+Create the kerberos entry unit, for example "cn=kerberos,dc=adaltas,dc=com".
+Note: In recent version of openldap, dn compose or organizationalUnit (ou) are 
+not allowed to be used for krb5 ldap containers.
 
       @ldap_add
         header: 'Container DN'
@@ -44,8 +45,7 @@ Create the kerberos organisational unit, for example
         passwd: openldap_server.root_password,
         entry: 
           dn: "#{kerberos_dn}"
-          objectClass: ['top', 'organizationalUnit']
-          description: 'Kerberos OU to store Kerberos principals.'
+          objectClass: ['krbContainer']
 
 ## Insert Group
 

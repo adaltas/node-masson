@@ -395,11 +395,30 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=ryba
           replace: "olcTLSCertificateKeyFile: /etc/pki/tls/certs/#{path.basename openldap_server.tls_key_file}"
           # append: 'olcTLSCertificateFile'
         ]
-      @file
-        header: 'Activation'
-        match: /^SLAPD_LDAPS.*/mg
-        replace: 'SLAPD_LDAPS=yes'
-        target: '/etc/sysconfig/ldap'
+      @call (options) ->
+        write = []
+        sysconfig_file = '/etc/sysconfig/ldap'
+        if options.store['mecano:system:type'] in ['redhat','centos']
+          options.store['mecano:system:release']?[0] ?= 6
+          switch options.store['mecano:system:release'][0]
+            when '6' 
+              write.push 
+                match: /^SLAPD_LDAPS.*/mg
+                replace: 'SLAPD_LDAPS=yes'
+              sysconfig_file = '/etc/sysconfig/ldap'
+            when '7'
+              urls = ''
+              urls += "#{url} " for url in openldap_server.urls
+              write.push 
+                match: /^SLAPD_URLS.*/mg
+                replace: "SLAPD_URLS=\"#{urls}\""
+              sysconfig_file = '/etc/sysconfig/slapd'
+            else throw Error 'Version of Centos/Redhat not supported'
+        @file
+          header: 'Activation'
+          write: write
+          target: sysconfig_file
+          append: true
       @service.restart
         header: 'Restart'
         name: 'slapd'

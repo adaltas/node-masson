@@ -38,7 +38,17 @@ and should correspond to "openldap_server.config_password".
       openldap_server.tls ?= false
       openldap_server.config_file ?= '/etc/openldap/slapd.d/cn=config/olcDatabase={0}config.ldif'
       openldap_server.monitor_file ?= '/etc/openldap/slapd.d/cn=config/olcDatabase={1}monitor.ldif'
-      openldap_server.bdb_file ?= '/etc/openldap/slapd.d/cn=config/olcDatabase={2}bdb.ldif'
+      # make this propertiy dynamic to support multiple OS type installation
+      # no client needs this property.
+      default_bdb_file = '/etc/openldap/slapd.d/cn=config/olcDatabase={2}bdb.ldif'
+      @after
+        type: 'service'
+        name: 'openldap-servers'
+        handler: (options) ->
+          @config.openldap_server.bdb_file ?= switch options.store['mecano:system:release'][0]
+            when '6' then default_bdb_file
+            when '7' then '/etc/openldap/slapd.d/cn=config/olcDatabase={2}hdb.ldif'
+            else default_bdb_file
       if openldap_server.tls
         throw Error 'TLS mode requires "tls_cert_file"' unless openldap_server.tls_cert_file
         throw Error 'TLS mode requires "tls_key_file"' unless openldap_server.tls_key_file
@@ -75,7 +85,8 @@ and should correspond to "openldap_server.config_password".
       # Normalization
       @config.openldap_server_krb5 ?= {}
       {openldap_server, openldap_server_krb5} = @config
-      openldap_server_krb5.kerberos_dn ?= "ou=kerberos,#{openldap_server.suffix}"
+      openldap_server_krb5.kerberos_dn ?= "cn=kerberos,#{openldap_server.suffix}"
+      throw Error "attribute 'ou' not allowed" unless openldap_server_krb5.kerberos_dn.indexOf('ou=') is -1
       # Configure openldap_server_krb5
       # {admin_group, users_dn, groups_dn, admin_user} = openldap_server_krb5
       # User for kdc
@@ -128,6 +139,11 @@ and should correspond to "openldap_server.config_password".
         gidNumber: '800'
         description: 'Kerberos administrator\'s group.'
       , openldap_server_krb5.krbadmin_group
+
+## Slapd 
+    
+      openldap_server.urls ?= [ 'ldapi:///','ldap:///' ]
+      openldap_server.urls.push 'ldaps:///' if openldap_server.tls and openldap_server.urls.indexOf('ldaps:///') is -1
 
 ## Dependencies
 
