@@ -9,5 +9,8 @@ TODO: https://dev.mysql.com/doc/refman/5.7/en/mysql-cluster.html
       configure:
         'masson/commons/mysql/server/configure'
       commands:
-        'install':
+        'install': [
           'masson/commons/mysql/server/install'
+          'masson/commons/mysql/server/replication'
+          'masson/commons/mysql/server/check'
+        ]
