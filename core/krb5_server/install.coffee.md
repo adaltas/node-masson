@@ -15,6 +15,7 @@ Resources:
 *   [Replication](http://tldp.org/HOWTO/Kerberos-Infrastructure-HOWTO/server-replication.html)
 *   [Kerberos with LDAP backend on ubuntu](http://labs.opinsys.com/blog/2010/02/05/setting-up-openldap-kerberos-on-ubuntu-10-04-lucid/)
 *   [On Load Balancers and Kerberos](https://ssimo.org/blog/id_019.html)
+*   [Kerberos With LDAP on centos 7](http://www.rjsystems.nl/en/2100-d6-kerberos-openldap-provider.php)
 
     safe_etc_krb5_conf = require('.').safe_etc_krb5_conf
 
