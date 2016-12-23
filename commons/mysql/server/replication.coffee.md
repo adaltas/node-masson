@@ -73,18 +73,19 @@ Gather the target master informations, then start the slave replication.
                 parts = line.trim().split(':')
                 master_file = parts[1].trim() if parts[0] is 'File'
                 master_pos = parts[1].trim() if parts[0] is 'Position'
-            @execute
-              cmd: db.cmd props, """
-                STOP SLAVE ;
-                RESET SLAVE ;
-                CHANGE MASTER TO \
-                MASTER_HOST = '#{repl_master.host}', \
-                MASTER_USER = '#{repl_master.user}', \
-                MASTER_PASSWORD = '#{repl_master.pwd}',
-                MASTER_LOG_FILE='#{master_file}', \
-                MASTER_LOG_POS=#{master_pos} ;
-                START SLAVE ;
-              """
+            @call ->
+              @execute
+                cmd: db.cmd props, """
+                  STOP SLAVE ;
+                  RESET SLAVE ;
+                  CHANGE MASTER TO \
+                  MASTER_HOST = '#{repl_master.host}', \
+                  MASTER_USER = '#{repl_master.user}', \
+                  MASTER_PASSWORD = '#{repl_master.pwd}',
+                  MASTER_LOG_FILE='#{master_file}', \
+                  MASTER_LOG_POS=#{master_pos} ;
+                  START SLAVE ;
+                """
               
 
 ## Dependencies

@@ -41,11 +41,19 @@ Package on Centos/Redhat 7 OS.
         @call
           if: -> (options.store['mecano:system:type'] in ['redhat','centos'])
           handler: ->
-            @service
+            @call
               if: -> (options.store['mecano:system:release'][0] is '7')
-              name: 'mariadb-server'
-              chk_name: service_name
-              startup: true
+              handler: ->
+                @service
+                  name: 'mariadb-server'
+                  chk_name: service_name
+                  startup: true
+                @tmpfs
+                  mount: "#{path.dirname mysql.server.my_cnf['mysqld']['pid-file']}"
+                  name: 'mariadb'
+                  perm: '0750'
+                  uid: mysql.server.user.name
+                  gid: mysql.server.group.name
             @service
               if: -> (options.store['mecano:system:release'][0] is '6')
               name: 'mysql-server'

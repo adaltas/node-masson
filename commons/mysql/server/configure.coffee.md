@@ -88,6 +88,7 @@ Note: For Now Ryba does not support automatic discovery for more than 2 master.
         mysql.server.my_cnf['mysqld']['relay-log-info-file'] ?= "#{mysql.replication_dir}/relay-log.info"
         mysql.server.my_cnf['mysqld']['log-slave-updates'] ?= ''
         mysql.server.my_cnf['mysqld']['replicate-same-server-id'] ?= '0'
+        mysql.server.my_cnf['mysqld']['slave-skip-errors'] = '1062' #skip all duplicate errors you might be getting
 
 ### Journalisation
 

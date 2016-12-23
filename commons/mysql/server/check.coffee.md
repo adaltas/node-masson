@@ -30,7 +30,8 @@ Wait connect action is used as a check n the port availability.
             cmd: "#{db.cmd props,'show slave status \\G ;'} | grep Slave_IO_State"
           , (err, status, stdout) ->
             throw err if err
-            throw Error 'Error in Replication' unless /^Slave_IO_State:\sWaiting for master to send event/.test stdout.trim()
+            ok = /^Slave_IO_State:\sWaiting for master to send event/.test(stdout.trim() )or /^Slave_IO_State:\sConnecting to master/.test(stdout.trim())
+            throw Error 'Error in Replication state' unless ok
 
 ## Dependencies
 
