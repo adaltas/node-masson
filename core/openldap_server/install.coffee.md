@@ -5,7 +5,7 @@ The default ports used by OpenLdap server are 389 and 636.
 
 todo: add migrationtools
 
-    module.exports = header: 'OpenLDAP Server Install', handler: ->
+    module.exports = header: 'OpenLDAP Server Install', handler: (options) ->
       {openldap_server} = @config
 
 ## IPTables
@@ -44,11 +44,18 @@ ldap:x:55:
         name: 'openldap-servers'
         chk_name: 'slapd'
         startup: true
-        action: 'start'
       @service
         name: 'openldap-clients'
       @service
         name: 'migrationtools'
+      @tmpfs
+        if: -> (options.store['mecano:system:type'] in ['redhat','centos']) and (options.store['mecano:system:release'][0] is '7')
+        mount: '/var/run/openldap'
+        name: 'openldap'
+        uid: openldap_server.user.name
+        gid: openldap_server.group.name
+        perm: '0750'
+      @service.start 'slapd'
 
 ## Logging
 

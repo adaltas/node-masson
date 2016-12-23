@@ -4,6 +4,7 @@
     module.exports =
       use:
         iptables: implicit: true, module: 'masson/core/iptables'
+        iptables: module: 'masson/core/network'
       configure: [
         'masson/core/openldap_server/configure'
         'masson/core/openldap_client/configure'
