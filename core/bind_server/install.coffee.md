@@ -1,7 +1,7 @@
 
 # Bind server Install
 
-    module.exports = header: 'Bind Server Install', handler: ->
+    module.exports = header: 'Bind Server Install', handler: (options) ->
       {bind_server} = @config
 
 ## Users & Groups
@@ -45,6 +45,13 @@ The packages "bind" is installed as a startup item and not yet installed.
         name: 'bind'
         srv_name: 'named'
         startup: true
+      @tmpfs
+        if: -> (options.store['mecano:system:type'] in ['redhat','centos']) and (options.store['mecano:system:release'][0] is '7')
+        mount: '/run/named'
+        name: 'named'
+        perm: '0750'
+        uid: bind_server.user.name
+        gid: bind_server.group.name
 
 ## Configure
 
