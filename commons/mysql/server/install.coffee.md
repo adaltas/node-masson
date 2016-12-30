@@ -1,11 +1,11 @@
 
-# Mysql Server Install
+# MySQL Server Install
 
-    module.exports = header: 'Mysql Server Install', handler: ->
+    module.exports = header: 'MySQL Server Install', handler: ->
       {iptables, mysql} = @config
       {ssl} = @config.ryba
       service_name = 'mysqld'
-    
+
 ## IPTables
 
 | Service           | Port | Proto | Parameter |
@@ -24,7 +24,8 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
         if: iptables.action is 'start'
 
 ## Package
-Install the Mysql database server. Secure the temporary directory. Install MariaDB
+
+Install the MySQL database server. Secure the temporary directory. Install MariaDB
 Package on Centos/Redhat 7 OS.
 
       @call header: 'Package', timeout: -1, handler: (options) ->
@@ -59,7 +60,9 @@ Package on Centos/Redhat 7 OS.
               name: 'mysql-server'
               chk_name: service_name
               startup: true
-## Layout 
+
+## Layout
+
 Create the directories, needed by the database.
 
       @mkdir
@@ -105,10 +108,11 @@ Create the directories, needed by the database.
         mode: 0o0750
 
 ## Configuration
+
 Generates the `my.cnf` file, read be MySQL/MariaDB, and restart the service if it 
 is running.
 
-      @call header: 'Mysql Configuration', handler: ->
+      @call header: 'Configuration', handler: ->
         @file.ini
           target: '/etc/my.cnf'
           content: mysql.server.my_cnf
@@ -162,8 +166,9 @@ is running.
         @execute
           cmd: "mysql_install_db --user=#{mysql.server.my_cnf['mysqld']['user']}  --datadir=#{mysql.server.my_cnf['mysqld']['datadir']}"
           unless_exists: "#{mysql.server.my_cnf['mysqld']['datadir']}/mysql"
-          
+
 ## Secure Installation
+
 `/usr/bin/mysql_secure_installation` (run as root after install).
 Enter current password for root (enter for none):
 Set root password? [Y/n] y
@@ -179,7 +184,7 @@ when admin user has configured it elsewhere, then it restarts the database serve
 with the chosen params. Other action could be used to change the root password, but
 `/usr/bin/mysql_secure_installation` program is to the one to be used for production
 envrionment.
-The bu is fixed after version 5.7 of MySQL/MariaDB.
+The bug is fixed after version 5.7 of MySQL/MariaDB.
 
       @call 
         header: 'Secure Installation'
@@ -204,7 +209,7 @@ The bu is fixed after version 5.7 of MySQL/MariaDB.
             version = match[0].split('.')[1] if match
             safe_start = not (version >= 7) or ((version <= 7) and mysql.server.my_cnf['mysqld']['socket'] is '/var/lib/mysql/mysql.sock')
           @call 
-            header: 'Setup mysql secure installation'
+            header: 'Secure MySQL'
             unless_exec: "#{db.cmd database, 'show databases'}"
             handler: ->
               @call 
