@@ -1,7 +1,7 @@
 
 # HTTPD Web Server Configure
 
-    module.exports = handler: ->
+    module.exports = ->
       httpd = @config.httpd ?= {}
       # Service
       httpd.startup ?= '235'
