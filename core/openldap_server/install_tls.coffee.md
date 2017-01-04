@@ -405,6 +405,7 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=ryba
               write.push 
                 match: /^SLAPD_LDAPS.*/mg
                 replace: 'SLAPD_LDAPS=yes'
+                append: true
               sysconfig_file = '/etc/sysconfig/ldap'
             when '7'
               urls = ''
@@ -412,13 +413,13 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=ryba
               write.push 
                 match: /^SLAPD_URLS.*/mg
                 replace: "SLAPD_URLS=\"#{urls}\""
+                append: true
               sysconfig_file = '/etc/sysconfig/slapd'
             else throw Error 'Version of Centos/Redhat not supported'
         @file
           header: 'Activation'
           write: write
           target: sysconfig_file
-          append: true
       @service.restart
         header: 'Restart'
         name: 'slapd'
