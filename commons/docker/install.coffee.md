@@ -14,17 +14,35 @@ service.
         yum_name: 'docker-io'
         startup: true
         action: 'start'
+      @tmpfs
+        if: -> (options.store['mecano:system:type'] in ['redhat','centos']) and (options.store['mecano:system:release'][0] is '7')
+        mount: '/var/run/docker'
+        name: 'docker'
+        perm: '0750'
 
 ## Configuration
 
       other_args = for k, v of options.other_args then "--#{k}=#{v}"
-      @file
-        target: '/etc/sysconfig/docker'
-        write: [
-          match: /^other_args=.*$/m
-          replace: "other_args=\"#{other_args.join ' '}\""
-        ]
-        backup: true
+      @call 
+        if: -> (options.store['mecano:system:type'] in ['redhat','centos'])
+        handler: ->
+          switch options.store['mecano:system:release'][0]
+            when '6' 
+              @file
+                target: '/etc/sysconfig/docker'
+                write: [
+                  match: /^other_args=.*$/mg
+                  replace: "other_args=\"#{other_args.join ' '}\"" 
+                ]
+                backup: true
+            when '7'
+              @file
+                target: '/etc/sysconfig/docker'
+                write: [
+                  match: /^OPTIONS=.*$/mg
+                  replace: "OPTIONS=\"#{other_args.join ' '}\"" 
+                ]
+                backup: true
 
 ## Install docker-pid
 
