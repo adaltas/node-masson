@@ -47,6 +47,7 @@ Example:
       # Limits
       system.limits ?= {}
       system.limits.memlock ?= {}
+      #system.limits.memlock.soft ?= 130
       system.limits.memlock.hard ?= 130
       # Groups
       system.groups ?= {}
