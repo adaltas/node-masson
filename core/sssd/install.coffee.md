@@ -38,9 +38,9 @@ the command `authconfig --update --ldaploadcacert={file}`.
             shy: true
           , (err, _, stdout) ->
             filename = stdout.trim() unless err
-          @call ->
+          # @call ->
             # TODO: use move to speed this up, improve status handling
-            @file.download 
+            @file.download
               source: certificate
               target: "/etc/openldap/cacerts/#{filename}.0"
               # target: "#{config.TLS_CACERTDIR}/#{filename}.0"
