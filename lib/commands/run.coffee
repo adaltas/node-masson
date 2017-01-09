@@ -64,6 +64,7 @@ module.exports = ->
     for k, v of config.styles
       styles[k] = if typeof v is 'string' then colors[v] else v
     run params, config
+    .exec params
     .on 'context', (ctx) ->
       ctx
       .on 'middleware_skip', (middleware) ->
