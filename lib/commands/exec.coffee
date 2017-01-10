@@ -22,7 +22,6 @@ module.exports = ->
       context [], params, merge {}, config.config, node.config
       .ssh.open config.config.ssh , host: node.config.ip
       .call (options, callback) ->
-        console.log 'coucouc'
         exec options.ssh, params.subcommand, (err, stdout, stderr) ->
           write if err
           then "\x1b[31m#{node.config.host} (exit code #{err.code})\x1b[39m\n"
