@@ -19,7 +19,7 @@ module.exports = ->
       node.config ?= {}
       node.config.host = host
       return next() if params.hosts? and multimatch(node.config.host, params.hosts).indexOf(node.config.host) is -1
-      context [], params, merge {}, config.config, node.config
+      context [], params, node.services, merge {}, config.config, node.config
       .ssh.open config.config.ssh , host: node.config.ip
       .call (options, callback) ->
         exec options.ssh, params.subcommand, (err, stdout, stderr) ->
