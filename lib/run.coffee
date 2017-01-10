@@ -12,6 +12,8 @@ mecano = require 'mecano'
 constraints = require './constraints'
 context = require './context'
 
+normalize_node = (node) ->
+
 normalize_service = (service) ->
   service = require.main.require service if typeof service is 'string'
   service.use ?= {}
@@ -42,7 +44,6 @@ normalize_service = (service) ->
   service
 
 Run = (params, @config) ->
-  params.end ?= true
   EventEmitter.call @
   @setMaxListeners 100
   process.on 'uncaughtException', (err) =>
@@ -54,6 +55,7 @@ Run = (params, @config) ->
     node.config ?= {}
     node.config.host ?= id
     node.config.shortname ?= node.config.host.split('.')[0]
+    node.services ?= []
   # Discover module inside parent project
   for p in Module._nodeModulePaths path.resolve '.'
     require.main.paths.push p
@@ -82,22 +84,24 @@ Run = (params, @config) ->
       continue if use.id is service.id
       graph.add use.id, service.id
   service_ids = graph.sort()
-  # Build Mecano context
-  @contexts = []
-  for id, node of @config.nodes
-    @contexts.push context @contexts, params, merge {}, @config.config, node.config
   # List services in context
   for service_id in service_ids
     service = @config.services[service_id]
     continue unless service
     nodes = constraints @config.nodes, service.constraints
-    nodes = nodes.map (node) -> node.config.host
-    for context in @contexts
-      context.services.push service_id if context.config.host in nodes
-  # Merge service configuration into note
-  for context in @contexts
-    for service in context.services
-      merge context.config, @config.services[service].config
+    for node in nodes
+      node.services.push service_id
+  # Merge global, node and service configuration
+  for id, node of @config.nodes
+    config = {}
+    merge config, @config.config, node.config
+    for service in node.services
+      merge config, @config.services[service].config
+    node.config = config
+  # Build Mecano context
+  @contexts = []
+  for id, node of @config.nodes
+    @contexts.push context @contexts, params, node.services, node.config
   # Configuration
   for service_id in service_ids
     service = @config.services[service_id]
@@ -123,9 +127,11 @@ Options:
 *   `command`
 *   `hosts`
 *   `modules`
+*   `end`
 ###
 Run::exec = (params='install') ->
   params = command: params if typeof params is 'string'
+  params.end ?= true
   services = @config.services
   each @contexts
   .parallel true
@@ -153,7 +159,7 @@ Run::exec = (params='install') ->
           error = true
           throw err
     context.then (err) ->
-      @ssh.close()
+      @ssh.close() if params.end
       console.log 'ERROR', err if err and not error
       @then callback
   .then (err) =>
