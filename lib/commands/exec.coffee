@@ -20,8 +20,9 @@ module.exports = ->
       node.config.host = host
       return next() if params.hosts? and multimatch(node.config.host, params.hosts).indexOf(node.config.host) is -1
       context [], params, merge {}, config.config, node.config
-      .call 'masson/bootstrap/connection/install'
-      .call (options, callback)->
+      .ssh.open config.config.ssh , host: node.config.ip
+      .call (options, callback) ->
+        console.log 'coucouc'
         exec options.ssh, params.subcommand, (err, stdout, stderr) ->
           write if err
           then "\x1b[31m#{node.config.host} (exit code #{err.code})\x1b[39m\n"
@@ -30,7 +31,7 @@ module.exports = ->
           write "\x1b[36m#{stdout.trim()}\x1b[39m\n" if stdout.length
           write "\x1b[35m#{stderr.trim()}\x1b[39m\n" if stderr.length
           write "\n"
-          options.ssh.end()
           callback()
+      .ssh.close()
     .then (err) ->
       # Done
