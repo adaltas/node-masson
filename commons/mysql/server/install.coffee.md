@@ -49,7 +49,7 @@ Package on Centos/Redhat 7 OS.
                   name: 'mariadb-server'
                   chk_name: service_name
                   startup: true
-                @tmpfs
+                @system.tmpfs
                   mount: "#{path.dirname mysql.server.my_cnf['mysqld']['pid-file']}"
                   name: 'mariadb'
                   perm: '0750'

@@ -48,7 +48,7 @@ ldap:x:55:
         name: 'openldap-clients'
       @service
         name: 'migrationtools'
-      @tmpfs
+      @system.tmpfs
         if: -> (options.store['mecano:system:type'] in ['redhat','centos']) and (options.store['mecano:system:release'][0] is '7')
         mount: '/var/run/openldap'
         name: 'openldap'

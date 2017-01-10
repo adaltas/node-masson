@@ -14,7 +14,7 @@ service.
         yum_name: 'docker-io'
         startup: true
         action: 'start'
-      @tmpfs
+      @system.tmpfs
         if: -> (options.store['mecano:system:type'] in ['redhat','centos']) and (options.store['mecano:system:release'][0] is '7')
         mount: '/var/run/docker'
         name: 'docker'
