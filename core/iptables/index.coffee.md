@@ -36,6 +36,8 @@ Example:
 ```
 
     module.exports =
+      use:
+        yum: implicit: true, module: 'masson/core/yum'
       configure:
         'masson/core/iptables/configure'
       commands:
