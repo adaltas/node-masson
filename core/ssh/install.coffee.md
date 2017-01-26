@@ -5,9 +5,7 @@
 
 ## Package
 
-      @call
-        header: 'Packages'
-      , ->
+      @call header: 'Packages', ->
         @service
           name: "openssh-server"
         @service
