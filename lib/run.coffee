@@ -15,7 +15,9 @@ context = require './context'
 normalize_node = (node) ->
 
 normalize_service = (service) ->
-  service = require.main.require service if typeof service is 'string'
+  if typeof service is 'string'
+    service = path.resolve process.cwd(), service if service.substr(0, 1) is '.'
+    service = require.main.require service
   service.use ?= {}
   for id, v of service.use
     v = service.use[id] = module: v if typeof v is 'string'
@@ -49,13 +51,8 @@ Run = (params, @config) ->
   process.on 'uncaughtException', (err) =>
     @emit 'error', err
   @config.config = merge {}, @config.config... if Array.isArray @config.config
-  # Normalize nodes
-  for id, node of @config.nodes
-    node.id ?= id
-    node.config ?= {}
-    node.config.host ?= id
-    node.config.shortname ?= node.config.host.split('.')[0]
-    node.services ?= []
+  @config.services ?= {}
+  @config.nodes ?= {}
   # Discover module inside parent project
   for p in Module._nodeModulePaths path.resolve '.'
     require.main.paths.push p
@@ -65,11 +62,26 @@ Run = (params, @config) ->
     service.module ?= id
     normalize_service service
     merge service, normalize_service service.module
+  # Normalize nodes
+  for id, node of @config.nodes
+    node.id ?= id
+    node.config ?= {}
+    node.config.host ?= id
+    node.config.shortname ?= node.config.host.split('.')[0]
+    node.services ?= []
+    for service in node.services
+      service = merge
+        id: service
+        module: service
+        constraints: nodes: "#{node.id}": true
+      , @config.services[service]
+      , normalize_service service
+      @config.services[service.id] = service 
   # Add auto loaded services
   load_children = (service) =>
     for id, use of service.use
       if use.implicit
-        module = @config.services[use.id] or require.main.require(use.module)
+        module = @config.services[use.id] or @require use.module
         use = merge module, use
         child = @config.services[use.id] = normalize_service use
         merge child.constraints, service.constraints
@@ -110,7 +122,7 @@ Run = (params, @config) ->
       continue unless service_id in context.services
       for configure, i in service.configure
         switch typeof configure
-          when 'string' then configure_fn = service.configure[i] = require.main.require configure
+          when 'string' then configure_fn = service.configure[i] = @require configure
           when 'function' then configure_fn = configure
           else throw Error "Invalid configure defined by: #{JSON.stringify service_id}"
         try
@@ -121,6 +133,10 @@ Run = (params, @config) ->
           return
   @
 util.inherits Run, EventEmitter
+
+Run::require = (module) ->
+  module = path.resolve process.cwd(), module if module.substr(0, 1) is '.'
+  require.main.require module
 
 ###
 Options:
