@@ -68,7 +68,7 @@ Example:
           'config_file_version' : '2'
           'reconnection_retries' : '3'
           'sbus_timeout' : '30'
-          'services' : 'nss, pam'
+          'services' : 'nss, pam'#Note on redhat 7, sudo must be added to become root using sssd
           'debug_level': '1'
         'nss':
           'filter_groups' : 'root'
