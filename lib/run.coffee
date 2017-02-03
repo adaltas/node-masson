@@ -156,7 +156,7 @@ Run::exec = (params='install') ->
     error = false
     context.log.cli host: context.config.host, pad: host: 20, header: 60
     context.log.md basename: context.config.shortname
-    context.ssh.open context.config.ssh, host: context.config.ip or context.config.host
+    context.ssh.open context.config.ssh, host: context.config.ip or context.config.host unless params.command is 'prepare'
     context.call ->
       for id in context.services then do (id) =>
         service = services[id]
