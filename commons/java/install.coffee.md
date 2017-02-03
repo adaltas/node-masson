@@ -74,6 +74,8 @@ have been copied or not (in case they already exist).
             @file.download
               source: jdk.jdk_location
               target: "/tmp/java.#{now}/#{path.basename jdk.jdk_location}"
+              location: true
+              headers: ['Cookie: oraclelicense=accept-securebackup-cookie']
             @mkdir "#{java.jdk.root_dir}/jdk#{version}"
             @extract
               source: "/tmp/java.#{now}/#{path.basename jdk.jdk_location}"
@@ -86,6 +88,8 @@ have been copied or not (in case they already exist).
             @file.download
               source: "#{jdk.jce_location}"
               target: "/var/tmp/#{path.basename jdk.jce_location}"
+              location: true
+              headers: ['Cookie: oraclelicense=accept-securebackup-cookie']
               shy: true
             @mkdir "/tmp/#{path_name}.#{now}", shy: true
             @mkdir "/tmp/#{path_name}", shy: true
