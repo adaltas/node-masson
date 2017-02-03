@@ -26,11 +26,13 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
 ## User & groups
 By default the "mariadb-server/mysql-server" packages create the following entry:
 
-
 ```bash
 cat /etc/passwd | grep mysql
 mysql:x:27:27:MariaDB Server:/var/lib/mysql:/sbin/nologin
 ```
+Actions present to be able to change uid/gid:
+Note: Be careful if using different name thans 'mysql:mysql'
+User/group are hard coded in some of mariadb/mysql package scripts.
 
       @call header: 'Users & Groups', handler: ->
         @group mysql.server.group
@@ -116,6 +118,12 @@ Create the directories, needed by the database.
       @mkdir
         header: 'Run dir'
         target: "#{path.dirname mysql.server.my_cnf['mysqld']['pid-file']}"
+        uid: mysql.server.user.name
+        gid: mysql.server.group.name
+        mode: 0o0750
+      @mkdir
+        header: 'Socket Dir'
+        target: "#{path.dirname mysql.server.my_cnf['mysqld']['socket']}"
         uid: mysql.server.user.name
         gid: mysql.server.group.name
         mode: 0o0750
