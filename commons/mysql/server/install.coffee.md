@@ -23,6 +23,19 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
         ]
         if: iptables.action is 'start'
 
+## User & groups
+By default the "mariadb-server/mysql-server" packages create the following entry:
+
+
+```bash
+cat /etc/passwd | grep mysql
+mysql:x:27:27:MariaDB Server:/var/lib/mysql:/sbin/nologin
+```
+
+      @call header: 'Users & Groups', handler: ->
+        @group mysql.server.group
+        @user mysql.server.user
+
 ## Package
 
 Install the MySQL database server. Secure the temporary directory. Install MariaDB
