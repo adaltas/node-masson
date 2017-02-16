@@ -8,16 +8,26 @@ code, runtime, system tools, system libraries – anything you can install on a
 server. This guarantees that it will always run the same, regardless of the
 environment it is running in. 
 
+## How To
+
+This modules aims to install docker engine on any host. It does not support docker-cluster
+installation. For this purpose you can use `ryba/swarm/manager` and `ryba/swarm/agent`
+modules which will bring docker swarm support for the local docker engine.
+
+Indeed this module care about installing docker daemon, configure startup options
+setup TLS, sockets etc. Configuration which are mandatory if you want to use docker cluster.
+
     module.exports =
       use:
         iptables: implicit: true, module: 'masson/core/iptables'
       configure:
         'masson/commons/docker/configure'
       commands:
-        'install': handler: ->
-          @call 'masson/commons/docker/install', @config.docker
-          @call 'masson/commons/docker/stop', if: -> @status -1
-          @call 'masson/commons/docker/start'
+        'install':
+          [
+            'masson/commons/docker/install'
+            'masson/commons/docker/start'
+          ]
         'prepare':
           'masson/commons/docker/prepare'
         'start':

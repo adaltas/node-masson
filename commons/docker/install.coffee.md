@@ -2,47 +2,83 @@
 # Docker Install
 
     module.exports = header: 'Docker Install', handler: (options) ->
-    
+      {docker} = @config
+      {ssl, other_args, sockets} = docker
+      
 ## Install
 
-Install the `docker-io` package and configure it as a startup and started
-service.
+Install the `docker-io` package on Centos/REHL 6 or `docker` on Centos/REHL 7.
+Configure it as a startup and started service.
+Skip Pakage installation, if provided by external deploy tool.
 
-      @service
-        header: 'Service'
-        name: 'docker'
-        yum_name: 'docker-io'
-        startup: true
-        action: 'start'
-      @system.tmpfs
-        if: -> (options.store['mecano:system:type'] in ['redhat','centos']) and (options.store['mecano:system:release'][0] is '7')
-        mount: '/var/run/docker'
-        name: 'docker'
-        perm: '0750'
-
-## Configuration
-
-      other_args = for k, v of options.other_args then "--#{k}=#{v}"
       @call 
+        header: 'Cache Current System'
+        handler: discover.system
+      @call
+        unless: @config.docker.external
         if: -> (options.store['mecano:system:type'] in ['redhat','centos'])
+        header: 'Packages'
         handler: ->
           switch options.store['mecano:system:release'][0]
-            when '6' 
-              @file
-                target: '/etc/sysconfig/docker'
-                write: [
-                  match: /^other_args=.*$/mg
-                  replace: "other_args=\"#{other_args.join ' '}\"" 
-                ]
-                backup: true
+            when '6'
+              @service
+                header: 'Service'
+                name: 'docker'
+                yum_name: 'docker-io'
+                startup: true
             when '7'
-              @file
-                target: '/etc/sysconfig/docker'
-                write: [
-                  match: /^OPTIONS=.*$/mg
-                  replace: "OPTIONS=\"#{other_args.join ' '}\"" 
-                ]
-                backup: true
+              @service
+                header: 'Service'
+                name: 'docker'
+                yum_name: 'docker'
+                startup: true
+              @system.tmpfs
+                mount: '/var/run/docker'
+                name: 'docker'
+                perm: '0750'
+
+## Configuration
+      
+      @call header: 'Daemon Option', handler: ->
+        other_opts = @config.docker.other_opts
+        opts = []
+        opts.push "--#{k}=#{v}" for k,v of other_args
+        opts.push '--tlsverify' if ssl.tlsverify
+        for type, socketPaths of sockets
+          opts.push "-H #{type}://#{path}" for path in socketPaths
+        other_opts += opts.join ' '
+        @call 
+          if: -> (options.store['mecano:system:type'] in ['redhat','centos'])
+          handler: ->
+            switch options.store['mecano:system:release'][0]
+              when '6' 
+                @file
+                  target: '/etc/sysconfig/docker'
+                  write: [
+                    match: /^other_args=.*$/mg
+                    replace: "other_args=\"#{other_opts}\"" 
+                  ]
+                  backup: true
+              when '7'
+                @file
+                  target: '/etc/sysconfig/docker'
+                  write: [
+                    match: /^OPTIONS=.*$/mg
+                    replace: "OPTIONS=\"#{other_opts}\"" 
+                  ]
+                  backup: true
+
+## Download Certs
+
+      @file.download
+        source: @config.ryba.ssl.cacert
+        destination: ssl.cacert
+      @file.download
+        source: @config.ryba.ssl.cert
+        destination: ssl.cert
+      @file.download
+        source: @config.ryba.ssl.key
+        destination: ssl.key
 
 ## Install docker-pid
 
@@ -114,6 +150,10 @@ Compose is a tool for defining and running multi-container Docker applications.
       @chmod
         target: '/usr/local/bin/docker-compose'
         mode: 0o750
+
+## Dependencies
+
+    discover = require 'mecano/lib/misc/discover'
 
 ## Additionnal resources
 

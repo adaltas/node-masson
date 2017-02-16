@@ -55,6 +55,7 @@ Install the PostgreSQL database server.
           header: 'Load Container'
           unless: -> exists
           source: "#{tmp}/postgres.tar"
+          docker: @config.docker
       
 ## Run Container
 Run the PostgreSQL server container
@@ -63,6 +64,7 @@ Run the PostgreSQL server container
         machine: @config.mecano.machine
         header: 'Run PostgreSQL Container'
         label_true: 'RUNNED'
+        docker: @config.docker
         force: -> @status(-1)
         image: "postgres:#{postgres.version}"
         env: [
