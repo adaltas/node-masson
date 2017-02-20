@@ -16,7 +16,7 @@ named:x:25:
 ```
 
       @group bind_server.group
-      @user bind_server.user
+      @system.user bind_server.user
 
 ## IPTables
 

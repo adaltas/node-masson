@@ -55,7 +55,7 @@ Create the users defined inside the "hdp.users" configuration. See the
 [mecano "user" documentation][mecano_user] for additionnal information.
 
       @call header: 'Users', ->
-        @user user for _, user of system.users
+        @system.user user for _, user of system.users
 
 ## Profile
 
