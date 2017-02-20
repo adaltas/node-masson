@@ -113,7 +113,7 @@ Generates configuration files for rndc.
         @execute
           cmd: 'rndc-confgen -a -r /dev/urandom -c /etc/rndc.key'
           unless_exists: '/etc/rndc.key'
-        @chown
+        @system.chown
           target: '/etc/rndc.key'
           uid: bind_server.user.name
           gid: bind_server.group.name
