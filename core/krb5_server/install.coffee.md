@@ -59,7 +59,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
       if add_default_kdc_tcp_ports
         for port in (kdc_conf.kdcdefaults.kdc_tcp_ports or '88').split /\s,/
           rules.push chain: 'INPUT', jump: 'ACCEPT', dport: port, protocol: 'tcp', state: 'NEW', comment: "Kerberos Authentication Service and Key Distribution Center (krb5kdc daemon)"
-      @iptables
+      @tools.iptables
         header: 'IPTables'
         rules: rules
         if: @config.iptables.action is 'start'

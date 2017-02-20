@@ -29,7 +29,7 @@ Redirect input logs in "/var/log/messages".
         timeout: -1
         unless: -> @config.iptables.action isnt 'start' or @config.iptables.log is false
         handler: ->
-          @iptables
+          @tools.iptables
             rules: @config.iptables.log_rules
           @service
             srv_name: 'restart'
@@ -39,7 +39,7 @@ Redirect input logs in "/var/log/messages".
 
 Add user defined rules to IPTables.
 
-      @iptables
+      @tools.iptables
         header: 'Rules'
         timeout: -1
         if: @config.iptables.action is 'start'

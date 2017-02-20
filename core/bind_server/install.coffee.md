@@ -28,7 +28,7 @@ named:x:25:
 IPTables rules are only inserted if the parameter "iptables.action" is set to 
 "start" (default value).
 
-      @iptables
+      @tools.iptables
         header: 'IPTables'
         rules: [
           { chain: 'INPUT', jump: 'ACCEPT', dport: 53, protocol: 'tcp', state: 'NEW', comment: "Named" }
