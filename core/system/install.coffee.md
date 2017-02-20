@@ -47,7 +47,7 @@ Create the users defined inside the "hdp.groups" configuration. See the
 [mecano "group" documentation][mecano_group] for additionnal information.
 
       @call header: 'Groups', ->
-        @group group for _, group of system.groups
+        @system.group group for _, group of system.groups
 
 ## Users
 

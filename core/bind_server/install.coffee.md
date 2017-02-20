@@ -15,7 +15,7 @@ cat /etc/group | grep named
 named:x:25:
 ```
 
-      @group bind_server.group
+      @system.group bind_server.group
       @system.user bind_server.user
 
 ## IPTables

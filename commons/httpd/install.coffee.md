@@ -32,7 +32,7 @@ apache:x:48:
 ```
 
       @call header: 'Users & Groups', handler: ->
-        @group httpd.group
+        @system.group httpd.group
         @system.user httpd.user
 
 ## Install

@@ -35,7 +35,7 @@ Note: Be careful if using different name thans 'mysql:mysql'
 User/group are hard coded in some of mariadb/mysql package scripts.
 
       @call header: 'Users & Groups', handler: ->
-        @group mysql.server.group
+        @system.group mysql.server.group
         @system.user mysql.server.user
 
 ## Package
