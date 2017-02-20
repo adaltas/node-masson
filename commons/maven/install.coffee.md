@@ -11,9 +11,9 @@
       @extract
         source: '/var/tmp/maven.tar.gz'
         target: '/usr/ryba'
-      @link
+      @system.link
         source: "/usr/ryba/#{maven.dirname}"
         target: '/usr/ryba/maven'
-      @link
+      @system.link
         source: '/usr/ryba/maven/bin/mvn'
         target: '/usr/ryba/bin/mvn'
