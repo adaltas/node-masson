@@ -11,7 +11,7 @@ Install the libxml2 package and the SM plugin manager using NPM.
 
 Download source code from github.
 
-      @git
+      @tools.git
         source: cloud9.github
         target: "/usr/lib/cloud9"
 
