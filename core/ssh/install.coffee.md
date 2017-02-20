@@ -20,7 +20,7 @@ defined inside "users.[].authorized_keys".
         header: 'Authorized Keys'
       , ->
         for _, user of @config.system.users
-          @mkdir
+          @system.mkdir
             target: "#{user.home or '/home/'+user.name}/.ssh"
             uid: user.name
             gid: null

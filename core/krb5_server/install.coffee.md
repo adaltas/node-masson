@@ -179,7 +179,7 @@ The following files are updated:
               return callback err if err
               keyfileContent = content
               callback null, false
-          @mkdir
+          @system.mkdir
             target: path.dirname(ldap_service_password_file)
             if: -> @status -1
           @call (_, callback) ->

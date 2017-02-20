@@ -60,7 +60,7 @@ have been copied or not (in case they already exist).
           installed_versions = (string.lines stdout.trim())
             .filter (out) -> out if /jdk(.*)/.exec out
             .map (abs) -> "#{path.basename abs}" 
-        @mkdir java.jdk.root_dir
+        @system.mkdir java.jdk.root_dir
         @each java.jdk.versions, (options, callback) ->
           version = options.key
           jdk = options.value
@@ -76,7 +76,7 @@ have been copied or not (in case they already exist).
               target: "/tmp/java.#{now}/#{path.basename jdk.jdk_location}"
               location: true
               headers: ['Cookie: oraclelicense=accept-securebackup-cookie']
-            @mkdir "#{java.jdk.root_dir}/jdk#{version}"
+            @system.mkdir "#{java.jdk.root_dir}/jdk#{version}"
             @extract
               source: "/tmp/java.#{now}/#{path.basename jdk.jdk_location}"
               target: "#{java.jdk.root_dir}/jdk#{version}"
@@ -91,8 +91,8 @@ have been copied or not (in case they already exist).
               location: true
               headers: ['Cookie: oraclelicense=accept-securebackup-cookie']
               shy: true
-            @mkdir "/tmp/#{path_name}.#{now}", shy: true
-            @mkdir "/tmp/#{path_name}", shy: true
+            @system.mkdir "/tmp/#{path_name}.#{now}", shy: true
+            @system.mkdir "/tmp/#{path_name}", shy: true
             @extract
               source: "/var/tmp/#{path.basename jdk.jce_location}"
               target: "/tmp/#{path_name}.#{now}"

@@ -34,7 +34,7 @@ Wait for master remote login.
 
 ## Layout
 
-      @mkdir
+      @system.mkdir
         header: 'Replication dir'
         target: @config.mysql.replication_dir
         uid: @config.mysql.server.user.name

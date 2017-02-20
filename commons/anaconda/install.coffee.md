@@ -9,9 +9,9 @@ Install anaconda.
         version = options.key
         @call unless_exec: "#{anaconda.install_dir}/python#{version}/bin/python --version 2>&1 | grep #{anaconda.version}", handler: ->
           script = "#{anaconda.tmp_dir}/Anaconda#{version}-#{anaconda.version}-Linux-x86_64.sh"
-          @mkdir anaconda.tmp_dir
-          @mkdir anaconda.install_dir
-          @mkdir "#{anaconda.install_dir}/python#{version}"
+          @system.mkdir anaconda.tmp_dir
+          @system.mkdir anaconda.install_dir
+          @system.mkdir "#{anaconda.install_dir}/python#{version}"
           @file.download
             source: anaconda.source["python#{version}"]
             target: script

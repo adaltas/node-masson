@@ -80,48 +80,48 @@ Package on Centos/Redhat 7 OS.
 
 Create the directories, needed by the database.
 
-      @mkdir
+      @system.mkdir
         target: '/tmp/mysql'
         uid: mysql.server.user.name
         gid: mysql.server.group.name
         mode: 0o0774
-      @mkdir
+      @system.mkdir
         header: 'Journal log dir'
         target: mysql.journal_log_dir
         uid: mysql.server.user.name
         gid: mysql.server.group.name
         mode: 0o0750
-      @mkdir
+      @system.mkdir
         header: 'Bin log dir'
         target: mysql.server.my_cnf['mysqld']['log-bin']
         uid: mysql.server.user.name
         gid: mysql.server.group.name
         mode: 0o0750
-      @mkdir
+      @system.mkdir
         header: 'Data dir'
         target: mysql.server.my_cnf['mysqld']['datadir']
         uid: mysql.server.user.name
         gid: mysql.server.group.name
         mode: 0o0750
-      @mkdir
+      @system.mkdir
         header: 'Priv file'
         target: mysql.server.my_cnf['mysqld']['secure-file-priv']
         uid: mysql.server.user.name
         gid: mysql.server.group.name
         mode: 0o0750
-      @mkdir
+      @system.mkdir
         header: 'Log dir'
         target: "#{path.dirname mysql.server.my_cnf['mysqld']['log-error']}"
         uid: mysql.server.user.name
         gid: mysql.server.group.name
         mode: 0o0750
-      @mkdir
+      @system.mkdir
         header: 'Run dir'
         target: "#{path.dirname mysql.server.my_cnf['mysqld']['pid-file']}"
         uid: mysql.server.user.name
         gid: mysql.server.group.name
         mode: 0o0750
-      @mkdir
+      @system.mkdir
         header: 'Socket Dir'
         target: "#{path.dirname mysql.server.my_cnf['mysqld']['socket']}"
         uid: mysql.server.user.name

@@ -6,7 +6,7 @@
       @file.download
         source: maven.source
         target: '/var/tmp/maven.tar.gz'
-      @mkdir
+      @system.mkdir
         target: "/usr/ryba"
       @extract
         source: '/var/tmp/maven.tar.gz'
