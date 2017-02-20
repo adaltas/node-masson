@@ -211,9 +211,9 @@ The following files are updated:
               callback null, keyfileContent isnt content
 
       @call header: 'Log', timeout: 100000, handler: ->
-        @touch
+        @file.touch
           target: '/var/log/krb5kdc.log'
-        @touch
+        @file.touch
           target: '/var/log/kadmind.log'
         @file
           target: '/etc/rsyslog.conf'
