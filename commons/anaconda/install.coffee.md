@@ -16,7 +16,7 @@ Install anaconda.
             source: anaconda.source["python#{version}"]
             target: script
             md5: true
-          @chmod
+          @system.chmod
             target: script
             mode: 0o755
           @execute

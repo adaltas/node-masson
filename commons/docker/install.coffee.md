@@ -147,7 +147,7 @@ Compose is a tool for defining and running multi-container Docker applications.
         target: "/usr/local/bin/docker-compose"
         local: true
         unless_exec: 'which docker-compose'
-      @chmod
+      @system.chmod
         target: '/usr/local/bin/docker-compose'
         mode: 0o750
 
