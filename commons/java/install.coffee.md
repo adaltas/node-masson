@@ -100,10 +100,10 @@ have been copied or not (in case they already exist).
             @execute
               cmd: "mv  /tmp/#{path_name}.#{now}/*/* /tmp/#{path_name}/"
               shy: true
-            @copy
+            @system.copy
               source: "/tmp/#{path_name}/local_policy.jar"
               target: "#{java.jdk.root_dir}/jdk#{version}/jre/lib/security/local_policy.jar"
-            @copy
+            @system.copy
               source: "/tmp/#{path_name}/US_export_policy.jar"
               target: "#{java.jdk.root_dir}/jdk#{version}/jre/lib/security/US_export_policy.jar"
             @remove "/tmp/#{path_name}", shy: true
