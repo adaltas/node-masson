@@ -59,7 +59,7 @@ in "/etc/yum.repos.d"
               not local_files.some (local_file) -> path.basename(file) is path.basename(local_file)
             .map (file) -> # Transform to object
               target: file
-          @remove remote_files
+          @system.remove remote_files
         @call (_, callback) ->
           options.log "Upload #{local_files.length} files", level: 'INFO', module: 'masson/core/yum'
           @file (

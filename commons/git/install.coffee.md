@@ -28,7 +28,7 @@ Deploy the git configuration.
           target: '/etc/gitconfig'
           config: global
           if: global
-        @remove
+        @system.remove
           if: global is false
           target: '/etc/gitconfig'
         @git_config (

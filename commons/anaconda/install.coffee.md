@@ -21,4 +21,4 @@ Install anaconda.
             mode: 0o755
           @execute
             cmd: "#{script} -b -f -p #{anaconda.install_dir}/python#{version}"
-          @remove target: script
+          @system.remove target: script

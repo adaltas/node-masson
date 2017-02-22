@@ -81,7 +81,7 @@ have been copied or not (in case they already exist).
               source: "/tmp/java.#{now}/#{path.basename jdk.jdk_location}"
               target: "#{java.jdk.root_dir}/jdk#{version}"
               strip: 1
-            @remove "/tmp/java.#{now}/#{path.basename jdk.jdk_location}"
+            @system.remove "/tmp/java.#{now}/#{path.basename jdk.jdk_location}"
           @call
             header: "JCE #{version}"
           , ->
@@ -106,7 +106,7 @@ have been copied or not (in case they already exist).
             @system.copy
               source: "/tmp/#{path_name}/US_export_policy.jar"
               target: "#{java.jdk.root_dir}/jdk#{version}/jre/lib/security/US_export_policy.jar"
-            @remove "/tmp/#{path_name}", shy: true
+            @system.remove "/tmp/#{path_name}", shy: true
           @then callback
             
 ## Java Paths

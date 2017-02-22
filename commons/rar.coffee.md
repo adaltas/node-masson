@@ -25,7 +25,7 @@
       @execute
         cmd: "rpm -Uvh /tmp/rar.rpm"
         if: -> @status -1
-      @remove
+      @system.remove
         target: '/tmp/rar.rpm'
         if: -> @status -2
 
@@ -39,7 +39,7 @@
         unless_exec: 'which unrar'
       @execute
         cmd: "rpm -Uvh /tmp/unrar.rpm"
-      @remove
+      @system.remove
         target: '/tmp/unrar.rpm'
 
 ## Dependencies

@@ -279,7 +279,7 @@ Note: `openldap_server.bdb_file` default value is now configured at runtime. Che
           @execute
             cmd: "ldapdelete -c -H ldapi:/// -f #{target} -D #{openldap_server.root_dn} -w #{openldap_server.root_password}"
             code_skipped: 32
-          @remove
+          @system.remove
             target: target
 
 ## Add ldif data
@@ -299,7 +299,7 @@ Note: `openldap_server.bdb_file` default value is now configured at runtime. Che
           , (err, executed, stdout, stderr) ->
             return if err
             status = true if stdout.match(/Already exists/g)?.length isnt stdout.match(/adding new entry/g).length
-          @remove
+          @system.remove
             target: target
             shy: true
         @call (_, callback) ->

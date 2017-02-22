@@ -151,7 +151,7 @@ is running.
       # @call 
       #   if: -> @error -1
       #   handler: ->
-      #     @remove
+      #     @system.remove
       #       target: "/var/lib/mysql/mysql.sock"
       #     , (err, removed) ->
       #       throw err if err
