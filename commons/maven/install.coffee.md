@@ -8,7 +8,7 @@
         target: '/var/tmp/maven.tar.gz'
       @system.mkdir
         target: "/usr/ryba"
-      @extract
+      @tools.extract
         source: '/var/tmp/maven.tar.gz'
         target: '/usr/ryba'
       @system.link

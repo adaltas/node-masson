@@ -77,7 +77,7 @@ have been copied or not (in case they already exist).
               location: true
               headers: ['Cookie: oraclelicense=accept-securebackup-cookie']
             @system.mkdir "#{java.jdk.root_dir}/jdk#{version}"
-            @extract
+            @tools.extract
               source: "/tmp/java.#{now}/#{path.basename jdk.jdk_location}"
               target: "#{java.jdk.root_dir}/jdk#{version}"
               strip: 1
@@ -93,7 +93,7 @@ have been copied or not (in case they already exist).
               shy: true
             @system.mkdir "/tmp/#{path_name}.#{now}", shy: true
             @system.mkdir "/tmp/#{path_name}", shy: true
-            @extract
+            @tools.extract
               source: "/var/tmp/#{path.basename jdk.jce_location}"
               target: "/tmp/#{path_name}.#{now}"
               shy: true
