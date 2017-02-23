@@ -57,7 +57,7 @@
         #   replace: "olcModuleLoad: {1}ppolicy"
         #   append: true
         ]
-      # @execute
+      # @system.execute
       #   if: -> @config.host is active_host
       #   cmd: """
       #   replication_bindpw_sha=`slappasswd -s #{replication_bindpw}`
@@ -94,7 +94,7 @@
       #     ]
       #     first: true
       #   ]
-      @execute
+      @system.execute
         cmd: """
         ldapsearch -H "#{master_uri}" -D "#{replication_binddn}" -w "#{replication_bindpw}" -b "#{suffix}"
         """

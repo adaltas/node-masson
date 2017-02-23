@@ -147,7 +147,7 @@ The following files are updated:
               -b \"#{ldap_kerberos_container_dn}\"
             """
             code_skipped: 32
-          @execute 
+          @system.execute 
             cmd: """
             ldapsearch -x \
             -H #{ldap_server} -D \"#{manager_dn}\" -w #{manager_password} \
@@ -155,7 +155,7 @@ The following files are updated:
             """
             code_skipped: 32
           # Note, kdb5_ldap_util is using /etc/krb5.conf (server version)
-          @execute
+          @system.execute
             cmd: """
             kdb5_ldap_util \
             -D \"#{manager_dn}\" -w #{manager_password} \

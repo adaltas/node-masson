@@ -17,7 +17,7 @@ Wait for OpenLDAP servers to start.
 
 ## Check Search
 
-      @execute
+      @system.execute
         retry: 3
         header: 'Search'
         if: -> suffix

@@ -118,7 +118,7 @@ nsenter doesn't enter the cgroups, and therefore evades resource limitations.
 The potential benefit of this would be debugging and external audit, but for
 remote access, docker exec is the current recommended approach.
 
-      @execute
+      @system.execute
         header: 'nsenter'
         if: options.nsenter
         cmd: """
@@ -132,7 +132,7 @@ Docker Registry stores and distributes images centrally. It's where you push
 images to and pull them from; Docker Registry gives team members the ability to
 share images and deploy them to testing, staging and production environments.
 
-    #   @execute
+    #   @system.execute
     #     header: 'Registry 2.0'
     #     cmd: "docker run -p 5000:5000 registry:2.0"    
 

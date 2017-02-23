@@ -31,7 +31,7 @@ process is finished.
             @ssh = connection
             callback()
         # @log "Reboot"
-        @execute
+        @system.execute
           cmd: 'reboot\n'
         , (err, executed, stdout, stderr) ->
           return callback err if err

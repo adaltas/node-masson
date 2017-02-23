@@ -25,7 +25,7 @@ Wait connect action is used as a check n the port availability.
         header: 'Check Replication'
         if: @config.mysql.ha_enabled
         handler: ->
-          @execute
+          @system.execute
             retry: 3
             cmd: "#{db.cmd props,'show slave status \\G ;'} | grep Slave_IO_State"
           , (err, status, stdout) ->

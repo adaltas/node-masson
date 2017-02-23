@@ -7,7 +7,7 @@
 Install the libxml2 package and the SM plugin manager using NPM.
 
       @service name: 'libxml2-devel'
-      @execute cmd: 'npm install -g sm'
+      @system.execute cmd: 'npm install -g sm'
 
 Download source code from github.
 
@@ -18,6 +18,6 @@ Download source code from github.
 Run package installation.
 
       # TODO: detect previous install of sm
-      @execute
+      @system.execute
         cmd: "sm install"
         cwd: "/usr/lib/cloud9"

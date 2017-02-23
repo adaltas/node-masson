@@ -49,7 +49,7 @@ have been copied or not (in case they already exist).
         if: -> @config.java.jdk
       , (options) ->
         installed_versions = null
-        @execute
+        @system.execute
           header: "List Installed JDK"
           cmd: "ls -d #{java.jdk.root_dir}/*"
           code_skipped: 2
@@ -97,7 +97,7 @@ have been copied or not (in case they already exist).
               source: "/var/tmp/#{path.basename jdk.jce_location}"
               target: "/tmp/#{path_name}.#{now}"
               shy: true
-            @execute
+            @system.execute
               cmd: "mv  /tmp/#{path_name}.#{now}/*/* /tmp/#{path_name}/"
               shy: true
             @system.copy
@@ -111,7 +111,7 @@ have been copied or not (in case they already exist).
             
 ## Java Paths
 
-      @execute 
+      @system.execute 
         header: 'Set JDK Version (default)'
         cmd: """
         if [ -L  "#{java.jdk.root_dir}/default" ] || [ -e "#{java.jdk.root_dir}/default" ] ; then 
@@ -131,7 +131,7 @@ have been copied or not (in case they already exist).
         """
         code_skipped: 3
         trap: true
-      @execute 
+      @system.execute 
         header: 'Set JDK Version (latest)'
         cmd: """
         if [ -L  "#{java.jdk.root_dir}/latest" ] || [ -e "#{java.jdk.root_dir}/latest" ] ; then
@@ -151,7 +151,7 @@ have been copied or not (in case they already exist).
         """
         code_skipped: 3
         trap: true
-      @execute 
+      @system.execute 
         header: 'Link Java home'
         unless: java.java_home is "#{java.jdk.root_dir}/default"
         cmd: """

@@ -17,7 +17,7 @@ OS will reboot if SELINUX was modified.
         target: '/etc/selinux/config'
         match: /^SELINUX=.*/mg
         replace: "SELINUX=#{if system.selinux then 'enforcing' else 'disabled'}"
-      @execute
+      @system.execute
         header: 'Reboot'
         cmd: 'shutdown -r now'
         if: -> @status -1

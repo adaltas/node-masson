@@ -26,7 +26,7 @@ Note, I didnt find how to restrict dig to return only A records like it
 does for CNAME records if you append "cname" at the end of the command.
 I assume the A record to always be printed on the last line.
 
-      @execute
+      @system.execute
         header: 'DNS Forward Lookup'
         label_true: 'CHECKED'
         cmd: "dig #{@config.host}. +short"
@@ -43,7 +43,7 @@ I assume the A record to always be printed on the last line.
 Check reverse DNS lookup using the configured DNS configuration present inside
 "/etc/resolv.conf". Internally, the exectuted command uses "dig".
 
-      @execute
+      @system.execute
         header: 'DNS Reverse Lookup'
         label_true: 'CHECKED'
         cmd: "dig -x #{@config.ip} +short"
@@ -61,7 +61,7 @@ Check forward DNS lookup using the system configuration which take into account
 the local configuration present inside "/etc/hosts". Internally, the exectuted
 command uses "getent".
 
-      @execute
+      @system.execute
         header: 'System Forward Lookup'
         label_true: 'CHECKED'
         cmd: "getent hosts #{@config.host}"
@@ -80,7 +80,7 @@ Check forward DNS lookup using the system configuration which take into account
 the local configuration present inside "/etc/hosts". Internally, the exectuted
 command uses "getent".
 
-      @execute
+      @system.execute
         header: 'System Reverse Lookup'
         label_true: 'CHECKED'
         cmd: "getent hosts #{@config.ip}"
@@ -99,7 +99,7 @@ command uses "getent".
 Read the server hostname and check it matches the expected FQDN. Internally, 
 the executed command is `hostname --fqdn`.
 
-      @execute
+      @system.execute
         header: 'Hostname'
         label_true: 'CHECKED'
         cmd: "hostname --fqdn"

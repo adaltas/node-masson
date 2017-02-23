@@ -15,7 +15,7 @@ time when the `ntpd` daemon isnt yet started.
         code_stopped: [1, 3]
       # Note, no NTPD server may be available yet, no solution at the moment
       # to wait for an available NTPD server
-      @execute
+      @system.execute
         header: 'Synchronize'
         cmd: "ntpdate #{ntp.servers[0]}"
         retry: 20

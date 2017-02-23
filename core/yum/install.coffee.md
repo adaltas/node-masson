@@ -67,7 +67,7 @@ in "/etc/yum.repos.d"
             local: true
             target: "/etc/yum.repos.d/#{path.basename file}"
           ) for file in local_files
-          @execute
+          @system.execute
             cmd: 'yum clean metadata; yum -y update'
             if: @status -1
           @then callback
@@ -79,7 +79,7 @@ deployed by installing the "epel-release" package. It may also be installed from
 an url by defining the "yum.epel_url" property. To disable Epel, simply set the
 property "yum.epel" to false.
 
-      @execute
+      @system.execute
         header: 'Epel'
         timeout: 100000
         if: -> @config.yum.epel
@@ -90,7 +90,7 @@ property "yum.epel" to false.
 
 ## Package Update
 
-      @execute
+      @system.execute
         header: 'Update'
         cmd: "yum -y update"
         if: @config.yum.update

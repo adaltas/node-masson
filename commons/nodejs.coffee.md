@@ -64,7 +64,7 @@ N is a Node.js binary management system, similar to nvm and nave.
       env = {}
       env.http_proxy = http_proxy if http_proxy
       env.https_proxy = https_proxy if https_proxy
-      @execute
+      @system.execute
         env: env
         cmd: """
         export http_proxy=#{http_proxy or ''}
@@ -83,7 +83,7 @@ Multiple installation of Node.js may coexist with N.
 
     exports.push header: 'Node.js Installation', timeout: -1, handler: ->
       {method} = @config.nodejs
-      @execute
+      @system.execute
         cmd: "n #{@config.nodejs.version}"
         if: method is 'n'
 

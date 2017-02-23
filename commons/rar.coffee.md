@@ -22,7 +22,7 @@
         proxy: proxy
         binary: true
         unless_exec: 'which rar'
-      @execute
+      @system.execute
         cmd: "rpm -Uvh /tmp/rar.rpm"
         if: -> @status -1
       @system.remove
@@ -37,7 +37,7 @@
         proxy: proxy
         binary: true
         unless_exec: 'which unrar'
-      @execute
+      @system.execute
         cmd: "rpm -Uvh /tmp/unrar.rpm"
       @system.remove
         target: '/tmp/unrar.rpm'

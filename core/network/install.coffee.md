@@ -48,7 +48,7 @@ relevant file is "/etc/sysconfig/network".
             target: '/etc/sysconfig/network'
           , (err, replaced) ->
             restart = true if replaced
-          @execute
+          @system.execute
             cmd: "hostname #{@config.host} && service network restart"
             if: -> restart
 

@@ -196,7 +196,7 @@ masson init \
         Compare the file content with its expected value.
 
               check: ->
-                @execute
+                @system.execute
                   cmd: "[[ `cat /root/helloword` == '@config.helloword.content' ]]"
         """
         eof: true

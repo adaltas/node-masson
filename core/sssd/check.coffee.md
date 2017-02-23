@@ -12,7 +12,7 @@ $user`. The command is only executed if a test user is defined by the
         if: -> @config.sssd.test_user
         handler: ->
           {test_user} = ctx.config.sssd
-          @execute
+          @system.execute
             cmd: "getent passwd #{test_user}"
 
 ## Check PAM
@@ -26,5 +26,5 @@ user is defined by the "sssd.test_user" property.
         if: -> @config.sssd.test_user
         handler: ->
           {test_user} = ctx.config.sssd
-          @execute
+          @system.execute
             cmd: "su -l #{test_user} -c 'whoami'"

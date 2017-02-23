@@ -101,7 +101,7 @@ http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
               return if password_ok then  callback null, false else callback null, true
             else # First installation, password not yet defined
               callback null, true
-        @execute
+        @system.execute
           cmd: "slappasswd -s #{openldap_server.config_password}"
           if: -> @status -1
         , (err, executed, stdout) ->
@@ -132,7 +132,7 @@ Check section[3](https://www.server-world.info/en/note?os=CentOS_7&p=openldap).
         handler: ->
           @each ['cosine','inetorgperson','nis'], (options) ->
             name = options.key
-            @execute
+            @system.execute
               cmd: " ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/#{name}.ldif "
               unless_exec: """
                 ldapsearch -LLL -D #{openldap_server.config_dn} \
@@ -165,7 +165,7 @@ Note: `openldap_server.bdb_file` default value is now configured at runtime. Che
               return if password_ok then  callback null, false else callback null, true
             else # First installation, password not yet defined
               callback null, true
-        @execute
+        @system.execute
           cmd: "slappasswd -s #{openldap_server.root_password}"
           if: -> @status -1
         , (err, executed, stdout) ->
@@ -215,7 +215,7 @@ Note: `openldap_server.bdb_file` default value is now configured at runtime. Che
             ]
           ]
       [_, suffix_k, suffix_v] = /(\w+)=([^,]+)/.exec openldap_server.suffix
-      @execute
+      @system.execute
         header: 'Users and Groups'
         cmd: """
         ldapadd -c -H ldapi:/// -D #{openldap_server.root_dn} -w #{openldap_server.root_password} <<-EOF
@@ -245,7 +245,7 @@ Note: `openldap_server.bdb_file` default value is now configured at runtime. Che
         @service
           name: 'sudo'
         schema = '/tmp/ldap.schema'
-        @execute
+        @system.execute
           cmd: """
           schema=`rpm -ql sudo | grep -i schema.openldap`
           if [ ! -f $schema ]; then exit 2; fi
@@ -276,7 +276,7 @@ Note: `openldap_server.bdb_file` default value is now configured at runtime. Che
             source: path
             target: target
             mode: 0o0640
-          @execute
+          @system.execute
             cmd: "ldapdelete -c -H ldapi:/// -f #{target} -D #{openldap_server.root_dn} -w #{openldap_server.root_password}"
             code_skipped: 32
           @system.remove
@@ -292,7 +292,7 @@ Note: `openldap_server.bdb_file` default value is now configured at runtime. Che
             source: path
             target: target
             shy: true
-          @execute
+          @system.execute
             cmd: "ldapadd -c -H ldapi:/// -D #{openldap_server.root_dn} -w #{openldap_server.root_password} -f #{target}"
             code_skipped: 68
             shy: true

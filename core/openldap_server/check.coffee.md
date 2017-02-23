@@ -3,5 +3,5 @@
 
     module.exports = header: 'OpenLDAP Server Check', label_true: 'CHECKED', handler: ->
       {openldap_server} = @config
-      @execute
+      @system.execute
         cmd: "ldapsearch -x -H ldaps://#{@config.host} -b #{openldap_server.suffix} -D #{openldap_server.root_dn} -w #{openldap_server.root_password}"

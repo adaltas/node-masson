@@ -2,5 +2,5 @@
 # Network Restart
 
     module.exports = header: 'Network Restart', timeout: -1, handler: ->
-      @execute
+      @system.execute
         cmd: 'service network restart'

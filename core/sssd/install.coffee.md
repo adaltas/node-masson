@@ -33,7 +33,7 @@ the command `authconfig --update --ldaploadcacert={file}`.
             source: certificate
             target: "/tmp/#{hash}"
             shy: true
-          @execute # openssh is executed remotely
+          @system.execute # openssh is executed remotely
             cmd: "openssl x509 -noout -hash -in /tmp/#{hash}; rm -rf /tmp/#{hash}"
             shy: true
           , (err, _, stdout) ->
@@ -80,7 +80,7 @@ default overwritten unless the "sssd.merge" is `true`.
         {ldap_uri, ldap_search_base} = config['domain/default']?
         cmd += "--ldapserver=#{ldap_uri}" if ldap_uri
         cmd += "--ldapbasedn=#{ldap_search_base}" if ldap_search_base
-        @execute
+        @system.execute
           cmd: cmd
           if: -> @status -1
         @service

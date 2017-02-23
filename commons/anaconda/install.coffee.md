@@ -19,6 +19,6 @@ Install anaconda.
           @system.chmod
             target: script
             mode: 0o755
-          @execute
+          @system.execute
             cmd: "#{script} -b -f -p #{anaconda.install_dir}/python#{version}"
           @system.remove target: script

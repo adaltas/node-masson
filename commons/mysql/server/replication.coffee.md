@@ -47,7 +47,7 @@ Grant privileges on the remote master server to the user used for replication.
       @call header: 'Replication Activation', handler: ->
         master_pos = null
         master_file = null
-        @execute
+        @system.execute
           header: 'Slave Privileges'
           cmd: db.cmd remote_master, """
             GRANT REPLICATION SLAVE ON *.* TO '#{repl_master.user}'@'%' IDENTIFIED BY '#{repl_master.pwd}';
@@ -63,7 +63,7 @@ Gather the target master informations, then start the slave replication.
           header: 'Slave Setup'
           unless_exec: "#{db.cmd props, 'show slave status \\G'} | grep 'Master_Host' | grep '#{repl_master.host}'"
           handler: ->
-            @execute
+            @system.execute
               header: 'Master Infos'
               cmd: db.cmd remote_master, "show master status \\G"
             , (err, status, stdout, stderr) ->
@@ -74,7 +74,7 @@ Gather the target master informations, then start the slave replication.
                 master_file = parts[1].trim() if parts[0] is 'File'
                 master_pos = parts[1].trim() if parts[0] is 'Position'
             @call ->
-              @execute
+              @system.execute
                 cmd: db.cmd props, """
                   STOP SLAVE ;
                   RESET SLAVE ;

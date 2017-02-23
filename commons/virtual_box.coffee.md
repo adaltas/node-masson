@@ -7,7 +7,7 @@
 
     exports.push header: 'VirtualBox Guest Additions', timeout: -1, handler: (options) ->
       version_target, version_current
-      @execute
+      @system.execute
         ssh: false
         cmd: 'VBoxManage -v'
       , (err, executed, stdout) ->
@@ -15,7 +15,7 @@
         options.log 'Get Guest Additions version on VM machine'
         version_target = /\d+\.\d+\.\d+/.exec(stdout)[0]
       @call ->
-        @execute
+        @system.execute
           cmd: "modinfo vboxguest | grep ^version: | sed -r 's/.* ([0-9\\.]+)/\\1/'"
           code_skipped: 1
         , (err, executed, stdout) ->
@@ -23,7 +23,7 @@
           version_current = stdout.trim()
       @call ->
         options.log "Install latest Guest Additions #{version_target}"
-        @execute
+        @system.execute
           cmd: """
             yum install -y gcc kernel-* # might need to reboot
             source="http://download.virtualbox.org/virtualbox/#{version_target}/VBoxGuestAdditions_#{version_target}.iso"

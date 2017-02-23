@@ -110,7 +110,7 @@ Upload the zones definition files provided in the configuration file.
 Generates configuration files for rndc.   
 
       @call header: 'rndc Key', handler: ->
-        @execute
+        @system.execute
           cmd: 'rndc-confgen -a -r /dev/urandom -c /etc/rndc.key'
           unless_exists: '/etc/rndc.key'
         @system.chown

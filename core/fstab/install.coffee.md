@@ -25,7 +25,7 @@ Write /etc/fstab
 
 ## Mount
 
-      @execute (
+      @system.execute (
         header: 'Mount Volumes'
         if: fstab.enabled
         cmd: "mount #{disk.device}"

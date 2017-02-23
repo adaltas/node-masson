@@ -11,14 +11,14 @@ Some Programs might not start if all locale variables are exported with en empty
 such as LC_ALL= . We set all variable to `en_US.UTF-8` by default.
 
       props = {}
-      @execute
+      @system.execute
         cmd: "locale | grep \'LANG=#{locale.lang}\'"
         code_skipped: 1
         shy: true
       , (err, exists, stdout) ->
         throw err if err
         props['LANG'] = "#{locale.lang}" unless exists
-      @execute
+      @system.execute
         cmd: 'locale | grep \'LC_*\''
         shy: true
       , (err, executed, stdout, stderr) ->

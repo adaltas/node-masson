@@ -11,7 +11,7 @@ Expose system information. On execution, the context is enriched with the
 properties "kernel\_name", "nodename", "kernel\_release", "kernel\_version", 
 "processor" and "operating_system".
 
-      @execute
+      @system.execute
         header: 'Server'
         cmd: 'uname -snrvmo'
         stdout: null
@@ -58,7 +58,7 @@ It will output:
 ```
 
       properties = ['filesystem', 'total', 'used', 'available', 'available_pourcent', 'mountpoint']
-      @execute
+      @system.execute
         header: 'Disk'
         cmd: 'df'
       , (err, executed, stdout) ->
@@ -117,7 +117,7 @@ provide superior performance on encryption tasks. You can determine if a node's
 CPU supports the AES instruction set by running the following command: 
 `cat /proc/cpuinfo | grep flags | grep aes`
 
-      @execute
+      @system.execute
         header: 'CPU'
         cmd: 'cat /proc/cpuinfo'
       , (err, executed, stdout, stderr) ->
@@ -164,7 +164,7 @@ It will output:
   "Hugepagesize":2048000,"DirectMap4k":8128000,"DirectMap2M":1040384000}
 ```
 
-      @execute
+      @system.execute
         header: 'Mem'
         cmd: 'cat /proc/meminfo'
         stdout: null

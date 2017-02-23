@@ -20,7 +20,7 @@ synchronization the date and the `ntpd` daemon is finally restarted.
         options.log "Synchronize the system clock with #{@config.ntp.servers[0]}"
         {lag} = @config.ntp
         current_lag = null
-        @execute
+        @system.execute
           cmd: "date +%s"
         , (err, executed, stdout) ->
           throw err if err
@@ -33,7 +33,7 @@ synchronization the date and the `ntpd` daemon is finally restarted.
             @service.stop
               name: 'ntpd'
               code_stopped: [1, 3]
-            @execute
+            @system.execute
               cmd: "ntpdate #{@config.ntp.servers[0]}"
             @service.start
               name: 'ntpd'

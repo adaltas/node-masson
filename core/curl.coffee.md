@@ -109,7 +109,7 @@ connection.
       if: -> @config.curl.check
       handler: ->
         {check, check_match, config} = @config.curl
-        @execute
+        @system.execute
           cmd: "curl -s #{check}"
           stdout: null
         , (err, executed, stdout, stderr) ->

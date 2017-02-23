@@ -20,7 +20,7 @@ the command `ldapsearch  -D cn=admin,cn=config -w test -b "cn=config"`.
           name: 'krb5-server-ldap'
         options.log message: 'Get schema location', level: 'DEBUG'
         schema = null
-        @execute
+        @system.execute
           cmd: 'rpm -ql krb5-server-ldap | grep kerberos.schema'
         , (err, executed, stdout) ->
           throw Error 'Kerberos schema not found' if not err and stdout is ''
@@ -91,7 +91,7 @@ Create the kerberos administrator's user.
               ]
             ]
           options.log message: "Check it returns the entire #{kerberos_dn} subtree", level: 'DEBUG'
-          @execute
+          @system.execute
             cmd: "ldapsearch -H #{openldap_server.uri} -x -D #{krbadmin_user.dn} -w #{krbadmin_user.userPassword} -b #{kerberos_dn}"
 
 ## Krb5 Index

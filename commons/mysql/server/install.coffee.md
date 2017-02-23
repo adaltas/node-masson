@@ -159,7 +159,7 @@ is running.
       #     @service.start
       #       name: 'mysqld'
       for sql, i in mysql.server.sql_on_install
-        @execute
+        @system.execute
           header: "Populate #{i}"
           cmd: "mysql -uroot -e \"#{escape sql}\""
           code_skipped: 1
@@ -184,7 +184,7 @@ is running.
           gid: mysql.server.group.name
       
       @call header: 'Init data directory', handler: ->
-        @execute
+        @system.execute
           cmd: "mysql_install_db --user=#{mysql.server.my_cnf['mysqld']['user']}  --datadir=#{mysql.server.my_cnf['mysqld']['datadir']}"
           unless_exists: "#{mysql.server.my_cnf['mysqld']['datadir']}/mysql"
 
@@ -221,7 +221,7 @@ The bug is fixed after version 5.7 of MySQL/MariaDB.
             admin_password: password
             engine: 'mysql'
             host: 'localhost'
-          @execute
+          @system.execute
             cmd: 'mysql -V'
             shy: true
           , (err, status, stdout, stderr) ->
@@ -239,7 +239,7 @@ The bug is fixed after version 5.7 of MySQL/MariaDB.
                 handler: ->
                   @service.stop
                     name: service_name
-                  @execute
+                  @system.execute
                     cmd: "mysqld_safe --socket=/var/lib/mysql/mysql.sock > /dev/null 2>&1 &"
                   @wait_exist
                     target: mysql.server.my_cnf['mysqld_safe']['pid-file']
@@ -315,7 +315,7 @@ The bug is fixed after version 5.7 of MySQL/MariaDB.
                         @call
                           if: -> safe_start
                           handler: ->
-                            @execute
+                            @system.execute
                               cmd: """
                                   pid=$(cat #{mysql.server.my_cnf['mysqld']['pid-file']})
                                   kill $pid
@@ -333,7 +333,7 @@ The bug is fixed after version 5.7 of MySQL/MariaDB.
               query = (query) -> "mysql -uroot -p#{password} -s -e \"#{query}\""
               sql =
               @service.start service_name
-              @execute
+              @system.execute
                 cmd: query """
                 USE mysql;
                 GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '#{password}' WITH GRANT OPTION;
