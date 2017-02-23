@@ -10,13 +10,13 @@ Download the Oracle JDK.
       handler: ->
         {java} = @config
         for version, urls of java.jdk.versions
-          @cache
+          @file.cache
             header: "Oracle JDK #{version}"
             ssh: null
             location: true
             headers: ['Cookie: oraclelicense=accept-securebackup-cookie']
           , "#{urls.jdk_location}"
-          @cache
+          @file.cache
             header: "Oracle JCE #{version}"
             ssh: null
             location: true

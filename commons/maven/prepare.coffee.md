@@ -7,7 +7,7 @@
       if: -> @contexts('masson/commons/maven')[0]?.config.host is @config.host
       handler: ->
         {maven} = @config
-        @cache
+        @file.cache
           ssh: null
           source: "#{maven.source}"
           location: true
