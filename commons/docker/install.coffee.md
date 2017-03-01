@@ -11,9 +11,7 @@ Install the `docker-io` package on Centos/REHL 6 or `docker` on Centos/REHL 7.
 Configure it as a startup and started service.
 Skip Pakage installation, if provided by external deploy tool.
 
-      @call 
-        header: 'Cache Current System'
-        handler: discover.system
+      @system.discover
       @call
         unless: @config.docker.external
         if: -> (options.store['mecano:system:type'] in ['redhat','centos'])
@@ -150,10 +148,6 @@ Compose is a tool for defining and running multi-container Docker applications.
       @system.chmod
         target: '/usr/local/bin/docker-compose'
         mode: 0o750
-
-## Dependencies
-
-    discover = require 'mecano/lib/misc/discover'
 
 ## Additionnal resources
 
