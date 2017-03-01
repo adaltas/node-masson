@@ -15,7 +15,7 @@
       replication_bindpw = 'test'
       # replication_binddn = "cn=replication,ou=systeme,#{suffix}"
       # replication_bindpw = 'ldap123replicattion'
-      # @wait_execute
+      # @wait.execute
       #   unless: @config.host is active_host
       #   cmd: """
       #   ldapsearch -H "#{master_uri}" -D "#{replication_binddn}" -w "#{replication_bindpw}" -b "#{suffix}"

@@ -28,7 +28,7 @@ consistency reasons.
 ## Wait
 Wait for master remote login.
 
-      @wait_execute
+      @wait.execute
         header: 'Wait Root remote login'
         cmd: db.cmd remote_master, "show databases"
 

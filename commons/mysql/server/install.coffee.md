@@ -320,7 +320,7 @@ The bug is fixed after version 5.7 of MySQL/MariaDB.
                                   pid=$(cat #{mysql.server.my_cnf['mysqld']['pid-file']})
                                   kill $pid
                                 """
-                            @wait_execute
+                            @wait.execute
                               cmd: "if [ -f \"#{mysql.server.my_cnf['mysqld']['pid-file']}\" ]; then exit 1; else exit 0 ; fi"
                             @service.start
                               name: service_name
