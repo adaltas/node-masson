@@ -30,28 +30,28 @@
     }
   ],
   "dependencies": {
-    "coffee-script": "~1.11.1",
+    "coffee-script": "~1.12.4",
     "colors": "~1.1.2",
     "cson": "~4.0.0",
     "each": "~0.6.1",
     "glob": "~7.1.1",
-    "mecano": "~0.5.5",
+    "mecano": "~0.6.0",
     "minimatch": "~3.0.3",
     "mustache": "~2.3.0",
-    "pad": "~1.0.2",
+    "pad": "~1.1.0",
     "parameters": "~0.1.6",
     "regexp-quote": "~0.0.0",
-    "request": "~2.78.0",
+    "request": "~2.79.0",
     "semver": "~5.3.0",
-    "ssh2-connect": "~1.0.1",
-    "ssh2-exec": "~0.3.3",
-    "ssh2-fs": "~0.2.2",
+    "ssh2-connect": "~1.0.2",
+    "ssh2-exec": "~0.3.4",
+    "ssh2-fs": "~0.2.3",
     "ssha": "~1.0.1",
     "tsort": "~0.0.1"
   },
   "devDependencies": {
-    "mocha": "~3.1.2",
-    "should": "~11.1.1"
+    "mocha": "~3.2.0",
+    "should": "~11.2.0"
   },
   "main": "./lib",
   "bin": {
