@@ -9,19 +9,23 @@ Download the Oracle JDK.
       if: -> @contexts('masson/commons/java')[0]?.config.host is @config.host
       handler: ->
         {java} = @config
-        for version, urls of java.jdk.versions
+        for version, info of java.jdk.versions
           @file.cache
             header: "Oracle JDK #{version}"
             ssh: null
             location: true
             headers: ['Cookie: oraclelicense=accept-securebackup-cookie']
-          , "#{urls.jdk_location}"
+            md5: info.md5
+            sha256: info.sha256
+          , "#{info.jdk_location}"
           @file.cache
             header: "Oracle JCE #{version}"
             ssh: null
             location: true
             headers: ['Cookie: oraclelicense=accept-securebackup-cookie']
-          , "#{urls.jce_location}"
+            md5: info.md5
+            sha256: info.sha256
+          , "#{info.jce_location}"
 
 ## Resources
 

@@ -21,11 +21,13 @@ Example for using Oracle JDK:
       "versions": {
         "1.7.0_79": {
           "jdk_location": "http://download.oracle.com/otn-pub/java/jdk/7u79-b15/jdk-7u79-linux-x64.tar.gz",
-          "jce_location": "http://download.oracle.com/otn-pub/java/jce/7/UnlimitedJCEPolicyJDK7.zip"
+          "jce_location": "http://download.oracle.com/otn-pub/java/jce/7/UnlimitedJCEPolicyJDK7.zip",
+          "sha256": "29d75d0022bfa211867b876ddd31a271b551fa10727401398295e6e666a11d90"
         },
         "1.8.0_101": {
-          "jdk_location": "http://download.oracle.com/otn-pub/java/jdk/8u111-b14/jdk-8u111-linux-x64.tar.gz",
-          "jce_location": "http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip"
+          "jdk_location": "http://download.oracle.com/otn-pub/java/jdk/8u121-b14/jdk-8u121-linux-x64.tar.gz",
+          "jce_location": "http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip",
+          "sha256": "97e30203f1aef324a07c94d9d078f5d19bb6c50e638e4492722debca588210bc"
         }
       }
     }
@@ -44,9 +46,11 @@ Example for using Oracle JDK:
       java.jdk.versions['1.7.0_79'] ?= {}
       java.jdk.versions['1.7.0_79'].jdk_location ?= "http://download.oracle.com/otn-pub/java/jdk/7u79-b15/jdk-7u79-linux-x64.tar.gz"
       java.jdk.versions['1.7.0_79'].jce_location ?= "http://download.oracle.com/otn-pub/java/jce/7/UnlimitedJCEPolicyJDK7.zip"
+      java.jdk.versions['1.7.0_79'].sha256 ?= "29d75d0022bfa211867b876ddd31a271b551fa10727401398295e6e666a11d90"
       java.jdk.versions['1.8.0_101'] ?= {}
       java.jdk.versions['1.8.0_101'].jdk_location ?= "http://download.oracle.com/otn-pub/java/jdk/8u101-b13/jdk-8u101-linux-x64.tar.gz"
       java.jdk.versions['1.8.0_101'].jce_location ?= "http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip"
+      java.jdk.versions['1.8.0_101'].sha256 ?= "97e30203f1aef324a07c94d9d078f5d19bb6c50e638e4492722debca588210bc"
       # Java properties
       java.java_home ?= "#{java.jdk.root_dir}/default"
       java.java_home = java.java_home.replace /\/+$/, "" # remove trailing slashes
