@@ -50,7 +50,7 @@ ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=co
         # require('./openldap_server').configure host_ctx
         # {url, root_dn, root_password, users_dn, groups_dn} = host_@config.openldap_server
         {openldap_server} = @config
-        @ldap_user
+        @ldap.user
           uri: openldap_server.uri,
           binddn: openldap_server.root_dn,
           passwd: openldap_server.root_password,

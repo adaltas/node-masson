@@ -62,7 +62,7 @@ Create the kerberos administrator's group.
 
 Create the kerberos administrator's user.
 
-      @ldap_user
+      @ldap.user
         header: 'User DN'
         uri: openldap_server.uri,
         binddn: openldap_server.root_dn,
