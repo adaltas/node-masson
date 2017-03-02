@@ -15,7 +15,7 @@
 ## Wait Connect
 Wait connect action is used as a check n the port availability.
 
-      @wait_connect
+      @connection.wait
         port: mysql.server.my_cnf['mysqld']['port']
         host: @config.host
 
