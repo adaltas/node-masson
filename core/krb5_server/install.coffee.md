@@ -244,7 +244,7 @@ The following files are updated:
           # We dont provide an "kadmin_server". Instead, we need
           # to use "kadmin.local" because the principal used
           # to login with "kadmin" isnt created yet
-          @krb5_addprinc
+          @krb5.addprinc
             realm: realm
             principal: config.kadmin_principal
             password: config.kadmin_password
@@ -254,7 +254,7 @@ The following files are updated:
         #   {kadmin_principal, kadmin_password} = config
         #   return next() unless kdc_conf.realms[realm]?.database_module
         #   options.log "Create principal #{kadmin_principal}"
-        #   @krb5_addprinc
+        #   @krb5.addprinc
         #     # We dont provide an "kadmin_server". Instead, we need
         #     # to use "kadmin.local" because the principal used
         #     # to login with "kadmin" isnt created yet

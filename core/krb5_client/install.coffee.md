@@ -66,7 +66,7 @@ Create a user principal for this host. The principal is named like
           # As a consequence, we never enter here, which might be acceptable
           # but doc and code need to be aligned.
           continue if default_realm isnt realm or not config.create_hosts
-          @krb5_addprinc
+          @krb5.addprinc
             principal: "host/#{@config.host}@#{realm}"
             randkey: true
             kadmin_principal: config.kadmin_principal
@@ -83,7 +83,7 @@ principals and generate concurrency errors.
         for realm, config of krb5.etc_krb5_conf.realms
           continue unless config.principals
           for principal in config.principals  
-            @krb5_addprinc misc.merge
+            @krb5.addprinc misc.merge
               kadmin_principal: config.kadmin_principal
               kadmin_password: config.kadmin_password
               kadmin_server: config.admin_server
