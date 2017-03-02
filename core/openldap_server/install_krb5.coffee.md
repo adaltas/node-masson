@@ -38,7 +38,7 @@ Create the kerberos entry unit, for example "cn=kerberos,dc=adaltas,dc=com".
 Note: In recent version of openldap, dn compose or organizationalUnit (ou) are 
 not allowed to be used for krb5 ldap containers.
 
-      @ldap_add
+      @ldap.add
         header: 'Container DN'
         uri: openldap_server.uri,
         binddn: openldap_server.root_dn,
@@ -51,7 +51,7 @@ not allowed to be used for krb5 ldap containers.
 
 Create the kerberos administrator's group.
 
-      @ldap_add
+      @ldap.add
         header: 'Group DN'
         uri: openldap_server.uri,
         binddn: openldap_server.root_dn,

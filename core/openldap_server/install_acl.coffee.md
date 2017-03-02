@@ -58,7 +58,7 @@ ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=co
 
       @call header: 'ACL Insert Group', handler: ->
         {openldap_server} = @config
-        @ldap_add
+        @ldap.add
           uri: openldap_server.uri,
           binddn: openldap_server.root_dn,
           passwd: openldap_server.root_password,
