@@ -41,7 +41,7 @@ Skip Pakage installation, if provided by external deploy tool.
         other_opts = @config.docker.other_opts
         opts = []
         opts.push "--#{k}=#{v}" for k,v of other_args
-        opts.push '--tlsverify' if ssl.tlsverify
+        opts.push '--tlsverify' if ssl?.tlsverify
         for type, socketPaths of sockets
           opts.push "-H #{type}://#{path}" for path in socketPaths
         other_opts += opts.join ' '
@@ -70,13 +70,16 @@ Skip Pakage installation, if provided by external deploy tool.
 
       @file.download
         source: @config.ryba.ssl.cacert
-        destination: ssl.cacert
+        target: ssl?.cacert
+        if: docker.sslEnabled
       @file.download
         source: @config.ryba.ssl.cert
-        destination: ssl.cert
+        target: ssl?.cert
+        if: docker.sslEnabled
       @file.download
         source: @config.ryba.ssl.key
-        destination: ssl.key
+        target: ssl?.key
+        if: docker.sslEnabled
 
 ## Install docker-pid
 
