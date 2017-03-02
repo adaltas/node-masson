@@ -25,8 +25,6 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
         
 ## Startup Script
 
-Write startup script to /etc/init.d/service-hue-docker
-
       @service.init
         header: 'Startup Script'
         source: "#{__dirname}/resources/postgres-server.j2"
@@ -35,6 +33,7 @@ Write startup script to /etc/init.d/service-hue-docker
         context: container: postgres.server.container_name
 
 ## Package
+
 Install the PostgreSQL database server.
 
       @call header: 'Download Container', handler: ->
@@ -58,6 +57,7 @@ Install the PostgreSQL database server.
           docker: @config.docker
       
 ## Run Container
+
 Run the PostgreSQL server container
 
       @docker.service
