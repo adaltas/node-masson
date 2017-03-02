@@ -96,7 +96,7 @@ Create the kerberos administrator's user.
 
 ## Krb5 Index
 
-      @ldap_index
+      @ldap.index
         header: 'Krb5 Index'
         suffix: openldap_server.suffix
         indexes:
