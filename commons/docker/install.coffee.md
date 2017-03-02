@@ -11,7 +11,7 @@ Install the `docker-io` package on Centos/REHL 6 or `docker` on Centos/REHL 7.
 Configure it as a startup and started service.
 Skip Pakage installation, if provided by external deploy tool.
 
-      @system.discover
+      @system.discover()
       @call
         unless: @config.docker.external
         if: -> (options.store['mecano:system:type'] in ['redhat','centos'])

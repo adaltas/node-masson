@@ -140,7 +140,7 @@ The following files are updated:
           continue unless config.database_module
           {kdc_master_key, ldap_kerberos_container_dn, manager_dn, manager_password, ldap_servers} = kdc_conf.dbmodules[config.database_module]
           ldap_server = ldap_servers.split(' ')[0]
-          @wait.execute
+          @wait.execute 
             cmd: """
             ldapsearch -x -LLL \
               -H #{ldap_server} -D \"#{manager_dn}\" -w #{manager_password} \
