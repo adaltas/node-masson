@@ -38,17 +38,6 @@ and should correspond to "openldap_server.config_password".
       openldap_server.tls ?= false
       openldap_server.config_file ?= '/etc/openldap/slapd.d/cn=config/olcDatabase={0}config.ldif'
       openldap_server.monitor_file ?= '/etc/openldap/slapd.d/cn=config/olcDatabase={1}monitor.ldif'
-      # make this propertiy dynamic to support multiple OS type installation
-      # no client needs this property.
-      default_bdb_file = '/etc/openldap/slapd.d/cn=config/olcDatabase={2}bdb.ldif'
-      @after
-        type: 'service'
-        name: 'openldap-servers'
-        handler: (options) ->
-          @config.openldap_server.bdb_file ?= switch options.store['mecano:system:release'][0]
-            when '6' then default_bdb_file
-            when '7' then '/etc/openldap/slapd.d/cn=config/olcDatabase={2}hdb.ldif'
-            else default_bdb_file
       if openldap_server.tls
         throw Error 'TLS mode requires "tls_cert_file"' unless openldap_server.tls_cert_file
         throw Error 'TLS mode requires "tls_key_file"' unless openldap_server.tls_key_file

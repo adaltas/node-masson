@@ -150,14 +150,21 @@ Check section[3](https://www.server-world.info/en/note?os=CentOS_7&p=openldap).
         replace: "$1#{openldap_server.suffix}$2"
 
 ## DB bdb
-Note: `openldap_server.bdb_file` default value is now configured at runtime. Check
-`masson/core/openldap_server/configure` to support multiple OS installation.
+
+The path of the bdb configuration file differ between RH6 and RH7. It is 
+discovered at runtime based on the OS release.
 
       @call header: 'DB bdb', timeout: -1, handler: (options) ->
+        bdb_file = null
+        @system.discover shy: true, (err, status, info) ->
+          throw Error "Unsupported OS: #{JSON.stringify info.type}" unless info.type in ['centos', 'redhat']
+          bdb_file = if /^6/.test info.release
+          then '/etc/openldap/slapd.d/cn=config/olcDatabase={2}bdb.ldif'
+          else '/etc/openldap/slapd.d/cn=config/olcDatabase={2}hdb.ldif'
         @call (_, callback) ->
           return callback null, false if openldap_server.root_slappasswd
-          options.log "Extract password from #{openldap_server.bdb_file}"
-          @fs.readFile openldap_server.bdb_file, 'ascii', (err, content) ->
+          options.log "Extract password from #{bdb_file}"
+          @fs.readFile bdb_file, 'ascii', (err, content) ->
             return callback err if err
             match = /^olcRootPW: {SSHA}(.*)$/m.exec content
             if match = /^olcRootPW: {SSHA}(.*)$/m.exec content
@@ -182,7 +189,7 @@ Note: `openldap_server.bdb_file` default value is now configured at runtime. Che
               replace: "olcRootPW: #{openldap_server.root_slappasswd}"
               append: 'olcRootDN'
           @file
-            target: openldap_server.bdb_file
+            target: bdb_file
             write: write
           @service
             srv_name: 'slapd'
@@ -190,6 +197,7 @@ Note: `openldap_server.bdb_file` default value is now configured at runtime. Che
             if: -> @status -1
           @then callback
 
+## ACLs
 
       @call header: "ACLs", handler: (options) ->
         # We used: http://itdavid.blogspot.fr/2012/05/howto-centos-62-kerberos-kdc-with.html
