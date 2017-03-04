@@ -9,7 +9,7 @@
     util = require 'util'
     EventEmitter = require('events').EventEmitter
     CSON = require 'cson'
-    string = require 'mecano/lib/misc/string'
+    string = require 'nikita/lib/misc/string'
     Module = require 'module'
 
     # ./bin/ryba configure -o output_file -p JSON

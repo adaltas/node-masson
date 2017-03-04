@@ -1,8 +1,8 @@
 
-mecano = require 'mecano'
+nikita = require 'nikita'
 
 module.exports = (contexts, params, services, config) ->
-  m = mecano config.mecano
+  m = nikita config.nikita
   m.params = params
   m.config = config
   m.services = services
@@ -19,4 +19,4 @@ module.exports = (contexts, params, services, config) ->
       m.services.indexOf(srv) isnt -1
   m
 
-misc = require 'mecano/lib/misc'
+misc = require 'nikita/lib/misc'

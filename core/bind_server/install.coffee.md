@@ -46,7 +46,7 @@ The packages "bind" is installed as a startup item and not yet installed.
         srv_name: 'named'
         startup: true
       @system.tmpfs
-        if: -> (options.store['mecano:system:type'] in ['redhat','centos']) and (options.store['mecano:system:release'][0] is '7')
+        if: -> (options.store['nikita:system:type'] in ['redhat','centos']) and (options.store['nikita:system:release'][0] is '7')
         mount: '/run/named'
         name: 'named'
         perm: '0750'

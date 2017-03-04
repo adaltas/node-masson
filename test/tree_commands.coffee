@@ -1,6 +1,6 @@
 
 should = require 'should'
-mecano = require 'mecano'
+nikita = require 'nikita'
 tree = require '../lib/tree'
 
 describe 'tree commands', ->
@@ -8,13 +8,13 @@ describe 'tree commands', ->
   tmp = '/tmp/masson-test'
   beforeEach (next) ->
     require('module')._cache = {}
-    mecano.mkdir destination: tmp, next
-  afterEach (next) -> mecano.remove tmp, next
+    nikita.mkdir destination: tmp, next
+  afterEach (next) -> nikita.remove tmp, next
   
   describe 'default', ->
 
     it 'find default commands', (next) ->
-      mecano.file [
+      nikita.file [
         destination: "#{tmp}/module_1.coffee"
         content: """
         module.exports = [
@@ -41,7 +41,7 @@ describe 'tree commands', ->
   describe 'user', ->
 
     it 'find user commands', (next) ->
-      mecano.file [
+      nikita.file [
         destination: "#{tmp}/module_1.coffee"
         content: """
         module.exports = [

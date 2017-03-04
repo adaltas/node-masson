@@ -1,5 +1,5 @@
 
-{merge} = require 'mecano/lib/misc'
+{merge} = require 'nikita/lib/misc'
 
 misc = module.exports =
   flatten: (arr, ret) ->

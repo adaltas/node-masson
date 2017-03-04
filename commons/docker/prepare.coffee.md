@@ -10,5 +10,5 @@ Download different Docker packages
         @file.cache
           ssh: null
           source: "#{@config.docker.source}"
-          target: "#{@config.mecano.cache_dir}/docker-compose"
+          target: "#{@config.nikita.cache_dir}/docker-compose"
           location: true

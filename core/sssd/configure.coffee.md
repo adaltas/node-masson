@@ -103,4 +103,4 @@ service sssd restart
 
 ## Dependencies
 
-    {merge} = require 'mecano/lib/misc'
+    {merge} = require 'nikita/lib/misc'

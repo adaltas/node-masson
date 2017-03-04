@@ -1,6 +1,6 @@
 
 should = require 'should'
-mecano = require 'mecano'
+nikita = require 'nikita'
 tree = require '../lib/tree'
 
 describe 'tree dependencies', ->
@@ -8,13 +8,13 @@ describe 'tree dependencies', ->
   tmp = '/tmp/masson-test'
   beforeEach (next) ->
     require('module')._cache = {}
-    mecano.mkdir destination: tmp, next
-  afterEach (next) -> mecano.remove tmp, next
+    nikita.mkdir destination: tmp, next
+  afterEach (next) -> nikita.remove tmp, next
 
   describe 'default command', ->
 
     it 'find dependencies without a command', (next) ->
-      mecano.file [
+      nikita.file [
         destination: "#{tmp}/module_1.coffee"
         content: """
         module.exports = [
@@ -42,7 +42,7 @@ describe 'tree dependencies', ->
           next()
 
     it 'find dependencies and filter other commands', (next) ->
-      mecano.file [
+      nikita.file [
         destination: "#{tmp}/module_1.coffee"
         content: """
         module.exports = [
@@ -71,7 +71,7 @@ describe 'tree dependencies', ->
     it 'filter commands inside filtered out modules', (next) ->
       # We need to recompute module dependencies after module are filtered out
       # or the ordering may be wrong
-      mecano.file [
+      nikita.file [
         destination: "#{tmp}/module_1.coffee"
         content: """
         module.exports = [
@@ -108,7 +108,7 @@ describe 'tree dependencies', ->
   describe 'custom command', ->
 
     it 'find dependencies', (next) ->
-      mecano.file [
+      nikita.file [
         destination: "#{tmp}/module_1.coffee"
         content: """
         module.exports = [
@@ -143,7 +143,7 @@ describe 'tree dependencies', ->
           next()
 
     it 'find dependencies and filter other commands', (next) ->
-      mecano.file [
+      nikita.file [
         destination: "#{tmp}/module_1.coffee"
         content: """
         module.exports = [

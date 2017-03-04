@@ -21,7 +21,7 @@ masson init \
 
     params = require '../params'
     fs = require 'fs'
-    mecano = require 'mecano'
+    nikita = require 'nikita'
     readline = require 'readline'
 
     module.exports = ->
@@ -32,7 +32,7 @@ masson init \
       rl = readline.createInterface process.stdin, process.stdout
       rl.setPrompt ''
       rl.on 'SIGINT', process.exit
-      mecano
+      nikita
         debug: params.debug
       .call (_, callback) ->
         fs.stat "#{params.path}", (err, stat) =>
@@ -155,7 +155,7 @@ masson init \
             bootstrap:
               username: 'vagrant'
               password: 'vagrant'
-          mecano:
+          nikita:
             domain: true
             cache_dir: "./cache"
           servers:

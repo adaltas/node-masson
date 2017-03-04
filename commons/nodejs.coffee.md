@@ -94,19 +94,14 @@ module.
 
     exports.push header: 'NPM Configuration', timeout: -1, handler: ->
       {merge, config} = @config.nodejs
-      for user in @config.users do (user) ->
-        @file.ini
-          target: "#{user.home}/.npmrc"
-          content: config
-          merge: merge
-          uid: user.username
-          gid: null
-          if:  user.home
+      @file.ini (
+        target: "#{user.home}/.npmrc"
+        content: config
+        merge: merge
+        uid: user.username
+        gid: null
+        if:  user.home
+      ) for user in @config.users do (user) ->
 
 [nodejs]: http://www.nodejs.org
 [n]: https://github.com/visionmedia/n
-
-## Dependencies
-
-    mecano = require 'mecano'
-    misc = require 'mecano/lib/misc'

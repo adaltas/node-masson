@@ -45,4 +45,4 @@ such as LC_ALL= . We set all variable to `en_US.UTF-8` by default.
 
 # Dependencies
 
-    string = require 'mecano/lib/misc/string'
+    string = require 'nikita/lib/misc/string'

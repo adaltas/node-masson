@@ -108,4 +108,4 @@ property "yum.epel" to false.
 
     glob = require 'glob'
     path = require 'path'
-    pidfile_running = require 'mecano/lib/misc/pidfile_running'
+    pidfile_running = require 'nikita/lib/misc/pidfile_running'

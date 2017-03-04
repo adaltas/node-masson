@@ -161,4 +161,4 @@ Example:
 
 ## Dependencies
 
-    misc = require 'mecano/lib/misc'
+    misc = require 'nikita/lib/misc'

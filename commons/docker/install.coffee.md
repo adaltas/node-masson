@@ -14,10 +14,10 @@ Skip Pakage installation, if provided by external deploy tool.
       @system.discover()
       @call
         unless: @config.docker.external
-        if: -> (options.store['mecano:system:type'] in ['redhat','centos'])
+        if: -> (options.store['nikita:system:type'] in ['redhat','centos'])
         header: 'Packages'
         handler: ->
-          switch options.store['mecano:system:release'][0]
+          switch options.store['nikita:system:release'][0]
             when '6'
               @service
                 header: 'Service'
@@ -46,9 +46,9 @@ Skip Pakage installation, if provided by external deploy tool.
           opts.push "-H #{type}://#{path}" for path in socketPaths
         other_opts += opts.join ' '
         @call 
-          if: -> (options.store['mecano:system:type'] in ['redhat','centos'])
+          if: -> (options.store['nikita:system:type'] in ['redhat','centos'])
           handler: ->
-            switch options.store['mecano:system:release'][0]
+            switch options.store['nikita:system:release'][0]
               when '6' 
                 @file
                   target: '/etc/sysconfig/docker'
@@ -144,7 +144,7 @@ Compose is a tool for defining and running multi-container Docker applications.
 
       @file.download
         header: 'Docker Compose'
-        source: "#{@config.mecano.cache_dir}/docker-compose"
+        source: "#{@config.nikita.cache_dir}/docker-compose"
         target: "/usr/local/bin/docker-compose"
         local: true
         unless_exec: 'which docker-compose'

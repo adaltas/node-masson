@@ -96,6 +96,6 @@ and when only ONE ntp server is configured
 
 ## Module Dependencies
 
-    string = require 'mecano/lib/misc/string'
+    string = require 'nikita/lib/misc/string'
 
 [cyberciti]: http://www.cyberciti.biz/faq/howto-install-ntp-to-synchronize-server-clock/

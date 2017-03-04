@@ -5,10 +5,10 @@ multimatch = require './multimatch'
 each = require 'each'
 {EventEmitter} = require 'events'
 Module = require 'module'
-{merge} = require 'mecano/lib/misc'
+{merge} = require 'nikita/lib/misc'
 
 tsort = require 'tsort'
-mecano = require 'mecano'
+nikita = require 'nikita'
 constraints = require './constraints'
 context = require './context'
 
@@ -110,7 +110,7 @@ Run = (params, @config) ->
     for service in node.services
       merge config, @config.services[service].config
     node.config = config
-  # Build Mecano context
+  # Build Nikita context
   @contexts = []
   for id, node of @config.nodes
     @contexts.push context @contexts, params, node.services, node.config

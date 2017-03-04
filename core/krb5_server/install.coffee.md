@@ -293,7 +293,7 @@ The following files are updated:
 ## Dependencies
 
     path = require 'path'
-    misc = require 'mecano/lib/misc'
+    misc = require 'nikita/lib/misc'
 
 ## Notes
 

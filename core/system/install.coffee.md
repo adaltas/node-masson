@@ -44,7 +44,7 @@ root       soft    nproc     unlimited
 ## Groups
 
 Create the users defined inside the "hdp.groups" configuration. See the
-[mecano "group" documentation][mecano_group] for additionnal information.
+[nikita "group" documentation][nikita_group] for additionnal information.
 
       @call header: 'Groups', ->
         @system.group group for _, group of system.groups
@@ -52,7 +52,7 @@ Create the users defined inside the "hdp.groups" configuration. See the
 ## Users
 
 Create the users defined inside the "hdp.users" configuration. See the
-[mecano "user" documentation][mecano_user] for additionnal information.
+[nikita "user" documentation][nikita_user] for additionnal information.
 
       @call header: 'Users', ->
         @system.user user for _, user of system.users
@@ -70,7 +70,7 @@ Publish scripts inside the profile directory, located in "/etc/profile.d".
 
 ## Dependencies
 
-    {merge} = require 'mecano/lib/misc'
+    {merge} = require 'nikita/lib/misc'
 
-[mecano_group]: https://github.com/wdavidw/node-mecano/blob/master/src/group.coffee.md
-[mecano_user]: https://github.com/wdavidw/node-mecano/blob/master/src/user.coffee.md
+[nikita_group]: https://github.com/wdavidw/node-nikita/blob/master/src/group.coffee.md
+[nikita_user]: https://github.com/wdavidw/node-nikita/blob/master/src/user.coffee.md

@@ -114,7 +114,7 @@ configuration object. By default, we set the following properties to "yes": "Cha
 
 ## Module Dependencies
 
-    misc = require 'mecano/lib/misc'
+    misc = require 'nikita/lib/misc'
     {safe_etc_krb5_conf} = require './index'
 
 ## Useful Client Commands

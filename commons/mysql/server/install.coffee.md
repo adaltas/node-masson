@@ -49,16 +49,16 @@ Package on Centos/Redhat 7 OS.
           code_skipped: 1
         @call 
           shy: true
-          if: -> (options.store['mecano:system:type'] in ['redhat','centos'])
+          if: -> (options.store['nikita:system:type'] in ['redhat','centos'])
           handler: ->
-            service_name = switch options.store['mecano:system:release'][0]
+            service_name = switch options.store['nikita:system:release'][0]
               when '7' then'mariadb'
               else 'mysqld'
         @call
-          if: -> (options.store['mecano:system:type'] in ['redhat','centos'])
+          if: -> (options.store['nikita:system:type'] in ['redhat','centos'])
           handler: ->
             @call
-              if: -> (options.store['mecano:system:release'][0] is '7')
+              if: -> (options.store['nikita:system:release'][0] is '7')
               handler: ->
                 @service
                   name: 'mariadb-server'
@@ -71,7 +71,7 @@ Package on Centos/Redhat 7 OS.
                   uid: mysql.server.user.name
                   gid: mysql.server.group.name
             @service
-              if: -> (options.store['mecano:system:release'][0] is '6')
+              if: -> (options.store['nikita:system:release'][0] is '6')
               name: 'mysql-server'
               chk_name: service_name
               startup: true
@@ -147,7 +147,7 @@ is running.
           header: 'Restart'
           name: service_name
           if: -> @status(-2) and @status(-1)
-      # TODO: wait for error in mecano
+      # TODO: wait for error in nikita
       # @call 
       #   if: -> @error -1
       #   handler: ->
@@ -254,7 +254,7 @@ The bug is fixed after version 5.7 of MySQL/MariaDB.
                     error = exit = null
                     exited = false
                     stream.on 'data', (data, extended) =>
-                      # todo: not working anymore after implementing log object in mecano
+                      # todo: not working anymore after implementing log object in nikita
                       # options.log message = data, type: ''
                       # options.log[if extended is 'stderr' then 'err' else 'out']?.write data
                       # for now options.log to see nonetheless what is executed
@@ -348,6 +348,6 @@ The bug is fixed after version 5.7 of MySQL/MariaDB.
 
 ## Dependencies
 
-    misc = require 'mecano/lib/misc'
-    db = require 'mecano/lib/misc/db'
+    misc = require 'nikita/lib/misc'
+    db = require 'nikita/lib/misc/db'
     path = require 'path'

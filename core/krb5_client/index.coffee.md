@@ -23,5 +23,5 @@
 
 ## Module Dependencies
 
-    misc = require 'mecano/lib/misc'
+    misc = require 'nikita/lib/misc'
     krb5_server = require '../krb5_server'

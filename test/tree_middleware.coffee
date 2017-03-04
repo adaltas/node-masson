@@ -1,6 +1,6 @@
 
 should = require 'should'
-mecano = require 'mecano'
+nikita = require 'nikita'
 tree = require '../lib/tree'
 
 describe 'tree middleware', ->
@@ -8,11 +8,11 @@ describe 'tree middleware', ->
   tmp = '/tmp/masson-test'
   beforeEach (next) ->
     require('module')._cache = {}
-    mecano.mkdir destination: tmp, next
-  afterEach (next) -> mecano.remove tmp, next
+    nikita.mkdir destination: tmp, next
+  afterEach (next) -> nikita.remove tmp, next
 
   it 'is a async function', (next) ->
-    mecano.write
+    nikita.write
       destination: "#{tmp}/module_1.coffee"
       content: """
       exports = module.exports = []
@@ -32,7 +32,7 @@ describe 'tree middleware', ->
         next()
 
   it 'is an object with a function callback', (next) ->
-    mecano.write
+    nikita.write
       destination: "#{tmp}/module_1.coffee"
       content: """
       exports = module.exports = []

@@ -12,7 +12,7 @@ the application level by binding the system of cgroup hierarchies with the syste
 
       @service name: 'libcgroup'
       @service
-        if: -> (options.store['mecano:system:type'] in ['redhat','centos']) and options.store['mecano:system:release'][0] is '7'
+        if: -> (options.store['nikita:system:type'] in ['redhat','centos']) and options.store['nikita:system:release'][0] is '7'
         header: 'libcroup services'
         name: 'libcgroup-tools'
       @service.startup
@@ -22,5 +22,5 @@ the application level by binding the system of cgroup hierarchies with the syste
 
 ## Dependencies
 
-    string = require 'mecano/lib/misc/string'
+    string = require 'nikita/lib/misc/string'
     path = require 'path'

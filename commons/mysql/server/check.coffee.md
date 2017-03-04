@@ -35,4 +35,4 @@ Wait connect action is used as a check n the port availability.
 
 ## Dependencies
 
-    db = require 'mecano/lib/misc/db'
+    db = require 'nikita/lib/misc/db'

@@ -2,9 +2,9 @@
 # Bind Server Configure
 
 *   `bind_server.user` (string|object)   
-    The Unix user name or a user object (see Mecano User documentation).   
+    The Unix user name or a user object (see Nikita User documentation).   
 *   `bind_server.group` (string|object)   
-    The Unix group name or a group object (see Mecano User documentation).   
+    The Unix group name or a group object (see Nikita User documentation).   
 *   `bind_server.zones` (string|array)   
     A list of zone definition files to be uploaded and registered to the named
     server.   

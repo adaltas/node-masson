@@ -93,7 +93,7 @@ ctx.connect username: root, host: "master1.hadoop", (err, ssh) ->
 ## Modules Dependencies
 
     fs = require 'fs'
-    misc = require 'mecano/lib/misc'
+    misc = require 'nikita/lib/misc'
     connect = require 'ssh2-connect'
 
 [ssh2]: https://github.com/mscdex/ssh2

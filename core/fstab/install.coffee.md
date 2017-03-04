@@ -35,4 +35,4 @@ Write /etc/fstab
 
 ## Dependencies
 
-    {regexp} = require 'mecano/lib/misc'
+    {regexp} = require 'nikita/lib/misc'

@@ -40,4 +40,4 @@ Deploy the git configuration.
 
 ## Dependencies
 
-    misc = require 'mecano/lib/misc'
+    misc = require 'nikita/lib/misc'

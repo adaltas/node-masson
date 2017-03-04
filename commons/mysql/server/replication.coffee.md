@@ -90,5 +90,5 @@ Gather the target master informations, then start the slave replication.
 
 ## Dependencies
 
-    db = require 'mecano/lib/misc/db'
-    string = require 'mecano/lib/misc/string'
+    db = require 'nikita/lib/misc/db'
+    string = require 'nikita/lib/misc/string'

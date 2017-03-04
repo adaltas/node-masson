@@ -50,6 +50,6 @@ provides a good description on how Kerberos is negotiated by GSSAPI and SSPI.
 
 ## Dependencies
 
-    misc = require 'mecano/lib/misc'
+    misc = require 'nikita/lib/misc'
 
 [gss_sspi]: http://www.drdobbs.com/ssh-kerberos-authentication-using-gssapi/184402071

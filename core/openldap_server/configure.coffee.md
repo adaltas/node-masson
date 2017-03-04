@@ -147,4 +147,4 @@ and should correspond to "openldap_server.config_password".
 
 ## Dependencies
 
-    misc = require 'mecano/lib/misc'
+    misc = require 'nikita/lib/misc'

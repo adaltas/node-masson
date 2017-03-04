@@ -48,7 +48,7 @@ Install the PostgreSQL database server.
           unless: -> exists
           binary: true
           md5: true
-          source: "#{@config.mecano.cache_dir}/postgres.tar"
+          source: "#{@config.nikita.cache_dir}/postgres.tar"
           target: "#{tmp}/postgres.tar"
         @docker.load
           header: 'Load Container'
@@ -61,7 +61,7 @@ Install the PostgreSQL database server.
 Run the PostgreSQL server container
 
       @docker.service
-        machine: @config.mecano.machine
+        machine: @config.nikita.machine
         header: 'Run PostgreSQL Container'
         label_true: 'RUNNED'
         docker: @config.docker

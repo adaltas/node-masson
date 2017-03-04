@@ -38,4 +38,4 @@ and we couldnt dig the exact nature of this error.
 
 ## Module Dependencies
 
-    misc = require 'mecano/lib/misc'
+    misc = require 'nikita/lib/misc'

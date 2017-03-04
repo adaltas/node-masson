@@ -12,7 +12,7 @@ The package "iptables" is installed.
         timeout: -1
         name: 'iptables'
       @service 
-        if: -> (options.store['mecano:system:type'] in ['redhat','centos']) and options.store['mecano:system:release'][0] is '7'
+        if: -> (options.store['nikita:system:type'] in ['redhat','centos']) and options.store['nikita:system:release'][0] is '7'
         header: 'Iptable Service'
         name: 'iptables-services'
       @service.startup

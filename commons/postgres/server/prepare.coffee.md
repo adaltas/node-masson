@@ -13,4 +13,4 @@ Download the PostgreSQL Container
           version: postgres.version
         @docker.save
           image: "postgres:#{postgres.version}"
-          output: "#{@config.mecano.cache_dir}/postgres.tar"
+          output: "#{@config.nikita.cache_dir}/postgres.tar"
