@@ -11,10 +11,11 @@ The package "iptables" is installed.
       @service
         timeout: -1
         name: 'iptables'
-      @service 
-        if: -> (options.store['nikita:system:type'] in ['redhat','centos']) and options.store['nikita:system:release'][0] is '7'
-        header: 'Iptable Service'
-        name: 'iptables-services'
+      @system.discover (err, status, os) ->
+        @service
+          if: -> (os.type in ['redhat','centos']) and os.release[0] is '7'
+          header: 'Iptable Service'
+          name: 'iptables-services'
       @service.startup
         name: 'iptables'
         startup: startup

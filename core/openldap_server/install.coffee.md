@@ -48,13 +48,14 @@ ldap:x:55:
         name: 'openldap-clients'
       @service
         name: 'migrationtools'
-      @system.tmpfs
-        if: -> (options.store['nikita:system:type'] in ['redhat','centos']) and (options.store['nikita:system:release'][0] is '7')
-        mount: '/var/run/openldap'
-        name: 'openldap'
-        uid: openldap_server.user.name
-        gid: openldap_server.group.name
-        perm: '0750'
+      @system.discover (err, status, os) ->
+        @system.tmpfs
+          if: -> (os.type in ['redhat','centos']) and (os.release[0] is '7')
+          mount: '/var/run/openldap'
+          name: 'openldap'
+          uid: openldap_server.user.name
+          gid: openldap_server.group.name
+          perm: '0750'
       @service.start 'slapd'
 
 ## Logging

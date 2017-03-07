@@ -11,60 +11,63 @@ Install the `docker-io` package on Centos/REHL 6 or `docker` on Centos/REHL 7.
 Configure it as a startup and started service.
 Skip Pakage installation, if provided by external deploy tool.
 
-      @system.discover()
-      @call
-        unless: @config.docker.external
-        if: -> (options.store['nikita:system:type'] in ['redhat','centos'])
-        header: 'Packages'
-        handler: ->
-          switch options.store['nikita:system:release'][0]
-            when '6'
-              @service
-                header: 'Service'
-                name: 'docker'
-                yum_name: 'docker-io'
-                startup: true
-            when '7'
-              @service
-                header: 'Service'
-                name: 'docker'
-                yum_name: 'docker'
-                startup: true
-              @system.tmpfs
-                mount: '/var/run/docker'
-                name: 'docker'
-                perm: '0750'
+      @system.discover (err, status, os) ->
+        @call
+          unless: @config.docker.external
+          if: -> (os.type in ['redhat','centos'])
+          header: 'Packages'
+          handler: ->
+            switch os.release[0]
+              when '6'
+                @service
+                  header: 'Service'
+                  name: 'docker'
+                  yum_name: 'docker-io'
+                  startup: true
+              when '7'
+                @service
+                  header: 'Service'
+                  name: 'docker'
+                  yum_name: 'docker'
+                  startup: true
+                @system.tmpfs
+                  mount: '/var/run/docker'
+                  name: 'docker'
+                  perm: '0750'
 
 ## Configuration
       
-      @call header: 'Daemon Option', handler: ->
-        other_opts = @config.docker.other_opts
-        opts = []
-        opts.push "--#{k}=#{v}" for k,v of other_args
-        opts.push '--tlsverify' if ssl?.tlsverify
-        for type, socketPaths of sockets
-          opts.push "-H #{type}://#{path}" for path in socketPaths
-        other_opts += opts.join ' '
-        @call 
-          if: -> (options.store['nikita:system:type'] in ['redhat','centos'])
-          handler: ->
-            switch options.store['nikita:system:release'][0]
-              when '6' 
-                @file
-                  target: '/etc/sysconfig/docker'
-                  write: [
-                    match: /^other_args=.*$/mg
-                    replace: "other_args=\"#{other_opts}\"" 
-                  ]
-                  backup: true
-              when '7'
-                @file
-                  target: '/etc/sysconfig/docker'
-                  write: [
-                    match: /^OPTIONS=.*$/mg
-                    replace: "OPTIONS=\"#{other_opts}\"" 
-                  ]
-                  backup: true
+        @call header: 'Daemon Option', handler: ->
+          other_opts = @config.docker.other_opts
+          opts = []
+          opts.push "--#{k}=#{v}" for k,v of other_args
+          opts.push '--tlsverify' if ssl?.tlsverify and not(os.type in ['redhat','centos'] and os.release[0] is '6')
+          for type, socketPaths of sockets
+            opts.push "-H #{type}://#{path}" for path in socketPaths
+          other_opts += opts.join ' '
+          @call 
+            if: -> (os.type in ['redhat','centos'])
+            handler: ->
+              switch os.release[0]
+                when '6' 
+                  @file
+                    target: '/etc/sysconfig/docker'
+                    write: [
+                      match: /^other_args=.*$/mg
+                      replace: "other_args=\"#{other_opts}\""
+                    ]
+                    backup: true
+                when '7'
+                  @file
+                    target: '/etc/sysconfig/docker'
+                    write: [
+                      match: /^OPTIONS=.*$/mg
+                      replace: "OPTIONS=\"#{other_opts}\"",
+                      
+                      match: /^DOCKER_CERT_PATH=.*$/mg
+                      replace: "DOCKER_CERT_PATH=\"#{docker.conf_dir}/certs.d\""
+                    ]
+                    backup: true
 
 ## Download Certs
 
