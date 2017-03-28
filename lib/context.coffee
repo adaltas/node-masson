@@ -2,7 +2,7 @@
 nikita = require 'nikita'
 
 module.exports = (contexts, params, services, config) ->
-  m = nikita config.nikita
+  m = nikita config.nikita or {}
   m.params = params
   m.config = config
   m.services = services
