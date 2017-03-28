@@ -16,7 +16,7 @@ Download the Oracle JDK.
             location: true
             headers: ['Cookie: oraclelicense=accept-securebackup-cookie']
             md5: info.md5
-            sha256: info.sha256
+            sha256: info.jdk_sha256
           , "#{info.jdk_location}"
           @file.cache
             header: "Oracle JCE #{version}"
@@ -24,7 +24,7 @@ Download the Oracle JDK.
             location: true
             headers: ['Cookie: oraclelicense=accept-securebackup-cookie']
             md5: info.md5
-            sha256: info.sha256
+            sha256: info.jce_sha256
           , "#{info.jce_location}"
 
 ## Resources
