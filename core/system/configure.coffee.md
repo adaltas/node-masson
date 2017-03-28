@@ -1,22 +1,43 @@
 
 # System Configure
 
+## Options
+
 The module accept the following properties:
 
-*   `profile` (object)   
-    Object where keys are the script filename and values are the script
-    content.    
-*   `selinux` (boolean|string)   
-    Activate or desactivate SeLinux, accepted values are "enforcing", "permissive" and "disabled"
-*   `limits` (object)   
-*   `groups` (object)   
-*   `users` (object)   
+* `profile` (object)   
+  Object where keys are the script filename and values are the script content.    
+* `limits` (object)   
+* `groups` (object)   
+* `reboot` (boolean)   
+  Reboot the system in case selinux was modified, default is "false"
+* `selinux` (boolean|string)   
+  Activate or desactivate SeLinux, accepted values are "enforcing", "permissive" and "disabled"
+* `users` (object)   
 
-Example:
+## Default Configuration
 
 ```json
 { "system": {
-    "selinux": false,
+    "selinux": true,
+    "reboot": true,
+    "limits": {
+      "memlock": {
+        "hard": 130
+      }
+    },
+    "profile": {},
+    "groups": {},
+    "users": {}
+} }
+```
+
+## Example
+
+```json
+{ "system": {
+    "selinux": true,
+    "reboot": true,
     "limits": {
       "nproc": 2048,
       "nofile": {
