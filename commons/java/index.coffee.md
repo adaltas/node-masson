@@ -1,6 +1,11 @@
 
 # Java
 
+* Install openjdk
+* Install multiple versions of Oracle JDK
+* Install JCE extension for each Oracle JDK
+* Set JAVA_HOME in the system profile
+
     module.exports =
       Header: 'JAVA'
       configure:
