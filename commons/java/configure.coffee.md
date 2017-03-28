@@ -58,7 +58,7 @@ Java home are:
     module.exports = ->
       java = @config.java ?= {}
       # OpenJDK
-      java.openjdk ?= true
+      java.openjdk ?= false
       # Oracle JDK
       java.jdk ?= {}
       java.jdk.root_dir ?= '/usr/java'
