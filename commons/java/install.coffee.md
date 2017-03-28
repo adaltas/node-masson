@@ -61,6 +61,10 @@ have been copied or not (in case they already exist).
             .filter (out) -> out if /jdk(.*)/.exec out
             .map (abs) -> "#{path.basename abs}" 
         @system.mkdir java.jdk.root_dir
+        @service.install
+          header: "Dependency unzip"
+          if: Object.keys(java.jdk.versions).length
+          name: 'unzip'
         @each java.jdk.versions, (options, callback) ->
           version = options.key
           jdk = options.value
