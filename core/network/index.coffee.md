@@ -4,6 +4,12 @@
 Modify the various network related configuration files such as
 "/etc/hosts" and "/etc/resolv.conf".
 
+* Fill "/etc/hosts" with node hostname and IP information
+* Fill "/etc/hosts" with all registed hosts if option "hosts_auto" is activated
+* Set hostname unless option "hostname_disabled" is activated
+* Write DNS configuration if option "resolv" is defined
+* Customize the network interfaces if option "ifcg" is provided
+
     module.exports =
       use:
         bind_server: 'masson/core/bind_server'

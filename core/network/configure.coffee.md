@@ -1,6 +1,8 @@
 
 # Network Configure
 
+## Options
+
 The module accept the following properties:
 
 *   `hostname` (boolean)   
@@ -8,23 +10,31 @@ The module accept the following properties:
     property "HOSTNAME" inside the "/etc/sysconfig/network" file, must not be 
     configure globally, default to the "host" property.   
 *   `network.hostname_disabled` (boolean)   
-    Do not update the "/etc/sysconfig/network" file, disable the effect of the
+    Do not update the hostname, disable the effect of the
     "hostname" property (which itself default to "host"), 
-    default to false.   
+    default to "false".   
 *   `network.hosts_auto` (boolean)   
     Enrich the "/etc/hosts" file with the server hostname present on 
-    the cluster, default to false   
+    the cluster, default to "false"   
 *   `network.hosts` (object)   
     Enrich the "/etc/hosts" file with custom adresses, the keys represent the 
     IPs and the value the hostnames, optional.   
 *   `network.resolv` (string)   
     Content of the '/etc/resolv.conf' file, optional.   
 
-Example:
+## Default configuration
 
 ```json
-{
-  "network": {
+{ "network": {
+  "hostname_disabled": false,
+  "hosts_auto": false,
+} }
+```
+
+## Example
+
+```json
+{ "network": {
     "hosts_auto": true,
     "hosts": {
       "10.10.10.15": "myserver.hadoop"
@@ -35,8 +45,7 @@ Example:
         "PEERDNS": "no"
       }
     }
-  }
-}
+} }
 ```
 
     module.exports = ->
