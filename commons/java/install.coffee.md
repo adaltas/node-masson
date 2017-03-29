@@ -55,8 +55,8 @@ have been copied or not (in case they already exist).
           code_skipped: 2
           shy: true
         , (err, executed, stdout, stderr) ->
-          return callback err if err
-          stdout = '' if err or not executed
+          throw err if err
+          stdout = '' unless executed
           installed_versions = (string.lines stdout.trim())
             .filter (out) -> out if /jdk(.*)/.exec out
             .map (abs) -> "#{path.basename abs}" 
