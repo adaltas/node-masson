@@ -149,11 +149,13 @@ Run::exec = (params='install') ->
   params = command: params if typeof params is 'string'
   params.end ?= true
   services = @config.services
+  engine = require('nikita/src/core/kv/engines/memory')()
   each @contexts
   .parallel true
   .call (context, callback) ->
     return callback() if params.hosts and multimatch(context.config.host, params.hosts).length is 0
     error = false
+    context.kv.engine engine: engine
     context.log.cli host: context.config.host, pad: host: 20, header: 60
     context.log.md basename: context.config.shortname
     context.ssh.open context.config.ssh, host: context.config.ip or context.config.host unless params.command is 'prepare'
