@@ -17,6 +17,7 @@ OS will reboot if SELINUX was modified.
         target: '/etc/selinux/config'
         match: /^SELINUX=.*/mg
         replace: "SELINUX=#{system.selinux}"
+        backup: true
       @system.execute
         header: 'Reboot'
         cmd: 'shutdown -r now'
