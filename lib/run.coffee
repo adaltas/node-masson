@@ -149,7 +149,7 @@ Run::exec = (params='install') ->
   params = command: params if typeof params is 'string'
   params.end ?= true
   services = @config.services
-  engine = require('nikita/src/core/kv/engines/memory')()
+  engine = require('nikita/lib/core/kv/engines/memory')()
   each @contexts
   .parallel true
   .call (context, callback) ->
