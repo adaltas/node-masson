@@ -46,23 +46,35 @@ the command `authconfig --update --ldaploadcacert={file}`.
 
       @call header: 'Certificate', timeout: -1, handler: ->
         for certificate in openldap_client.certificates then do (certificate) =>
-          hash = crypto.createHash('md5').update(certificate).digest('hex')
           filename = null
-          @file.download
-            source: certificate
-            target: "/tmp/#{hash}"
-            mode: 0o0640
-            shy: true
-          @system.execute # openssh is executed remotely
-            cmd: "openssl x509 -noout -hash -in /tmp/#{hash}; rm -rf /tmp/#{hash}"
-            shy: true
-          , (err, _, stdout) ->
-            filename = stdout.trim() unless err
-          @call ->
-            @file 
-              source: certificate
-              local: true
-              target: "#{openldap_client.config.TLS_CACERTDIR}/#{filename}.0"
+          if certificate.local
+            hash = crypto.createHash('md5').update(certificate.name).digest('hex')
+            @file.download
+              source: certificate.name
+              target: "/tmp/#{hash}"
+              mode: 0o0640
+              shy: true
+            @system.execute # openssh is executed remotely
+              cmd: "openssl x509 -noout -hash -in /tmp/#{hash}; rm -rf /tmp/#{hash}"
+              shy: true
+            , (err, _, stdout) ->
+              filename = stdout.trim() unless err
+            @call ->
+              @file 
+                source: certificate.name
+                local: true
+                target: "#{openldap_client.config.TLS_CACERTDIR}/#{filename}.0"
+          else
+            @system.execute # openssh is executed remotely
+              cmd: "openssl x509 -noout -hash -in #{certificate.name}"
+              shy: true
+            , (err, _, stdout) ->
+              filename = stdout.trim() unless err
+            @call ->
+              @file 
+                source: certificate.name
+                local: true
+                target: "#{openldap_client.config.TLS_CACERTDIR}/#{filename}.0"
 
 ## Dependencies
 

@@ -3,8 +3,9 @@
 
     module.exports =
       use:
-        iptables: implicit: true, module: 'masson/core/iptables'
-        iptables: module: 'masson/core/network'
+        # TODO: manually activate iptables after removal of implicit: true,
+        iptables: module: 'masson/core/iptables'
+        # network: module: 'masson/core/network'
       configure: [
         'masson/core/openldap_server/configure'
         'masson/core/openldap_client/configure'
@@ -17,7 +18,7 @@
           'masson/core/openldap_server/install'
           'masson/core/openldap_server/install_tls'
           'masson/core/openldap_client/install'
-          'masson/core/openldap_server/install_krb5'
+          # # 'masson/core/openldap_server/install_krb5'
           'masson/core/openldap_server/start'
           'masson/core/openldap_server/check'
         ]

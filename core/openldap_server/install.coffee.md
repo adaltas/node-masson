@@ -24,7 +24,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
           { chain: 'INPUT', jump: 'ACCEPT', dport: 389, protocol: 'tcp', state: 'NEW', comment: "LDAP (non-secured)" }
           { chain: 'INPUT', jump: 'ACCEPT', dport: 636, protocol: 'tcp', state: 'NEW', comment: "LDAP (secured)" }
         ]
-        if: @config.iptables.action is 'start'
+        if: @has_service('masson/core/iptables') and @config.iptables.action is 'start'
 
 
 ## Users & Groups
@@ -38,25 +38,30 @@ cat /etc/group | grep ldap
 ldap:x:55:
 ```
 
+      @call header: 'User & Group', ->
+        @system.group openldap_server.group
+        @system.user openldap_server.user
+
 ## Packages
 
-      @service
-        name: 'openldap-servers'
-        chk_name: 'slapd'
-        startup: true
-      @service
-        name: 'openldap-clients'
-      @service
-        name: 'migrationtools'
-      @system.discover (err, status, os) ->
-        @system.tmpfs
-          if: -> (os.type in ['redhat','centos']) and (os.release[0] is '7')
-          mount: '/var/run/openldap'
-          name: 'openldap'
-          uid: openldap_server.user.name
-          gid: openldap_server.group.name
-          perm: '0750'
-      @service.start 'slapd'
+      @call header: 'Service', ->
+        @service
+          name: 'openldap-servers'
+          chk_name: 'slapd'
+          startup: true
+        @service
+          name: 'openldap-clients'
+        @service
+          name: 'migrationtools'
+        @system.discover (err, status, os) ->
+          @system.tmpfs
+            if: -> (os.type in ['redhat','centos']) and (os.release[0] is '7')
+            mount: '/var/run/openldap'
+            name: 'openldap'
+            uid: openldap_server.user.name
+            gid: openldap_server.group.name
+            perm: '0750'
+        @service.start 'slapd'
 
 ## Logging
 
@@ -70,133 +75,158 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
         @file
           target: '/etc/rsyslog.conf'
           match: /^local4.*/mg
-          replace: 'local4.*                                                /var/log/slapd.log'
+          replace: 'local4.* /var/log/slapd.log'
           append: 'RULES'
         options.log 'Restart rsyslog service'
         @service
           name: 'rsyslog'
           action: 'restart'
           if: -> @status -1
-        @file
-          target: openldap_server.config_file
-          match: /^olcLogLevel:.*$/mg
-          replace: "olcLogLevel: #{openldap_server.log_level}"
-          place_before: 'structuralObjectClass'
-
-###
-Borrowed from
-http://docs.adaptivecomputing.com/viewpoint/hpc/Content/topics/1-setup/installSetup/settingUpOpenLDAPOnCentos6.htm
-Interesting posts also include
-http://itdavid.blogspot.ca/2012/05/howto-centos-6.html
-http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
-###
-
-      @call header: 'Config Access', timeout: -1, handler: (options) ->
-        @call (_, callback) ->
-          return callback null, false if openldap_server.config_slappasswd
-          options.log "Extract password from #{openldap_server.config_file}"
-          @fs.readFile openldap_server.config_file, 'ascii', (err, content) ->
-            return callback err if err
-            if match = /^olcRootPW: {SSHA}(.*)$/m.exec content
-              password_ok =  check_password(openldap_server.config_password, match[1])
-              return if password_ok then  callback null, false else callback null, true
-            else # First installation, password not yet defined
-              callback null, true
         @system.execute
-          cmd: "slappasswd -s #{openldap_server.config_password}"
-          if: -> @status -1
-        , (err, executed, stdout) ->
-          openldap_server.config_slappasswd = stdout.trim() if not err and executed
-        @call (_, callback) ->
-          options.log 'Database config: root DN & PW'
-          write = [match: /^olcRootDN:.*$/m, replace: "olcRootDN: #{openldap_server.config_dn}", append: true, place_before: 'structuralObjectClass']
-          if openldap_server.config_slappasswd
-            write.push
-              match: /^olcRootPW:.*$/m
-              replace: "olcRootPW: #{openldap_server.config_slappasswd}"
-              append: 'olcRootDN'
-          @file
-            target: openldap_server.config_file
-            write: write
-          @service
-            srv_name: 'slapd'
-            action: 'restart'
-            if: -> @status -1
-          @then callback
+          cmd: """
+          ldapmodify -Y EXTERNAL -H ldapi:/// <<-EOF
+          dn: cn=config
+          changetype: modify
+          add: olcLogLevel
+          olcLogLevel: #{openldap_server.log_level}
+          EOF
+          """
+          unless_exec: """
+            ldapsearch -Y EXTERNAL -H ldapi:/// -b "cn=config" | \
+            grep -E "olcLogLevel: #{openldap_server.log_level}"
+          """
 
 ## Import Basic Schema
 On Redhat/Centos 7, Basic schema must be manually imported.
 Check section[3](https://www.server-world.info/en/note?os=CentOS_7&p=openldap).
 
-      @call
-        header: 'Import Schema'
-        handler: ->
-          @each ['cosine','inetorgperson','nis'], (options) ->
-            name = options.key
-            @system.execute
-              cmd: " ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/#{name}.ldif "
-              unless_exec: """
-                ldapsearch -LLL -D #{openldap_server.config_dn} \
-                -w #{openldap_server.config_password} -H ldapi:/// \
-                -b "cn=schema,cn=config" | \
-                grep -E cn=\{[0-9]+\}#{name},cn=schema,cn=config
-              """
+      @system.execute (
+        header: "Import Schema #{schema}"
+        cmd: "ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/#{schema}.ldif"
+        unless_exec: """
+        ldapsearch -Y EXTERNAL -H ldapi:/// \
+        -b "cn=schema,cn=config" | \
+        grep -E cn=\{[0-9]+\}#{schema},cn=schema,cn=config
+        """
+      ) for schema in ['cosine','inetorgperson','nis']
+
+## Database config
+
+Borrowed from:
+* http://docs.adaptivecomputing.com/viewpoint/hpc/Content/topics/1-setup/installSetup/settingUpOpenLDAPOnCentos6.htm
+Interesting posts also include:
+* http://itdavid.blogspot.ca/2012/05/howto-centos-6.html
+* http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
+
+      @call header: 'Database config', timeout: -1, handler: (options) ->
+        @system.execute
+          header: 'Root DN'
+          cmd: """
+          ldapmodify -Y EXTERNAL -H ldapi:/// <<-EOF
+          dn: olcDatabase={0}config,cn=config
+          changetype: modify
+          replace: olcRootDN
+          olcRootDN: #{openldap_server.config_dn}
+          EOF
+          """
+          unless_exec: """
+            ldapsearch -Y EXTERNAL -H ldapi:/// -b "olcDatabase={0}config,cn=config" \
+            | grep -E "olcRootDN: #{openldap_server.config_dn}"
+          """
+        @call (_, callback) -> @system.execute
+          cmd: 'ldapsearch -Y EXTERNAL -H ldapi:/// -b "olcDatabase={0}config,cn=config"'
+        , (err, _, stdout) ->
+          return callback err if err
+          if match = /^olcRootPW: {SSHA}(.*)$/m.exec stdout
+            callback null, not check_password openldap_server.config_password, match[1]
+          else # First installation, password not yet defined
+            callback null, true
+        @system.execute
+          header: 'Root PW'
+          if: -> @status -1
+          cmd: """
+          password=`slappasswd -s #{openldap_server.config_password}`
+          ldapmodify -c -Y EXTERNAL -H ldapi:/// <<-EOF
+          dn: olcDatabase={0}config,cn=config
+          changetype: modify
+          replace: olcRootPW
+          olcRootPW: $password
+          EOF
+          """
+        @service.restart 'slapd', if: -> @status -1
 
 ## DB monitor root DN
 
-      @file
-        header: 'DB monitor root DN'
-        target: openldap_server.monitor_file
-        match: /^(.*)dc=my-domain,dc=com(.*)$/m
-        replace: "$1#{openldap_server.suffix}$2"
+Usage and configuration of OpenLDAP monitoring is not clear, commented for now.
 
-## DB bdb
+      # @file
+      #   header: 'DB monitor root DN'
+      #   target: openldap_server.monitor_file
+      #   match: /^(.*)dc=my-domain,dc=com(.*)$/m
+      #   replace: "$1#{openldap_server.suffix}$2"
 
-The path of the bdb configuration file differ between RH6 and RH7. It is 
+## Database hdb
+
+The path of the bdb configuration file differ between RH6 and RH7. It is
 discovered at runtime based on the OS release.
 
       @call header: 'DB bdb', timeout: -1, handler: (options) ->
-        bdb_file = null
+        bdb = null
         @system.discover shy: true, (err, status, info) ->
           throw Error "Unsupported OS: #{JSON.stringify info.type}" unless info.type in ['centos', 'redhat']
-          bdb_file = if /^6/.test info.release
-          then '/etc/openldap/slapd.d/cn=config/olcDatabase={2}bdb.ldif'
-          else '/etc/openldap/slapd.d/cn=config/olcDatabase={2}hdb.ldif'
-        @call (_, callback) ->
-          return callback null, false if openldap_server.root_slappasswd
-          options.log "Extract password from #{bdb_file}"
-          @fs.readFile bdb_file, 'ascii', (err, content) ->
+          bdb = if /^6/.test info.release then 'bdb' else 'hdb'
+        @call ->
+          @system.execute
+            header: 'Suffix'
+            cmd: """
+            ldapmodify -Y EXTERNAL -H ldapi:/// <<-EOF
+            dn: olcDatabase={2}#{bdb},cn=config
+            changetype: modify
+            replace: olcSuffix
+            olcSuffix: #{openldap_server.suffix}
+            EOF
+            """
+            unless_exec: """
+              ldapsearch -Y EXTERNAL -H ldapi:/// \
+              -b "olcDatabase={2}hdb,cn=config" | \
+              grep -E "olcSuffix: #{openldap_server.suffix}"
+            """
+          @system.execute
+            header: 'Root DN'
+            cmd: """
+            ldapmodify -Y EXTERNAL -H ldapi:/// <<-EOF
+            dn: olcDatabase={2}#{bdb},cn=config
+            changetype: modify
+            replace: olcRootDN
+            olcRootDN: #{openldap_server.root_dn}
+            EOF
+            """
+            unless_exec: """
+            ldapsearch -Y EXTERNAL -H ldapi:/// \
+            -b "olcDatabase={2}#{bdb},cn=config" | \
+            grep -E "olcRootDN: #{openldap_server.root_dn}"
+            """
+          @call (_, callback) ->  @system.execute
+            cmd: "ldapsearch -Y EXTERNAL -H ldapi:/// -b 'olcDatabase={2}#{bdb},cn=config'"
+          , (err, _, stdout) ->
             return callback err if err
-            match = /^olcRootPW: {SSHA}(.*)$/m.exec content
-            if match = /^olcRootPW: {SSHA}(.*)$/m.exec content
-              password_ok =  check_password openldap_server.root_password, match[1]
-              return if password_ok then  callback null, false else callback null, true
+            if match = /^olcRootPW: {SSHA}(.*)$/m.exec stdout
+              callback null, not check_password openldap_server.root_password, match[1]
             else # First installation, password not yet defined
               callback null, true
-        @system.execute
-          cmd: "slappasswd -s #{openldap_server.root_password}"
-          if: -> @status -1
-        , (err, executed, stdout) ->
-          openldap_server.root_slappasswd = stdout.trim() if not err and executed
-        @call (_, callback) ->
-          options.log 'Database bdb: root DN, root PW, password protection'
-          write = [
-            {match: /^(.*)dc=my-domain,dc=com(.*)$/m, replace: "$1#{openldap_server.suffix}$2"}
-            {match: /^olcRootDN:.*$/m, replace: "olcRootDN: #{openldap_server.root_dn}"}
-          ]
-          if openldap_server.root_slappasswd
-            write.push
-              match: /^olcRootPW:.*$/m
-              replace: "olcRootPW: #{openldap_server.root_slappasswd}"
-              append: 'olcRootDN'
-          @file
-            target: bdb_file
-            write: write
-          @service
-            srv_name: 'slapd'
-            action: 'restart'
+          @system.execute
+            header: 'Root PW'
             if: -> @status -1
-          @then callback
+            cmd: """
+            password=`slappasswd -s #{openldap_server.root_password}`
+            ldapmodify -c -Y EXTERNAL -H ldapi:/// <<-EOF
+            dn: olcDatabase={2}#{bdb},cn=config
+            changetype: modify
+            replace: olcRootPW
+            olcRootPW: $password
+            EOF
+            """
+          @service.restart 'slapd', if: -> @status -1
 
 ## ACLs
 
@@ -204,7 +234,7 @@ discovered at runtime based on the OS release.
         # We used: http://itdavid.blogspot.fr/2012/05/howto-centos-62-kerberos-kdc-with.html
         # But this is also interesting: http://web.mit.edu/kerberos/krb5-current/doc/admin/conf_ldap.html
         # says that a user with the group id and user id of 0 (root), matched using EXTERNAL SASL on localhost
-        @ldap_acl
+        @ldap.acl
           header: 'Global Rules'
           suffix: openldap_server.suffix
           acls: [
@@ -223,6 +253,7 @@ discovered at runtime based on the OS release.
               '* none'
             ]
           ]
+
       [_, suffix_k, suffix_v] = /(\w+)=([^,]+)/.exec openldap_server.suffix
       @system.execute
         header: 'Users and Groups'
@@ -261,20 +292,20 @@ discovered at runtime based on the OS release.
           echo $schema
           """
           code_skipped: 2
-        , (err, installed, stdout) ->
-          schema = stdout.trim() if installed
+          shy: true
+        , (err, exists, stdout) ->
+          schema = stdout.trim() if exists
         @file.download
           source: "#{__dirname}/resources/ldap.schema"
           target: '/tmp/ldap.schema'
           mode: 0o0640
           unless: -> @status -1
-        @call ->
-          @ldap_schema
-            name: 'sudo'
-            schema: schema
-            binddn: openldap_server.config_dn
-            passwd: openldap_server.config_password
-            uri: true
+        @call -> @ldap.schema
+          name: 'sudo'
+          schema: schema
+          binddn: openldap_server.config_dn
+          passwd: openldap_server.config_password
+          uri: true
 
 ## Delete ldif data
 
@@ -286,7 +317,7 @@ discovered at runtime based on the OS release.
             target: target
             mode: 0o0640
           @system.execute
-            cmd: "ldapdelete -c -H ldapi:/// -f #{target} -D #{openldap_server.root_dn} -w #{openldap_server.root_password}"
+            cmd: "ldapdelete -c -Y EXTERNAL -H ldapi:/// -f #{target}"
             code_skipped: 32
           @system.remove
             target: target
@@ -302,7 +333,7 @@ discovered at runtime based on the OS release.
             target: target
             shy: true
           @system.execute
-            cmd: "ldapadd -c -H ldapi:/// -D #{openldap_server.root_dn} -w #{openldap_server.root_password} -f #{target}"
+            cmd: "ldapadd -c -Y EXTERNAL -H ldapi:/// -f #{target}"
             code_skipped: 68
             shy: true
           , (err, executed, stdout, stderr) ->

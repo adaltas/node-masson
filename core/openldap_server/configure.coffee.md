@@ -1,7 +1,7 @@
-  
+
 # OpenLDAP Server Configure
 
-The property "openldap_server.config_slappasswd" may be generated with the command `slappasswd` 
+The property "openldap_server.config_slappasswd" may be generated with the command `slappasswd`
 and should correspond to "openldap_server.config_password".
 
     module.exports = ->
@@ -13,6 +13,11 @@ and should correspond to "openldap_server.config_password".
       # throw new Error "Missing \"openldap_server.root_slappasswd\" property" unless openldap_server.root_slappasswd
       throw new Error "Missing \"openldap_server.config_dn\" property" unless openldap_server.config_dn
       throw new Error "Missing \"openldap_server.config_password\" property" unless openldap_server.config_password
+      # Group
+      openldap_server.group = name: openldap_server.group if typeof openldap_server.group is 'string'
+      openldap_server.group ?= {}
+      openldap_server.group.name ?= 'ldap'
+      openldap_server.group.system ?= true
       # User
       openldap_server.user = name: openldap_server.user if typeof openldap_server.user is 'string'
       openldap_server.user ?= {}
@@ -22,11 +27,6 @@ and should correspond to "openldap_server.config_password".
       openldap_server.user.shell = false
       openldap_server.user.comment ?= 'LDAP User'
       openldap_server.user.home = '/var/lib/ldap'
-      # Group
-      openldap_server.group = name: openldap_server.group if typeof openldap_server.group is 'string'
-      openldap_server.group ?= {}
-      openldap_server.group.name ?= 'ldap'
-      openldap_server.group.system ?= true
       # Configuration
       {suffix} = openldap_server
       openldap_server.root_dn ?= "cn=Manager,#{openldap_server.suffix}"
@@ -129,8 +129,8 @@ and should correspond to "openldap_server.config_password".
         description: 'Kerberos administrator\'s group.'
       , openldap_server_krb5.krbadmin_group
 
-## Slapd 
-    
+## Slapd
+
       openldap_server.urls ?= [ 'ldapi:///','ldap:///' ]
       openldap_server.urls.push 'ldaps:///' if openldap_server.tls and openldap_server.urls.indexOf('ldaps:///') is -1
 
