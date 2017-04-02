@@ -12,8 +12,6 @@ nikita = require 'nikita'
 constraints = require './constraints'
 context = require './context'
 
-normalize_node = (node) ->
-
 normalize_service = (service) ->
   if typeof service is 'string'
     service = path.resolve process.cwd(), service if service.substr(0, 1) is '.'
