@@ -1,0 +1,38 @@
+
+# Mysql Server Check
+
+    module.exports = header: 'Mysql Server Check', handler: ->
+      {iptables, mysql} = @config
+      {ssl} = @config.ryba
+      props =
+        database: null
+        admin_username: 'root'
+        admin_password: @config.mysql.server.password
+        engine: 'mysql'
+        host: @config.host
+        silent: false
+
+## Wait Connect
+Wait connect action is used as a check n the port availability.
+
+      @connection.wait
+        port: mysql.server.my_cnf['mysqld']['port']
+        host: @config.host
+
+## Check Replication
+
+      @call 
+        header: 'Check Replication'
+        if: @config.mysql.ha_enabled
+        handler: ->
+          @system.execute
+            retry: 3
+            cmd: "#{db.cmd props,'show slave status \\G ;'} | grep Slave_IO_State"
+          , (err, status, stdout) ->
+            throw err if err
+            ok = /^Slave_IO_State:\sWaiting for master to send event/.test(stdout.trim() )or /^Slave_IO_State:\sConnecting to master/.test(stdout.trim())
+            throw Error 'Error in Replication state' unless ok
+
+## Dependencies
+
+    db = require 'nikita/lib/misc/db'
