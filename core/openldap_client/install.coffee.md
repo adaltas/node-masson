@@ -48,9 +48,9 @@ the command `authconfig --update --ldaploadcacert={file}`.
         for certificate in openldap_client.certificates then do (certificate) =>
           filename = null
           if certificate.local
-            hash = crypto.createHash('md5').update(certificate.name).digest('hex')
+            hash = crypto.createHash('md5').update(certificate.source).digest('hex')
             @file.download
-              source: certificate.name
+              source: certificate.source
               target: "/tmp/#{hash}"
               mode: 0o0640
               shy: true
@@ -61,19 +61,18 @@ the command `authconfig --update --ldaploadcacert={file}`.
               filename = stdout.trim() unless err
             @call ->
               @file 
-                source: certificate.name
+                source: certificate.source
                 local: true
                 target: "#{openldap_client.config.TLS_CACERTDIR}/#{filename}.0"
           else
             @system.execute # openssh is executed remotely
-              cmd: "openssl x509 -noout -hash -in #{certificate.name}"
+              cmd: "openssl x509 -noout -hash -in #{certificate.source}"
               shy: true
             , (err, _, stdout) ->
               filename = stdout.trim() unless err
             @call ->
               @file 
-                source: certificate.name
-                local: true
+                source: certificate.source
                 target: "#{openldap_client.config.TLS_CACERTDIR}/#{filename}.0"
 
 ## Dependencies

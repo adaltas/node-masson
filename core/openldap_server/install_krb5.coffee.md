@@ -14,7 +14,6 @@ is possible to check if the schema is installed by calling
 the command `ldapsearch  -D cn=admin,cn=config -w test -b "cn=config"`.
 
       @call header: 'Schema', timeout: -1, handler: (options) ->
-        {openldap_server} = @config
         options.log message: 'Install schema', level: 'DEBUG'
         @service
           name: 'krb5-server-ldap'
