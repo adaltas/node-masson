@@ -66,7 +66,7 @@ Example:
       kdc_conf = @config.krb5.kdc_conf ?= {}
       # Generate dynamic "krb5.dbmodules" object
       for ctx_krb5 in openldap_ctxs
-        {kerberos_dn, kdc_user, krbadmin_user, manager_dn, manager_password} = ctx_krb5.config.openldap_server_krb5
+        {kerberos_dn, kdc_user, krbadmin_user, root_dn, root_password} = ctx_krb5.config.openldap_server_krb5
         name = "openldap_#{ctx_krb5.config.shortname}"
         # scheme = if ctx_krb5.has_service 'masson/core/openldap_server/install_tls' then "ldaps://" else "ldap://"
         # ldap_server =  "#{scheme}#{ctx_krb5.config.host}"
@@ -86,8 +86,8 @@ Example:
           # 'ldap_servers': 'ldapi:///'
           'ldap_servers': ldap_server
           'ldap_conns_per_server': 5
-          'manager_dn': manager_dn
-          'manager_password': manager_password
+          'root_dn': root_dn
+          'root_password': root_password
         , kdc_conf.dbmodules[name]
         ldapservers = kdc_conf.dbmodules[name].ldap_servers
         kdc_conf.dbmodules[name].ldap_servers = ldapservers.join ' ' if Array.isArray ldapservers

@@ -21,7 +21,7 @@ Resources:
 
     module.exports = header: 'Krb5 Server Install', handler: ->
       {kdc_conf} = @config.krb5
-      
+
 ## IPTables
 
 | Service    | Port | Proto | Parameter                            |
@@ -30,7 +30,7 @@ Resources:
 | krb5kdc    | 88   | upd   | `kdc_conf.kdcdefaults.kdc_ports`     |
 | krb5kdc    | 88   | tcp   | `kdc_conf.kdcdefaults.kdc_tcp_ports` |
 
-IPTables rules are only inserted if the parameter "iptables.action" is set to 
+IPTables rules are only inserted if the parameter "iptables.action" is set to
 "start" (default value).
 
       rules = []
@@ -62,7 +62,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
       @tools.iptables
         header: 'IPTables'
         rules: rules
-        if: @config.iptables.action is 'start'
+        if: @has_service('masson/core/iptables') and @config.iptables.action is 'start'
 
 ## Package
 
@@ -81,9 +81,9 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
 
 ## Configuration
 
-The following files are updated:   
-*   "/etc/krb5.conf" client configuration   
-*   "/var/kerberos/krb5kdc/kadm5.acl" acl definition   
+The following files are updated:
+*   "/etc/krb5.conf" client configuration
+*   "/var/kerberos/krb5kdc/kadm5.acl" acl definition
 *   "/var/kerberos/krb5kdc/kdc.conf" kdc server configuration
 *   "/etc/sysconfig/kadmin" kadmin default realm
 *   "/etc/sysconfig/krb5kdc" kdc default realm
@@ -96,7 +96,7 @@ The following files are updated:
           target: '/etc/krb5.conf'
           stringify: misc.ini.stringify_square_then_curly
           backup: true
-        @file 
+        @file
           write: for realm of etc_krb5_conf.realms
             match: ///^\*/\w+@#{misc.regexp.escape realm}\s+\*///mg
             replace: "*/admin@#{realm}     *"
@@ -118,39 +118,39 @@ The following files are updated:
           match: /^KRB5REALM=.*$/mg
           replace: "KRB5REALM=#{any_realm}"
           backup: true
-        @call 
+        @call
           if: -> @status()
-          handler: ->
-            @call 'masson/core/openldap_client/wait'
-            @service
-              srv_name: 'krb5kdc'
-              action: 'restart'
-            @service
-              srv_name: 'kadmin'
-              action: 'restart'
+        , ->
+          @call 'masson/core/openldap_client/wait'
+          @service
+            srv_name: 'krb5kdc'
+            action: 'restart'
+          @service
+            srv_name: 'kadmin'
+            action: 'restart'
 ## Wait
-    
+
       @call 'masson/core/openldap_client/wait'
 
 ## Ldap Krb5 entries
-      
+
       @call header: 'LDAP Insert Entries', timeout: -1, handler: ->
         {kdc_conf} = @config.krb5
         for realm, config of kdc_conf.realms
           continue unless config.database_module
-          {kdc_master_key, ldap_kerberos_container_dn, manager_dn, manager_password, ldap_servers} = kdc_conf.dbmodules[config.database_module]
+          {kdc_master_key, ldap_kerberos_container_dn, root_dn, root_password, ldap_servers} = kdc_conf.dbmodules[config.database_module]
           ldap_server = ldap_servers.split(' ')[0]
-          @wait.execute 
+          @wait.execute
             cmd: """
             ldapsearch -x -LLL \
-              -H #{ldap_server} -D \"#{manager_dn}\" -w #{manager_password} \
+              -H #{ldap_server} -D \"#{root_dn}\" -w #{root_password} \
               -b \"#{ldap_kerberos_container_dn}\"
             """
             code_skipped: 32
-          @system.execute 
+          @system.execute
             cmd: """
             ldapsearch -x \
-            -H #{ldap_server} -D \"#{manager_dn}\" -w #{manager_password} \
+            -H #{ldap_server} -D \"#{root_dn}\" -w #{root_password} \
             -b \"cn=#{realm},#{ldap_kerberos_container_dn}\"
             """
             code_skipped: 32
@@ -158,7 +158,7 @@ The following files are updated:
           @system.execute
             cmd: """
             kdb5_ldap_util \
-            -D \"#{manager_dn}\" -w #{manager_password} \
+            -D \"#{root_dn}\" -w #{root_password} \
             create -subtrees \"#{ldap_kerberos_container_dn}\" -r #{realm} -s -P #{kdc_master_key}
             """
             unless: -> @status -1
@@ -169,7 +169,7 @@ The following files are updated:
         for name, dbmodule of kdc_conf.dbmodules then do(name, dbmodule) =>
         # each kdc_conf.dbmodules
         # .run (name, dbmodule, next) ->
-          {kdc_master_key, manager_dn, manager_password, ldap_service_password_file, ldap_kadmind_dn} = dbmodule
+          {kdc_master_key, root_dn, root_password, ldap_service_password_file, ldap_kadmind_dn, ldap_kadmind_password} = dbmodule
           options.log "Stash key file is: #{dbmodule.ldap_service_password_file}"
           keyfileContent = null
           @call (_, callback) ->
@@ -186,7 +186,7 @@ The following files are updated:
             options.log 'Stash password into local file for kadmin dn'
             @options.ssh.shell (err, stream) =>
               return callback err if err
-              cmd = "kdb5_ldap_util -D \"#{manager_dn}\" -w #{manager_password} stashsrvpw -f #{ldap_service_password_file} #{ldap_kadmind_dn}"
+              cmd = "kdb5_ldap_util -D \"#{root_dn}\" -w #{root_password} stashsrvpw -f #{ldap_service_password_file} #{ldap_kadmind_dn}"
               options.log "Run #{cmd}"
               reentered = done = false
               stream.write "#{cmd}\n"
@@ -194,9 +194,9 @@ The following files are updated:
                 # options.log[if stderr then 'err' else 'out'].write data
                 data = data.toString()
                 if /Password for/.test data
-                  stream.write "#{kdc_master_key}\n"
+                  stream.write "#{ldap_kadmind_password}\n"
                 else if /Re-enter password for/.test data
-                  stream.write "#{kdc_master_key}\n\n"
+                  stream.write "#{ldap_kadmind_password}\n\n"
                   reentered = true
                 else if reentered and not done
                   done = true

@@ -42,8 +42,8 @@ provides a good description on how Kerberos is negotiated by GSSAPI and SSPI.
         delete config.principals
       for name, config of etc_krb5_conf.dbmodules
         delete config.kdc_master_key
-        delete config.manager_dn
-        delete config.manager_password
+        delete config.root_dn
+        delete config.root_password
         delete config.ldap_kdc_password
         delete config.ldap_kadmind_password
       etc_krb5_conf
