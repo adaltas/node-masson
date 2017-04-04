@@ -11,6 +11,6 @@ TODO: https://dev.mysql.com/doc/refman/5.7/en/mysql-cluster.html
       commands:
         'install': [
           'masson/commons/mysql/server/install'
-          'masson/commons/mysql/server/replication'
-          'masson/commons/mysql/server/check'
+          # 'masson/commons/mysql/server/replication'
+          # 'masson/commons/mysql/server/check'
         ]

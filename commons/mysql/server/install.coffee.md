@@ -3,13 +3,12 @@
 
     module.exports = header: 'MySQL Server Install', handler: ->
       {iptables, mysql} = @config
-      {ssl} = @config.ryba
 
 ## IPTables
 
 | Service           | Port | Proto | Parameter |
 |-------------------|------|-------|-----------|
-| MySQL/MariaDB     | 3306 | tcp   | -         |
+| MySQL             | 3306 | tcp   | -         |
 
 
 IPTables rules are only inserted if the parameter "iptables.action" is set to
@@ -103,8 +102,6 @@ the following ways:
           stream.on 'exit', =>
             @service.restart 'mysqld' unless err
             @then -> callback err, true
-
-    escape = (text) -> text.replace(/[\\"]/g, "\\$&")
 
 ## Dependencies
 
