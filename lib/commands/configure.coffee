@@ -11,9 +11,19 @@
     CSON = require 'cson'
     string = require 'nikita/lib/misc/string'
     Module = require 'module'
+    run = require '../run'
 
     # ./bin/ryba configure -o output_file -p JSON
     module.exports = ->
+      # EXAMPLE START
+      params = params.parse()
+      config params.config, (err, config) ->
+        # console.log config
+        {contexts} = run params, config
+        console.log contexts[0].config
+        process.exit()
+      return
+      # EXAMPLE END
       # behave like the first pass of run command
       # creates a context perserver by executing all configure functions
       valid_extensions = ['json','cson', 'js', 'coffee']
