@@ -62,10 +62,10 @@ Skip Pakage installation, if provided by external deploy tool.
                     target: '/etc/sysconfig/docker'
                     write: [
                       match: /^OPTIONS=.*$/mg
-                      replace: "OPTIONS=\"#{other_opts}\"",
-                      
-                      match: /^DOCKER_CERT_PATH=.*$/mg
-                      replace: "DOCKER_CERT_PATH=\"#{docker.conf_dir}/certs.d\""
+                      replace: "OPTIONS=\"#{other_opts}\""
+                    ,
+                      match: /^(\s+)DOCKER_CERT_PATH=.*$/mg
+                      replace: "$1DOCKER_CERT_PATH=\"#{docker.conf_dir}/certs.d\""
                     ]
                     backup: true
 
