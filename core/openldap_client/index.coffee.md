@@ -49,7 +49,7 @@ Example:
 
     module.exports =
       use:
-        yum: implicit: true, module: 'masson/core/yum'
+        yum: module: 'masson/core/yum' # implicit: true, 
         openldap_server: 'masson/core/openldap_server'
       configure:
         'masson/core/openldap_client/configure'
