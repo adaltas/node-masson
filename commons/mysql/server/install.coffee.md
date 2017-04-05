@@ -47,8 +47,24 @@ Package on Centos/Redhat 7 OS.
           if_exec: 'yum info mysql-community-release'
         @service.install
           name: 'mysql-community-server'
+          if_exec: 'yum info mysql-community-server'
           startup: true
           action: 'start'
+        @service.install
+          name: 'mysql-server'
+          if_exec: 'yum info mysql-server'
+          startup: true
+          action: 'start'
+
+## Configuration
+Write /etc/my.cnf configuration file.
+
+      @file.ini
+        target: '/etc/my.cnf'
+        content: mysql.server.my_cnf
+        stringify: misc.ini.stringify_single_key
+        merge: false
+        backup: true
 
 ## Secure Installation
 
