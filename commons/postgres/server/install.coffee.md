@@ -37,7 +37,6 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
 Install the PostgreSQL database server.
 
       @system.discover (err, status, os) ->
-        config = 
         @call header: 'Download Container', handler: ->
           exists = false
           @docker.checksum
