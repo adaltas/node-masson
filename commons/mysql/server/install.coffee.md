@@ -44,7 +44,7 @@ Package on Centos/Redhat 7 OS.
       @call header: 'Package', ->
         @service.install
           name: 'mysql-community-release'
-          unless_exec: 'yum info mysql-community-release'
+          if_exec: 'yum info mysql-community-release'
         @service.install
           name: 'mysql-community-server'
           startup: true
