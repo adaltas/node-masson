@@ -33,11 +33,11 @@ Example:
 ```
 
     module.exports = ->
-      krb5_ctxs = @contexts "masson/core/krb5_server"
+      krb5_ctxs = @contexts 'masson/core/krb5_server'
       @config.krb5 ?= {}
       @config.krb5.sshd ?= {}
       @config.krb5.kinit ?= '/usr/bin/kinit'
-      etc_krb5_conf = misc.merge {}, module.exports.etc_krb5_conf, @config.krb5.etc_krb5_conf
+      etc_krb5_conf = misc.merge {}, module.exports.etc_krb5_conf, krb5_ctxs[0].config.krb5.etc_krb5_conf
       @config.krb5.etc_krb5_conf = etc_krb5_conf
       # Merge global with server-based configuration
       for krb5_ctx in krb5_ctxs

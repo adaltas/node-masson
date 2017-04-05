@@ -59,6 +59,7 @@ Example:
 ```
 
     module.exports = ->
+    
       openldap_ctxs = @contexts 'masson/core/openldap_server'
       {etc_krb5_conf} = @config.krb5
       throw new Error "Expect at least one server with action \"masson/core/openldap_server\"" if openldap_ctxs.length is 0
