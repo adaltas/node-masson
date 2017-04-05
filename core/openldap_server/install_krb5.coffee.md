@@ -25,7 +25,7 @@ the command `ldapsearch  -D cn=admin,cn=config -w test -b "cn=config"`.
           throw Error 'Kerberos schema not found' if not err and stdout is ''
           schema = stdout
         @call ->
-          @ldap_schema
+          @ldap.schema
             name: 'kerberos'
             schema: schema
             binddn: openldap_server.config_dn
@@ -73,7 +73,7 @@ Create the kerberos administrator's user.
       @call
         header: 'User permissions'
         handler: (options) ->
-          @ldap_acl
+          @ldap.acl
             suffix: openldap_server.suffix
             acls: [
               place_before: "dn.subtree=\"#{openldap_server.suffix}\""

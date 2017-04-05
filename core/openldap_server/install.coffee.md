@@ -130,8 +130,8 @@ Interesting posts also include:
           EOF
           """
           unless_exec: """
-            ldapsearch -Y EXTERNAL -H ldapi:/// -b "olcDatabase={0}config,cn=config" \
-            | grep -E "olcRootDN: #{openldap_server.config_dn}"
+          ldapsearch -Y EXTERNAL -H ldapi:/// -b "olcDatabase={0}config,cn=config" \
+          | grep -E "olcRootDN: #{openldap_server.config_dn}"
           """
         @call (_, callback) -> @system.execute
           cmd: 'ldapsearch -Y EXTERNAL -H ldapi:/// -b "olcDatabase={0}config,cn=config"'
@@ -187,9 +187,9 @@ discovered at runtime based on the OS release.
             EOF
             """
             unless_exec: """
-              ldapsearch -Y EXTERNAL -H ldapi:/// \
-              -b "olcDatabase={2}hdb,cn=config" | \
-              grep -E "olcSuffix: #{openldap_server.suffix}"
+            ldapsearch -Y EXTERNAL -H ldapi:/// \
+            -b "olcDatabase={2}hdb,cn=config" \
+            | grep -E "olcSuffix: #{openldap_server.suffix}"
             """
           @system.execute
             header: 'Root DN'

@@ -15,7 +15,7 @@ ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=co
 
       @call header: 'ACL for nssproxy', handler: ->
         {suffix} = @config.openldap_server
-        @ldap_acl
+        @ldap.acl
           suffix: suffix
           acls: [
             to: 'attrs=userPassword,userPKCS12'

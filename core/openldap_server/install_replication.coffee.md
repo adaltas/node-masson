@@ -83,7 +83,7 @@
         #   EOF
         #   """
         #   code_skipped: 68
-        # @ldap_acl
+        # @ldap.acl
         #   if: -> @config.host is active_host
         #   suffix: suffix
         #   acls: [
