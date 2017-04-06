@@ -11,15 +11,13 @@ The package "iptables" is installed.
       @service
         timeout: -1
         name: 'iptables'
+        startup: startup
+        action: action
       @system.discover (err, status, os) ->
         @service
           if: -> (os.type in ['redhat','centos']) and os.release[0] is '7'
           header: 'Iptable Service'
           name: 'iptables-services'
-      @service.startup
-        name: 'iptables'
-        startup: startup
-        action: action
 
 ## Log
 
