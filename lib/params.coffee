@@ -29,19 +29,13 @@ module.exports = parameters
     ]
   ,
   name: 'configure',
-  description: 'Export the server\'s configuration in a file  ',
+  description: 'Export servers\' configuration in a file',
   options: [
     name: 'output', shortcut: 'o', type: 'string'
-    description: 'Name of the output file/directory'
-  ,
-    name: 'ignore', shortcut: 'i', type: 'boolean'
-    description: 'Overwrite ouput file'
+    description: 'output directory'
   ,
     name: 'format', shortcut: 'f', type: 'string'
-    description: 'Format of the output file'
-  ,
-    name: 'explode', shortcut: 'd', type: 'boolean'
-    description: 'Explode configuration by host. Output option then refers to the directory name'
+    description: 'Format of the output files: [json, cson, js, coffee]'
   ,
     name: 'hosts', shortcut: 'h', type: 'array'
     description: 'Limit to a list of server hostnames'
