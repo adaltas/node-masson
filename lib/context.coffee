@@ -11,7 +11,9 @@ module.exports = (contexts, params, services, config) ->
     throw Error 'Invalid argument to context.contexts' unless Array.isArray services
     contexts.filter (context) ->
       for service in services
-        return true if service in context.services
+        for ctx_service in context.services
+          return true if minimatch ctx_service, service
+      return false
   m.has_service = (services...) ->
     # service = [service] if typeof service is 'string'
     services = misc.array.flatten services
@@ -20,3 +22,4 @@ module.exports = (contexts, params, services, config) ->
   m
 
 misc = require 'nikita/lib/misc'
+minimatch = require 'minimatch'
