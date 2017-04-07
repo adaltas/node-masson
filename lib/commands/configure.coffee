@@ -17,7 +17,7 @@
     module.exports = ->
       # EXAMPLE START
       params = params.parse()
-      params.output ?= '.'
+      params.output ?= 'export'
       params.format ?= 'cson'
       params.output = path.resolve process.cwd(), params.output
       params.hosts = [params.hosts] if typeof params.hosts is 'string'
@@ -40,10 +40,10 @@
         console.log path
       # Print contexts
       print_ctxs = (ctxs) ->
-        if params.hosts?
-          ctxs = ctxs.filter ( (ctx) -> ctx.config.host in params.hosts )
-        for c in ctxs
-          print_object c.config, "#{params.output}/#{c.config.host}.#{params.format}"
+        ctxs = ctxs.filter((c) -> c.config.host in params.hosts) if params.hosts?
+        confs = ctxs.map((c) -> config: c.config, services: c.services)
+        for c in confs
+          print_object c, "#{params.output}/#{c.config.host}.#{params.format}"
       # Call config
       config params.config, (err, config) ->
         # console.log config
