@@ -59,6 +59,15 @@ module.exports = parameters
       description: 'Fast mode without dependency resolution'
     ]
   ,
+    name: 'server'
+    description: "Print the execution plan"
+    options: [
+      name: 'action', shortcut: 'a'
+      description: 'Run list holding the list of modules'
+      one_of: ['start', 'stop', 'status']
+      required: true
+    ]
+  ,
     name: 'prepare'
     description: 'Prepare components before deployment'
     options: [
