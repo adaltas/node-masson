@@ -16,7 +16,7 @@ module.exports.start = ->
     kill -0 $pid && exit 1
     rm -f conf/server.pid
   fi
-  #{bin} -p 5680 -d -i conf/public >/dev/null 2>&1 &
+  #{bin} conf/public -p 5680 -d -i >/dev/null 2>&1 &
   echo $! > conf/server.pid
   """, (err) ->
     if err
