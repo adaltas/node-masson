@@ -113,6 +113,7 @@ Run = (params, @config) ->
   for id, node of @config.nodes
     @contexts.push context @contexts, params, node.services, node.config
   # Configuration
+  errors = []
   for service_id in service_ids
     service = @config.services[service_id]
     continue unless service # Optional service
@@ -127,8 +128,12 @@ Run = (params, @config) ->
           throw Error "Invalid configure module: #{JSON.stringify configure}" if typeof configure_fn.call isnt 'function'
           configure_fn.call context
         catch e
-          console.log 'Catch error: ', e
-          return
+          errors.push e
+  if errors.length
+    throw errors[0] if errors.length is 1
+    error = Error "Multiple Errors"
+    error.errors = errors
+    throw error
   @
 util.inherits Run, EventEmitter
 
