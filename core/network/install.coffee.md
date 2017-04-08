@@ -42,33 +42,39 @@ relevant file is "/etc/sysconfig/network".
         handler: ->
           {hostname, shortname, network} = @config
           restart = false
-          @system.execute
-            header: 'FQDN'
-            cmd: """
-            fqdn=`hostnamectl status | grep 'Static hostname' | sed 's/^.* \\(.*\\)$/\\1/'`
-            [[ $fqdn == "#{hostname}" ]] && exit 3
-            hostnamectl set-hostname #{hostname} --static
-            """
-            code_skipped: 3
-          # Note, transient hostname must be set after static
-          # or only static will be set if static wasnt previously defined
-          @system.execute
-            header: 'Hostname'
-            cmd: """
-            fqdn=`hostnamectl status | grep 'Transient hostname' | sed 's/^.* \\(.*\\)$/\\1/'`
-            [[ $fqdn == "#{shortname}" ]] && exit 3
-            hostnamectl set-hostname #{shortname}
-            """
-            code_skipped: 3
-          # @file
-          #   match: /^HOSTNAME=.*/mg
-          #   replace: "HOSTNAME=#{hostname}"
-          #   target: '/etc/sysconfig/network'
-          # , (err, replaced) ->
-          #   restart = true if replaced
-          # @system.execute
-          #   cmd: "hostname #{@config.host} && service network restart"
-          #   if: -> restart
+          @call
+            if_os: name: ['centos','redhat'], version: '6'
+          , ->
+            @file
+              match: /^HOSTNAME=.*/mg
+              replace: "HOSTNAME=#{shortname}"
+              target: '/etc/sysconfig/network'
+            , (err, replaced) ->
+              restart = true if replaced
+            @system.execute
+              cmd: "hostname #{shortname} && service network restart"
+              if: -> restart
+          @call
+            if_os: name: ['centos','redhat'], version: '7'
+          , ->
+            @system.execute
+              header: 'FQDN'
+              cmd: """
+              fqdn=`hostnamectl status | grep 'Static hostname' | sed 's/^.* \\(.*\\)$/\\1/'`
+              [[ $fqdn == "#{hostname}" ]] && exit 3
+              hostnamectl set-hostname #{hostname} --static
+              """
+              code_skipped: 3
+            # Note, transient hostname must be set after static
+            # or only static will be set if static wasnt previously defined
+            @system.execute
+              header: 'Hostname'
+              cmd: """
+              fqdn=`hostnamectl status | grep 'Transient hostname' | sed 's/^.* \\(.*\\)$/\\1/'`
+              [[ $fqdn == "#{shortname}" ]] && exit 3
+              hostnamectl set-hostname #{shortname}
+              """
+              code_skipped: 3
 
 ## Network # DNS resolv
 
