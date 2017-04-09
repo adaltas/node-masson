@@ -5,14 +5,20 @@
 *   `password` (string)
 *   `my_cnf` (object)
     Object to be serialized into the "ini" format inside "/etc/my.cnf"
+*   `root_host` (string|boolean)   
+    Open root access to all host by default, set to "false" to disable it.
 
-Default configuration:
+Note, root access is activated by default in order to let other service to 
+provision their databases and user access.
+
+## Default configuration
 
 ```
 { "mysql": {
   "server": {
     "current_password": "",
     "password": "{secret}",
+    "root_host": "%"
     "my_cnf": {
       "mysqld": {
         "port": 3306
@@ -28,6 +34,7 @@ Default configuration:
       # Secure Installation
       mysql.server.current_password ?= ''
       mysql.server.password ?= ''
+      mysql.server.root_host ?= '%'
       # Service Configuration
       mysql.server.my_cnf ?= {}
       mysql.server.user ?= name: 'mysql'
