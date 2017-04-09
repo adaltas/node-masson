@@ -1,12 +1,13 @@
 
 # Mysql Server Configure
 
-*   `current_password` (string)
-*   `password` (string)
-*   `my_cnf` (object)
-    Object to be serialized into the "ini" format inside "/etc/my.cnf"
-*   `root_host` (string|boolean)   
-    Open root access to all host by default, set to "false" to disable it.
+* `password` (string)   
+* `my_cnf` (object)   
+  Object to be serialized into the "ini" format inside "/etc/my.cnf".
+* `repo` (boolean)   
+  Download the "mysql57-community-release-el7" package to register the repository, disabled by default. 
+* `root_host` (string|boolean)   
+  Open root access to all host by default, set to "false" to disable it.
 
 Note, root access is activated by default in order to let other service to 
 provision their databases and user access.
@@ -15,13 +16,14 @@ provision their databases and user access.
 
 ```
 { "mysql": { "server": {
-  "current_password": "",
-  "password": "{secret}",
+  "password": "{required}",
+  "root_host": "%"
   "my_cnf": {
     "mysqld": {
       "port": 3306
     }
   },
+  "repo": false,
   "root_host": "%"
 } } }
 ```
@@ -29,12 +31,19 @@ provision their databases and user access.
     module.exports = ->
       mysql = @config.mysql ?= {}
       mysql.server ?= {}
-      # Secure Installation
+        
+
+## Environnment
+
+      mysql.server.repo ?= false
       mysql.server.current_password ?= ''
       throw Error "Required Option: mysql.server.password" unless mysql.server.password
       mysql.server.root_host ?= '%'
       # Service Configuration
       mysql.server.my_cnf ?= {}
+
+## Identities
+
       mysql.server.user ?= name: 'mysql'
       mysql.server.user = name: mysql.server.user if typeof mysql.server.user is 'string'
       mysql.server.user.home ?= "/var/lib/#{mysql.server.user.name}"
