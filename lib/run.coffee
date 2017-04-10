@@ -188,5 +188,8 @@ Run::exec = (params='install') ->
   @
 
 module.exports = (params, config) ->
-  run = new Run params, config
-  run
+  try
+    new Run params, config
+  catch err
+    console.log err.errors if err.errors
+    throw err

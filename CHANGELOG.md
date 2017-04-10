@@ -4,6 +4,7 @@
 ## Trunk
 
 * replace system.discover by if_os
-* mysql: set service name to mysqld
-
-## Version 0.1.4
+* mysql: set service name to mysql
+* run: print multiple exceptions
+* mysql: improve/simplify root permission
+* mysql: merge my.conf
