@@ -149,10 +149,11 @@ a command argumet because it can not be run interractively.
         mysql_exec <<SQL
         GRANT ALL PRIVILEGES \
          ON *.* TO 'root'@'#{mysql.server.root_host}' \
-         IDENTIFIED BY '#{mysql.server.password}'; \
-        UPDATE mysql.user \
-         SET Grant_priv='Y', Super_priv='Y' \
-         WHERE User='root' and Host='#{mysql.server.root_host}';
+         IDENTIFIED BY '#{mysql.server.password}'
+         GRANT OPTION; \
+        #UPDATE mysql.user \
+        # SET Grant_priv='Y', Super_priv='Y' \
+        # WHERE User='root' and Host='#{mysql.server.root_host}';
         FLUSH PRIVILEGES;
         SQL
         """
