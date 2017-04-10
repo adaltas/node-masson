@@ -37,7 +37,9 @@ Example:
       @config.krb5 ?= {}
       @config.krb5.sshd ?= {}
       @config.krb5.kinit ?= '/usr/bin/kinit'
-      etc_krb5_conf = misc.merge {}, module.exports.etc_krb5_conf, krb5_ctxs[0].config.krb5.etc_krb5_conf
+      etc_krb5_conf = if krb5_ctxs.length isnt 0
+      then module.exports.etc_krb5_conf
+      else misc.merge etc_krb5_conf, krb5_ctxs[0].config.krb5.etc_krb5_conf
       @config.krb5.etc_krb5_conf = etc_krb5_conf
       # Merge global with server-based configuration
       for krb5_ctx in krb5_ctxs
