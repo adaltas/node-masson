@@ -45,7 +45,7 @@ Skip Pakage installation, if provided by external deploy tool.
           for type, socketPaths of sockets
             opts.push "-H #{type}://#{path}" for path in socketPaths
           other_opts += opts.join ' '
-          @call 
+          @call
             if: -> (os.type in ['redhat','centos'])
             handler: ->
               switch os.release[0]
@@ -61,28 +61,32 @@ Skip Pakage installation, if provided by external deploy tool.
                   @file
                     target: '/etc/sysconfig/docker'
                     write: [
-                      match: /^OPTIONS=.*$/mg
+                      match: /^OPTIONS=.*/
                       replace: "OPTIONS=\"#{other_opts}\""
                     ,
-                      match: /^(\s+)DOCKER_CERT_PATH=.*$/mg
-                      replace: "$1DOCKER_CERT_PATH=\"#{docker.conf_dir}/certs.d\""
+                      match: /^DOCKER_CERT_PATH=.*/
+                      replace: "DOCKER_CERT_PATH=\"#{docker.conf_dir}/certs.d\""
                     ]
                     backup: true
 
 ## Download Certs
 
-      @file.download
-        source: @config.ryba.ssl.cacert
-        target: ssl?.cacert
+      @call ->
         if: docker.sslEnabled
-      @file.download
-        source: @config.ryba.ssl.cert
-        target: ssl?.cert
-        if: docker.sslEnabled
-      @file.download
-        source: @config.ryba.ssl.key
-        target: ssl?.key
-        if: docker.sslEnabled
+        header: 'SSL Layout'
+      , handler: ->
+          @file.download
+            source: @config.ryba.ssl.cacert
+            target: ssl?.cacert
+          @system.link
+            source: ssl?.cacert
+            target: "#{docker.conf_dir}/certs.d/ca.pem"
+          @file.download
+            source: @config.ryba.ssl.cert
+            target: ssl?.cert
+          @file.download
+            source: @config.ryba.ssl.key
+            target: ssl?.key
 
 ## Install docker-pid
 
