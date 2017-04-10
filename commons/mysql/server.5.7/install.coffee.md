@@ -68,7 +68,7 @@ Write /etc/my.cnf configuration file.
         target: '/etc/my.cnf'
         content: mysql.server.my_cnf
         stringify: misc.ini.stringify_single_key
-        merge: false
+        merge: true
         backup: true
 
 ## Secure Temp Password
