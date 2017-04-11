@@ -18,7 +18,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
         rules: [
           chain: 'INPUT', jump: 'ACCEPT', dport: 80, protocol: 'tcp', state: 'NEW', comment: "HTTPD"
         ]
-        if: @config.iptables.action is 'start'
+        if: @has_service('masson/core/iptables') and @config.iptables.action is 'start'
 
 ## Users & Groups
 

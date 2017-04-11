@@ -5,6 +5,7 @@
 
 * replace system.discover by if_os
 * mysql: set service name to mysql
+* httpd: iptables dependency not implicit
 * krb5_server: refactor conf
 * run: print multiple exceptions
 * mysql: improve/simplify root permission
