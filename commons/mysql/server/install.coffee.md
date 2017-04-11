@@ -54,6 +54,7 @@ Package on Centos/Redhat 7 OS.
           name: 'mysql-server'
           if_exec: 'yum info mysql-server'
           startup: true
+          srv_name: 'mysqld'
           action: 'start'
 
 ## Configuration
