@@ -7,10 +7,10 @@ TODO: https://dev.mysql.com/doc/refman/5.7/en/mysql-cluster.html
       use:
         iptables: implicit: true, module: 'masson/core/iptables'
       configure:
-        'masson/commons/mysql/server/configure'
+        'masson/commons/mariadb/server/configure'
       commands:
         'install': [
-          'masson/commons/mysql/server/install'
-          'masson/commons/mysql/server/replication'
-          'masson/commons/mysql/server/check'
+          'masson/commons/mariadb/server/install'
+          'masson/commons/mariadb/server/replication'
+          'masson/commons/mariadb/server/check'
         ]
