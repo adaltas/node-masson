@@ -24,6 +24,10 @@ Example:
 ```json
 {
   "krb5": {
+    "ldap": {
+      "root_dn": "cn=ldapadm,dc=ryba",
+      "root_password": "test"
+    },
     "etc_krb5_conf": {
       "libdefaults": {
         "default_realm": "HADOOP.RYBA"
@@ -59,58 +63,55 @@ Example:
 ```
 
     module.exports = ->
-    
       openldap_ctxs = @contexts 'masson/core/openldap_server'
-      {etc_krb5_conf} = @config.krb5
+      [openldap_ctx] = openldap_ctxs
+      krb5 = @config.krb5 ?= {}
       throw new Error "Expect at least one server with action \"masson/core/openldap_server\"" if openldap_ctxs.length is 0
       # Prepare configuration for "kdc.conf"
-      kdc_conf = @config.krb5.kdc_conf ?= {}
+      krb5.kdc_conf ?= {}
+      krb5.root_dn ?= openldap_ctx.config.openldap_server.root_dn
+      krb5.root_password ?= openldap_ctx.config.openldap_server.root_password
       # Generate dynamic "krb5.dbmodules" object
-      for ctx_krb5 in openldap_ctxs
-        {kerberos_dn, kdc_user, krbadmin_user, root_dn, root_password} = ctx_krb5.config.openldap_server_krb5
-        name = "openldap_#{ctx_krb5.config.shortname}"
-        # scheme = if ctx_krb5.has_service 'masson/core/openldap_server/install_tls' then "ldaps://" else "ldap://"
-        # ldap_server =  "#{scheme}#{ctx_krb5.config.host}"
-        ldap_server = ctx_krb5.config.openldap_server.uri
-        kdc_conf.dbmodules[name] = misc.merge
-          'db_library': 'kldap'
-          'ldap_kerberos_container_dn': kerberos_dn
-          'ldap_kdc_dn': kdc_user.dn
-          'ldap_kdc_password': kdc_user.userPassword
-           # this object needs to have read rights on
-           # the realm container, principal container and realm sub-trees
-          'ldap_kadmind_dn': krbadmin_user.dn
-          'ldap_kadmind_password': krbadmin_user.userPassword
-           # this object needs to have read and write rights on
-           # the realm container, principal container and realm sub-trees
-          'ldap_service_password_file': "/etc/krb5.d/#{name}.stash.keyfile"
-          # 'ldap_servers': 'ldapi:///'
-          'ldap_servers': ldap_server
-          'ldap_conns_per_server': 5
-          'root_dn': root_dn
-          'root_password': root_password
-        , kdc_conf.dbmodules[name]
-        ldapservers = kdc_conf.dbmodules[name].ldap_servers
-        kdc_conf.dbmodules[name].ldap_servers = ldapservers.join ' ' if Array.isArray ldapservers
+      {openldap_server_krb5} = openldap_ctx.config
+      name = "openldap_#{openldap_ctx.config.shortname}"
+      ldap_server = openldap_ctx.config.openldap_server.uri
+      krb5.kdc_conf.dbmodules[name] = misc.merge
+        'db_library': 'kldap'
+        'ldap_kerberos_container_dn': openldap_server_krb5.kerberos_dn
+        'ldap_kdc_dn': openldap_server_krb5.kdc_user.dn
+        'ldap_kdc_password': openldap_server_krb5.kdc_user.userPassword
+         # this object needs to have read rights on
+         # the realm container, principal container and realm sub-trees
+        'ldap_kadmind_dn': openldap_server_krb5.krbadmin_user.dn
+        'ldap_kadmind_password': openldap_server_krb5.krbadmin_user.userPassword
+         # this object needs to have read and write rights on
+         # the realm container, principal container and realm sub-trees
+        'ldap_service_password_file': "/etc/krb5.d/#{name}.stash.keyfile"
+        # 'ldap_servers': 'ldapi:///'
+        'ldap_servers': ldap_server
+        'ldap_conns_per_server': 5
+      , krb5.kdc_conf.dbmodules[name]
+      ldapservers = krb5.kdc_conf.dbmodules[name].ldap_servers
+      krb5.kdc_conf.dbmodules[name].ldap_servers = ldapservers.join ' ' if Array.isArray ldapservers
       # Set default
-      misc.merge kdc_conf,
+      misc.merge krb5.kdc_conf,
         'kdcdefaults':
           'kdc_ports': '88'
           'kdc_tcp_ports': '88'
         'realms': {}
         'logging':
             'kdc': 'FILE:/var/log/kdc.log'
-      , kdc_conf
+      , krb5.kdc_conf
       # Multiple kerberos servers accross the cluster are defined in server
       # specific configuration
       # realms = @config.servers[@config.host].krb5?.etc_krb5_conf?.realms
       # realms = @config.krb5?.etc_krb5_conf?.realms
-      realms = etc_krb5_conf.realms if not realms or realms.length is 0
+      realms = krb5.etc_krb5_conf.realms if not realms or realms.length is 0
       for realm, i of realms
-        kdc_conf.realms[realm] ?= {}
+        krb5.kdc_conf.realms[realm] ?= {}
       # Set default values each realm
-      for realm, config of kdc_conf.realms
-        kdc_conf.realms[realm] = misc.merge
+      for realm, config of krb5.kdc_conf.realms
+        krb5.kdc_conf.realms[realm] = misc.merge
           'kadmind_port': 749
           # 'kpasswd_port': 464 # http://www.opensource.apple.com/source/Kerberos/Kerberos-47/KerberosFramework/Kerberos5/Documentation/kadmin/kpasswd.protocol
           'max_life': '10h 0m 0s'
@@ -124,15 +125,15 @@ Example:
           #'supported_enctypes': 'aes256-cts:normal aes128-cts:normal des3-hmac-sha1:normal arcfour-hmac:normal des-hmac-sha1:normal des-cbc-md5:normal des-cbc-crc:normal'
           'supported_enctypes': 'aes256-cts-hmac-sha1-96:normal aes128-cts-hmac-sha1-96:normal des3-hmac-sha1:normal arcfour-hmac-md5:normal'
         , config
-      for realm, config of kdc_conf.realms
+      for realm, config of krb5.kdc_conf.realms
         # Check if realm point to a database_module
         if config.database_module
           # Make sure this db module is registered
-          dbmodules = Object.keys(kdc_conf.dbmodules).join ','
-          valid = kdc_conf.dbmodules[config.database_module]?
+          dbmodules = Object.keys(krb5.kdc_conf.dbmodules).join ','
+          valid = krb5.kdc_conf.dbmodules[config.database_module]?
           throw new Error "Property database_module \"#{config.database_module}\" not in list: \"#{dbmodules}\"" unless valid
         # # Set a database module if we manage the realm locally
-        # else if etc_krb5_conf.realms[realm].admin_server is @config.host
+        # else if krb5.etc_krb5_conf.realms[realm].admin_server is @config.host
         #   # Valid if
         #   # *   only one OpenLDAP server accross the cluster or
         #   # *   an OpenLDAP server in this host
@@ -140,19 +141,19 @@ Example:
         #   openldap_ctx = if openldap_ctxs.length is 1 then openldap_ctxs[0] else if openldap_index isnt -1 then openldap_ctxs[openldap_index]
         #   throw new Error "Could not find a suitable OpenLDAP server" unless openldap_ctx
         #   config.database_module = "openldap_#{openldap_ctx.config.shortname}"
-        else if Object.keys(kdc_conf.dbmodules).length is 1
-          database_module = Object.keys(kdc_conf.dbmodules)[0]
+        else if Object.keys(krb5.kdc_conf.dbmodules).length is 1
+          database_module = Object.keys(krb5.kdc_conf.dbmodules)[0]
           config.database_module = database_module
         else
           throw Error "Cannot associate realm with a database_module"
         config.principals ?= []
       # Now that we have db_modules and realms, filter and validate the used db_modules
-      database_modules = for realm, config of kdc_conf.realms
+      database_modules = for realm, config of krb5.kdc_conf.realms
         config.database_module
-      for name, config of kdc_conf.dbmodules
+      for name, config of krb5.kdc_conf.dbmodules
         # Filter
         if database_modules.indexOf(name) is -1
-          delete kdc_conf.dbmodules[name]
+          delete krb5.kdc_conf.dbmodules[name]
           continue
         # Validate
         throw new Error "Kerberos property `krb5.dbmodules.#{name}.kdc_master_key` is required" unless config.kdc_master_key
