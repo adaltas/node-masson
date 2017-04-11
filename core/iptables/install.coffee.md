@@ -13,11 +13,10 @@ The package "iptables" is installed.
         name: 'iptables'
         startup: startup
         action: action
-      @system.discover (err, status, os) ->
-        @service
-          if: -> (os.type in ['redhat','centos']) and os.release[0] is '7'
-          header: 'Iptable Service'
-          name: 'iptables-services'
+      @service
+        if_os: name: ['redhat','centos'], version: '7'
+        header: 'Iptable Service'
+        name: 'iptables-services'
 
 ## Log
 

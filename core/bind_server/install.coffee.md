@@ -45,14 +45,13 @@ The packages "bind" is installed as a startup item and not yet installed.
         name: 'bind'
         srv_name: 'named'
         startup: true
-      @system.discover (err, status, os) ->
-        @system.tmpfs
-          if: -> (os.type in ['redhat','centos']) and (os.release[0] is '7')
-          mount: '/run/named'
-          name: 'named'
-          perm: '0750'
-          uid: bind_server.user.name
-          gid: bind_server.group.name
+      @system.tmpfs
+        if_os: name: ['redhat','centos'], version: '7'
+        mount: '/run/named'
+        name: 'named'
+        perm: '0750'
+        uid: bind_server.user.name
+        gid: bind_server.group.name
 
 ## Configure
 

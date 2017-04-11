@@ -11,19 +11,12 @@ Install the MySQL command-line tool.
 
 Install the Mysql client.
 
-          @service.install
+          @service
+            if_os: name: ['redhat','centos'], version: '7'
+            name: 'mariadb'
+          @service
+            if_os: name: ['redhat','centos'], version: '6'
             name: 'mysql'
-            code_skipped: 1
-          @system.discover (err, status, os) ->
-            @call
-              if: -> (os.type in ['redhat','centos'])
-              handler: ->
-                @service
-                  if: -> (os.release[0] is '7')
-                  name: 'mariadb'
-                @service
-                  if: -> (os.release[0] is '6')
-                  name: 'mysql'
 
 ## Connector
 

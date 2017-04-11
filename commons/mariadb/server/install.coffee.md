@@ -44,38 +44,24 @@ Install the MySQL database server. Secure the temporary directory. Install Maria
 Package on Centos/Redhat 7 OS.
 
       @call header: 'Package', timeout: -1, handler: (options) ->
-        @service.install
+        @call
+          if_os: name: ['redhat','centos'], version: '7'
+        , ->
+          @service
+            name: 'mariadb-server'
+            chk_name: service_name
+            startup: true
+          @system.tmpfs
+            mount: "#{path.dirname mysql.server.my_cnf['mysqld']['pid-file']}"
+            name: 'mariadb'
+            perm: '0750'
+            uid: mysql.server.user.name
+            gid: mysql.server.group.name
+        @service
+          if_os: name: ['redhat','centos'], version: '6'
           name: 'mysql-server'
-          code_skipped: 1
-        @system.discover (err, status, os) ->
-          @call 
-            shy: true
-            if: -> (os.type in ['redhat','centos'])
-            handler: ->
-              service_name = switch os.release[0]
-                when '7' then'mariadb'
-                else 'mysqld'
-          @call
-            if: -> (os.type in ['redhat','centos'])
-            handler: ->
-              @call
-                if: -> (os.release[0] is '7')
-                handler: ->
-                  @service
-                    name: 'mariadb-server'
-                    chk_name: service_name
-                    startup: true
-                  @system.tmpfs
-                    mount: "#{path.dirname mysql.server.my_cnf['mysqld']['pid-file']}"
-                    name: 'mariadb'
-                    perm: '0750'
-                    uid: mysql.server.user.name
-                    gid: mysql.server.group.name
-              @service
-                if: -> (os.release[0] is '6')
-                name: 'mysql-server'
-                chk_name: service_name
-                startup: true
+          chk_name: service_name
+          startup: true
 
 ## Layout
 
