@@ -361,6 +361,11 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=ryba
       openldap_server.tls_ca_cert_target = "/etc/openldap/certs/#{path.basename openldap_server.tls_ca_cert_file}"
       openldap_server.tls_cert_target = "/etc/openldap/certs/#{path.basename openldap_server.tls_cert_file}"
       openldap_server.tls_key_target = "/etc/openldap/certs/#{path.basename openldap_server.tls_key_file}"
+
+## Deploy
+
+Place the certificates into their final destinations.
+
       (if openldap_server.tls_ca_cert_local then @file.download else @system.copy)
         header: 'Deploy CA'
         source: openldap_server.tls_ca_cert_file
@@ -382,8 +387,17 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=ryba
         uid: 'ldap'
         gid: 'ldap'
         mode: 0o0400
+
+## Registration
+
+Register the certificates inside the internal LDAP config database.
+
       @system.execute
-        header: 'register CA'
+        header: 'Register CA'
+        unless_exec: """
+        ldapsearch -Y EXTERNAL -H ldapi:/// -b "cn=config" \
+        | grep -E "olcTLSCACertificateFile: #{openldap_server.tls_ca_cert_target}"
+        """
         cmd: """
         ldapmodify -Y EXTERNAL -H ldapi:/// <<-EOF
         dn: cn=config
@@ -392,12 +406,12 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=ryba
         olcTLSCACertificateFile: #{openldap_server.tls_ca_cert_target}
         EOF
         """
-        unless_exec: """
-        ldapsearch -Y EXTERNAL -H ldapi:/// -b "cn=config" \
-        | grep -E "olcTLSCACertificateFile: #{openldap_server.tls_ca_cert_target}"
-        """
       @system.execute
         header: 'Register Cert'
+        unless_exec: """
+        ldapsearch -Y EXTERNAL -H ldapi:/// -b "cn=config" \
+        | grep -E "olcTLSCertificateFile: #{openldap_server.tls_cert_target}"
+        """
         cmd: """
         ldapmodify -Y EXTERNAL -H ldapi:/// <<-EOF
         dn: cn=config
@@ -406,12 +420,12 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=ryba
         olcTLSCertificateFile: #{openldap_server.tls_cert_target}
         EOF
         """
-        unless_exec: """
-        ldapsearch -Y EXTERNAL -H ldapi:/// -b "cn=config" \
-        | grep -E "olcTLSCertificateFile: #{openldap_server.tls_cert_target}"
-        """
       @system.execute
         header: 'Register Key'
+        unless_exec: """
+        ldapsearch -Y EXTERNAL -H ldapi:/// -b "cn=config" \
+        | grep -E "olcTLSCertificateKeyFile: #{openldap_server.tls_key_target}"
+        """
         cmd: """
         ldapmodify -Y EXTERNAL -H ldapi:/// <<-EOF
         dn: cn=config
@@ -420,32 +434,34 @@ ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=ryba
         olcTLSCertificateKeyFile: #{openldap_server.tls_key_target}
         EOF
         """
-        unless_exec: """
-        ldapsearch -Y EXTERNAL -H ldapi:/// -b "cn=config" \
-        | grep -E "olcTLSCertificateKeyFile: #{openldap_server.tls_key_target}"
-        """
-      @call (_, callback) ->
-        @system.discover (err, status, info) ->
-          throw Error "Unsupported OS: #{JSON.stringify info.type}" unless info.type in ['centos', 'redhat']
-          write = []
-          if /^6/.test info.release
-            write.push 
-              match: /^SLAPD_LDAPS.*/mg
-              replace: 'SLAPD_LDAPS=yes'
-              append: true
-            sysconfig_file = '/etc/sysconfig/ldap'
-          else
-            urls = openldap_server.urls.join ' '
-            write.push 
-              match: /^SLAPD_URLS.*/mg
-              replace: "SLAPD_URLS=\"#{urls}\""
-              append: true
-            sysconfig_file = '/etc/sysconfig/slapd'
-          @file
-            header: 'Activation'
-            write: write
-            target: sysconfig_file
-          @then callback
+      write = []
+      sysconfig_file = null
+
+## Activation
+
+Register the SSL support into the system configuration located inside the
+"/etc/sysconfig" directory.
+
+      @call
+        if_os: name: ['centos', 'redhat', 'oracle'], version: '6'
+      , ->
+        write.push 
+          match: /^SLAPD_LDAPS.*/mg
+          replace: 'SLAPD_LDAPS=yes'
+          append: true
+        sysconfig_file = '/etc/sysconfig/ldap'
+      @call
+        if_os: name: ['centos', 'redhat', 'oracle'], version: '7'
+      , ->
+        write.push 
+          match: /^SLAPD_URLS.*/mg
+          replace: "SLAPD_URLS=\"#{openldap_server.urls.join ' '}\""
+          append: true
+        sysconfig_file = '/etc/sysconfig/slapd'
+      @call -> @file
+        header: 'Activation'
+        write: write
+        target: sysconfig_file
       @service.restart
         header: 'Restart'
         name: 'slapd'

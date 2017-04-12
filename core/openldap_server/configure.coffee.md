@@ -7,6 +7,7 @@ and should correspond to "openldap_server.config_password".
     module.exports = ->
       # Todo: Generate '*_slappasswd' with command `slappasswd -s $password`, but only the first time, we
       # need a mechanism to store configuration properties before.
+      openldap_ctxs = @contexts 'masson/core/openldap_server'
       openldap_server = @config.openldap_server ?= {}
       throw new Error "Missing \"openldap_server.suffix\" property" unless openldap_server.suffix
       throw new Error "Missing \"openldap_server.root_password\" property" unless openldap_server.root_password
@@ -133,6 +134,16 @@ and should correspond to "openldap_server.config_password".
 
       openldap_server.urls ?= [ 'ldapi:///','ldap:///' ]
       openldap_server.urls.push 'ldaps:///' if openldap_server.tls and openldap_server.urls.indexOf('ldaps:///') is -1
+
+## High Availability (HA)
+
+      openldap_server.server_ids = {}
+      for openldap_ctx, i in openldap_ctxs.sort( (ctx) -> ctx.config.host )
+        openldap_server.server_ids[openldap_ctx.config.host] ?= "#{i+1}"
+        if openldap_ctx.config.host isnt @config.host
+          openldap_server.remote_provider = if openldap_ctx.config.openldap_server.tls
+          then "ldaps://#{openldap_ctx.config.host}"
+          else "ldap://#{openldap_ctx.config.host}"
 
 ## Dependencies
 

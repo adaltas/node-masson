@@ -83,6 +83,10 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
           action: 'restart'
           if: -> @status -1
         @system.execute
+          unless_exec: """
+          ldapsearch -Y EXTERNAL -H ldapi:/// -b "cn=config" \
+          | grep -E "olcLogLevel: #{openldap_server.log_level}"
+          """
           cmd: """
           ldapmodify -Y EXTERNAL -H ldapi:/// <<-EOF
           dn: cn=config
@@ -90,10 +94,6 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
           add: olcLogLevel
           olcLogLevel: #{openldap_server.log_level}
           EOF
-          """
-          unless_exec: """
-            ldapsearch -Y EXTERNAL -H ldapi:/// -b "cn=config" | \
-            grep -E "olcLogLevel: #{openldap_server.log_level}"
           """
 
 ## Import Basic Schema
@@ -105,8 +105,8 @@ Check section[3](https://www.server-world.info/en/note?os=CentOS_7&p=openldap).
         cmd: "ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/#{schema}.ldif"
         unless_exec: """
         ldapsearch -Y EXTERNAL -H ldapi:/// \
-        -b "cn=schema,cn=config" | \
-        grep -E cn=\{[0-9]+\}#{schema},cn=schema,cn=config
+          -b "cn=schema,cn=config" \
+        | grep -E cn=\{[0-9]+\}#{schema},cn=schema,cn=config
         """
       ) for schema in ['cosine','inetorgperson','nis']
 
@@ -121,6 +121,10 @@ Interesting posts also include:
       @call header: 'Database config', timeout: -1, handler: (options) ->
         @system.execute
           header: 'Root DN'
+          unless_exec: """
+          ldapsearch -Y EXTERNAL -H ldapi:/// -b "olcDatabase={0}config,cn=config" \
+          | grep -E "olcRootDN: #{openldap_server.config_dn}"
+          """
           cmd: """
           ldapmodify -Y EXTERNAL -H ldapi:/// <<-EOF
           dn: olcDatabase={0}config,cn=config
@@ -128,10 +132,6 @@ Interesting posts also include:
           replace: olcRootDN
           olcRootDN: #{openldap_server.config_dn}
           EOF
-          """
-          unless_exec: """
-          ldapsearch -Y EXTERNAL -H ldapi:/// -b "olcDatabase={0}config,cn=config" \
-          | grep -E "olcRootDN: #{openldap_server.config_dn}"
           """
         @call (_, callback) -> @system.execute
           cmd: 'ldapsearch -Y EXTERNAL -H ldapi:/// -b "olcDatabase={0}config,cn=config"'
@@ -178,6 +178,11 @@ discovered at runtime based on the OS release.
         @call ->
           @system.execute
             header: 'Suffix'
+            unless_exec: """
+            ldapsearch -Y EXTERNAL -H ldapi:/// \
+              -b "olcDatabase={2}hdb,cn=config" \
+            | grep -E "olcSuffix: #{openldap_server.suffix}"
+            """
             cmd: """
             ldapmodify -Y EXTERNAL -H ldapi:/// <<-EOF
             dn: olcDatabase={2}#{bdb},cn=config
@@ -186,13 +191,13 @@ discovered at runtime based on the OS release.
             olcSuffix: #{openldap_server.suffix}
             EOF
             """
-            unless_exec: """
-            ldapsearch -Y EXTERNAL -H ldapi:/// \
-            -b "olcDatabase={2}hdb,cn=config" \
-            | grep -E "olcSuffix: #{openldap_server.suffix}"
-            """
           @system.execute
             header: 'Root DN'
+            unless_exec: """
+            ldapsearch -Y EXTERNAL -H ldapi:/// \
+              -b "olcDatabase={2}#{bdb},cn=config" \
+            | grep -E "olcRootDN: #{openldap_server.root_dn}"
+            """
             cmd: """
             ldapmodify -Y EXTERNAL -H ldapi:/// <<-EOF
             dn: olcDatabase={2}#{bdb},cn=config
@@ -200,11 +205,6 @@ discovered at runtime based on the OS release.
             replace: olcRootDN
             olcRootDN: #{openldap_server.root_dn}
             EOF
-            """
-            unless_exec: """
-            ldapsearch -Y EXTERNAL -H ldapi:/// \
-            -b "olcDatabase={2}#{bdb},cn=config" | \
-            grep -E "olcRootDN: #{openldap_server.root_dn}"
             """
           @call (_, callback) ->  @system.execute
             cmd: "ldapsearch -Y EXTERNAL -H ldapi:/// -b 'olcDatabase={2}#{bdb},cn=config'"
@@ -253,6 +253,8 @@ discovered at runtime based on the OS release.
               '* none'
             ]
           ]
+
+## Users and Groups
 
       [_, suffix_k, suffix_v] = /(\w+)=([^,]+)/.exec openldap_server.suffix
       @system.execute

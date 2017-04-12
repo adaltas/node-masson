@@ -30,6 +30,7 @@ the command `ldapsearch  -D cn=admin,cn=config -w test -b "cn=config"`.
             schema: schema
             binddn: openldap_server.config_dn
             passwd: openldap_server.config_password
+            uri: true
 
 ## Insert Container
 
@@ -39,9 +40,10 @@ not allowed to be used for krb5 ldap containers.
 
       @ldap.add
         header: 'Container DN'
-        uri: openldap_server.uri,
-        binddn: openldap_server.root_dn,
-        passwd: openldap_server.root_password,
+        # uri: openldap_server.uri
+        uri: true
+        binddn: openldap_server.root_dn
+        passwd: openldap_server.root_password
         entry: 
           dn: "#{kerberos_dn}"
           objectClass: ['krbContainer']
@@ -52,9 +54,10 @@ Create the kerberos administrator's group.
 
       @ldap.add
         header: 'Group DN'
-        uri: openldap_server.uri,
-        binddn: openldap_server.root_dn,
-        passwd: openldap_server.root_password,
+        # uri: openldap_server.uri
+        uri: true
+        binddn: openldap_server.root_dn
+        passwd: openldap_server.root_password
         entry: krbadmin_group
 
 # Insert Admin User
@@ -63,35 +66,38 @@ Create the kerberos administrator's user.
 
       @ldap.user
         header: 'User DN'
-        uri: openldap_server.uri,
-        binddn: openldap_server.root_dn,
-        passwd: openldap_server.root_password,
+        # uri: openldap_server.uri
+        uri: true
+        binddn: openldap_server.root_dn
+        passwd: openldap_server.root_password
         user: krbadmin_user
 
 ## Krb5 User permissions
 
       @call
         header: 'User permissions'
-        handler: (options) ->
-          @ldap.acl
-            suffix: openldap_server.suffix
-            acls: [
-              place_before: "dn.subtree=\"#{openldap_server.suffix}\""
-              to: "dn.subtree=\"#{kerberos_dn}\""
-              by: [
-                "dn.exact=\"#{krbadmin_user.dn}\" write"
-                "dn.base=\"gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth\" read"
-                "* none"
-              ]
-            ,
-              to: "dn.subtree=\"#{openldap_server.suffix}\""
-              by: [
-                "dn.exact=\"#{krbadmin_user.dn}\" write"
-              ]
+      , ->
+        @ldap.acl
+          header: 'Create'
+          suffix: openldap_server.suffix
+          acls: [
+            place_before: "dn.subtree=\"#{openldap_server.suffix}\""
+            to: "dn.subtree=\"#{kerberos_dn}\""
+            by: [
+              "dn.exact=\"#{krbadmin_user.dn}\" write"
+              "dn.base=\"gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth\" read"
+              "* none"
             ]
-          options.log message: "Check it returns the entire #{kerberos_dn} subtree", level: 'DEBUG'
-          @system.execute
-            cmd: "ldapsearch -H #{openldap_server.uri} -x -D #{krbadmin_user.dn} -w #{krbadmin_user.userPassword} -b #{kerberos_dn}"
+          ,
+            to: "dn.subtree=\"#{openldap_server.suffix}\""
+            by: [
+              "dn.exact=\"#{krbadmin_user.dn}\" write"
+            ]
+          ]
+        @system.execute
+          header: 'Check'
+          if: -> @status -1
+          cmd: "ldapsearch -H ldapi:// -x -D #{krbadmin_user.dn} -w #{krbadmin_user.userPassword} -b #{kerberos_dn}"
 
 ## Krb5 Index
 

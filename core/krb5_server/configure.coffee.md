@@ -73,8 +73,8 @@ Example:
       krb5.root_password ?= openldap_ctx.config.openldap_server.root_password
       # Generate dynamic "krb5.dbmodules" object
       {openldap_server_krb5} = openldap_ctx.config
-      name = "openldap_#{openldap_ctx.config.shortname}"
-      ldap_server = openldap_ctx.config.openldap_server.uri
+      name = 'masson_default'
+      console.log openldap_ctxs.map((ctx) -> ctx.config.openldap_server.uri).join ' '
       krb5.kdc_conf.dbmodules[name] = misc.merge
         'db_library': 'kldap'
         'ldap_kerberos_container_dn': openldap_server_krb5.kerberos_dn
@@ -88,7 +88,7 @@ Example:
          # the realm container, principal container and realm sub-trees
         'ldap_service_password_file': "/etc/krb5.d/#{name}.stash.keyfile"
         # 'ldap_servers': 'ldapi:///'
-        'ldap_servers': ldap_server
+        'ldap_servers': openldap_ctxs.map((ctx) -> ctx.config.openldap_server.uri).join ' '
         'ldap_conns_per_server': 5
       , krb5.kdc_conf.dbmodules[name]
       ldapservers = krb5.kdc_conf.dbmodules[name].ldap_servers

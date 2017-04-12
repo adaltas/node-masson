@@ -15,7 +15,7 @@
       {openldap_client} = @config
       for uri in openldap_client.config['URI'].split ' '
         uri = url.parse uri
-        throw Error "Invalid propotol: #{JSON.stringify uri}" if ['ldap:', 'ldaps:'].indexOf(uri.protocol) is -1
+        throw Error "Invalid propotol: #{JSON.stringify uri.protocol}" unless uri.protocol in ['ldap:', 'ldaps:']
         uri.port ?= switch uri.protocol
           when 'ldap:' then 389
           when 'ldaps:' then 636
