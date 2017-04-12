@@ -9,7 +9,6 @@ Wait for all the Kerberos servers referenced by the client configuration.
       {krb5} = @config
       @connection.wait
         header: 'TCP Admin'
-        timeout: -1
         label_true: 'READY'
         servers: for realm, config of krb5.etc_krb5_conf.realms
           continue unless config.admin_server
@@ -26,9 +25,9 @@ and we couldnt dig the exact nature of this error.
       @call header: 'Command kadmin', retry: 2, handler: ->
         for realm, config of krb5.etc_krb5_conf.realms
           continue unless config.kadmin_principal and config.admin_server
-          @wait.execute cmd: misc.kadmin
-            timeout: -1
+          @wait.execute misc.kadmin
             retry: 5
+            interval: 10000
             label_true: 'READY'
             realm: realm
             kadmin_principal: config.kadmin_principal
