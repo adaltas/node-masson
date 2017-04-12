@@ -18,7 +18,7 @@
       # EXAMPLE START
       params = params.parse()
       params.output ?= 'export'
-      params.format ?= 'cson'
+      params.format ?= 'coffee'
       params.output = path.resolve process.cwd(), params.output
       params.hosts = [params.hosts] if typeof params.hosts is 'string'
       throw Error "Format not supported: #{params.format}" unless params.format in ['json','cson', 'js', 'coffee']
