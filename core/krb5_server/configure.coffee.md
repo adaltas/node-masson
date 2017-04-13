@@ -74,7 +74,6 @@ Example:
       # Generate dynamic "krb5.dbmodules" object
       {openldap_server_krb5} = openldap_ctx.config
       name = 'masson_default'
-      console.log openldap_ctxs.map((ctx) -> ctx.config.openldap_server.uri).join ' '
       krb5.kdc_conf.dbmodules[name] = misc.merge
         'db_library': 'kldap'
         'ldap_kerberos_container_dn': openldap_server_krb5.kerberos_dn
