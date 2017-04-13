@@ -442,22 +442,20 @@ Register the certificates inside the internal LDAP config database.
 Register the SSL support into the system configuration located inside the
 "/etc/sysconfig" directory.
 
-      @call
-        if_os: name: ['centos', 'redhat', 'oracle'], version: '6'
-      , ->
+      @call if_os: name: ['centos', 'redhat', 'oracle'], version: '6', ->
         write.push 
           match: /^SLAPD_LDAPS.*/mg
           replace: 'SLAPD_LDAPS=yes'
           append: true
         sysconfig_file = '/etc/sysconfig/ldap'
-      @call
-        if_os: name: ['centos', 'redhat', 'oracle'], version: '7'
-      , ->
+      @call if_os: name: ['centos', 'redhat', 'oracle'], version: '7', ->
         write.push 
           match: /^SLAPD_URLS.*/mg
           replace: "SLAPD_URLS=\"#{openldap_server.urls.join ' '}\""
           append: true
         sysconfig_file = '/etc/sysconfig/slapd'
+      @call unless_os: name: ['centos', 'redhat', 'oracle'], ->
+        throw Error 'Unsupported OS'
       @call -> @file
         header: 'Activation'
         write: write
