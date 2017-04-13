@@ -16,28 +16,28 @@ Skip Pakage installation, if provided by external deploy tool.
           unless: @config.docker.external
           if: -> (os.type in ['redhat','centos'])
           header: 'Packages'
-          handler: ->
-            switch os.release[0]
-              when '6'
-                @service
-                  header: 'Service'
-                  name: 'docker'
-                  yum_name: 'docker-io'
-                  startup: true
-              when '7'
-                @service
-                  header: 'Service'
-                  name: 'docker'
-                  yum_name: 'docker'
-                  startup: true
-                @system.tmpfs
-                  mount: '/var/run/docker'
-                  name: 'docker'
-                  perm: '0750'
+        , ->
+          switch os.release[0]
+            when '6'
+              @service
+                header: 'Service'
+                name: 'docker'
+                yum_name: 'docker-io'
+                startup: true
+            when '7'
+              @service
+                header: 'Service'
+                name: 'docker'
+                yum_name: 'docker'
+                startup: true
+              @system.tmpfs
+                mount: '/var/run/docker'
+                name: 'docker'
+                perm: '0750'
 
 ## Configuration
       
-        @call header: 'Daemon Option', handler: ->
+        @call header: 'Daemon Option', ->
           other_opts = @config.docker.other_opts
           opts = []
           opts.push "--#{k}=#{v}" for k,v of other_args
@@ -47,46 +47,43 @@ Skip Pakage installation, if provided by external deploy tool.
           other_opts += opts.join ' '
           @call
             if: -> (os.type in ['redhat','centos'])
-            handler: ->
-              switch os.release[0]
-                when '6' 
-                  @file
-                    target: '/etc/sysconfig/docker'
-                    write: [
-                      match: /^other_args=.*$/mg
-                      replace: "other_args=\"#{other_opts}\""
-                    ]
-                    backup: true
-                when '7'
-                  @file
-                    target: '/etc/sysconfig/docker'
-                    write: [
-                      match: /^OPTIONS=.*/
-                      replace: "OPTIONS=\"#{other_opts}\""
-                    ,
-                      match: /^DOCKER_CERT_PATH=.*/
-                      replace: "DOCKER_CERT_PATH=\"#{docker.conf_dir}/certs.d\""
-                    ]
-                    backup: true
+          , ->
+            switch os.release[0]
+              when '6' 
+                @file
+                  target: '/etc/sysconfig/docker'
+                  write: [
+                    match: /^other_args=.*$/mg
+                    replace: "other_args=\"#{other_opts}\""
+                  ]
+                  backup: true
+              when '7'
+                @file
+                  target: '/etc/sysconfig/docker'
+                  write: [
+                    match: /^OPTIONS=.*/
+                    replace: "OPTIONS=\"#{other_opts}\""
+                  ,
+                    match: /^DOCKER_CERT_PATH=.*/
+                    replace: "DOCKER_CERT_PATH=\"#{docker.conf_dir}/certs.d\""
+                  ]
+                  backup: true
 
 ## Download Certs
 
-      @call ->
-        if: docker.sslEnabled
+      @call
+        if: -> docker.ssl.enabled
         header: 'SSL Layout'
-      , handler: ->
-          @file.download
-            source: @config.ryba.ssl.cacert
-            target: ssl?.cacert
-          @system.link
-            source: ssl?.cacert
-            target: "#{docker.conf_dir}/certs.d/ca.pem"
-          @file.download
-            source: @config.ryba.ssl.cert
-            target: ssl?.cert
-          @file.download
-            source: @config.ryba.ssl.key
-            target: ssl?.key
+      , ->
+        @file.download
+          source: @config.ryba.ssl?.cacert
+          target: ssl.cacert
+        @file.download
+          source: @config.ryba.ssl?.cert
+          target: ssl.cert
+        @file.download
+          source: @config.ryba.ssl?.key
+          target: ssl.key
 
 ## Install docker-pid
 

@@ -56,25 +56,27 @@ Docker Engine supports TLS authentication between the CLI and engine.
 When TLS is enabled, `tlscacert`, `tlscert`, `tlskey` and `tlsverify` properties
 are added docker `@config.docker` object, so it can be used in nikita docker actions.
 
-      docker.sslEnabled ?= true
-      docker.default_port ?= if docker.sslEnabled then 2376 else 2375
-      if docker.sslEnabled
-        docker.ssl ?= {}
+      
+      docker.ssl ?= {}
+      docker.ssl.enabled ?= true
+      docker.default_port ?= if docker.ssl.enabled then 2376 else 2375
+      if docker.ssl.enabled
         docker.host ?= "tcp://#{@config.host}:#{docker.default_port}"
-        docker.other_args['tlscacert'] ?= docker.ssl.cacert ?= "#{docker.conf_dir}/certs.d/cacert.pem"
-        docker.other_args['tlscert'] ?= docker.ssl.cert ?= "#{docker.conf_dir}/certs.d/cert.pem"
-        docker.other_args['tlskey'] ?= docker.ssl.key ?= "#{docker.conf_dir}/certs.d/key.pem"
+        # this ca MUST be at #{docker.conf_dir}/certs.d/ca.pem
+        docker.other_args['tlscacert'] = docker.ssl.cacert = "#{docker.conf_dir}/certs.d/ca.pem"
+        docker.other_args['tlscert'] = docker.ssl.cert ?= "#{docker.conf_dir}/certs.d/cert.pem"
+        docker.other_args['tlskey'] = docker.ssl.key ?= "#{docker.conf_dir}/certs.d/key.pem"
         docker.ssl.tlsverify ?= true
         tlsverify_socket = "#{@config.host}:#{docker.default_port}"
-        if ((docker.sockets.tcp.indexOf tlsverify_socket < 0 ) and docker.ssl.tlsverify )
+        if (docker.sockets.tcp.indexOf tlsverify_socket < 0 ) and docker.ssl.tlsverify
         then docker.sockets.tcp.push tlsverify_socket
         # indeed when executing a nikita.docker action, it will build the docker command
         # to communicate with local daemon engine
         # for example docker --host tcp://master2.ryba:3376 --tlscacert /etc/docker/certs.d/cacert.pem
         # --tlscert /etc/docker/certs.d/cert.pem --tlskey /etc/docker/certs.d/key.pem --tlsverify
-        docker.tlscacert ?= docker.ssl.cacert
-        docker.tlscert ?= docker.ssl.cert
-        docker.tlskey ?= docker.ssl.key
-        docker.tlsverify ?= ' '
+        docker.tlscacert = docker.ssl.cacert
+        docker.tlscert = docker.ssl.cert
+        docker.tlskey = docker.ssl.key
+        docker.tlsverify = ' '
 
 [socket-opts]:(https://docs.docker.com/engine/reference/commandline/dockerd/#/daemon-socket-option)
