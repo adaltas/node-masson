@@ -49,6 +49,7 @@ Package on Centos/Redhat 7 OS.
           name: 'mysql-community-server'
           if_exec: 'yum info mysql-community-server'
           startup: true
+          srv_name: 'mysqld'
           action: 'start'
         @service
           name: 'mysql-server'
