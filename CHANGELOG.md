@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* run: remove fast option
 * openldap: fix log level modification
 * krb5: remove unrelevant acl
 * mysql 5.7: enforce if_os conditions
