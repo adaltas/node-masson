@@ -6,6 +6,7 @@
         # TODO: manually activate iptables after removal of implicit: true,
         iptables: module: 'masson/core/iptables'
         # network: module: 'masson/core/network'
+        saslauthd: module: 'masson/core/saslauthd'
       configure: [
         'masson/core/openldap_server/configure'
         # 'masson/core/openldap_client/configure'
@@ -14,14 +15,11 @@
         'check':
           'masson/core/openldap_server/check'
         'install': [
-          'masson/bootstrap/fs'
           'masson/core/openldap_server/install'
           'masson/core/openldap_server/install_tls'
-          # 'masson/core/openldap_client/install'
           'masson/core/openldap_server/install_krb5'
           'masson/core/openldap_server/install_ha'
-          # 'masson/core/openldap_server/start'
-          # 'masson/core/openldap_server/check'
+          'masson/core/openldap_server/install_sasl'
         ]
         'start':
           'masson/core/openldap_server/start'

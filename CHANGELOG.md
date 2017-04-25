@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* openldap: honors saslauthd
 * saslauthd: new service
 * ntp: stronger synchronization moved into install
 * mysql: improve grant and super permission to root
