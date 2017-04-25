@@ -252,8 +252,8 @@ ACLs can be retrieved with the command:
           ,
             to: 'attrs=shadowLastChange'
             by: [
-              'self write'
               'dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage'
+              'self write'
               '* none'
             ]
           ]
