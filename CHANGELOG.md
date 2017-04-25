@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* ntp: stronger synchronization moved into install
 * mysql: improve grant and super permission to root
 * run: remove fast option
 * openldap: fix log level modification
