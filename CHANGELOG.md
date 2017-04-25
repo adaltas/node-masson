@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* openldap: ldapsearch exemple to returl acls
 * openldap: honors saslauthd
 * saslauthd: new service
 * ntp: stronger synchronization moved into install

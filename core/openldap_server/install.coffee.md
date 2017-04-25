@@ -230,6 +230,10 @@ discovered at runtime based on the OS release.
 
 ## ACLs
 
+ACLs can be retrieved with the command:
+
+`ldapsearch -LLL -Y EXTERNAL -H ldapi:/// -b "cn=config" '(olcAccess=*)'`
+
       @call header: "ACLs", handler: (options) ->
         # We used: http://itdavid.blogspot.fr/2012/05/howto-centos-62-kerberos-kdc-with.html
         # But this is also interesting: http://web.mit.edu/kerberos/krb5-current/doc/admin/conf_ldap.html
