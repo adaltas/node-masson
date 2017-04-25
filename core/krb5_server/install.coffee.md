@@ -139,6 +139,7 @@ The following files are updated:
           {kdc_master_key, ldap_kerberos_container_dn, ldap_servers} = krb5.kdc_conf.dbmodules[config.database_module]
           ldap_server = ldap_servers.split(' ')[0]
           @wait.execute
+            header: 'Wait DN Access'
             cmd: """
             ldapsearch -x -LLL \
               -H #{ldap_server} -D \"#{krb5.root_dn}\" -w #{krb5.root_password} \
@@ -146,6 +147,7 @@ The following files are updated:
             """
             code_skipped: 32
           @system.execute
+            header: 'Realm Detection'
             cmd: """
             ldapsearch -x \
             -H #{ldap_server} -D \"#{krb5.root_dn}\" -w #{krb5.root_password} \
@@ -154,6 +156,7 @@ The following files are updated:
             code_skipped: 32
           # Note, kdb5_ldap_util is using /etc/krb5.conf (server version)
           @system.execute
+            header: 'Realm Initialization'
             cmd: """
             kdb5_ldap_util \
             -D \"#{krb5.root_dn}\" -w #{krb5.root_password} \
