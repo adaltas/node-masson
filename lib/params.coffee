@@ -194,4 +194,14 @@ module.exports = parameters
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
     ]
+  ,
+    name: 'ambari_blueprint'
+    description: 'Export blueprint definitions'
+    options: [
+      name: 'hosts', shortcut: 'h', type: 'array'
+      description: 'Limit to a list of server hostnames'
+    ,
+      name: 'modules', shortcut: 'm', type: 'array'
+      description: 'Limit to a list of modules'
+    ]
   ]

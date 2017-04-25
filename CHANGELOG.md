@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* params: ambari blueprint command
 * mysql server: place run dir inside tempfs
 * openldap: ldapsearch exemple to returl acls
 * openldap: honors saslauthd
