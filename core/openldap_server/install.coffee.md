@@ -91,7 +91,7 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
           ldapmodify -Y EXTERNAL -H ldapi:/// <<-EOF
           dn: cn=config
           changetype: modify
-          add: olcLogLevel
+          replace: olcLogLevel
           olcLogLevel: #{openldap_server.log_level}
           EOF
           """
@@ -280,6 +280,16 @@ discovered at runtime based on the OS release.
         EOF
         """
         code_skipped: 68
+      # @ldap.acl
+      #   header: 'ACL'
+      #   suffix: openldap_server.suffix
+      #   acls: [
+      #     to: 'dn.subtree=#{openldap_server.users_dn}'
+      #     by: [
+      #       'dn.children="#{openldap_server.users_dn}" read'
+      #     ]
+      #   ]
+
 
 ## Sudo Schema
 
