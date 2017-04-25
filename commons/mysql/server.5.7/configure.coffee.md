@@ -54,3 +54,4 @@ provision their databases and user access.
 
       mysql.server.my_cnf['mysqld'] ?= {}
       mysql.server.my_cnf['mysqld']['port'] ?= '3306'
+      mysql.server.my_cnf['mysqld']['pid-file'] ?= '/var/run/mysqld/mysqld.pid'

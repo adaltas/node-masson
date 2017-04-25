@@ -54,7 +54,16 @@ package.
 Install the MySQL database server. Secure the temporary directory.
 
       @call header: 'Package', ->
+        @system.tmpfs
+          header: 'TempFS pid'
+          if_os: name: ['centos', 'redhat', 'oracle'], version: '7'
+          mount: "#{path.dirname mysql.server.my_cnf['mysqld']['pid-file']}"
+          name: 'mysqld'
+          perm: '0750'
+          uid: mysql.server.user.name
+          gid: mysql.server.group.name
         @service
+          header: 'Install'
           name: 'mysql-community-server'
           chk_name: 'mysqld'
           srv_name: 'mysqld'
