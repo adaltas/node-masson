@@ -140,14 +140,16 @@ the following ways:
          FROM mysql.user \
          WHERE user = 'root' and host = '#{mysql.server.root_host}';
         SQL`
-        [ $exist -gt 0 ] && exit 3
+        [[ $exist -gt 0 ]] && exit 3
         mysql_exec <<SQL
         GRANT ALL PRIVILEGES \
          ON *.* TO 'root'@'#{mysql.server.root_host}' \
-         IDENTIFIED BY '#{mysql.server.password}'; \
-        UPDATE mysql.user \
-         SET Grant_priv='Y', Super_priv='Y' \
-         WHERE User='root' and Host='#{mysql.server.root_host}';
+         IDENTIFIED BY '#{mysql.server.password}' \
+         WITH GRANT OPTION;
+        GRANT SUPER ON *.* TO 'root'@'#{mysql.server.root_host}';
+        # UPDATE mysql.user \
+        #  SET Grant_priv='Y', Super_priv='Y' \
+        #  WHERE User='root' and Host='#{mysql.server.root_host}';
         FLUSH PRIVILEGES;
         SQL
         """

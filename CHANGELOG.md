@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* mysql: improve grant and super permission to root
 * run: remove fast option
 * openldap: fix log level modification
 * krb5: remove unrelevant acl

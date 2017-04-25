@@ -46,7 +46,7 @@ User/group are hard coded in some of mariadb/mysql package scripts.
 
 If running on RedHad, the package "mysql-community-server" is MySQL Server 5.7. 
 On CentOS 7.3, MySQL is not available in the default repoitory and the 
-repository can be downloaded in installing the "mysql57-community-release-el7" 
+repository can be downloaded by installing the "mysql57-community-release-el7" 
 package. 
 
 ## Package
@@ -149,8 +149,9 @@ a command argumet because it can not be run interractively.
         mysql_exec <<SQL
         GRANT ALL PRIVILEGES \
          ON *.* TO 'root'@'#{mysql.server.root_host}' \
-         IDENTIFIED BY '#{mysql.server.password}'
-         GRANT OPTION; \
+         IDENTIFIED BY '#{mysql.server.password}' \
+         WITH GRANT OPTION;
+        GRANT SUPER ON *.* TO 'root'@'#{mysql.server.root_host}';
         #UPDATE mysql.user \
         # SET Grant_priv='Y', Super_priv='Y' \
         # WHERE User='root' and Host='#{mysql.server.root_host}';
