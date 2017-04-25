@@ -88,11 +88,11 @@ Create the kerberos administrator's user.
               "dn.base=\"gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth\" read"
               "* none"
             ]
-          ,
-            to: "dn.subtree=\"#{openldap_server.suffix}\""
-            by: [
-              "dn.exact=\"#{krbadmin_user.dn}\" write"
-            ]
+          # ,
+          #   to: "dn.subtree=\"#{openldap_server.suffix}\""
+          #   by: [
+          #     "dn.exact=\"#{krbadmin_user.dn}\" write"
+          #   ]
           ]
         @system.execute
           header: 'Check'

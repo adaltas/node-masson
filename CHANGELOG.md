@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* krb5: remove unrelevant acl
 * mysql 5.7: enforce if_os conditions
 * openldap server: ha #8
 * replace system.discover by if_os
