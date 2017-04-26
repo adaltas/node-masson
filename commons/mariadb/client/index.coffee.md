@@ -1,7 +1,7 @@
 
-# Mysql
+# MariaDB
 
-Install the MySQL command-line tool.
+Install the MariaDB command-line tool.
 
     module.exports =
       commands:

@@ -1,16 +1,16 @@
 
-# MySQL Server Install
+# MariaDB Server Install
 
-    module.exports = header: 'MySQL Server Install', handler: ->
+    module.exports = header: 'MariaDB Server Install', handler: ->
       {iptables, mysql} = @config
       {ssl} = @config.ryba
-      service_name = 'mysqld'
+      service_name = 'mariadb'
 
 ## IPTables
 
-| Service           | Port | Proto | Parameter |
-|-------------------|------|-------|-----------|
-| MySQL/MariaDB     | 3306 | tcp   | -         |
+| Service         | Port | Proto | Parameter |
+|-----------------|------|-------|-----------|
+| MariaDB         | 3306 | tcp   | -         |
 
 
 IPTables rules are only inserted if the parameter "iptables.action" is set to
@@ -19,7 +19,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
       @tools.iptables
         header: 'IPTables'
         rules: [
-          { chain: 'INPUT', jump: 'ACCEPT', dport: mysql.server.my_cnf['mysqld']['port'], protocol: 'tcp', state: 'NEW', comment: "MySQL" }
+          { chain: 'INPUT', jump: 'ACCEPT', dport: mysql.server.my_cnf['mysqld']['port'], protocol: 'tcp', state: 'NEW', comment: "MariaDB" }
         ]
         if: iptables.action is 'start'
 
@@ -40,7 +40,7 @@ User/group are hard coded in some of mariadb/mysql package scripts.
 
 ## Package
 
-Install the MySQL database server. Secure the temporary directory. Install MariaDB
+Install the MariaDB database server. Secure the temporary directory. Install MariaDB
 Package on Centos/Redhat 7 OS.
 
       @call header: 'Package', timeout: -1, handler: (options) ->
@@ -117,7 +117,7 @@ Create the directories, needed by the database.
 
 ## Configuration
 
-Generates the `my.cnf` file, read be MySQL/MariaDB, and restart the service if it 
+Generates the `my.cnf` file, read be MariaDB, and restart the service if it 
 is running.
 
       @call header: 'Configuration', handler: ->
@@ -186,13 +186,13 @@ Disallow root login remotely? [Y/n] n
 Remove test database and access to it? [Y/n] y
 
 Note: Due to a [bug](http://bugs.mysql.com/bug.php?id=46842), `/usr/bin/mysql_secure_installation`
-can only be used when MySQL/MariaDB runs on the default socket (`/var/lib/mysql/mysql.scoket`).
-To setup secure installation, Ryba does start MySQL/MariaDB  on the default socket 
+can only be used when MariaDB runs on the default socket (`/var/lib/mysql/mysql.scoket`).
+To setup secure installation, Ryba does start MariaDB  on the default socket 
 when admin user has configured it elsewhere, then it restarts the database server 
 with the chosen params. Other action could be used to change the root password, but
 `/usr/bin/mysql_secure_installation` program is to the one to be used for production
 envrionment.
-The bug is fixed after version 5.7 of MySQL/MariaDB.
+The bug is fixed after version 5.7 of MariaDB.
 
       @call 
         header: 'Secure Installation'
@@ -217,7 +217,7 @@ The bug is fixed after version 5.7 of MySQL/MariaDB.
             version = match[0].split('.')[1] if match
             safe_start = not (version >= 7) or ((version <= 7) and mysql.server.my_cnf['mysqld']['socket'] is '/var/lib/mysql/mysql.sock')
           @call 
-            header: 'Secure MySQL'
+            header: 'Secure MariaDB'
             unless_exec: "#{db.cmd database, 'show databases'}"
             handler: ->
               @call 
@@ -293,7 +293,7 @@ The bug is fixed after version 5.7 of MySQL/MariaDB.
                           return if data.toString().indexOf('ERROR 1008 (HY000) at line 1: Can\'t drop database \'test\'') isnt -1
                           error = new Error data.toString()
                           if data.toString().indexOf('ERROR 2002 (HY000)') isnt -1
-                            error = new Error 'MySQL Server Not started'
+                            error = new Error 'MariaDB Server Not started'
                           exited = true
                           return callback error, modified
                     stream.on 'exit', =>
