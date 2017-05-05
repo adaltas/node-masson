@@ -34,12 +34,13 @@ provision their databases and user access.
       throw Error "Required Option: mysql.server.password" unless mysql.server.password
       mysql.server.root_host ?= '%'
       # Service Configuration
+      mysql.server.group ?= name: 'mysql'
+      mysql.server.group = name: mysql.server.group if typeof mysql.server.group is 'string'
       mysql.server.my_cnf ?= {}
       mysql.server.user ?= name: 'mysql'
       mysql.server.user = name: mysql.server.user if typeof mysql.server.user is 'string'
       mysql.server.user.home ?= "/var/lib/#{mysql.server.user.name}"
-      mysql.server.group ?= name: 'mysql'
-      mysql.server.group = name: mysql.server.group if typeof mysql.server.group is 'string'
+      mysql.server.user.gid = mysql.server.group.name
 
 ## Configuration
 

@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* mysql: refactor user/group config
 * mariadb: refactor user/group config
 * params: ambari blueprint command
 * mysql server: place run dir inside tempfs
