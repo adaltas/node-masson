@@ -9,7 +9,7 @@ consistency reasons.
     module.exports = header: 'Mysql Server Replication', handler: ->
       return unless @config.mysql.ha_enabled
       {repl_master} = @config.mysql.server
-      [master_ctx] = @contexts('masson/commons/mysql/server').filter (ctx) -> ctx.config.host is repl_master.host
+      [master_ctx] = @contexts('masson/commons/mariadb/server').filter (ctx) -> ctx.config.host is repl_master.host
       remote_master =
         database: null
         admin_username: 'root'

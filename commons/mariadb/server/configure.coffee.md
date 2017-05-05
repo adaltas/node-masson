@@ -33,7 +33,7 @@ Default configuration:
 ```
 
     module.exports = ->
-      mysql_ctxs = @contexts 'masson/commons/mysql/server'
+      mysql_ctxs = @contexts 'masson/commons/mariadb/server'
       mysql = @config.mysql ?= {}
       mysql.server ?= {}
       # User SQL
