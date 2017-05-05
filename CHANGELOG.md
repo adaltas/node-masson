@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* exec: print node name instead of host
 * saslathd: enable service startup
 * ntp: sync before start
 * krb5: reduce wait log noise
