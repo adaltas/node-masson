@@ -31,6 +31,6 @@ to a substantial amount of space.
 
 
     module.exports = header: 'OpenLDAP Server Backup', timeout: -1, label_true: 'BACKUPED', handler: ->
-      @tools.remove
+      @tools.backup
         name: 'openldap'
         cmd: 'slapcat'

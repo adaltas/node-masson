@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* src: fix backup renamed as remove
 * exec: print node name instead of host
 * saslathd: enable service startup
 * ntp: sync before start
