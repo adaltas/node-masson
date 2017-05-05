@@ -28,4 +28,5 @@
         header: 'Start'
         if: -> @status()
         srv_name: 'saslauthd'
+        startup: true
         action: ['start', 'restart']

@@ -3,6 +3,8 @@
 
 ## Trunk
 
+* saslathd: enable service startup
+* ntp: sync before start
 * krb5: reduce wait log noise
 * mysql: support < and > mysql 5.7 securisation
 * mysql: refactor user/group config
