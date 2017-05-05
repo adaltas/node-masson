@@ -80,7 +80,7 @@ Write /etc/my.cnf configuration file.
         merge: false
         backup: true
 
-## Secure Installation
+## Mysql <5.7 Secure Installation
 
 This program enables you to improve the security of your MySQL installation in 
 the following ways:
@@ -134,7 +134,64 @@ the following ways:
           stream.on 'exit', =>
             @service.restart 'mysqld' unless err
             @then (err) -> callback err, true
+
+## Mysql >5.7 Secure Temp Password
+
+If this is the first run, grab the temporary password from the log.
+
+      password = null
+      @system.execute
+        header: 'Temp Password'
+        unless_exec: db.cmd
+          engine: 'mysql'
+          host: 'localhost'
+          username: 'root'
+          password: "#{mysql.server.password}"
+        , "SHOW STATUS"
+        cmd: "grep 'temporary password' /var/log/mysqld.log"
+        shy: true
+      , (err, status, stdout) ->
+        throw err if err
+        password = / ([^ ]+)$/.exec(stdout)[1].trim() if status
+
+## Mysql >5.7 Secure Root Password
       
+Now we open a shell to change the password. Note, we can not pass the query as 
+a command argumet because it can not be run interractively.
+
+      @call
+        header: 'Root Password'
+        if: -> password
+      , (options, callback) ->
+        options.ssh.shell (err, stream) =>
+          return callback err if err
+          cmd = db.cmd
+            engine: 'mysql'
+            host: 'localhost'
+            username: 'root'
+            password: password
+          stream.write "#{cmd}\n"
+          err = null
+          called = 0
+          stream.on 'data', (data, extended) =>
+            data = data.toString()
+            if /ERROR/.test data
+              err = new Error /ERROR.*/.exec(data)[0]
+              stream.write 'quit\n'
+              stream.end 'exit\n'
+              called = 3
+            else if called is 0 and /mysql>/.test data
+              stream.write "ALTER USER 'root'@'localhost' IDENTIFIED BY '#{mysql.server.password}';\n"
+              called++
+            else if called is 1 and /mysql>/.test data
+              stream.write 'quit\n'
+              called++
+            else if called is 2
+              stream.end 'exit\n'
+              called++
+          stream.on 'exit', ->
+            callback err, true
+
       @system.execute
         header: 'External Root Access'
         if: mysql.server.root_host

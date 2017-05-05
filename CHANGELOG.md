@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* mysql: support < and > mysql 5.7 securisation
 * mysql: refactor user/group config
 * mariadb: refactor user/group config
 * params: ambari blueprint command
