@@ -90,8 +90,9 @@ and when only ONE ntp server is configured
 
 ## Synchronization
 
-      # Note, no NTPD server may be available yet, no solution at the moment
-      # to wait for an available NTPD server
+Note, no NTPD server may be available yet, no solution at the moment
+to wait for an available NTPD server.
+
       @system.execute
         header: 'Synchronization'
         cmd: """
@@ -99,10 +100,6 @@ and when only ONE ntp server is configured
         [ "$lag" -gt "#{Math.round(ntp.lag/1000)}" ] || exit 3
         """
         code_skipped: 3
-        # retry: 20
-        # wait: 3000
-        # if: ->
-        #   @status(-1) and ntp.servers?.length and ( ntp.servers[0] isnt @config.host )
       @call if: (-> @status -1), ->
         @service.stop 'ntpd'
         @system.execute "ntpdate #{ntp.servers[0]}"

@@ -16,7 +16,8 @@ Example:
 {
   "ntp": {
     "servers": "pool.ntp.org",
-    "lag": 2000
+    "lag": 2000,
+    "fudge": false
   }
 }
 ```

@@ -4,6 +4,10 @@
 Network Time Protocol (NTP) is a networking protocol for clock synchronization
 between computer systems over packet-switched, variable-latency data networks.
 
+Note, in a VirtualBox environnemnet (including with Vagrant), you might enforce
+the clock of the virtual box with the command 
+`VBoxManage modifyvm ${vmname} --biossystemtimeoffset -0`.
+
     module.exports =
       use:
         network: 'masson/core/network'
