@@ -9,7 +9,6 @@ Wait for all the Kerberos servers referenced by the client configuration.
       {krb5} = @config
       @connection.wait
         header: 'TCP Admin'
-        label_true: 'READY'
         servers: for realm, config of krb5.etc_krb5_conf.realms
           continue unless config.admin_server
           [host, port] = config.admin_server.split ':'
@@ -25,15 +24,18 @@ and we couldnt dig the exact nature of this error.
       @call header: 'Command kadmin', retry: 2, handler: ->
         for realm, config of krb5.etc_krb5_conf.realms
           continue unless config.kadmin_principal and config.admin_server
-          @wait.execute misc.kadmin
+          @wait.execute 
             retry: 5
             interval: 10000
-            label_true: 'READY'
-            realm: realm
-            kadmin_principal: config.kadmin_principal
-            kadmin_password: config.kadmin_password
-            kadmin_server: config.admin_server
-          , 'listprincs'
+            cmd: misc.kadmin
+              realm: realm
+              kadmin_principal: config.kadmin_principal
+              kadmin_password: config.kadmin_password
+              kadmin_server: config.admin_server
+            , 'listprincs'
+            stdin_log: true
+            stdout_log: false
+            stderr_log: false
 
 ## Module Dependencies
 
