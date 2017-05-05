@@ -47,12 +47,13 @@ Default configuration:
       mysql.server.remove_test_db ?= true
       mysql.server.reload_privileges ?= true
       # Service Configuration
-      mysql.server.my_cnf ?= {}
+      mysql.server.group ?= name: 'mysql'
+      mysql.server.group = name: mysql.server.group if typeof mysql.server.group is 'string'
       mysql.server.user ?= name: 'mysql'
       mysql.server.user = name: mysql.server.user if typeof mysql.server.user is 'string'
       mysql.server.user.home ?= "/var/lib/#{mysql.server.user.name}"
-      mysql.server.group ?= name: 'mysql'
-      mysql.server.group = name: mysql.server.group if typeof mysql.server.group is 'string'
+      mysql.server.user.gid = mysql.server.group.name
+      mysql.server.my_cnf ?= {}
       mysql.server.my_cnf['mysqld'] ?= {}
 
 ## High Availability
