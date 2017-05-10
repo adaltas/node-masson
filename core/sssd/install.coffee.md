@@ -8,6 +8,23 @@ following service: "sssd", "sssd-client", "pam\_krb5", "pam\_ldap" and
 "sssd-tools". It also ensures SSSD is marked as a startup service.
 
     module.exports = header: 'SSSD Install', handler: ->
+      {sssd} = @config
+
+## Identities
+
+By default, the "openldap-servers" package create the following entries:
+
+```bash
+cat /etc/passwd | grep sssd
+sssd:x:996:994:User for sssd:/:/sbin/nologin
+cat /etc/group | grep sssd
+sssd:x:994:
+```
+
+      @call header: 'Identities', ->
+        @system.group sssd.group
+        @system.user sssd.user
+
 
 ## Packages
 

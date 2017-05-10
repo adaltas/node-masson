@@ -60,10 +60,30 @@ Example:
 ```
 
     module.exports = ->
-      @config.sssd ?= {}
-      @config.sssd.certificates ?= []
-      @config.sssd.merge ?= false
-      @config.sssd.config = merge
+      sssd = @config.sssd ?= {}
+      sssd.certificates ?= []
+      sssd.merge ?= false
+      
+## Identities
+
+      # Group
+      sssd.group = name: sssd.group if typeof sssd.group is 'string'
+      sssd.group ?= {}
+      sssd.group.name ?= 'sssd'
+      sssd.group.system ?= true
+      # User
+      sssd.user = name: sssd.user if typeof sssd.user is 'string'
+      sssd.user ?= {}
+      sssd.user.name ?= 'sssd'
+      sssd.user.system ?= true
+      sssd.user.gid = 'sssd'
+      sssd.user.shell = false
+      sssd.user.comment ?= 'SSSD User'
+      sssd.user.home = '/'
+
+## Configuration
+
+      sssd.config = merge
         'sssd':
           'config_file_version' : '2'
           'reconnection_retries' : '3'
@@ -83,8 +103,8 @@ Example:
           'offline_failed_login_attempts' : '3'
           'offline_failed_login_delay' : '5'
           'debug_level': '1'
-      , @config.sssd.config or {}
-      @config.sssd.test_user ?= null
+      , sssd.config or {}
+      sssd.test_user ?= null
 
 The System Security Services Daemon (SSSD) provides access to different
 identity and authentication providers.
