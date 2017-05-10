@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* proxy: new service
 * src: fix backup renamed as remove
 * exec: print node name instead of host
 * saslathd: enable service startup
