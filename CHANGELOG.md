@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* mysql server: wait action
 * package: latest dependencies
 * krb5 server: provision principals
 * sssd: provision user and group
