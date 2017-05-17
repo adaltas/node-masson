@@ -1,5 +1,5 @@
 
-# Network 
+# Network Install
 
     module.exports = header: 'Network Install', handler: ->
       {network} = @config
@@ -78,7 +78,7 @@ relevant file is "/etc/sysconfig/network".
 
 ## Network # DNS resolv
 
-Write the DNS configuration. On CentOs like system, this is configured 
+Write the DNS configuration. On RH like system, this is configured 
 by the "/etc/resolv" file.
 
 The [resolver](http://man7.org/linux/man-pages/man5/resolver.5.html) 

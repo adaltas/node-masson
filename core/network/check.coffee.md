@@ -1,5 +1,5 @@
 
-# DNS
+# Network Check
 
 Forward and reverse DNS mandatory to many service. For exemple both Kerberos 
 and Hadoop require a working DNS environment to work properly. A common 
