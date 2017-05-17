@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* ssl: new service
 * mysql server: wait action
 * package: latest dependencies
 * krb5 server: provision principals
