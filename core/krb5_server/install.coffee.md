@@ -247,46 +247,24 @@ The following files are updated:
             realm: realm
             principal: config.kadmin_principal
             password: config.kadmin_password
-        # modified = false
-        # each(krb5.etc_krb5_conf.realms)
-        # .on 'item', (realm, config, next) ->
-        #   {kadmin_principal, kadmin_password} = config
-        #   return next() unless krb5.kdc_conf.realms[realm]?.database_module
-        #   options.log "Create principal #{kadmin_principal}"
-        #   @krb5.addprinc
-        #     # We dont provide an "kadmin_server". Instead, we need
-        #     # to use "kadmin.local" because the principal used
-        #     # to login with "kadmin" isnt created yet
-        #     realm: realm
-        #     principal: kadmin_principal
-        #     password: kadmin_password
-        #   , (err, created) ->
-        #     return next err if err
-        #     modified = true if created
-        #     next()
-        # .on 'both', (err) ->
-        #   next err, modified
 
-    # TODO: no time to work on this, the idea is to modified kadmin startup
-    # script to handle multiple kadmin server. Note, for `killproc` to stop
-    # all instances, it seems that we need to set multiple pid files, here
-    # a exemple: `/usr/sbin/kadmind -r USERS.ADALTAS.COM -P /var/run/kadmind1.pid`
-    # exports.push name: 'Startup', timeout: 100000, handler: ->
-    #   write = []
-    #   write.push match: /^(\s+)(daemon\s+.*)/mg, replace: "$1#$2"
-    #   for realm, _ of krb5.kdc_conf
-    #     replace: "        daemon ${kadmind} -r"
-    #     append: /\s+#daemon\s+.*/
-    #   @file
-    #     target: '/etc/init.d/kadmin'
-    #     write: write
-    #   , next
+      @call header: 'Principals', timeout: -1, handler: ->
+        for realm, config of krb5.etc_krb5_conf.realms
+          for principal in config.principals
+            @krb5.addprinc krb5.kdc_conf.realms[realm], principal
 
-      # exports.push header: 'Start', timeout: 100000, handler: ->
-      #   @service.start
-      #     name: 'krb5kdc'
-      #   @service.start
-      #     name: 'kadmin'
+      # TODO: no time to work on this, the idea is to modified kadmin startup
+      # script to handle multiple kadmin server. Note, for `killproc` to stop
+      # all instances, it seems that we need to set multiple pid files, here
+      # a exemple: `/usr/sbin/kadmind -r USERS.ADALTAS.COM -P /var/run/kadmind1.pid`
+      #   write = []
+      #   write.push match: /^(\s+)(daemon\s+.*)/mg, replace: "$1#$2"
+      #   for realm, _ of krb5.kdc_conf
+      #     replace: "        daemon ${kadmind} -r"
+      #     append: /\s+#daemon\s+.*/
+      #   @file
+      #     target: '/etc/init.d/kadmin'
+      #     write: write
 
 ## Dependencies
 

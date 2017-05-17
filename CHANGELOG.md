@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* krb5 server: provision principals
 * sssd: provision user and group
 * proxy: new service
 * src: fix backup renamed as remove
