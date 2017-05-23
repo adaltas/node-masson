@@ -6,21 +6,21 @@
 
 ## Upload Certicate Authority
 
-      @file.download
+      @file
         header: 'CA'
         if: options.cacert?.target
       , options.cacert
 
 ## Upload Public Certicate
 
-      @file.download
+      @file
         header: 'Cert'
         if: options.cert?.target
       , options.cert
 
 ## Upload Private Key
 
-      @file.download
+      @file
         header: 'Key'
         if: options.key?.target
       , options.key
