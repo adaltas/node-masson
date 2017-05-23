@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* network: use start/end tag to fill host resolution #19
 * ssl: new service
 * mysql server: wait action
 * package: latest dependencies
