@@ -3,6 +3,18 @@
 
     module.exports = header: 'SASLAuthd Install', handler: (options) ->
       {saslauthd} = @config
+      
+## Identities
+
+```bash
+cat /etc/passwd | grep saslauth
+saslauth:x:995:76:Saslauthd user:/run/saslauthd:/sbin/nologin
+cat /etc/group | grep saslauth
+saslauth:x:76:
+```
+
+    @system.group header: 'Group', saslauthd.group
+    @system.user header: 'User', saslauthd.user  
 
 ## Packages
 
@@ -11,19 +23,22 @@
           name: 'cyrus-sasl'
         @service
           name: 'cyrus-sasl-ldap'
-      
+
+## Configuration
+
       @file.properties
         header: 'Sysconf'
         target: '/etc/sysconfig/saslauthd'
         content: saslauthd.sysconfig
-        mode: 0o0644
-      
+        mode: 0o0644=
       @file.properties
         header: 'Conf'
         target: saslauthd.conf_file
         content: saslauthd.conf
         mode: 0o0644
-      
+
+## Start
+
       @service
         header: 'Start'
         if: -> @status()

@@ -41,6 +41,23 @@
 
       saslauthd.conf_file ?= '/etc/saslauthd.conf'
 
+## Identities
+
+      # Group
+      saslauthd.group = name: saslauthd.group if typeof saslauthd.group is 'string'
+      saslauthd.group ?= {}
+      saslauthd.group.name ?= 'saslauth'
+      saslauthd.group.system ?= true
+      # User
+      saslauthd.user = name: saslauthd.user if typeof saslauthd.user is 'string'
+      saslauthd.user ?= {}
+      saslauthd.user.name ?= 'saslauth'
+      saslauthd.user.system ?= true
+      saslauthd.user.gid = 'saslauth'
+      saslauthd.user.shell = false
+      saslauthd.user.comment ?= 'Saslauthd User'
+      saslauthd.user.home = '/run/saslauthd'
+
 ## System
 
 The system configuration is written in "/run/saslauthd" and doesnt require any
