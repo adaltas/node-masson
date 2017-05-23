@@ -244,12 +244,14 @@ The following files are updated:
           # to use "kadmin.local" because the principal used
           # to login with "kadmin" isnt created yet
           @krb5.addprinc
+            if: config.kadmin_principal # TODO: remove once krb5 client & server configs are splitted
             realm: realm
             principal: config.kadmin_principal
             password: config.kadmin_password
 
       @call header: 'Principals', timeout: -1, handler: ->
         for realm, config of krb5.etc_krb5_conf.realms
+          continue unless config.kadmin_principal # TODO: remove once krb5 client & server configs are splitted
           for principal in config.principals
             @krb5.addprinc krb5.kdc_conf.realms[realm], principal
 

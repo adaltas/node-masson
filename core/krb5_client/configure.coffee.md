@@ -81,7 +81,7 @@ Example:
           'forwardable': true
           'krb4_convert': false
       'dbmodules': {}
-        
-## Module Dependencies
+
+## Dependencies
 
     misc = require 'nikita/lib/misc'

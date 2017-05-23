@@ -82,7 +82,7 @@ principals and generate concurrency errors.
       @call header: 'Principals', wait: 10000, handler: ->
         for realm, config of krb5.etc_krb5_conf.realms
           continue unless config.principals
-          for principal in config.principals  
+          for principal in config.principals
             @krb5.addprinc misc.merge
               kadmin_principal: config.kadmin_principal
               kadmin_password: config.kadmin_password
@@ -91,9 +91,9 @@ principals and generate concurrency errors.
 
 ## Configure SSHD
 
-Updated the "/etc/ssh/sshd\_config" file with properties provided by the "krb5.sshd" 
+Updated the "/etc/ssh/sshd\_config" file with properties provided by the "krb5.sshd"
 configuration object. By default, we set the following properties to "yes": "ChallengeResponseAuthentication",
-"KerberosAuthentication", "KerberosOrLocalPasswd", "KerberosTicketCleanup", "GSSAPIAuthentication", 
+"KerberosAuthentication", "KerberosOrLocalPasswd", "KerberosTicketCleanup", "GSSAPIAuthentication",
 "GSSAPICleanupCredentials". The "sshd" service will be restarted if a change to the configuration is detected.
 
       @call

@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* krb5 server: fix server when a client with no server is defined
 * network: use start/end tag to fill host resolution #19
 * ssl: new service
 * mysql server: wait action
