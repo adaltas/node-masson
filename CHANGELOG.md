@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* ntp: handle negative time synchronization
 * saslauthd: set user and group
 * ssl: use file instead of download
 * krb5 server: fix server when a client with no server is defined
