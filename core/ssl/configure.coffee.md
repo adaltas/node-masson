@@ -12,18 +12,44 @@
 ```
 
     module.exports = ->
-      return unless @config.ssl
-      @config.ssl = {} if @config.ssl is true
-      options = @config.ssl
+      shortname = @config.shortname
+      options = @config.ssl ?= {}
+      # CA Certiticate
       options.cacert = source: options.cacert, local: false if typeof options.cacert is 'string'
       if options.cacert?.target
-        options.cacert.target = "#{config.shortname}.cert.pem" if options.cacert.target is true
-        options.cacert.target = path.resolve '/etc/security/certs' if options.cacert.target is 'string'
+        options.cacert.target = "ca.cert.pem" if options.cacert.target is true
+        throw Error "Invalid Target" unless typeof options.cacert.target is 'string'
+        options.cacert.target = path.resolve '/etc/security/certs', options.cacert.target
+      # Public Certificate
       options.cert = source: options.cert, local: false if typeof options.cert is 'string'
       if options.cert?.target
         options.cert.target = "#{config.shortname}.cert.pem" if options.cert.target is true
-        options.cert.target = path.resolve '/etc/security/certs' if options.cert.target is 'string'
+        throw Error "Invalid Target" unless typeof options.cert.target is 'string'
+        options.cert.target = path.resolve '/etc/security/certs', options.cert.target
+      # Private Key
       options.key = source: options.key, local: false if typeof options.key is 'string'
       if options.key?.target
-        options.key.target = "#{config.shortname}.cert.pem" if options.key.target is true
-        options.key.target = path.resolve '/etc/security/certs' if options.key.target is 'string'
+        options.key.target = "#{config.shortname}.key.pem" if options.key.target is true
+        throw Error "Invalid Target" unless typeof options.key.target is 'string'
+        options.key.target = path.resolve '/etc/security/certs', options.key.target
+      # JKS Trusture
+      options.truststore ?= disabled: true
+      unless options.truststore.disabled
+        throw Error "Required Option: options.cacert" unless options.cacert
+        options.truststore.target ?= path.resolve '/etc/security/jks', 'truststore.jks'
+        options.truststore.caname ?= "ryba_root_ca"
+        throw Error "Required options: options.truststore.password" unless options.truststore.password
+      # JKS Keystore
+      options.keystore ?= disabled: true
+      unless options.keystore.disabled
+        throw Error "Required Option: options.key" unless options.key
+        throw Error "Required Option: options.cert" unless options.cert
+        options.keystore.target ?= path.resolve '/etc/security/jks', 'keystore.jks'
+        options.keystore.name ?= shortname
+        options.keystore.caname ?= "ryba_root_ca"
+        throw Error "Required options: options.keystore.password" unless options.keystore.password
+        throw Error "Required options: options.keystore.keypass" unless options.keystore.keypass
+
+## Dependencies
+
+    path = require 'path'

@@ -7,6 +7,8 @@ Services which require SSL activation are encourage to leverage this service. It
 can also upload the certificates into the host filesystem.
 
     module.exports =
+      use:
+        'java': 'masson/commons/java'
       configure:
         'masson/core/ssl/configure'
       commands:
