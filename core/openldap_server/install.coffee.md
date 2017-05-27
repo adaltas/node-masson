@@ -26,7 +26,6 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
         ]
         if: @has_service('masson/core/iptables') and @config.iptables.action is 'start'
 
-
 ## Users & Groups
 
 By default, the "openldap-servers" package create the following entries:

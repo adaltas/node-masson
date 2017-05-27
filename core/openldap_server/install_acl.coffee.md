@@ -51,17 +51,17 @@ ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=co
         # {url, root_dn, root_password, users_dn, groups_dn} = host_@config.openldap_server
         {openldap_server} = @config
         @ldap.user
-          uri: openldap_server.uri,
-          binddn: openldap_server.root_dn,
-          passwd: openldap_server.root_password,
+          uri: openldap_server.uri
+          binddn: openldap_server.root_dn
+          passwd: openldap_server.root_password
           user: openldap_server.proxy_user
 
       @call header: 'ACL Insert Group', handler: ->
         {openldap_server} = @config
         @ldap.add
           uri: openldap_server.uri,
-          binddn: openldap_server.root_dn,
-          passwd: openldap_server.root_password,
+          binddn: openldap_server.root_dn
+          passwd: openldap_server.root_password
           entry: openldap_server.proxy_group
 
       

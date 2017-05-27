@@ -20,6 +20,7 @@
           'masson/core/openldap_server/install_krb5'
           'masson/core/openldap_server/install_ha'
           'masson/core/openldap_server/install_sasl'
+          'masson/core/openldap_server/install_entries'
         ]
         'start':
           'masson/core/openldap_server/start'

@@ -4,6 +4,29 @@
 The property "openldap_server.config_slappasswd" may be generated with the command `slappasswd`
 and should correspond to "openldap_server.config_password".
 
+## Provision users and groups
+
+```json
+{ "openldap_server": { "entries": {
+  "groups": {
+    "my_group": {
+      "gidNumber": "1234",
+      "memberUid": ["5678"]
+    },
+    "my_user": {
+      "gidNumber": "5678"
+    }
+  },
+  "users": {
+    "my_user": {
+      "uidNumber": "5678",
+      "gidNumber": "5678",
+      "userPassword": "my secret"
+    }
+  }
+} } }
+```
+
     module.exports = ->
       # Todo: Generate '*_slappasswd' with command `slappasswd -s $password`, but only the first time, we
       # need a mechanism to store configuration properties before.
@@ -69,6 +92,41 @@ and should correspond to "openldap_server.config_password".
       openldap_server.proxy_group.objectClass ?= ['top', 'posixGroup']
       openldap_server.proxy_group.gidNumber ?= '801'
       openldap_server.proxy_group.description ?= 'Network Service Switch Proxy'
+
+## Entries
+
+Provision users and groups
+
+      openldap_server.entries ?= {}
+      openldap_server.entries.groups ?= {}
+      for name, group of openldap_server.entries.groups
+        continue unless group
+        group = openldap_server.entries.groups[name] = misc.merge {},
+        group = misc.merge {},
+          dn: "cn=#{name},#{openldap_server.groups_dn}"
+          objectClass: [ 'top', 'posixGroup' ]
+          memberUid: []
+        , group
+        throw Error "Required Entry: gidNumber" unless group.gidNumber
+      openldap_server.entries.users ?= {}
+      for name, user of openldap_server.entries.users
+        continue unless user
+        user = openldap_server.entries.users[name] = misc.merge {},
+          dn: "cn=#{name},#{openldap_server.users_dn}"
+          objectClass: [
+            'top', 'inetOrgPerson', 'organizationalPerson',
+            'person', 'posixAccount'
+          ]
+          sn: "#{name}"
+          uid: "#{name}"
+          homeDirectory: "/home/#{name}"
+          loginShell: '/bin/bash'
+          # givenName: ''
+          # displayname: ''
+        , user
+        throw Error "Required Entry: uidNumber" unless user.uidNumber
+        throw Error "Required Entry: gidNumber" unless user.gidNumber
+        throw Error "Required Entry: userPassword" unless user.userPassword
 
 ## Kerberos Schema
 

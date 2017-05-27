@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* openldap: provision users and groups
 * ssl: jks keystore and trustore
 * saslauthd: fix mode and indentation
 * ntp: handle negative time synchronization
