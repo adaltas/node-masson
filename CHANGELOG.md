@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* saslauthd: fix mode and indentation
 * ntp: handle negative time synchronization
 * saslauthd: set user and group
 * ssl: use file instead of download

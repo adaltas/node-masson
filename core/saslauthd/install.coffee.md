@@ -13,8 +13,8 @@ cat /etc/group | grep saslauth
 saslauth:x:76:
 ```
 
-    @system.group header: 'Group', saslauthd.group
-    @system.user header: 'User', saslauthd.user  
+      @system.group header: 'Group', saslauthd.group
+      @system.user header: 'User', saslauthd.user  
 
 ## Packages
 
@@ -30,7 +30,7 @@ saslauth:x:76:
         header: 'Sysconf'
         target: '/etc/sysconfig/saslauthd'
         content: saslauthd.sysconfig
-        mode: 0o0644=
+        mode: 0o0644
       @file.properties
         header: 'Conf'
         target: saslauthd.conf_file
