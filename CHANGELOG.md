@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* sssd: ldap certificates delegated to openldap client
 * openldap: provision users and groups
 * ssl: jks keystore and trustore
 * saslauthd: fix mode and indentation

@@ -36,32 +36,32 @@ sssd:x:994:
       @service name: 'pam_ldap'
       @service name: 'authconfig'
 
-## Certificates
-
-Certificates are temporarily uploaded to the "/tmp" folder and registered with
-the command `authconfig --update --ldaploadcacert={file}`.
-
-      @call header: 'Certificates', handler: ->
-        {certificates} = @config.sssd
-        for certificate in certificates then do =>
-          hash = crypto.createHash('md5').update(certificate).digest('hex')
-          filename = null
-          @file.download
-            source: certificate
-            target: "/tmp/#{hash}"
-            shy: true
-          @system.execute # openssh is executed remotely
-            cmd: "openssl x509 -noout -hash -in /tmp/#{hash}; rm -rf /tmp/#{hash}"
-            shy: true
-          , (err, _, stdout) ->
-            filename = stdout.trim() unless err
-          # @call ->
-            # TODO: use move to speed this up, improve status handling
-            @file.download
-              source: certificate
-              target: "/etc/openldap/cacerts/#{filename}.0"
-              # target: "#{config.TLS_CACERTDIR}/#{filename}.0"
-              unless_exists: true
+# ## Certificates
+# 
+# Certificates are temporarily uploaded to the "/tmp" folder and registered with
+# the command `authconfig --update --ldaploadcacert={file}`.
+# 
+#       @call header: 'Certificates', handler: ->
+#         {certificates} = @config.sssd
+#         for certificate in certificates then do =>
+#           hash = crypto.createHash('md5').update(certificate).digest('hex')
+#           filename = null
+#           @file.download
+#             source: certificate
+#             target: "/tmp/#{hash}"
+#             shy: true
+#           @system.execute # openssh is executed remotely
+#             cmd: "openssl x509 -noout -hash -in /tmp/#{hash}; rm -rf /tmp/#{hash}"
+#             shy: true
+#           , (err, _, stdout) ->
+#             filename = stdout.trim() unless err
+#           # @call ->
+#             # TODO: use move to speed this up, improve status handling
+#             @file.download
+#               source: certificate
+#               target: "/etc/openldap/cacerts/#{filename}.0"
+#               # target: "#{config.TLS_CACERTDIR}/#{filename}.0"
+#               unless_exists: true
 
 ## Configure
 

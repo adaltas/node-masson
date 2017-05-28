@@ -61,7 +61,7 @@ Example:
 
     module.exports = ->
       sssd = @config.sssd ?= {}
-      sssd.certificates ?= []
+      # sssd.certificates ?= []
       sssd.merge ?= false
       
 ## Identities
