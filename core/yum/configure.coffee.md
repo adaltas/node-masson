@@ -49,8 +49,6 @@ Examples
       @config.yum.packages['yum-plugin-priorities'] ?= true
       @config.yum.packages['man'] ?= true
       @config.yum.packages['ksh'] ?= true
-      @config.yum.epel ?= true
-      @config.yum.epel.url ?= 'http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm'
       {http_proxy_no_auth, username, password} = @config.proxy?
       if @config.yum.proxy
         @config.yum.config.main.proxy = http_proxy_no_auth
