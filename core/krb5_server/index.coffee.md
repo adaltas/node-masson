@@ -18,11 +18,11 @@ provides a good description on how Kerberos is negotiated by GSSAPI and SSPI.
       configure:
         'masson/core/krb5_server/configure'
       commands:
-        'install': [
-          'masson/bootstrap/fs'
-          'masson/core/krb5_server/install'
-          'masson/core/krb5_server/start'
-        ]
+        'install': ->
+          options = @config.krb5_server
+          @call 'masson/bootstrap/fs', options
+          @call 'masson/core/krb5_server/install', options
+          @call 'masson/core/krb5_server/start', options
         'reload':
           'masson/core/krb5_server/install'
         'start':
@@ -33,20 +33,6 @@ provides a good description on how Kerberos is negotiated by GSSAPI and SSPI.
           'masson/core/krb5_server/stop'
         'backup':
           'masson/core/krb5_server/backup'
-
-    module.exports.safe_etc_krb5_conf = (etc_krb5_conf) ->
-      etc_krb5_conf = misc.merge {}, etc_krb5_conf
-      for realm, config of etc_krb5_conf.realms
-        delete config.kadmin_principal
-        delete config.kadmin_password
-        delete config.principals
-      for name, config of etc_krb5_conf.dbmodules
-        delete config.kdc_master_key
-        delete config.root_dn
-        delete config.root_password
-        delete config.ldap_kdc_password
-        delete config.ldap_kadmind_password
-      etc_krb5_conf
 
 ## Dependencies
 

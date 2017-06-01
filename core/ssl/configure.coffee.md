@@ -32,7 +32,7 @@
         options.key.target = "#{config.shortname}.key.pem" if options.key.target is true
         throw Error "Invalid Target" unless typeof options.key.target is 'string'
         options.key.target = path.resolve '/etc/security/certs', options.key.target
-      # JKS Trusture
+      # JKS Truststore
       options.truststore ?= disabled: true
       unless options.truststore.disabled
         throw Error "Required Option: options.cacert" unless options.cacert

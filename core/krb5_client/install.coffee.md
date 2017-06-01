@@ -13,7 +13,7 @@ Institute of Technology](http://web.mit.edu).
 The package "krb5-workstation" is installed.
 
     module.exports = header: 'Krb5 Client Install', handler: ->
-      {krb5} = @config
+      options = @config.krb5_client
 
 ## Package
 
@@ -34,10 +34,7 @@ which create a Kerberos file with complementary information.
 
       @file.ini
         header: 'Configuration'
-        timeout: -1
-        # Kerberos config is also managed by the kerberos server action.
-        unless: -> @has_service 'masson/core/krb5_server'
-        content: safe_etc_krb5_conf krb5.etc_krb5_conf
+        content: options.etc_krb5_conf
         target: '/etc/krb5.conf'
         stringify: misc.ini.stringify_square_then_curly
         backup: true
@@ -56,10 +53,9 @@ Create a user principal for this host. The principal is named like
 ("krb5.etc\_krb5\_conf.libdefaults.default_realm") unless the property
 "etc_krb5_conf[realm].create\_hosts" is set.
 
-      @call header: 'Host Principal', timeout: -1, handler: ->
-        default_realm = krb5.etc_krb5_conf.libdefaults.default_realm
-        modified = false
-        for realm, config of krb5.etc_krb5_conf.realms
+      @call header: 'Host Principal', handler: ->
+        default_realm = options.etc_krb5_conf.libdefaults.default_realm
+        for realm, config of options.etc_krb5_conf.realms
           # Note:
           # The doc above say "apply if default realm unless create_hosts"
           # but this isnt what we do bellow
@@ -67,7 +63,7 @@ Create a user principal for this host. The principal is named like
           # but doc and code need to be aligned.
           continue if default_realm isnt realm or not config.create_hosts
           @krb5.addprinc
-            principal: "host/#{@config.host}@#{realm}"
+            principal: "host/#{options.fqdn}@#{realm}"
             randkey: true
             kadmin_principal: config.kadmin_principal
             kadmin_password: config.kadmin_password
@@ -80,7 +76,7 @@ set to 10s because multiple instance of this handler may try to create the same
 principals and generate concurrency errors.
 
       @call header: 'Principals', wait: 10000, handler: ->
-        for realm, config of krb5.etc_krb5_conf.realms
+        for realm, config of options.etc_krb5_conf.realms
           continue unless config.principals
           for principal in config.principals
             @krb5.addprinc misc.merge
@@ -98,11 +94,10 @@ configuration object. By default, we set the following properties to "yes": "Cha
 
       @call
         header: 'Configure SSHD'
-        if: -> @config.krb5.sshd
+        if: -> options.sshd
         handler: ->
-          {sshd} = @config.krb5
           @file
-            write: for k, v of sshd
+            write: for k, v of options.sshd
               match: new RegExp "^#{k}.*$", 'mg'
               replace: "#{k} #{v}"
               append: true
@@ -115,7 +110,6 @@ configuration object. By default, we set the following properties to "yes": "Cha
 ## Module Dependencies
 
     misc = require 'nikita/lib/misc'
-    {safe_etc_krb5_conf} = require './index'
 
 ## Useful Client Commands
 

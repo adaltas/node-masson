@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* krb5: split client & server
 * sssd: ldap certificates delegated to openldap client
 * openldap: provision users and groups
 * ssl: jks keystore and trustore

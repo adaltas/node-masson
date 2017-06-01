@@ -17,10 +17,8 @@ Resources:
 *   [On Load Balancers and Kerberos](https://ssimo.org/blog/id_019.html)
 *   [Kerberos With LDAP on centos 7](http://www.rjsystems.nl/en/2100-d6-kerberos-openldap-provider.php)
 
-    safe_etc_krb5_conf = require('.').safe_etc_krb5_conf
 
-    module.exports = header: 'Krb5 Server Install', handler: ->
-      {krb5} = @config
+    module.exports = header: 'Krb5 Server Install', handler: (options) ->
 
 ## IPTables
 
@@ -37,7 +35,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
       add_default_kadmind_port = false
       add_default_kdc_ports = false
       add_default_kdc_tcp_ports = false
-      for realm, config of krb5.kdc_conf.realms
+      for realm, config of options.kdc_conf.realms
         if config.kadmind_port
           rules.push chain: 'INPUT', jump: 'ACCEPT', dport: config.kadmind_port, protocol: 'tcp', state: 'NEW', comment: "Kerberos administration server (kadmind daemon)"
         else add_default_kadmind_port = true
@@ -51,18 +49,18 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
             rules.push chain: 'INPUT', jump: 'ACCEPT', dport: port, protocol: 'tcp', state: 'NEW', comment: "Kerberos Authentication Service and Key Distribution Center (krb5kdc daemon)"
         else add_default_kdc_tcp_ports = true
       if add_default_kadmind_port
-        port = krb5.kdc_conf.kdcdefaults.kadmind_port or '749'
+        port = options.kdc_conf.kdcdefaults.kadmind_port or '749'
         rules.push chain: 'INPUT', jump: 'ACCEPT', dport: port, protocol: 'tcp', state: 'NEW', comment: "Kerberos administration server (kadmind daemon)"
       if add_default_kdc_ports
-        for port in (krb5.kdc_conf.kdcdefaults.kdc_ports or '88').split /\s,/
+        for port in (options.kdc_conf.kdcdefaults.kdc_ports or '88').split /\s,/
           rules.push chain: 'INPUT', jump: 'ACCEPT', dport: port, protocol: 'udp', state: 'NEW', comment: "Kerberos Authentication Service and Key Distribution Center (krb5kdc daemon)"
       if add_default_kdc_tcp_ports
-        for port in (krb5.kdc_conf.kdcdefaults.kdc_tcp_ports or '88').split /\s,/
+        for port in (options.kdc_conf.kdcdefaults.kdc_tcp_ports or '88').split /\s,/
           rules.push chain: 'INPUT', jump: 'ACCEPT', dport: port, protocol: 'tcp', state: 'NEW', comment: "Kerberos Authentication Service and Key Distribution Center (krb5kdc daemon)"
       @tools.iptables
         header: 'IPTables'
+        if: options.iptables
         rules: rules
-        if: @has_service('masson/core/iptables') and @config.iptables.action is 'start'
 
 ## Package
 
@@ -88,22 +86,17 @@ The following files are updated:
 *   "/etc/sysconfig/kadmin" kadmin default realm
 *   "/etc/sysconfig/krb5kdc" kdc default realm
 
-      @call header: 'Configuration', handler: ->
-        any_realm = Object.keys(krb5.kdc_conf.realms)[0]
-        @file.ini
-          content: safe_etc_krb5_conf krb5.etc_krb5_conf
-          target: '/etc/krb5.conf'
-          stringify: misc.ini.stringify_square_then_curly
-          backup: true
+      @call header: 'Configuration', ->
+        any_realm = Object.keys(options.kdc_conf.realms)[0]
         @file
-          write: for realm of krb5.etc_krb5_conf.realms
+          write: for realm of options.kdc_conf.realms
             match: ///^\*/\w+@#{misc.regexp.escape realm}\s+\*///mg
             replace: "*/admin@#{realm}     *"
             append: true
           target: '/var/kerberos/krb5kdc/kadm5.acl'
           backup: true
         @file.ini
-          content: safe_etc_krb5_conf krb5.kdc_conf
+          content: options.kdc_conf
           target: '/var/kerberos/krb5kdc/kdc.conf'
           stringify: misc.ini.stringify_square_then_curly
           backup: true
@@ -133,24 +126,25 @@ The following files are updated:
 
 ## Ldap Krb5 entries
 
-      @call header: 'LDAP Insert Entries', timeout: -1, handler: ->
-        for realm, config of krb5.kdc_conf.realms
+      @call header: 'LDAP Insert Entries', ->
+        for realm, config of options.kdc_conf.realms
           continue unless config.database_module
-          {kdc_master_key, ldap_kerberos_container_dn, ldap_servers} = krb5.kdc_conf.dbmodules[config.database_module]
+          {kdc_master_key, ldap_kerberos_container_dn, ldap_servers} = options.kdc_conf.dbmodules[config.database_module]
           ldap_server = ldap_servers.split(' ')[0]
           @wait.execute
             header: 'Wait DN Access'
             cmd: """
             ldapsearch -x -LLL \
-              -H #{ldap_server} -D \"#{krb5.root_dn}\" -w #{krb5.root_password} \
+              -H #{ldap_server} -D \"#{options.root_dn}\" -w #{options.root_password} \
               -b \"#{ldap_kerberos_container_dn}\"
             """
             code_skipped: 32
           @system.execute
             header: 'Realm Detection'
+            shy: true
             cmd: """
             ldapsearch -x \
-            -H #{ldap_server} -D \"#{krb5.root_dn}\" -w #{krb5.root_password} \
+            -H #{ldap_server} -D \"#{options.root_dn}\" -w #{options.root_password} \
             -b \"cn=#{realm},#{ldap_kerberos_container_dn}\"
             """
             code_skipped: 32
@@ -159,16 +153,13 @@ The following files are updated:
             header: 'Realm Initialization'
             cmd: """
             kdb5_ldap_util \
-            -D \"#{krb5.root_dn}\" -w #{krb5.root_password} \
+            -D \"#{options.root_dn}\" -w #{options.root_password} \
             create -subtrees \"#{ldap_kerberos_container_dn}\" -r #{realm} -s -P #{kdc_master_key}
             """
             unless: -> @status -1
 
-      @call header: 'LDAP Stash password', timeout: 5*60*1000, handler: (options) ->
-        # modified = false
-        for name, dbmodule of krb5.kdc_conf.dbmodules then do(name, dbmodule) =>
-        # each kdc_conf.dbmodules
-        # .run (name, dbmodule, next) ->
+      @call header: 'LDAP Stash password', ->
+        for name, dbmodule of options.kdc_conf.dbmodules then do(name, dbmodule) =>
           {kdc_master_key, ldap_service_password_file, ldap_kadmind_dn, ldap_kadmind_password} = dbmodule
           options.log "Stash key file is: #{dbmodule.ldap_service_password_file}"
           keyfileContent = null
@@ -186,7 +177,7 @@ The following files are updated:
             options.log 'Stash password into local file for kadmin dn'
             @options.ssh.shell (err, stream) =>
               return callback err if err
-              cmd = "kdb5_ldap_util -D \"#{krb5.root_dn}\" -w #{krb5.root_password} stashsrvpw -f #{ldap_service_password_file} #{ldap_kadmind_dn}"
+              cmd = "kdb5_ldap_util -D \"#{options.root_dn}\" -w #{options.root_password} stashsrvpw -f #{ldap_service_password_file} #{ldap_kadmind_dn}"
               options.log "Run #{cmd}"
               reentered = done = false
               stream.write "#{cmd}\n"
@@ -210,7 +201,7 @@ The following files are updated:
               modified = if keyfileContent is content then false else true
               callback null, keyfileContent isnt content
 
-      @call header: 'Log', timeout: 100000, handler: ->
+      @call header: 'Log', ->
         @file.touch
           target: '/var/log/krb5kdc.log'
         @file.touch
@@ -237,23 +228,25 @@ The following files are updated:
           action: 'restart'
           if: -> @status -3
 
-      @call header: 'Admin principal', timeout: -1, handler: ->
-        for realm, config of krb5.etc_krb5_conf.realms
-          continue unless krb5.kdc_conf.realms[realm]?.database_module
+      @call header: 'Admin principal', ->
+        for realm, config of options.kdc_conf.realms
+          # continue unless config.database_module
           # We dont provide an "kadmin_server". Instead, we need
           # to use "kadmin.local" because the principal used
           # to login with "kadmin" isnt created yet
+          admin = options.admin[realm]
           @krb5.addprinc
-            if: config.kadmin_principal # TODO: remove once krb5 client & server configs are splitted
+            if: admin.kadmin_principal # TODO: remove once krb5 client & server configs are splitted
             realm: realm
-            principal: config.kadmin_principal
-            password: config.kadmin_password
+            principal: admin.kadmin_principal
+            password: admin.kadmin_password
 
-      @call header: 'Principals', timeout: -1, handler: ->
-        for realm, config of krb5.etc_krb5_conf.realms
-          continue unless config.kadmin_principal # TODO: remove once krb5 client & server configs are splitted
-          for principal in config.principals
-            @krb5.addprinc krb5.kdc_conf.realms[realm], principal
+      @call header: 'Principals', ->
+        for realm, config of options.kdc_conf.realms
+          admin = options.admin[realm]
+          # continue unless config.kadmin_principal # TODO: remove once krb5 client & server configs are splitted
+          for principal in admin.principals
+            @krb5.addprinc principal
 
       # TODO: no time to work on this, the idea is to modified kadmin startup
       # script to handle multiple kadmin server. Note, for `killproc` to stop
@@ -261,7 +254,7 @@ The following files are updated:
       # a exemple: `/usr/sbin/kadmind -r USERS.ADALTAS.COM -P /var/run/kadmind1.pid`
       #   write = []
       #   write.push match: /^(\s+)(daemon\s+.*)/mg, replace: "$1#$2"
-      #   for realm, _ of krb5.kdc_conf
+      #   for realm, _ of options.kdc_conf
       #     replace: "        daemon ${kadmind} -r"
       #     append: /\s+#daemon\s+.*/
       #   @file

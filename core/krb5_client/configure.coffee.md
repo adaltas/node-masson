@@ -34,27 +34,21 @@ Example:
 
     module.exports = ->
       krb5_ctxs = @contexts 'masson/core/krb5_server'
-      @config.krb5 ?= {}
-      @config.krb5.sshd ?= {}
-      @config.krb5.kinit ?= '/usr/bin/kinit'
-      etc_krb5_conf = if krb5_ctxs.length is 0
-      then misc.merge {}, module.exports.etc_krb5_conf, @config.krb5.etc_krb5_conf
-      else misc.merge {}, module.exports.etc_krb5_conf, krb5_ctxs[0].config.krb5.etc_krb5_conf
-      @config.krb5.etc_krb5_conf = etc_krb5_conf
+      options = @config.krb5_client ?= {}
+      options.fqdn ?= @config.host
+      options.sshd ?= {}
+      options.kinit ?= '/usr/bin/kinit'
+      options.etc_krb5_conf = misc.merge {}, module.exports.etc_krb5_conf, options.etc_krb5_conf
       # Merge global with server-based configuration
-      for krb5_ctx in krb5_ctxs
-        {realms} = misc.merge {}, krb5_ctx.config.krb5.etc_krb5_conf
-        for realm, config of realms
-          delete config.database_module
-          realms[realm].kdc ?= krb5_ctx.config.host
-          realms[realm].kdc = [realms[realm].kdc] unless Array.isArray realms[realm].kdc
-          realms[realm].admin_server ?= krb5_ctx.config.host
-          realms[realm].default_domain ?= realm.toLowerCase()
-        etc_krb5_conf.realms = misc.merge {}, realms, etc_krb5_conf.realms
-      # Generate the "domain_realm" property
-      # for realm of etc_krb5_conf.realms
-      #   etc_krb5_conf.domain_realm[".#{realm.toLowerCase()}"] ?= realm
-      #   etc_krb5_conf.domain_realm["#{realm.toLowerCase()}"] ?= realm
+      # options.etc_krb5_conf.realms = misc.merge {}, options.etc_krb5_conf.realms, options.etc_krb5_conf.realms
+      for krb5_server_ctx in krb5_ctxs
+        for realm, config of krb5_server_ctx.config.krb5_server.admin
+          options.etc_krb5_conf.realms[realm] ?= {}
+          options.etc_krb5_conf.realms[realm].kdc ?= krb5_server_ctx.config.host
+          # realms[realm].kdc = [realms[realm].kdc] unless Array.isArray realms[realm].kdc
+          options.etc_krb5_conf.realms[realm].admin_server ?= krb5_server_ctx.config.host
+          # realms[realm].default_domain ?= realm.toLowerCase()
+          options.etc_krb5_conf.libdefaults.default_realm = realm
 
     module.exports.etc_krb5_conf =
       'logging':
