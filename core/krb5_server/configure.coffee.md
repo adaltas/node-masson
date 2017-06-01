@@ -95,6 +95,7 @@ configuration profile.
       , options.kdc_conf
       # throw Error 'Required option: kdc_conf.libdefaults.default_realm' unless options.kdc_conf.libdefaults.default_realm
       for realm, config of options.admin
+        config.admin_server ?= @config.host
         options.kdc_conf.realms[realm] ?= {}
         options.kdc_conf.libdefaults.default_realm ?= realm
       for realm, config of options.kdc_conf.realms
