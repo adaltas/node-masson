@@ -95,7 +95,7 @@ the user must have a `user.home` property.
 Install the "curl" package. Note, on some plateform like CentOS, `curl` is 
 already installed.
 
-    exports.push header: 'Curl Install', timeout: -1, handler: ->
+    exports.push header: 'Curl Install', handler: ->
       # On centOS, curl is already here
       @service name: 'curl'
 

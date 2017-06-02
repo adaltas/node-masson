@@ -44,4 +44,3 @@ Install the HTTPD service and declare it as a startup service.
         name: 'httpd'
         startup: httpd.startup
         action: httpd.action
-        timeout: -1

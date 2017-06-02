@@ -1,7 +1,7 @@
 
 # OpenLDAP Client Wait
 
-    module.exports = header: 'OpenLDAP Client Wait', timeout: -1, label_true: 'READY', handler: ->
+    module.exports = header: 'OpenLDAP Client Wait', label_true: 'READY', handler: ->
       # for openldap_ctx in @contexts 'masson/core/openldap_server'
       #   for uri in openldap_ctx.config.openldap_client.config['URI'].split ' '
       #     uri = url.parse uri

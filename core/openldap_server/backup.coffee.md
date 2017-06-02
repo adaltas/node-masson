@@ -30,7 +30,7 @@ is that the generated LDIF files can be rather large and the accumulation of the
 to a substantial amount of space.
 
 
-    module.exports = header: 'OpenLDAP Server Backup', timeout: -1, label_true: 'BACKUPED', handler: ->
+    module.exports = header: 'OpenLDAP Server Backup', label_true: 'BACKUPED', handler: ->
       @tools.backup
         name: 'openldap'
         cmd: 'slapcat'

@@ -33,7 +33,7 @@ Upload the YUM repository definitions files present in
 "@config.yum.copy" to the yum repository directory 
 in "/etc/yum.repos.d"
 
-      @call header: 'Repositories', timeout: -1, handler: (options) ->
+      @call header: 'Repositories', handler: (options) ->
         {copy, clean} = @config.yum
         return unless copy
         local_files = null
@@ -81,7 +81,6 @@ property "yum.epel" to false.
 
       @system.execute
         header: 'Epel'
-        timeout: 100000
         if: -> @config.yum.epel
         cmd: if @config.yum.epel_url
         then "rpm -Uvh #{@config.yum.epel_url}"

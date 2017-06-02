@@ -86,7 +86,6 @@ configuration file is considered a trusted source of DNS information.
 
       @call
         header: 'DNS Resolver'
-        timeout: -1
         if: -> @config.network.resolv
         handler: ->
           @file
@@ -107,7 +106,6 @@ Customize the network interfaces configured present inside the
 
       @file (
         header: 'Interfaces'
-        timeout: -1
         if: -> @config.network.ifcg
         target: "/etc/sysconfig/network-scripts/ifcfg-#{name}"
         write: for k, v of config

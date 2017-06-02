@@ -53,7 +53,6 @@ properties found in the "ssh.sshd_config" object.
           target: '/etc/ssh/sshd_config'
         @service.restart
           name: 'sshd'
-          timeout: -1
           if: -> @status -1
 
 ## Public and Private Key
@@ -64,7 +63,6 @@ the "users.[].rsa\_pub" propery and is written in "~/.ssh/id\_rsa.pub".
 
       @call
         header: 'Public and Private Key'
-        timeout: -1
       , ->
         users = for _, user of @config.users then user
         for _, user of users
@@ -94,7 +92,6 @@ service will be restarted if this action had any effect.
 
       @call
         header: 'Banner'
-        timeout: 100000
         if: -> @config.ssh.banner
       , ->
         {banner} = @config.ssh

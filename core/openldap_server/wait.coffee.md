@@ -5,7 +5,7 @@ Wait for all the OpenLDAP servers deployed by Masson.
 
 ## Wait TCP
 
-    module.exports = header: 'OpenLDAP Server Wait', timeout: -1, label_true: 'READY', handler: ->
+    module.exports = header: 'OpenLDAP Server Wait', label_true: 'READY', handler: ->
       @connection.wait
         header: 'TCP'
         servers: for ldap_srv in @contexts 'masson/core/openldap_server'

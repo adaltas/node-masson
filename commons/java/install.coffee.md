@@ -16,7 +16,6 @@ TODO: leverage /etc/alternative to switch between multiple JDKs.
 
       @service
         header: 'OpenJDK'
-        timeout: -1
         if: -> @config.java.openjdk
         name: 'java-1.7.0-openjdk-devel'
 
@@ -45,7 +44,6 @@ have been copied or not (in case they already exist).
 
       @call
         header: 'Oracle JDKs'
-        timeout: -1
         if: -> @config.java.jdk
       , (options) ->
         installed_versions = null
@@ -178,7 +176,6 @@ have been copied or not (in case they already exist).
         trap: true
       @file
         header: 'Java Env'
-        timeout: -1
         target: '/etc/profile.d/java.sh'
         mode: 0o0644
         content: """

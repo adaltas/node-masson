@@ -5,7 +5,6 @@ Download the Oracle JDK.
 
     module.exports =
       header: 'Java Prepare'
-      timeout: -1
       if: -> @contexts('masson/commons/java')[0]?.config.host is @config.host
       handler: ->
         {java} = @config

@@ -1,7 +1,7 @@
 
 # Kerberos Server Backup
 
-    module.exports = name: "Kerberos Server Backup", timeout: -1, label_true: 'BACKUPED', handler: ->
+    module.exports = name: "Kerberos Server Backup", label_true: 'BACKUPED', handler: ->
       @tools.backup
         header: 'Database'
         name: 'kerberos'

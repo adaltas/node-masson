@@ -58,7 +58,7 @@ Example:
 
 N is a Node.js binary management system, similar to nvm and nave.
 
-    exports.push header: 'Node.js N', timeout: 100000, handler: ->
+    exports.push header: 'Node.js N', handler: ->
       # Accoring to current test, proxy env var arent used by ssh exec
       {method, http_proxy, https_proxy} = @config.nodejs
       env = {}
@@ -81,7 +81,7 @@ N is a Node.js binary management system, similar to nvm and nave.
 
 Multiple installation of Node.js may coexist with N.
 
-    exports.push header: 'Node.js Installation', timeout: -1, handler: ->
+    exports.push header: 'Node.js Installation', handler: ->
       {method} = @config.nodejs
       @system.execute
         cmd: "n #{@config.nodejs.version}"
@@ -92,7 +92,7 @@ Multiple installation of Node.js may coexist with N.
 Write the "~/.npmrc" file for each user defined by the "masson/core/users" 
 module.
 
-    exports.push header: 'NPM Configuration', timeout: -1, handler: ->
+    exports.push header: 'NPM Configuration', handler: ->
       {merge, config} = @config.nodejs
       @file.ini (
         target: "#{user.home}/.npmrc"

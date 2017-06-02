@@ -69,7 +69,7 @@ Update the SSSD configuration file present in "/etc/sssd/sssd.conf" with the
 values defined in the "sssd.config" property. The target file is by
 default overwritten unless the "sssd.merge" is `true`.
 
-      @call header: 'Configure', timeout: -1, handler: ->
+      @call header: 'Configure', handler: ->
         {merge, config} = @config.sssd
         @file.ini
           content: config

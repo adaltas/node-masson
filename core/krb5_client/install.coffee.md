@@ -21,7 +21,6 @@ Install the "krb5-workstation" dependency.
 
       @service
         header: 'Package'
-        timeout: -1
         name: 'krb5-workstation'
 
 ## Configure

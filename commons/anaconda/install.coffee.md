@@ -3,7 +3,7 @@
 
 Install anaconda.
 
-    module.exports = header: 'Anaconda Install', timeout: -1, handler: ->
+    module.exports = header: 'Anaconda Install', handler: ->
       {anaconda} = @config
       @each anaconda.python_version, (options) ->
         version = options.key

@@ -44,7 +44,7 @@ certificate, not sure why.
 Certificates are temporarily uploaded to the "/tmp" folder and registered with
 the command `authconfig --update --ldaploadcacert={file}`.
 
-      @call header: 'Certificate', timeout: -1, handler: ->
+      @call header: 'Certificate', handler: ->
         for certificate in openldap_client.certificates then do (certificate) =>
           filename = null
           if certificate.local

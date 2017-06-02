@@ -117,7 +117,7 @@ Interesting posts also include:
 * http://itdavid.blogspot.ca/2012/05/howto-centos-6.html
 * http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
 
-      @call header: 'Database config', timeout: -1, handler: (options) ->
+      @call header: 'Database config', handler: (options) ->
         @system.execute
           header: 'Root DN'
           unless_exec: """
@@ -169,7 +169,7 @@ Usage and configuration of OpenLDAP monitoring is not clear, commented for now.
 The path of the bdb configuration file differ between RH6 and RH7. It is
 discovered at runtime based on the OS release.
 
-      @call header: 'DB bdb', timeout: -1, handler: (options) ->
+      @call header: 'DB bdb', handler: (options) ->
         bdb = null
         @system.discover shy: true, (err, status, info) ->
           throw Error "Unsupported OS: #{JSON.stringify info.type}" unless info.type in ['centos', 'redhat']
@@ -296,7 +296,7 @@ ACLs can be retrieved with the command:
 
 ## Sudo Schema
 
-      @call header: 'SUDO schema', timeout: -1, handler: ->
+      @call header: 'SUDO schema', handler: ->
         @service
           name: 'sudo'
         schema = '/tmp/ldap.schema'
@@ -339,7 +339,7 @@ ACLs can be retrieved with the command:
 
 ## Add ldif data
 
-      @call header: 'Add ldif data', timeout: 100000, handler: ->
+      @call header: 'Add ldif data', handler: ->
         status = false
         for path in openldap_server.ldapadd
           target = "/tmp/ryba_#{Date.now()}"

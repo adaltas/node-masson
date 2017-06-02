@@ -9,7 +9,6 @@ The package "iptables" is installed.
       {action, startup} = @config.iptables
       
       @service
-        timeout: -1
         name: 'iptables'
         startup: startup
         action: action
@@ -24,7 +23,6 @@ Redirect input logs in "/var/log/messages".
 
       @call
         header: 'Log'
-        timeout: -1
         unless: -> @config.iptables.action isnt 'start' or @config.iptables.log is false
         handler: ->
           @tools.iptables
@@ -39,6 +37,5 @@ Add user defined rules to IPTables.
 
       @tools.iptables
         header: 'Rules'
-        timeout: -1
         if: @config.iptables.action is 'start'
         rules: @config.iptables.rules

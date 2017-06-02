@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* src: remove usage of timeout
 * krb5 server: admin server url
 * krb5: split client & server
 * sssd: ldap certificates delegated to openldap client

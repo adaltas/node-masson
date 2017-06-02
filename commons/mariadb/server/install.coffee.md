@@ -43,7 +43,7 @@ User/group are hard coded in some of mariadb/mysql package scripts.
 Install the MariaDB database server. Secure the temporary directory. Install MariaDB
 Package on Centos/Redhat 7 OS.
 
-      @call header: 'Package', timeout: -1, handler: (options) ->
+      @call header: 'Package', handler: (options) ->
         @call
           if_os: name: ['redhat','centos'], version: '7'
         , ->
