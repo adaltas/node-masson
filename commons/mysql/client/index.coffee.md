@@ -1,11 +1,11 @@
 
-# Mysql
+# MySQL
 
 Install the MySQL command-line tool.
 
     module.exports =
       commands:
-        'install': handler: (options) ->
+        'install': header: 'MySQL Client', handler: (options) ->
 
 ## Package
 

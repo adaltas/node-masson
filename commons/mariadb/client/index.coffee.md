@@ -5,7 +5,7 @@ Install the MariaDB command-line tool.
 
     module.exports =
       commands:
-        'install': handler: (options) ->
+        'install': header: 'MariaDB Client', handler: (options) ->
 
 ## Package
 
