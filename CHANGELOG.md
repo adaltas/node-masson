@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* mysql: start & stop actions
 * src: remove usage of timeout
 * krb5 server: admin server url
 * krb5: split client & server

@@ -13,3 +13,7 @@ TODO: https://dev.mysql.com/doc/refman/5.7/en/mysql-cluster.html
           'masson/commons/mysql/server/install'
           'masson/commons/mysql/server/check'
         ]
+        'start':
+          'masson/commons/mysql/server/start'
+        'stop':
+          'masson/commons/mysql/server/stop'
