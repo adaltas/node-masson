@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* saslauthd: check ldap properties if mech is ldap
 * mysql: start & stop actions
 * src: remove usage of timeout
 * krb5 server: admin server url

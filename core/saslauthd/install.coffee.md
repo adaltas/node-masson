@@ -19,10 +19,8 @@ saslauth:x:76:
 ## Packages
 
       @call header: 'Packages', ->
-        @service
-          name: 'cyrus-sasl'
-        @service
-          name: 'cyrus-sasl-ldap'
+        @service 'cyrus-sasl'
+        @service 'cyrus-sasl-ldap'
 
 ## Configuration
 

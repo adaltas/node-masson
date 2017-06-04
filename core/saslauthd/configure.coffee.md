@@ -75,10 +75,12 @@ The configuration is written by default in "/etc/saslauthd.conf" and must be
 entirely defined by the end user.
 
       saslauthd.conf ?= {}
-      throw Error "Required Property: \"conf.ldap_servers\"" unless saslauthd.conf.ldap_servers
-      throw Error "Required Property: \"conf.ldap_search_base\"" unless saslauthd.conf.ldap_search_base?
-      throw Error "Required Property: \"conf.ldap_bind_dn\"" unless saslauthd.conf.ldap_bind_dn?
-      throw Error "Required Property: \"conf.ldap_password\"" unless saslauthd.conf.ldap_password?
+      if saslauthd.sysconfig['MECH'] is 'ldap'
+        # http://www.openldap.org/doc/admin24/security.html#Pass-Through%20authentication
+        throw Error "Required Property: \"conf.ldap_servers\"" unless saslauthd.conf.ldap_servers
+        throw Error "Required Property: \"conf.ldap_search_base\"" unless saslauthd.conf.ldap_search_base?
+        throw Error "Required Property: \"conf.ldap_bind_dn\"" unless saslauthd.conf.ldap_bind_dn?
+        throw Error "Required Property: \"conf.ldap_password\"" unless saslauthd.conf.ldap_password?
 
 ## Check
 
