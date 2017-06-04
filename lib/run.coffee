@@ -170,7 +170,6 @@ Run::exec = (params='install') ->
       context.call ->
         for id, i in context.services then do (id, i) =>
           if_resume = ->
-            console.log params.resume, "#{context.config.shortname},#{id},#{i}" in history, "#{context.config.shortname},#{id},#{i}"
             ! (params.resume and "#{context.config.shortname},#{id},#{i}" in history)
           service = services[id]
           return if !service.required and params.modules and multimatch(service.module, params.modules).length is 0
