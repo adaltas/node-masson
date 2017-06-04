@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* run: ability to resume a previous run #20
 * saslauthd: check ldap properties if mech is ldap
 * mysql: start & stop actions
 * src: remove usage of timeout

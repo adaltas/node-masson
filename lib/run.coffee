@@ -1,5 +1,6 @@
 
 path = require 'path'
+fs = require 'fs'
 util = require 'util'
 multimatch = require './multimatch'
 each = require 'each'
@@ -153,38 +154,48 @@ Run::exec = (params='install') ->
   params.end ?= true
   services = @config.services
   engine = require('nikita/lib/core/kv/engines/memory')()
-  each @contexts
-  .parallel true
-  .call (context, callback) ->
-    return callback() if params.hosts and multimatch(context.config.host, params.hosts).length is 0
-    error = false
-    context.kv.engine engine: engine
-    context.log.cli host: context.config.host, pad: host: 20, header: 60
-    context.log.md basename: context.config.shortname
-    context.ssh.open context.config.ssh, host: context.config.ip or context.config.host unless params.command is 'prepare'
-    context.call ->
-      for id in context.services then do (id) =>
-        service = services[id]
-        return if !service.required and params.modules and multimatch(service.module, params.modules).length is 0
-        try
-          if service.commands['']
-            @call service.commands[''], (err) ->
-              console.log 'ERROR', context.config.host, id, err if err
-              error = true if err
-          if service.commands[params.command] 
-            @call service.commands[params.command], (err) ->
-              console.log 'ERROR', context.config.host, id, err if err
-              error = true if err
-        catch err
-          console.log 'ERROR', context.config.host, id, err if err
-          error = true
-          throw err
-    context.then (err) ->
-      @ssh.close() if params.end
-      console.log 'ERROR', err if err and not error
-      @then callback
-  .then (err) =>
-    @emit 'end'
+  fs.readFile "./.masson_history_#{params.command}", 'utf8', (err, history) =>
+    throw err if err and not err.code is 'ENOENT'
+    history = (history or '').split'\n'
+    historyws = fs.createWriteStream "./.masson_history_#{params.command}", flags: unless params.resume then 'w' else 'a'
+    each @contexts
+    .parallel true
+    .call (context, callback) ->
+      return callback() if params.hosts and multimatch(context.config.host, params.hosts).length is 0
+      error = false
+      context.kv.engine engine: engine
+      context.log.cli host: context.config.host, pad: host: 20, header: 60
+      context.log.md basename: context.config.shortname
+      context.ssh.open context.config.ssh, host: context.config.ip or context.config.host unless params.command is 'prepare'
+      context.call ->
+        for id, i in context.services then do (id, i) =>
+          if_resume = ->
+            console.log params.resume, "#{context.config.shortname},#{id},#{i}" in history, "#{context.config.shortname},#{id},#{i}"
+            ! (params.resume and "#{context.config.shortname},#{id},#{i}" in history)
+          service = services[id]
+          return if !service.required and params.modules and multimatch(service.module, params.modules).length is 0
+          try
+            if service.commands['']
+              @call service.commands[''], if: if_resume, (err) ->
+                console.log 'ERROR', context.config.host, id, err if err
+                error = true if err
+            if service.commands[params.command] 
+              @call service.commands[params.command], if: if_resume, (err) ->
+                console.log 'ERROR', context.config.host, id, err if err
+                error = true if err
+            @call ->
+              historyws.write "#{context.config.shortname},#{id},#{i}\n"
+          catch err
+            console.log 'ERROR', context.config.host, id, err if err
+            error = true
+            throw err
+      context.then (err) ->
+        @ssh.close() if params.end
+        console.log 'ERROR', err if err and not error
+        @then callback
+    .then (err) =>
+      historyws.end()
+      @emit 'end'
   @
 
 module.exports = (params, config) ->

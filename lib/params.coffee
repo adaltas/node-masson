@@ -102,6 +102,9 @@ module.exports = parameters
     ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
+    ,
+      name: 'resume', shortcut: 'r', type: 'boolean'
+      description: 'Resumt from previous run'
     ]
   ,
     name: 'start'
@@ -112,6 +115,9 @@ module.exports = parameters
     ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
+    ,
+      name: 'resume', shortcut: 'r', type: 'boolean'
+      description: 'Resumt from previous run'
     ]
   ,
     name: 'reload'
@@ -122,6 +128,9 @@ module.exports = parameters
     ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
+    ,
+      name: 'resume', shortcut: 'r', type: 'boolean'
+      description: 'Resumt from previous run'
     ]
   ,
     name: 'status'
@@ -132,6 +141,9 @@ module.exports = parameters
     ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
+    ,
+      name: 'resume', shortcut: 'r', type: 'boolean'
+      description: 'Resumt from previous run'
     ]
   ,
     name: 'stop',
@@ -142,6 +154,9 @@ module.exports = parameters
     ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
+    ,
+      name: 'resume', shortcut: 'r', type: 'boolean'
+      description: 'Resumt from previous run'
     ]
   ,
     name: 'check',
@@ -152,6 +167,9 @@ module.exports = parameters
     ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
+    ,
+      name: 'resume', shortcut: 'r', type: 'boolean'
+      description: 'Resumt from previous run'
     ]
   ,
     name: 'report',
@@ -162,6 +180,9 @@ module.exports = parameters
     ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
+    ,
+      name: 'resume', shortcut: 'r', type: 'boolean'
+      description: 'Resumt from previous run'
     ]
 
   ,
@@ -173,6 +194,9 @@ module.exports = parameters
     ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
+    ,
+      name: 'resume', shortcut: 'r', type: 'boolean'
+      description: 'Resumt from previous run'
     ]
   ,
     name: 'backup'
@@ -183,6 +207,9 @@ module.exports = parameters
     ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
+    ,
+      name: 'resume', shortcut: 'r', type: 'boolean'
+      description: 'Resumt from previous run'
     ]
   ,
     name: 'benchmark'
@@ -193,6 +220,9 @@ module.exports = parameters
     ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
+    ,
+      name: 'resume', shortcut: 'r', type: 'boolean'
+      description: 'Resumt from previous run'
     ]
   ,
     name: 'ambari_blueprint'
@@ -203,5 +233,8 @@ module.exports = parameters
     ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
+    ,
+      name: 'resume', shortcut: 'r', type: 'boolean'
+      description: 'Resumt from previous run'
     ]
   ]
