@@ -38,9 +38,10 @@ Example:
       options.fqdn ?= @config.host
       options.sshd ?= {}
       options.kinit ?= '/usr/bin/kinit'
-      options.etc_krb5_conf = misc.merge {}, module.exports.etc_krb5_conf, options.etc_krb5_conf
+      options.admin = merge {}, krb5_ctxs[0].config.krb5_server.admin, options.admin
+      options.etc_krb5_conf = merge {}, module.exports.etc_krb5_conf, options.etc_krb5_conf
       # Merge global with server-based configuration
-      # options.etc_krb5_conf.realms = misc.merge {}, options.etc_krb5_conf.realms, options.etc_krb5_conf.realms
+      # options.etc_krb5_conf.realms = merge {}, options.etc_krb5_conf.realms, options.etc_krb5_conf.realms
       for krb5_server_ctx in krb5_ctxs
         for realm, config of krb5_server_ctx.config.krb5_server.admin
           options.etc_krb5_conf.realms[realm] ?= {}
@@ -78,4 +79,4 @@ Example:
 
 ## Dependencies
 
-    misc = require 'nikita/lib/misc'
+    {merge} = require 'nikita/lib/misc'

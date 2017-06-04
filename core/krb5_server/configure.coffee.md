@@ -23,40 +23,20 @@ Example:
 
 ```json
 {
-  "krb5": {
-    "ldap": {
-      "root_dn": "cn=ldapadm,dc=ryba",
-      "root_password": "test"
-    },
-    "etc_krb5_conf": {
-      "libdefaults": {
-        "default_realm": "HADOOP.RYBA"
-      },
-      "realms": {
-        "HADOOP.RYBA": {
-          "default_domain": "ryba",
-          "kadmin_principal": "wdavidw/admin@HADOOP.RYBA",
-          "kadmin_password": "test",
-          "principals": [{
-            "principal": "wdavidw@HADOOP.RYBA",
-            "password": "test"
-          },{
-            "principal": "krbtgt/HADOOP.RYBA@USERS.RYBA",
-            "password": "test"
-          }]
-        }
-      }
-      "domain_realm": {
-        ".ryba": "HADOOP.RYBA",
-        "ryba": "HADOOP.RYBA"
-      },
-    },
-    "kdc_conf": {
-      "dbmodules": {
-        "openldap_master3": {
-          "kdc_master_key": "test"
-        }
-      }
+  "admin": {
+    "HADOOP.RYBA": {
+      "default_domain": "ryba",
+      "kadmin_principal": "wdavidw/admin@HADOOP.RYBA",
+      "kadmin_password": "test",
+      "kdc_master_key": "test",
+      "database_module": "mydbmodule",
+      "principals": [{
+        "principal": "wdavidw@HADOOP.RYBA",
+        "password": "test"
+      },{
+        "principal": "krbtgt/HADOOP.RYBA@USERS.RYBA",
+        "password": "test"
+      }]
     }
   }
 }
@@ -96,6 +76,7 @@ configuration profile.
       # throw Error 'Required option: kdc_conf.libdefaults.default_realm' unless options.kdc_conf.libdefaults.default_realm
       for realm, config of options.admin
         config.admin_server ?= @config.host
+        config.realm ?= realm
         options.kdc_conf.realms[realm] ?= {}
         options.kdc_conf.libdefaults.default_realm ?= realm
       for realm, config of options.kdc_conf.realms

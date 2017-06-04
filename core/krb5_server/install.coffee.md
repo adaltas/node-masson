@@ -17,7 +17,6 @@ Resources:
 *   [On Load Balancers and Kerberos](https://ssimo.org/blog/id_019.html)
 *   [Kerberos With LDAP on centos 7](http://www.rjsystems.nl/en/2100-d6-kerberos-openldap-provider.php)
 
-
     module.exports = header: 'Krb5 Server Install', handler: (options) ->
 
 ## IPTables
@@ -160,7 +159,7 @@ The following files are updated:
 
       @call header: 'LDAP Stash password', ->
         for name, dbmodule of options.kdc_conf.dbmodules then do(name, dbmodule) =>
-          {kdc_master_key, ldap_service_password_file, ldap_kadmind_dn, ldap_kadmind_password} = dbmodule
+          {ldap_service_password_file, ldap_kadmind_dn, ldap_kadmind_password} = dbmodule
           options.log "Stash key file is: #{dbmodule.ldap_service_password_file}"
           keyfileContent = null
           @call (_, callback) ->
@@ -229,12 +228,7 @@ The following files are updated:
           if: -> @status -3
 
       @call header: 'Admin principal', ->
-        for realm, config of options.kdc_conf.realms
-          # continue unless config.database_module
-          # We dont provide an "kadmin_server". Instead, we need
-          # to use "kadmin.local" because the principal used
-          # to login with "kadmin" isnt created yet
-          admin = options.admin[realm]
+        for realm, admin of options.admin
           @krb5.addprinc
             if: admin.kadmin_principal # TODO: remove once krb5 client & server configs are splitted
             realm: realm
