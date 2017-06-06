@@ -38,7 +38,7 @@ Example:
       options.fqdn ?= @config.host
       options.sshd ?= {}
       options.kinit ?= '/usr/bin/kinit'
-      options.admin = merge {}, krb5_ctxs[0].config.krb5_server.admin, options.admin
+      options.admin = merge {}, krb5_ctxs[0].config.krb5_server.admin, options.admin if krb5_ctxs.length > 0
       options.etc_krb5_conf = merge {}, module.exports.etc_krb5_conf, options.etc_krb5_conf
       # Merge global with server-based configuration
       # options.etc_krb5_conf.realms = merge {}, options.etc_krb5_conf.realms, options.etc_krb5_conf.realms
