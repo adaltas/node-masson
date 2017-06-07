@@ -74,15 +74,20 @@ Populate the Kerberos database with new principals. The "wait" property is
 set to 10s because multiple instance of this handler may try to create the same
 principals and generate concurrency errors.
 
-      @call header: 'Principals', wait: 10000, handler: ->
-        for realm, config of options.etc_krb5_conf.realms
-          continue unless config.principals
+      # @call header: 'Principals', wait: 10000, handler: ->
+      #   for realm, config of options.etc_krb5_conf.realms
+      #     continue unless config.principals
+      #     for principal in config.principals
+      #       @krb5.addprinc misc.merge
+      #         kadmin_principal: config.kadmin_principal
+      #         kadmin_password: config.kadmin_password
+      #         kadmin_server: config.admin_server
+      #       , principal
+      
+      @call header: 'Principals', ->
+        for realm, config of options.admin
           for principal in config.principals
-            @krb5.addprinc misc.merge
-              kadmin_principal: config.kadmin_principal
-              kadmin_password: config.kadmin_password
-              kadmin_server: config.admin_server
-            , principal
+            @krb5.addprinc config, principal
 
 ## Configure SSHD
 
