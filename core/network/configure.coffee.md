@@ -21,6 +21,8 @@ The module accept the following properties:
     IPs and the value the hostnames, optional.   
 *   `network.resolv` (string)   
     Content of the '/etc/resolv.conf' file, optional.   
+*   `network.host_replace` (string)   
+    Custom hostname to replace in /etc/hosts, optional.   
 
 ## Default configuration
 

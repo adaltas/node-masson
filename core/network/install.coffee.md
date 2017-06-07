@@ -28,6 +28,12 @@ this file.
         append: true
         backup: true
         eof: true
+      @file
+        header: 'Host replace'
+        if: network.host_replace?
+        target: '/etc/hosts'
+        match: RegExp "^#{quote @config.ip}\\s.*$", 'gm'
+        replace: "#{@config.ip} #{network.host_replace} #{@config.shortname}"
 
 ## Hostname
 
