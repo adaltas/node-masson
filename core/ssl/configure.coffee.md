@@ -52,4 +52,4 @@
 
 ## Dependencies
 
-    path = require 'path'.posix
+    path = require('path').posix
