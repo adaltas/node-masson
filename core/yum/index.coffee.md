@@ -9,5 +9,9 @@
         'masson/core/yum/configure'
       ]
       commands:
-        'install':
-          'masson/core/yum/install'
+        'prepare': ->
+          options = @config.yum
+          @call 'masson/core/yum/prepare', options
+        'install': ->
+          options = @config.yum
+          @call 'masson/core/yum/install', options

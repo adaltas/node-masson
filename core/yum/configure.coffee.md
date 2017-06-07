@@ -36,21 +36,28 @@ Examples
 ```
 
     module.exports = ->
-      @config.yum ?= {}
-      @config.yum.clean ?= false
-      @config.yum.copy ?= null
-      @config.yum.merge ?= true
-      @config.yum.update ?= true
-      @config.yum.proxy ?= true
-      @config.yum.config ?= {}
-      @config.yum.config.main ?= {}
-      @config.yum.config.main.keepcache ?= '0'
-      @config.yum.packages ?= {}
-      @config.yum.packages['yum-plugin-priorities'] ?= true
-      @config.yum.packages['man'] ?= true
-      @config.yum.packages['ksh'] ?= true
+      options = @config.yum ?= {}
+      options.clean ?= false
+      options.copy ?= null
+      options.merge ?= true
+      options.update ?= true
+      options.proxy ?= true
+      options.config ?= {}
+      options.config.main ?= {}
+      options.config.main.keepcache ?= '0'
+      options.packages ?= {}
+      options.packages['yum-plugin-priorities'] ?= true
+      options.packages['man'] ?= true
+      options.packages['ksh'] ?= true
       {http_proxy_no_auth, username, password} = @config.proxy?
-      if @config.yum.proxy
-        @config.yum.config.main.proxy = http_proxy_no_auth
-        @config.yum.config.main.proxy_username = username
-        @config.yum.config.main.proxy_password = password
+      if options.proxy
+        options.config.main.proxy = http_proxy_no_auth
+        options.config.main.proxy_username = username
+        options.config.main.proxy_password = password
+      console.log options.epel
+      if options.epel?.enabled
+        options.epel ?= {}
+        options.epel.url ?= 'http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm'
+        options.epel.repo ?= null
+        options.epel.url = null if options.epel.repo?
+      console.log options.epel
