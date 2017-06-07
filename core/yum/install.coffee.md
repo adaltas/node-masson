@@ -27,7 +27,7 @@ is available on [the centos website](http://www.centos.org/docs/5/html/yum/sn-yu
         merge: true
         backup: true
 
-## repositories
+## Yum Repositories
 
 Upload the YUM repository definitions files present in 
 "options.copy" to the yum repository directory 
@@ -40,6 +40,24 @@ in "/etc/yum.repos.d"
         update: options.update
         target: '/etc/yum.repos.d/centos.repo'
         clean: 'CentOS*'
+
+## Custom Repositories
+
+Upload the YUM repository definitions files present in 
+"options.copy" to the yum repository directory 
+in "/etc/yum.repos.d"
+
+      @call
+        header: 'Custom Repos',
+        if: options.additional_repos
+      , ->
+        for name, repo of options.additional_repos
+          @tools.repo
+            source: repo.source
+            update: repo.update
+            target: repo.target
+            name: repo.name
+            clean: repo.clean
 
 ## YUM Install # Epel
 
