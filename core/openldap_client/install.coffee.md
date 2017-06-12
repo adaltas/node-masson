@@ -60,7 +60,7 @@ the command `authconfig --update --ldaploadcacert={file}`.
             , (err, _, stdout) ->
               filename = stdout.trim() unless err
             @call ->
-              @file 
+              @file
                 source: certificate.source
                 local: true
                 target: "#{openldap_client.config.TLS_CACERTDIR}/#{filename}.0"
@@ -71,7 +71,7 @@ the command `authconfig --update --ldaploadcacert={file}`.
             , (err, _, stdout) ->
               filename = stdout.trim() unless err
             @call ->
-              @file 
+              @file
                 source: certificate.source
                 target: "#{openldap_client.config.TLS_CACERTDIR}/#{filename}.0"
 

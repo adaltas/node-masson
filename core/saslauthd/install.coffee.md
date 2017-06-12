@@ -3,7 +3,7 @@
 
     module.exports = header: 'SASLAuthd Install', handler: (options) ->
       {saslauthd} = @config
-      
+
 ## Identities
 
 ```bash
@@ -14,7 +14,7 @@ saslauth:x:76:
 ```
 
       @system.group header: 'Group', saslauthd.group
-      @system.user header: 'User', saslauthd.user  
+      @system.user header: 'User', saslauthd.user
 
 ## Packages
 

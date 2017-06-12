@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* saslauthd: fix wrong - sign in checks
 * core.epel: move epel install to its own module
 * openldap server: fix HA registration
 * saslauthd: fix delimiter
