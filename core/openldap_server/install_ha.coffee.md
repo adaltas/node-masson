@@ -9,7 +9,7 @@
         header: 'Module Install'
         unless_exec: """
         ldapsearch -Y EXTERNAL -H ldapi:/// -b "cn=config" | \
-        grep -E "olcModulePath: /usr/lib64/openldap"
+        grep -E "^olcModulePath: /usr/lib64/openldap"
         """
         cmd: """
         ldapadd -Y EXTERNAL -H ldapi:/// <<-EOF
@@ -25,7 +25,7 @@
         header: 'Module Activation'
         unless_exec: """
         ldapsearch -Y EXTERNAL -H ldapi:/// -b "cn=config" | \
-        grep -E "olcOverlay:.*syncprov"
+        grep -E "^olcOverlay:.*syncprov"
         """
         cmd: """
         ldapadd -Y EXTERNAL -H ldapi:/// <<-EOF
@@ -43,7 +43,7 @@
         header: 'Registration'
         unless_exec: """
         ldapsearch -Y EXTERNAL -H ldapi:/// -b "cn=config" \
-        | grep -E "olcSyncrepl"
+        | grep -E "^olcSyncrepl:.*rid="
         """
         cmd: """
         ldapmodify -Y EXTERNAL -H ldapi:/// <<-EOF

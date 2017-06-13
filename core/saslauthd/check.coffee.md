@@ -4,7 +4,6 @@
     module.exports = header: 'SASLAuthd Check', handler: (options) ->
       {saslauthd} = @config
 
-
 First check that the DN and password that saslauthd will use when it connects to AD are valid:
 
 ```

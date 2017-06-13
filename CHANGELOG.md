@@ -4,6 +4,8 @@
 ## Trunk
 
 * core.epel: move epel install to its own module
+* openldap server: fix HA registration
+* saslauthd: fix delimiter
 * krb5 client: expose server admin information
 * run: ability to resume a previous run #20
 * saslauthd: check ldap properties if mech is ldap

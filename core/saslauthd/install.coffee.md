@@ -34,6 +34,7 @@ saslauth:x:76:
         target: saslauthd.conf_file
         content: saslauthd.conf
         mode: 0o0644
+        separator: ': '
 
 ## Start
 
