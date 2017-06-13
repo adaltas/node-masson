@@ -28,12 +28,16 @@ this file.
         append: true
         backup: true
         eof: true
+      write = []
+      if network.host_replace then for ip in Object.keys network.host_replace
+        write.push
+          match: RegExp "^#{quote ip}\\s.*$", 'm'
+          replace: "#{ip} #{network.host_replace[ip]}"
       @file
         header: 'Host replace'
         if: network.host_replace?
         target: '/etc/hosts'
-        match: RegExp "^#{quote @config.ip}\\s.*$", 'gm'
-        replace: "#{@config.ip} #{network.host_replace} #{@config.shortname}"
+        write: write
 
 ## Hostname
 
