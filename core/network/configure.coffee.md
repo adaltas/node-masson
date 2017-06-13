@@ -46,6 +46,11 @@ The module accept the following properties:
       "eth0": {
         "PEERDNS": "no"
       }
+    },
+    "host_replace": {
+      "10.10.10.11": "master1.new.ryba",
+      "10.10.10.12": "master2.new.ryba",
+      "10.10.10.13": "master3.new.ryba"
     }
 } }
 ```

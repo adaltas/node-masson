@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* network: added host_replace option
 * core.epel: move epel install to its own module
 * openldap server: fix HA registration
 * saslauthd: fix delimiter
