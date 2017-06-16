@@ -36,7 +36,7 @@ in "/etc/yum.repos.d"
       @tools.repo
         if: options.repo?
         header: 'Repo'
-        source: options.repo
+        source: options.source
         update: options.update
         target: '/etc/yum.repos.d/centos.repo'
         clean: 'CentOS*'
@@ -84,7 +84,7 @@ property "yum.epel" to false.
             shy: true
         @tools.repo
           if: options.epel.repo?
-          source: options.epel.repo
+          source: options.epel.source
           target: '/etc/yum.repos.d/epel.repo'
           clean: 'epel*'
         @service
