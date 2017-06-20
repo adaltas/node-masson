@@ -14,3 +14,6 @@ TODO: https://dev.mysql.com/doc/refman/5.7/en/mysql-cluster.html
           'masson/commons/mariadb/server/replication'
           'masson/commons/mariadb/server/check'
         ]
+        'stop': 'masson/commons/mariadb/server/stop'
+        'start': 'masson/commons/mariadb/server/start'
+        'check': 'masson/commons/mariadb/server/check'
