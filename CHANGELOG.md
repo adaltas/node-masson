@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* yum: fix source detection
 * mysql: repo declaration per service
 * yum: rename repo to source
 * saslauthd: fix wrong - sign in checks

@@ -34,7 +34,7 @@ Upload the YUM repository file definition present in
 in "/etc/yum.repos.d"
 
       @tools.repo
-        if: options.repo?
+        if: options.source?
         header: 'Repo'
         source: options.source
         update: options.update
@@ -51,6 +51,7 @@ Allow administrators to upload additional repos.
       , ->
         for name, repo of options.additional_repos
           @tools.repo
+            if: repo.source?
             source: repo.source
             update: repo.update
             target: repo.target
@@ -83,7 +84,7 @@ property "yum.epel" to false.
             target: epel_rpm_tmp
             shy: true
         @tools.repo
-          if: options.epel.repo?
+          if: options.epel.source?
           source: options.epel.source
           target: '/etc/yum.repos.d/epel.repo'
           clean: 'epel*'
