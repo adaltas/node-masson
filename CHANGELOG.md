@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* krb5 client: re-activate wait admin
 * yum: fix source detection
 * mysql: repo declaration per service
 * yum: rename repo to source
