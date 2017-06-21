@@ -29,23 +29,21 @@ is available on [the centos website](http://www.centos.org/docs/5/html/yum/sn-yu
 
 ## Yum Repositories
 
-Upload the YUM repository definitions files present in 
-"options.copy" to the yum repository directory 
+Upload the YUM repository file definition present in 
+"options.repo" to the yum repository directory 
 in "/etc/yum.repos.d"
 
       @tools.repo
-        if: options.repo?
+        if: options.source?
         header: 'Repo'
-        source: options.repo
+        source: options.source
         update: options.update
         target: '/etc/yum.repos.d/centos.repo'
         clean: 'CentOS*'
 
 ## Custom Repositories
 
-Upload the YUM repository definitions files present in 
-"options.copy" to the yum repository directory 
-in "/etc/yum.repos.d"
+Allow administrators to upload additional repos.
 
       @call
         header: 'Custom Repos',
@@ -53,13 +51,14 @@ in "/etc/yum.repos.d"
       , ->
         for name, repo of options.additional_repos
           @tools.repo
+            if: repo.source?
             source: repo.source
             update: repo.update
             target: repo.target
             name: repo.name
             clean: repo.clean
 
-## YUM Install # Epel
+## Epel
 
 Install the Epel repository. This is by default activated and the repository is
 deployed by installing the "epel-release" package. It may also be installed from
@@ -85,8 +84,8 @@ property "yum.epel" to false.
             target: epel_rpm_tmp
             shy: true
         @tools.repo
-          if: options.epel.repo?
-          source: options.epel.repo
+          if: options.epel.source?
+          source: options.epel.source
           target: '/etc/yum.repos.d/epel.repo'
           clean: 'epel*'
         @service

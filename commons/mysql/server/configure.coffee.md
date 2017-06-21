@@ -27,23 +27,30 @@ provision their databases and user access.
 ```
 
     module.exports = ->
-      mysql = @config.mysql ?= {}
-      mysql.server ?= {}
+      @config.mysql ?= {}
+      options = @config.mysql.server ?= {}
       # Secure Installation
-      mysql.server.current_password ?= ''
-      throw Error "Required Option: mysql.server.password" unless mysql.server.password
-      mysql.server.root_host ?= '%'
+      options.current_password ?= ''
+      throw Error "Required Option: options.password" unless options.password
+      options.root_host ?= '%'
       # Service Configuration
-      mysql.server.group ?= name: 'mysql'
-      mysql.server.group = name: mysql.server.group if typeof mysql.server.group is 'string'
-      mysql.server.my_cnf ?= {}
-      mysql.server.user ?= name: 'mysql'
-      mysql.server.user = name: mysql.server.user if typeof mysql.server.user is 'string'
-      mysql.server.user.home ?= "/var/lib/#{mysql.server.user.name}"
-      mysql.server.user.gid = mysql.server.group.name
+      options.group ?= name: 'mysql'
+      options.group = name: options.group if typeof options.group is 'string'
+      options.my_cnf ?= {}
+      options.user ?= name: 'mysql'
+      options.user = name: options.user if typeof options.user is 'string'
+      options.user.home ?= "/var/lib/#{options.user.name}"
+      options.user.gid = options.group.name
 
 ## Configuration
 
-      mysql.server.my_cnf['mysqld'] ?= {}
-      mysql.server.my_cnf['mysqld']['port'] ?= '3306'
-      mysql.server.my_cnf['mysqld']['pid-file'] ?= '/var/run/mysqld/mysqld.pid'
+      options.my_cnf['mysqld'] ?= {}
+      options.my_cnf['mysqld']['port'] ?= '3306'
+      options.my_cnf['mysqld']['pid-file'] ?= '/var/run/mysqld/mysqld.pid'
+
+## Repository
+
+      options.repo ?= {}
+      # options.repo.url ?= 'http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm'
+      options.repo.source ?= null
+      options.repo.url = null if options.repo.repo?

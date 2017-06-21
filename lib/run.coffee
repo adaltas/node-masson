@@ -156,7 +156,7 @@ Run::exec = (params='install') ->
   engine = require('nikita/lib/core/kv/engines/memory')()
   fs.readFile "./.masson_history_#{params.command}", 'utf8', (err, history) =>
     throw err if err and not err.code is 'ENOENT'
-    history = (history or '').split'\n'
+    history = (history or '').split '\n'
     historyws = fs.createWriteStream "./.masson_history_#{params.command}", flags: unless params.resume then 'w' else 'a'
     each @contexts
     .parallel true

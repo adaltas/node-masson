@@ -57,5 +57,5 @@ Examples
       if options.epel?.enabled
         options.epel ?= {}
         options.epel.url ?= 'http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm'
-        options.epel.repo ?= null
-        options.epel.url = null if options.epel.repo?
+        options.epel.source ?= null
+        options.epel.url = null if options.epel.source?

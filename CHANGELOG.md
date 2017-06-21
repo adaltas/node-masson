@@ -4,6 +4,11 @@
 ## Trunk
 
 * network: added host_replace option
+* krb5 client: re-activate wait admin
+* yum: fix source detection
+* mysql: repo declaration per service
+* yum: rename repo to source
+* saslauthd: fix wrong - sign in checks
 * core.epel: move epel install to its own module
 * openldap server: fix HA registration
 * saslauthd: fix delimiter
