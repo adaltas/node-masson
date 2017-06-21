@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* mysql: repo declaration per service
 * yum: rename repo to source
 * saslauthd: fix wrong - sign in checks
 * core.epel: move epel install to its own module

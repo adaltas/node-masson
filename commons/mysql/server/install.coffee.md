@@ -2,7 +2,8 @@
 # MySQL Server Install
 
     module.exports = header: 'MySQL Server Install', handler: ->
-      {iptables, mysql} = @config
+      {iptables} = @config
+      options = @config.mysql.server
 
 ## IPTables
 
@@ -17,11 +18,12 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
       @tools.iptables
         header: 'IPTables'
         rules: [
-          { chain: 'INPUT', jump: 'ACCEPT', dport: mysql.server.my_cnf['mysqld']['port'], protocol: 'tcp', state: 'NEW', comment: "MySQL" }
+          { chain: 'INPUT', jump: 'ACCEPT', dport: options.my_cnf['mysqld']['port'], protocol: 'tcp', state: 'NEW', comment: "MySQL" }
         ]
         if: @has_service('masson/core/iptables') and iptables.action is 'start'
 
 ## User & groups
+
 By default the "mariadb-server/mysql-server" packages create the following entry:
 
 ```bash
@@ -33,8 +35,22 @@ Note: Be careful if using different name thans 'mysql:mysql'
 User/group are hard coded in some of mariadb/mysql package scripts.
 
       @call header: 'Users & Groups', handler: ->
-        @system.group mysql.server.group
-        @system.user mysql.server.user
+        @system.group options.group
+        @system.user options.user
+
+## Yum Repositories
+
+Upload the YUM repository definitions files present in 
+"options.copy" to the yum repository directory 
+in "/etc/yum.repos.d"
+
+      @tools.repo
+        if: options.repo?
+        header: 'Repo'
+        source: options.repo.source
+        update: options.repo.update
+        target: '/etc/yum.repos.d/mysql.repo'
+        clean: 'mysql*'
 
 ## Package
 
@@ -48,11 +64,11 @@ Package on Centos/Redhat 7 OS.
         @system.tmpfs
           header: 'TempFS pid'
           if_os: name: ['centos', 'redhat', 'oracle'], version: '7'
-          mount: "#{path.dirname mysql.server.my_cnf['mysqld']['pid-file']}"
+          mount: "#{path.dirname options.my_cnf['mysqld']['pid-file']}"
           name: 'mysqld'
           perm: '0750'
-          uid: mysql.server.user.name
-          gid: mysql.server.group.name
+          uid: options.user.name
+          gid: options.group.name
         @service
           header: 'Install'
           name: 'mysql-community-server'
@@ -75,7 +91,7 @@ Write /etc/my.cnf configuration file.
 
       @file.ini
         target: '/etc/my.cnf'
-        content: mysql.server.my_cnf
+        content: options.my_cnf
         stringify: misc.ini.stringify_single_key
         merge: false
         backup: true
@@ -104,7 +120,7 @@ the following ways:
             switch
               when /Enter current password for root/.test data
                 options.log data
-                stream.write "#{mysql.server.current_password}\n"
+                stream.write "#{options.current_password}\n"
               when /Change the root password/.test data
                 options.log data
                 stream.write "y\n"
@@ -113,7 +129,7 @@ the following ways:
                 stream.write "y\n"
               when /New password/.test(data) or /Re-enter new password/.test(data)
                 options.log data
-                stream.write "#{mysql.server.password}\n"
+                stream.write "#{options.password}\n"
               when /Remove anonymous users/.test data
                 options.log data
                 stream.write "y\n"
@@ -146,7 +162,7 @@ If this is the first run, grab the temporary password from the log.
           engine: 'mysql'
           host: 'localhost'
           username: 'root'
-          password: "#{mysql.server.password}"
+          password: "#{options.password}"
         , "SHOW STATUS"
         cmd: "grep 'temporary password' /var/log/mysqld.log"
         shy: true
@@ -162,8 +178,8 @@ a command argumet because it can not be run interractively.
       @call
         header: 'Root Password'
         if: -> password
-      , (options, callback) ->
-        options.ssh.shell (err, stream) =>
+      , (_, callback) ->
+        _.ssh.shell (err, stream) =>
           return callback err if err
           cmd = db.cmd
             engine: 'mysql'
@@ -181,7 +197,7 @@ a command argumet because it can not be run interractively.
               stream.end 'exit\n'
               called = 3
             else if called is 0 and /mysql>/.test data
-              stream.write "ALTER USER 'root'@'localhost' IDENTIFIED BY '#{mysql.server.password}';\n"
+              stream.write "ALTER USER 'root'@'localhost' IDENTIFIED BY '#{options.password}';\n"
               called++
             else if called is 1 and /mysql>/.test data
               stream.write 'quit\n'
@@ -194,31 +210,31 @@ a command argumet because it can not be run interractively.
 
       @system.execute
         header: 'External Root Access'
-        if: mysql.server.root_host
+        if: options.root_host
         cmd: """
         function mysql_exec {
           read query
           mysql \
-           -hlocalhost -P#{mysql.server.my_cnf['mysqld']['port']} \
-           -uroot -p#{mysql.server.password} \
+           -hlocalhost -P#{options.my_cnf['mysqld']['port']} \
+           -uroot -p#{options.password} \
            -N -s -r -e \
            "$query" 2>/dev/null
         }
         exist=`mysql_exec <<SQL
         SELECT count(*) \
          FROM mysql.user \
-         WHERE user = 'root' and host = '#{mysql.server.root_host}';
+         WHERE user = 'root' and host = '#{options.root_host}';
         SQL`
         [[ $exist -gt 0 ]] && exit 3
         mysql_exec <<SQL
         GRANT ALL PRIVILEGES \
-         ON *.* TO 'root'@'#{mysql.server.root_host}' \
-         IDENTIFIED BY '#{mysql.server.password}' \
+         ON *.* TO 'root'@'#{options.root_host}' \
+         IDENTIFIED BY '#{options.password}' \
          WITH GRANT OPTION;
-        GRANT SUPER ON *.* TO 'root'@'#{mysql.server.root_host}';
+        GRANT SUPER ON *.* TO 'root'@'#{options.root_host}';
         # UPDATE mysql.user \
         #  SET Grant_priv='Y', Super_priv='Y' \
-        #  WHERE User='root' and Host='#{mysql.server.root_host}';
+        #  WHERE User='root' and Host='#{options.root_host}';
         FLUSH PRIVILEGES;
         SQL
         """
