@@ -21,6 +21,8 @@ The module accept the following properties:
     IPs and the value the hostnames, optional.   
 *   `network.resolv` (string)   
     Content of the '/etc/resolv.conf' file, optional.   
+*   `network.host_replace` (string)   
+    Custom hostname to replace in /etc/hosts, optional.   
 
 ## Default configuration
 
@@ -44,6 +46,11 @@ The module accept the following properties:
       "eth0": {
         "PEERDNS": "no"
       }
+    },
+    "host_replace": {
+      "10.10.10.11": "master1.new.ryba",
+      "10.10.10.12": "master2.new.ryba",
+      "10.10.10.13": "master3.new.ryba"
     }
 } }
 ```
