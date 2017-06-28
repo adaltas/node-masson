@@ -14,6 +14,7 @@ provides a good description on how Kerberos is negotiated by GSSAPI and SSPI.
         iptables: 'masson/core/iptables/configure'
         openldap_client: implicit: true, module: 'masson/core/openldap_client'
         openldap_server: 'masson/core/openldap_server'
+        krb5_server: 'masson/core/krb5_server'
       configure:
         'masson/core/krb5_server/configure'
       commands:

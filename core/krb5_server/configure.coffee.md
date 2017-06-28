@@ -44,6 +44,7 @@ Example:
 
     module.exports = ->
       openldap_ctxs = @contexts 'masson/core/openldap_server'
+      krb5_servers_ctxs = @contexts 'masson/core/krb5_server'
       [openldap_ctx] = openldap_ctxs
       options = @config.krb5_server ?= {}
       throw new Error "Expect at least one server with action \"masson/core/openldap_server\"" if openldap_ctxs.length is 0
@@ -53,6 +54,22 @@ Example:
       options.root_password ?= openldap_ctx.config.openldap_server.root_password
       # Generate dynamic "options.dbmodules" object
       {openldap_server_krb5} = openldap_ctx.config
+
+## HA
+
+High availability for the KDC is based on a master-slave architecture. If not 
+declared in the configuration, the first KDC found is considered the master. To 
+declare the master server, set the property "config.{realm}.master" to "true" 
+on the appropriate node.
+
+      for realm, config of options.admin
+        config.ha ?= krb5_servers_ctxs.length > 1
+        if config.ha
+          master_ctxs = krb5_servers_ctxs.filter( (krb5_servers_ctx) -> krb5_servers_ctx.config.krb5_server?.admin?[realm]?.master )
+          throw Error 'Invalid configuration: more than one KDC server' if master_ctxs.length > 1
+          if master_ctxs.length is 0
+            krb5_servers_ctxs[0].config.krb5_server = merge krb5_servers_ctxs[0].config.krb5_server,
+              admin: "#{realm}": master: true
 
 ## kdc.conf
 

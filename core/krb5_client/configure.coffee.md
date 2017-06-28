@@ -33,21 +33,23 @@ Example:
 ```
 
     module.exports = ->
-      krb5_ctxs = @contexts 'masson/core/krb5_server'
+      krb5_server_ctxs = @contexts 'masson/core/krb5_server'
       options = @config.krb5_client ?= {}
       options.fqdn ?= @config.host
       options.sshd ?= {}
       options.kinit ?= '/usr/bin/kinit'
-      options.admin = merge {}, krb5_ctxs[0].config.krb5_server.admin, options.admin if krb5_ctxs.length > 0
+      options.admin = merge {}, krb5_server_ctxs[0].config.krb5_server.admin, options.admin if krb5_server_ctxs.length > 0
       options.etc_krb5_conf = merge {}, module.exports.etc_krb5_conf, options.etc_krb5_conf
       # Merge global with server-based configuration
       # options.etc_krb5_conf.realms = merge {}, options.etc_krb5_conf.realms, options.etc_krb5_conf.realms
-      for krb5_server_ctx in krb5_ctxs
+      for krb5_server_ctx in krb5_server_ctxs
         for realm, config of krb5_server_ctx.config.krb5_server.admin
           options.etc_krb5_conf.realms[realm] ?= {}
-          options.etc_krb5_conf.realms[realm].kdc ?= krb5_server_ctx.config.host
+          options.etc_krb5_conf.realms[realm].kdc ?= []
+          options.etc_krb5_conf.realms[realm].kdc.push krb5_server_ctx.config.host
           # realms[realm].kdc = [realms[realm].kdc] unless Array.isArray realms[realm].kdc
-          options.etc_krb5_conf.realms[realm].admin_server ?= krb5_server_ctx.config.host
+          options.etc_krb5_conf.realms[realm].admin_server ?= []
+          options.etc_krb5_conf.realms[realm].admin_server.push krb5_server_ctx.config.host
           # realms[realm].default_domain ?= realm.toLowerCase()
           options.etc_krb5_conf.libdefaults.default_realm = realm
 

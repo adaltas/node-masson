@@ -150,6 +150,7 @@ The following files are updated:
           # Note, kdb5_ldap_util is using /etc/krb5.conf (server version)
           @system.execute
             header: 'Realm Initialization'
+            if: options.admin[realm].ha and options.admin[realm].master
             cmd: """
             kdb5_ldap_util \
             -D \"#{options.root_dn}\" -w #{options.root_password} \
@@ -199,6 +200,21 @@ The following files are updated:
               return callback err if err
               modified = if keyfileContent is content then false else true
               callback null, keyfileContent isnt content
+
+      @call header: 'HA', ->
+        @each options.admin, (options, next) ->
+          # realm = options.key
+          config = options.value
+          return next() unless config.ha
+          @call if: config.master, ->
+            @fs.readFile "/var/kerberos/krb5kdc/.k5.#{config.realm}", (err, buf) =>
+              return next err if err
+              @kv.set key: "krb5_ha.#{config.realm}", value: buf
+              @then next
+          @call unless: config.master, ->
+            @kv.get key: "krb5_ha.#{config.realm}", (err, status, key, value) =>
+              @fs.writeFile "/var/kerberos/krb5kdc/.k5.#{config.realm}", value, (err) =>
+                next err
 
       @call header: 'Log', ->
         @file.touch
@@ -257,7 +273,8 @@ The following files are updated:
 
 ## Dependencies
 
-    path = require 'path'
+    path = require('path').posix
+    each = require 'each'
     misc = require 'nikita/lib/misc'
 
 ## Notes

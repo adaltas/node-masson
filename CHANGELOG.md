@@ -3,12 +3,10 @@
 
 ## Trunk
 
-<<<<<<< HEAD
 * commons/mariadb: refactor prepare masson2
 * network: added host_replace option
-=======
+* krb5: HA support
 * ssl: install java is keytool is required
->>>>>>> ssl: install java is keytool is required
 * java: raise openjdk version to 1.8.0
 * krb5 client: re-activate wait admin
 * yum: fix source detection

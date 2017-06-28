@@ -10,13 +10,15 @@ Wait for all the Kerberos servers referenced by the client configuration.
 
 Wait for the Admin Server to listen for TCP connection, by default on port 749.
 
-      @connection.wait
-        header: 'TCP Admin'
-        servers: for realm, config of options.etc_krb5_conf.realms
-          continue unless config.admin_server
-          [host, port] = config.admin_server.split ':'
-          host: host
-          port: port or 749
+      for realm, config of options.etc_krb5_conf.realms
+        continue unless config.admin_server.length
+        @connection.wait
+          header: 'TCP Admin'
+          quorum: 1
+          servers: for server in config.admin_server
+            [host, port] = server.split ':'
+            host: host
+            port: port or 749
 
 ## Wait Admin
 
