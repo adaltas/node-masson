@@ -27,6 +27,10 @@
 
 ## JKS
 
+      @service
+        header: 'OpenJDK'
+        if: !options.truststore.disabled or !options.keystore.disabled
+        name: 'java-1.8.0-openjdk-devel'
       # Client: import CA certificate
       @java.keystore_add
         header: 'Truststore'
