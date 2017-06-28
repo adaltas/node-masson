@@ -1,4 +1,4 @@
-
+options
 # Mysql Server Replication
 Enable the replication.
 Follow [instructions](https://www.digitalocean.com/community/tutorials/how-to-set-up-master-slave-replication-in-mysql).
@@ -6,21 +6,21 @@ Follow [instructions](https://www.digitalocean.com/community/tutorials/how-to-se
 Note: Ryba does not do any action if replication has already be enabled once for
 consistency reasons.
 
-    module.exports = header: 'Mysql Server Replication', handler: ->
-      return unless @config.mysql.ha_enabled
-      {repl_master} = @config.mysql.server
+    module.exports = header: 'MariaDB Server Replication', handler: (options) ->
+      return unless options.ha_enabled
+      {repl_master} = options.server
       [master_ctx] = @contexts('masson/commons/mariadb/server').filter (ctx) -> ctx.config.host is repl_master.host
       remote_master =
         database: null
         admin_username: 'root'
-        admin_password: master_ctx.config.mysql.server.password
+        admin_password: master_ctx.config.mariadb.server.password
         engine: 'mysql'
         host: master_ctx.config.host
         silent: false
       props =
         database: null
         admin_username: 'root'
-        admin_password: @config.mysql.server.password
+        admin_password: options.server.password
         engine: 'mysql'
         host: @config.host
         silent: false
@@ -36,9 +36,9 @@ Wait for master remote login.
 
       @system.mkdir
         header: 'Replication dir'
-        target: @config.mysql.replication_dir
-        uid: @config.mysql.server.user.name
-        gid: @config.mysql.server.group.name
+        target: options.replication_dir
+        uid: options.server.user.name
+        gid: options.server.group.name
         mode: 0o0750
 
 ## Grant Privileges

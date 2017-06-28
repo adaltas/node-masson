@@ -1,13 +1,13 @@
 
 # Mysql Server Check
 
-    module.exports = header: 'Mysql Server Check', handler: ->
-      {iptables, mysql} = @config
+    module.exports = header: 'MariaDB Server Check', handler: (options) ->
+      {iptables} = @config
       {ssl} = @config.ryba
       props =
         database: null
         admin_username: 'root'
-        admin_password: @config.mysql.server.password
+        admin_password: options.server.password
         engine: 'mysql'
         host: @config.host
         silent: false
@@ -16,14 +16,14 @@
 Wait connect action is used as a check n the port availability.
 
       @connection.wait
-        port: mysql.server.my_cnf['mysqld']['port']
+        port: options.server.my_cnf['mysqld']['port']
         host: @config.host
 
 ## Check Replication
 
       @call 
         header: 'Check Replication'
-        if: @config.mysql.ha_enabled
+        if: options.ha_enabled
         handler: ->
           @system.execute
             retry: 3

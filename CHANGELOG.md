@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* commons/mariadb: refactor prepare masson2
 * network: added host_replace option
 * krb5 client: re-activate wait admin
 * yum: fix source detection
