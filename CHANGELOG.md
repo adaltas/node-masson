@@ -5,6 +5,7 @@
 
 * commons/mariadb: refactor prepare masson2
 * network: added host_replace option
+* java: raise openjdk version to 1.8.0
 * krb5 client: re-activate wait admin
 * yum: fix source detection
 * mysql: repo declaration per service

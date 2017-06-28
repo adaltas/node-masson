@@ -17,7 +17,7 @@ TODO: leverage /etc/alternative to switch between multiple JDKs.
       @service
         header: 'OpenJDK'
         if: -> @config.java.openjdk
-        name: 'java-1.7.0-openjdk-devel'
+        name: 'java-1.8.0-openjdk-devel'
 
 ## Install Oracle JDK && Java Cryptography Extension
 
