@@ -3,7 +3,7 @@
 
 ## Trunk
 
-* commons/mariadb: refactor prepare masson2
+* mariadb: refactor prepare masson2
 * network: added host_replace option
 * krb5: HA support
 * ssl: install java is keytool is required
