@@ -11,7 +11,7 @@ Wait for all the Kerberos servers referenced by the client configuration.
 Wait for the Admin Server to listen for TCP connection, by default on port 749.
 
       for realm, config of options.etc_krb5_conf.realms
-        continue unless config.admin_server.length
+        continue unless config.admin_server?.length
         @connection.wait
           header: 'TCP Admin'
           quorum: 1
@@ -29,7 +29,7 @@ and we couldnt dig the exact nature of this error.
       @call header: 'Command kadmin', retry: 2, handler: ->
         for realm, config of options.admin
           continue unless config.kadmin_principal and config.admin_server
-          @wait.execute 
+          @wait.execute
             retry: 5
             interval: 10000
             cmd: misc.kadmin
