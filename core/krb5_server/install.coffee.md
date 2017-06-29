@@ -150,7 +150,7 @@ The following files are updated:
           # Note, kdb5_ldap_util is using /etc/krb5.conf (server version)
           @system.execute
             header: 'Realm Initialization'
-            if: options.admin[realm].ha and options.admin[realm].master
+            if: not options.admin[realm].ha or options.admin[realm].master
             cmd: """
             kdb5_ldap_util \
             -D \"#{options.root_dn}\" -w #{options.root_password} \

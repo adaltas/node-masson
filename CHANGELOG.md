@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* krb5 server: fix realm init in non ha mode
 * mariadb: refactor prepare masson2
 * network: added host_replace option
 * krb5: HA support
