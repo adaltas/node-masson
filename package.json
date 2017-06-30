@@ -1,6 +1,6 @@
 {
   "name": "masson",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Module execution engine for cluster deployments.",
   "homepage": "https://github.com/adaltas/node-masson",
   "bugs": "https://github.com/adaltas/node-masson/issues",
