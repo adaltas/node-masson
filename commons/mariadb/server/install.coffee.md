@@ -120,6 +120,13 @@ Create the directories, needed by the database.
         uid: options.server.user.name
         gid: options.server.group.name
         mode: 0o0750
+      @system.mkdir
+        if: options.ha_enabled
+        header: 'Replication dir'
+        target: options.replication_dir
+        uid: options.server.user.name
+        gid: options.server.group.name
+        mode: 0o0750
 
 ## Configuration
 

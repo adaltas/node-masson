@@ -32,15 +32,6 @@ Wait for master remote login.
         header: 'Wait Root remote login'
         cmd: db.cmd remote_master, "show databases"
 
-## Layout
-
-      @system.mkdir
-        header: 'Replication dir'
-        target: options.replication_dir
-        uid: options.server.user.name
-        gid: options.server.group.name
-        mode: 0o0750
-
 ## Grant Privileges
 Grant privileges on the remote master server to the user used for replication.
 

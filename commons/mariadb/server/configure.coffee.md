@@ -141,7 +141,7 @@ Note: For Now Ryba does not support automatic discovery for more than 2 master.
       options.server.my_cnf['mysqld']['innodb_data_file_path'] ?= 'ibdata1:10M:autoextend'
       options.server.my_cnf['mysqld']['innodb_log_group_home_dir'] ?= "#{options.journal_log_dir}"
       options.server.my_cnf['mysqld']['innodb_buffer_pool_size'] ?= '384M'
-      options.server.my_cnf['mysqld']['innodb_additional_mem_pool_size'] ?= '20M'
+      # options.server.my_cnf['mysqld']['innodb_additional_mem_pool_size'] ?= '20M'
       options.server.my_cnf['mysqld']['innodb_log_file_size'] ?= '100M'
       options.server.my_cnf['mysqld']['innodb_log_buffer_size'] ?= '8M'
       options.server.my_cnf['mysqld']['innodb_flush_log_at_trx_commit'] ?= '1'
