@@ -52,6 +52,9 @@ module.exports = parameters
       description: 'Server hostname associated with the plan'
       required: true
     ,
+      name: 'tags', shortcut: 't', type: 'array'
+      description: 'Limit to servers that honor a list of tags'
+    ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
     ]
@@ -70,6 +73,9 @@ module.exports = parameters
     options: [
       name: 'hosts', shortcut: 'h', type: 'array'
       description: 'Limit to a list of server hostnames'
+    ,
+      name: 'tags', shortcut: 't', type: 'array'
+      description: 'Limit to servers that honor a list of tags'
     ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
@@ -100,6 +106,9 @@ module.exports = parameters
       name: 'hosts', shortcut: 'h', type: 'array'
       description: 'Limit to a list of server hostnames'
     ,
+      name: 'tags', shortcut: 't', type: 'array'
+      description: 'Limit to servers that honor a list of tags'
+    ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
     ,
@@ -112,6 +121,9 @@ module.exports = parameters
     options: [
       name: 'hosts', shortcut: 'h', type: 'array'
       description: 'Limit to a list of server hostnames'
+    ,
+      name: 'tags', shortcut: 't', type: 'array'
+      description: 'Limit to servers that honor a list of tags'
     ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
@@ -126,6 +138,9 @@ module.exports = parameters
       name: 'hosts', shortcut: 'h', type: 'array'
       description: 'Limit to a list of server hostnames'
     ,
+      name: 'tags', shortcut: 't', type: 'array'
+      description: 'Limit to servers that honor a list of tags'
+    ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
     ,
@@ -138,6 +153,9 @@ module.exports = parameters
     options: [
       name: 'hosts', shortcut: 'h', type: 'array'
       description: 'Limit to a list of server hostnames'
+    ,
+      name: 'tags', shortcut: 't', type: 'array'
+      description: 'Limit to servers that honor a list of tags'
     ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
@@ -152,6 +170,9 @@ module.exports = parameters
       name: 'hosts', shortcut: 'h', type: 'array'
       description: 'Limit to a list of server hostnames'
     ,
+      name: 'tags', shortcut: 't', type: 'array'
+      description: 'Limit to servers that honor a list of tags'
+    ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
     ,
@@ -164,6 +185,9 @@ module.exports = parameters
     options: [
       name: 'hosts', shortcut: 'h', type: 'array'
       description: 'Limit to a list of server hostnames'
+    ,
+      name: 'tags', shortcut: 't', type: 'array'
+      description: 'Limit to servers that honor a list of tags'
     ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
@@ -178,19 +202,24 @@ module.exports = parameters
       name: 'hosts', shortcut: 'h', type: 'array'
       description: 'Limit to a list of server hostnames'
     ,
+      name: 'tags', shortcut: 't', type: 'array'
+      description: 'Limit to servers that honor a list of tags'
+    ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
     ,
       name: 'resume', shortcut: 'r', type: 'boolean'
       description: 'Resumt from previous run'
     ]
-
   ,
     name: 'clean'
     description: 'Clean the server'
     options: [
       name: 'hosts', shortcut: 'h', type: 'array'
       description: 'Limit to a list of server hostnames'
+    ,
+      name: 'tags', shortcut: 't', type: 'array'
+      description: 'Limit to servers that honor a list of tags'
     ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
@@ -205,6 +234,9 @@ module.exports = parameters
       name: 'hosts', shortcut: 'h', type: 'array'
       description: 'Limit to a list of server hostnames'
     ,
+      name: 'tags', shortcut: 't', type: 'array'
+      description: 'Limit to servers that honor a list of tags'
+    ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
     ,
@@ -218,6 +250,9 @@ module.exports = parameters
       name: 'hosts', shortcut: 'h', type: 'array'
       description: 'Limit to a list of server hostnames'
     ,
+      name: 'tags', shortcut: 't', type: 'array'
+      description: 'Limit to servers that honor a list of tags'
+    ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'
     ,
@@ -230,6 +265,9 @@ module.exports = parameters
     options: [
       name: 'hosts', shortcut: 'h', type: 'array'
       description: 'Limit to a list of server hostnames'
+    ,
+      name: 'tags', shortcut: 't', type: 'array'
+      description: 'Limit to servers that honor a list of tags'
     ,
       name: 'modules', shortcut: 'm', type: 'array'
       description: 'Limit to a list of modules'

@@ -146,6 +146,7 @@ Run::require = (module) ->
 Options:
 *   `command`
 *   `hosts`
+*   `tags`
 *   `modules`
 *   `end`
 ###
@@ -154,6 +155,9 @@ Run::exec = (params='install') ->
   params.end ?= true
   services = @config.services
   engine = require('nikita/lib/core/kv/engines/memory')()
+  tag_hosts = {}
+  for k, v of @config.nodes
+    tag_hosts[k] = v.tags
   fs.readFile "./.masson_history_#{params.command}", 'utf8', (err, history) =>
     throw err if err and not err.code is 'ENOENT'
     history = (history or '').split '\n'
@@ -162,6 +166,14 @@ Run::exec = (params='install') ->
     .parallel true
     .call (context, callback) ->
       return callback() if params.hosts and multimatch(context.config.host, params.hosts).length is 0
+      # if AT LEAST ONE tag match, we continue, else we exit (callback call)
+      if params.tags
+        match = false
+        for tag in params.tags
+          [key, value] = tag.split '='
+          if key and value
+            match = true if value is tag_hosts[context.config.host][key]
+        return callback() unless match
       error = false
       context.kv.engine engine: engine
       context.log.cli host: context.config.host, pad: host: 20, header: 60
