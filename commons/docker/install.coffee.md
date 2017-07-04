@@ -3,8 +3,6 @@
 
     module.exports = header: 'Docker Install', handler: (options) ->
       {docker} = @config
-      {ssl, other_args, sockets} = docker
-      
 ## Install
 
 Install the `docker-io` package on Centos/REHL 6 or `docker` on Centos/REHL 7.
@@ -13,7 +11,7 @@ Skip Pakage installation, if provided by external deploy tool.
 
       @system.discover (err, status, os) ->
         @call
-          unless: @config.docker.external
+          unless: docker.external
           if: -> (os.type in ['redhat','centos'])
           header: 'Packages'
         , ->
@@ -36,15 +34,13 @@ Skip Pakage installation, if provided by external deploy tool.
                 perm: '0750'
 
 ## Configuration
-      
+
         @call header: 'Daemon Option', ->
-          other_opts = @config.docker.other_opts
           opts = []
-          opts.push "--#{k}=#{v}" for k,v of other_args
+          opts.push "--#{k}=#{v}" for k,v of docker.other_args
           opts.push '--tlsverify' if ssl?.tlsverify and not(os.type in ['redhat','centos'] and os.release[0] is '6')
-          for type, socketPaths of sockets
+          for type, socketPaths of docker.sockets
             opts.push "-H #{type}://#{path}" for path in socketPaths
-          other_opts += opts.join ' '
           @call
             if: -> (os.type in ['redhat','centos'])
           , ->
@@ -54,7 +50,7 @@ Skip Pakage installation, if provided by external deploy tool.
                   target: '/etc/sysconfig/docker'
                   write: [
                     match: /^other_args=.*$/mg
-                    replace: "other_args=\"#{other_opts}\""
+                    replace: "other_args=\"#{docker.other_opts + opts.join ' '}\""
                   ]
                   backup: true
               when '7'
@@ -62,7 +58,7 @@ Skip Pakage installation, if provided by external deploy tool.
                   target: '/etc/sysconfig/docker'
                   write: [
                     match: /^OPTIONS=.*/
-                    replace: "OPTIONS=\"#{other_opts}\""
+                    replace: "OPTIONS=\"#{docker.other_opts + opts.join ' '}\""
                   ,
                     match: /^DOCKER_CERT_PATH=.*/
                     replace: "DOCKER_CERT_PATH=\"#{docker.conf_dir}/certs.d\""
@@ -77,13 +73,13 @@ Skip Pakage installation, if provided by external deploy tool.
       , ->
         @file.download
           source: @config.ryba.ssl?.cacert
-          target: ssl.cacert
+          target: docker.ssl.cacert
         @file.download
           source: @config.ryba.ssl?.cert
-          target: ssl.cert
+          target: docker.ssl.cert
         @file.download
           source: @config.ryba.ssl?.key
-          target: ssl.key
+          target: docker.ssl.key
 
 ## Install docker-pid
 
