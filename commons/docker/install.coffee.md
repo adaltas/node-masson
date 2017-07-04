@@ -3,6 +3,14 @@
 
     module.exports = header: 'Docker Install', handler: (options) ->
       {docker} = @config
+
+## Identities
+
+Users who belong to the group will be allowed to write into docker sockets and,
+therefore, use docker commands
+
+      @system.group header: 'Identities', docker.group
+
 ## Install
 
 Install the `docker-io` package on Centos/REHL 6 or `docker` on Centos/REHL 7.
@@ -64,6 +72,20 @@ Skip Pakage installation, if provided by external deploy tool.
                     replace: "DOCKER_CERT_PATH=\"#{docker.conf_dir}/certs.d\""
                   ]
                   backup: true
+
+## Layout
+
+Open sockets to the docker group
+
+      @call header: 'Sockets permissions', ->
+        for socket in docker.sockets.unix
+          @system.chown
+            target: socket
+            uid: 'root'
+            gid: docker.group.name
+          @system.chmod
+            target: socket
+            mode: 0o660
 
 ## Download Certs
 

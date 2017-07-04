@@ -6,6 +6,8 @@
       options = @config.docker ?= {}
       options.nsenter ?= true
       options.conf_dir ?= '/etc/docker'
+      options.group ?= name: 'docker'
+      options.group = name: options.group if typeof options.group is 'string'
 
 ## How to configure
 Masson does configure mainly two part of the docker engine:
