@@ -54,8 +54,8 @@ Examples
         options.config.main.proxy = http_proxy_no_auth
         options.config.main.proxy_username = username
         options.config.main.proxy_password = password
-      if options.epel?.enabled
-        options.epel ?= {}
-        options.epel.url ?= 'http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm'
+      options.epel ?= {}
+      options.epel.enabled ?= false
+      if options.epel.enabled
         options.epel.source ?= null
-        options.epel.url = null if options.epel.source?
+        options.epel.url ?= 'http://download.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-9.noarch.rpm' if options.epel.source?
