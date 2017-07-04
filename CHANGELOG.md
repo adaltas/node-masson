@@ -5,6 +5,7 @@
 
 ## Version 0.1.5
 
+* fstab: add disk formating
 * krb5 client: fix wait for remote servers
 * krb5 server: fix realm init in non ha mode
 * mariadb: refactor prepare masson2
