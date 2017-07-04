@@ -23,6 +23,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
         if: iptables.action is 'start'
 
 ## User & groups
+
 By default the "mariadb-server/mysql-server" packages create the following entry:
 
 ```bash
