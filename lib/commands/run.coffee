@@ -57,9 +57,10 @@ module.exports = ->
       process.exit()
     hostlength = 20
     for s in config.nodes then hostlength = Math.max(hostlength, (s.shortname or s.host).length+2)
-    multihost = params.hosts?.length isnt 1 and config.nodes.length isnt 1
-    times = {}
+    # multihost = params.hosts?.length isnt 1 and config.nodes.length isnt 1
+    # Disable mono host mode
     multihost = true
+    times = {}
     init()
     for k, v of config.styles
       styles[k] = if typeof v is 'string' then colors[v] else v
