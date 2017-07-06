@@ -9,7 +9,6 @@
     "type": "git",
     "url": "git://github.com/adaltas/node-masson.git"
   },
-  "homepage": "https://github.com/adaltas/node-masson",
   "license": "BSD-3-Clause",
   "keywords": [
     "deployment",
@@ -43,6 +42,7 @@
     "parameters": "~0.1.6",
     "regexp-quote": "~0.0.0",
     "request": "~2.81.0",
+    "rimraf": "^2.6.1",
     "semver": "~5.3.0",
     "ssh2-connect": "~1.0.2",
     "ssh2-exec": "~0.3.5",
