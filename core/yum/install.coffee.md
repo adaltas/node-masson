@@ -72,14 +72,15 @@ property "yum.epel" to false.
         epel_rpm_tmp = '/tmp/epel-release.rpm'
         @call
           if: options.epel.url?
+          unless_exec: 'rpm -qa | grep epel-release'
           timeout: 100000
         , ->
           @file.download
             source: options.epel.url
             target: epel_rpm_tmp
+            shy: true
           @system.execute
             cmd: "rpm -Uvh #{epel_rpm_tmp}" 
-            unless_exec: 'rpm -qa | grep epel-release'
           @system.remove
             target: epel_rpm_tmp
             shy: true
