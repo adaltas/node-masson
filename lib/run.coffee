@@ -7,7 +7,7 @@ each = require 'each'
 {EventEmitter} = require 'events'
 Module = require 'module'
 {merge} = require 'nikita/lib/misc'
-
+rimraf = require 'rimraf'
 tsort = require 'tsort'
 nikita = require 'nikita'
 constraints = require './constraints'
@@ -156,57 +156,106 @@ Run::exec = (params='install') ->
   services = @config.services
   engine = require('nikita/lib/core/kv/engines/memory')()
   tag_hosts = {}
+  # implement Masson run log archive
+  log = @contexts[0].config.log ?= {}
+  log.basedir ?= './log'
+  log.basedir = path.resolve process.cwd(), log.basedir
+  cmddir = path.join log.basedir, params.command
+  log.rotate ?= false
+  rotate_size = if log.rotate is true then 10 else log.rotate
+  log.archive ?= false
+  if log.archive
+    now = new Date()
+    dateformat = "#{now.getFullYear()}-#{('0'+now.getMonth()).slice -2}-#{('0'+now.getDate()).slice -2}"
+    dateformat += " #{('0'+now.getHours()).slice -2}-#{('0'+now.getMinutes()).slice -2}-#{('0'+now.getSeconds()).slice -2}"
+    log.basedir = path.join log.basedir, params.command
+    log.basedir = path.join log.basedir, dateformat
+  # creates relative symlink <log>/latest -> <log>/<command>/<date>
+  logdir_latest = path.join log.basedir, '../../'
+  # creates relative symlink <log>/<command>/latest -> <log>/<command>/<date>
+  logdir_latest_command = path.join log.basedir, '../'
   for k, v of @config.nodes
     tag_hosts[k] = v.tags
+  files = []
   fs.readFile "./.masson_history_#{params.command}", 'utf8', (err, history) =>
     throw err if err and not err.code is 'ENOENT'
     history = (history or '').split '\n'
     historyws = fs.createWriteStream "./.masson_history_#{params.command}", flags: unless params.resume then 'w' else 'a'
-    each @contexts
-    .parallel true
-    .call (context, callback) ->
-      return callback() if params.hosts and multimatch(context.config.host, params.hosts).length is 0
-      # if AT LEAST ONE tag match, we continue, else we exit (callback call)
-      if params.tags
-        match = false
-        for tag in params.tags
-          [key, value] = tag.split '='
-          if key and value
-            match = true if value is tag_hosts[context.config.host][key]
-        return callback() unless match
-      error = false
-      context.kv.engine engine: engine
-      context.log.cli host: context.config.host, pad: host: 20, header: 60
-      context.log.md basename: context.config.shortname
-      context.ssh.open context.config.ssh, host: context.config.ip or context.config.host unless params.command is 'prepare'
-      context.call ->
-        for id, i in context.services then do (id, i) =>
-          if_resume = ->
-            ! (params.resume and "#{context.config.shortname},#{id},#{i}" in history)
-          service = services[id]
-          return if !service.required and params.modules and multimatch(service.module, params.modules).length is 0
-          try
-            if service.commands['']
-              @call service.commands[''], if: if_resume, (err) ->
-                console.log 'ERROR', context.config.host, id, err if err
-                error = true if err
-            if service.commands[params.command] 
-              @call service.commands[params.command], if: if_resume, (err) ->
-                console.log 'ERROR', context.config.host, id, err if err
-                error = true if err
-            @call ->
-              historyws.write "#{context.config.shortname},#{id},#{i}\n"
-          catch err
-            console.log 'ERROR', context.config.host, id, err if err
-            error = true
-            throw err
-      context.then (err) ->
-        @ssh.close() if params.end
-        console.log 'ERROR', err if err and not error
+    nikita
+    .call
+      if: log.rotate? and log.archive
+      if_exists: cmddir
+    , (_, cb) ->
+      fs.readdir cmddir, (err, current_files) =>
+        err = null if err?.code is 'ENOENT'
+        files = current_files unless err
+        cb err, true
+    .call
+      if_exists: cmddir
+      if: -> (files.length > rotate_size) and log.archive
+    , (_, callback)->
+        @each [0...(files.length-rotate_size)], (opts, cb) ->
+          rimraf  (path.join "#{cmddir}", files[opts.key]), (err) ->
+            cb err
         @then callback
+    # create the path every time
+    .system.mkdir
+      target: log.basedir
+    .system.link
+      if: log.archive
+      source: path.relative logdir_latest, path.resolve log.basedir
+      target: path.join logdir_latest, 'latest'
+    .system.link
+      if: log.archive
+      source: path.relative logdir_latest_command, path.resolve log.basedir
+      target: path.join logdir_latest_command, 'latest'
     .then (err) =>
-      historyws.end()
-      @emit 'end'
+      throw err if err
+      each @contexts
+      .parallel true
+      .call (context, callback) ->
+        return callback() if params.hosts and multimatch(context.config.host, params.hosts).length is 0
+        # if AT LEAST ONE tag match, we continue, else we exit (callback call)
+        if params.tags
+          match = false
+          for tag in params.tags
+            [key, value] = tag.split '='
+            if key and value
+              match = true if value is tag_hosts[context.config.host][key]
+          return callback() unless match
+        error = false
+        context.kv.engine engine: engine
+        context.log.cli host: context.config.host, pad: host: 20, header: 60
+        context.log.md basename: context.config.shortname, basedir: log.basedir, archive: false
+        context.ssh.open context.config.ssh, host: context.config.ip or context.config.host unless params.command is 'prepare'
+        context.call ->
+          for id, i in context.services then do (id, i) =>
+            if_resume = ->
+              ! (params.resume and "#{context.config.shortname},#{id},#{i}" in history)
+            service = services[id]
+            return if !service.required and params.modules and multimatch(service.module, params.modules).length is 0
+            try
+              if service.commands['']
+                @call service.commands[''], if: if_resume, (err) ->
+                  console.log 'ERROR', context.config.host, id, err if err
+                  error = true if err
+              if service.commands[params.command] 
+                @call service.commands[params.command], if: if_resume, (err) ->
+                  console.log 'ERROR', context.config.host, id, err if err
+                  error = true if err
+              @call ->
+                historyws.write "#{context.config.shortname},#{id},#{i}\n"
+            catch err
+              console.log 'ERROR', context.config.host, id, err if err
+              error = true
+              throw err
+        context.then (err) ->
+          @ssh.close() if params.end
+          console.log 'ERROR', err if err and not error
+          @then callback
+      .then (err) =>
+        historyws.end()
+        @emit 'end'
   @
 
 module.exports = (params, config) ->
