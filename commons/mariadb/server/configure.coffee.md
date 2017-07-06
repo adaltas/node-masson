@@ -1,5 +1,5 @@
 
-# Mysql Server Configure
+# MariaDB Server Configure
 
 *   `sql_on_install` (array|string)
 *   `current_password` (string)

@@ -1,5 +1,5 @@
 
-# Mysql Server Check
+# MariaDB Server Check
 
     module.exports = header: 'MariaDB Server Check', handler: (options) ->
       {iptables} = @config

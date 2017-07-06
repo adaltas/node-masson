@@ -1,5 +1,6 @@
-options
-# Mysql Server Replication
+
+# MariaDB Server Replication
+
 Enable the replication.
 Follow [instructions](https://www.digitalocean.com/community/tutorials/how-to-set-up-master-slave-replication-in-mysql).
 

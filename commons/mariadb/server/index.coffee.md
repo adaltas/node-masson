@@ -1,5 +1,5 @@
 
-# Mysql Server
+# MariaDB Server
 
 TODO: https://dev.mysql.com/doc/refman/5.7/en/mysql-cluster.html
 
