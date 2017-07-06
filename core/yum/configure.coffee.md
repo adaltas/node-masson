@@ -58,4 +58,5 @@ Examples
       options.epel.enabled ?= false
       if options.epel.enabled
         options.epel.source ?= null
-        options.epel.url ?= 'http://download.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-9.noarch.rpm' if options.epel.source?
+        options.epel.url ?= 'http://download.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-9.noarch.rpm' unless options.epel.source?
+        options.epel.url = null if options.source? and options.url?
