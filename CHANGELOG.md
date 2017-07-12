@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* docker: refresh config and add devicemapper
 * log: add massson log archive
 * java: comment java 1.7
 * run: allow filtering by tags

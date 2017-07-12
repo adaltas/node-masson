@@ -20,19 +20,23 @@ setup TLS, sockets etc. Configuration which are mandatory if you want to use doc
     module.exports =
       use:
         iptables: implicit: true, module: 'masson/core/iptables'
+        ssl: implicit: true, module: 'masson/core/ssl'
       configure:
         'masson/commons/docker/configure'
       commands:
-        'install':
-          [
-            'masson/commons/docker/install'
-            'masson/commons/docker/start'
-          ]
-        'prepare':
-          'masson/commons/docker/prepare'
-        'start':
-          'masson/commons/docker/start'
-        'status':
-          'masson/commons/docker/status'
-        'stop':
-          'masson/commons/docker/stop'
+        'install': ->
+          options = @config.docker
+          @call 'masson/commons/docker/install', options
+          @call 'masson/commons/docker/start', options
+        'prepare': ->
+          options = @config.docker
+          @call 'masson/commons/docker/prepare', options
+        'start': ->
+          options = @config.docker
+          @call 'masson/commons/docker/start', options
+        'status': ->
+          options = @config.docker
+          @call 'masson/commons/docker/status', options
+        'stop': ->
+          options = @config.docker
+          @call 'masson/commons/docker/status', options
