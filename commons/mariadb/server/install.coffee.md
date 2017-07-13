@@ -20,7 +20,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
         rules: [
           { chain: 'INPUT', jump: 'ACCEPT', dport: options.server.my_cnf['mysqld']['port'], protocol: 'tcp', state: 'NEW', comment: "MariaDB" }
         ]
-        if: iptables.action is 'start'
+        if: @has_service('masson/core/iptables') and iptables.action is 'start'
 
 ## User & groups
 
