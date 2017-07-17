@@ -43,6 +43,6 @@ testsaslauthd -u user@ad.example.com -p wrongpassword
 ```
 
       @execute
-        header: "Cmd testsaslauthd"
+        header: 'Cmd testsaslauthd'
         if: saslauthd.check.username
         cmd: "testsaslauthd -u #{saslauthd.check.username} -p #{saslauthd.check.password}"

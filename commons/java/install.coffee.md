@@ -60,7 +60,7 @@ have been copied or not (in case they already exist).
             .map (abs) -> "#{path.basename abs}" 
         @system.mkdir java.jdk.root_dir
         @service.install
-          header: "Dependency unzip"
+          header: 'Dependency unzip'
           if: Object.keys(java.jdk.versions).length
           name: 'unzip'
         @each java.jdk.versions, (options, callback) ->

@@ -37,7 +37,7 @@ root       soft    nproc     unlimited
 
       @system.limits merge
         header: "Global System Limits"
-        target: "/etc/security/limits.conf"
+        target: '/etc/security/limits.conf'
         backup: true
         system: true
       , system.limits

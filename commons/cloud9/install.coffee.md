@@ -13,11 +13,11 @@ Download source code from github.
 
       @tools.git
         source: cloud9.github
-        target: "/usr/lib/cloud9"
+        target: '/usr/lib/cloud9'
 
 Run package installation.
 
       # TODO: detect previous install of sm
       @system.execute
-        cmd: "sm install"
-        cwd: "/usr/lib/cloud9"
+        cmd: 'sm install'
+        cwd: '/usr/lib/cloud9'

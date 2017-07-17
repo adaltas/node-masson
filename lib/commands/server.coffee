@@ -20,9 +20,9 @@ module.exports.start = ->
   echo $! > conf/server.pid
   """, (err) ->
     if err
-      console.error "HTTP Server Not Started"
+      console.error 'HTTP Server Not Started'
       process.exit 1
-    console.log "HTTP Server Started"
+    console.log 'HTTP Server Started'
     process.exit 0
       
 module.exports.stop = ->
@@ -38,12 +38,12 @@ module.exports.stop = ->
   rm -f conf/server.pid
   """, (err, stdout, stderr) ->
     if err?.code is 2
-      console.error "HTTP Server Already Stopped"
+      console.error 'HTTP Server Already Stopped'
       process.exit 1
     else if err
-      console.error "HTTP Server Kill Failed"
+      console.error 'HTTP Server Kill Failed'
       process.exit 1
-    console.log "HTTP Server Stopped"
+    console.log 'HTTP Server Stopped'
     process.exit 0
     
 module.exports.status = ->

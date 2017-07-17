@@ -233,7 +233,7 @@ remote access, docker exec is the current recommended approach.
         cmd: """
         docker run -v /usr/local/bin:/target jpetazzo/nsenter
         """
-        unless_exec: "which nsenter"
+        unless_exec: 'which nsenter'
 
 ## Registry 2.0
 
@@ -251,7 +251,7 @@ Compose is a tool for defining and running multi-container Docker applications.
       @file.download
         header: 'Docker Compose'
         source: "#{@config.nikita.cache_dir}/docker-compose"
-        target: "/usr/local/bin/docker-compose"
+        target: '/usr/local/bin/docker-compose'
         local: true
         unless_exec: 'which docker-compose'
       @system.chmod

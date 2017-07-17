@@ -44,7 +44,7 @@ contains the following properties:
 
       toUrl = (secure, auth) =>
         opts = if secure then options.secure else options
-        scheme = if secure then "https" else 'http'
+        scheme = if secure then 'https' else 'http'
         url = "#{scheme}://"
         if auth
           url = "#{url}#{opts.username}" if opts.username

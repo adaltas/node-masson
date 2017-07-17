@@ -29,7 +29,7 @@ docker exec -it -u postgres postgres_server psql
         ]
         'prepare':
           'masson/commons/postgres/server/prepare'
-        "start":
+        'start':
           'masson/commons/postgres/server/start'
-        "stop":
+        'stop':
           'masson/commons/postgres/server/stop'

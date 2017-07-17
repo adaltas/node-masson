@@ -13,7 +13,7 @@ module.exports = parameters
   ]
   commands: [
     name: 'help'
-    description: "Print this help and exit"
+    description: 'Print this help and exit'
     main:
       name: 'subcommand'
       description: 'Print the help relative to the command'
@@ -42,7 +42,7 @@ module.exports = parameters
   ]
   ,
     name: 'tree'
-    description: "Print the execution plan"
+    description: 'Print the execution plan'
     options: [
       name: 'run', shortcut: 'r'
       description: 'Run list holding the list of modules'
@@ -60,7 +60,7 @@ module.exports = parameters
     ]
   ,
     name: 'server'
-    description: "Print the execution plan"
+    description: 'Print the execution plan'
     options: [
       name: 'action', shortcut: 'a'
       description: 'Run list holding the list of modules'

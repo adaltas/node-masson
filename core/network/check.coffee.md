@@ -102,7 +102,7 @@ the executed command is `hostname --fqdn`.
       @system.execute
         header: 'Hostname'
         label_true: 'CHECKED'
-        cmd: "hostname --fqdn"
+        cmd: 'hostname --fqdn'
         shy: true
       , (err, _, stdout) ->
         throw err if err

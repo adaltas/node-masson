@@ -7,9 +7,9 @@
 
       @call header: 'Packages', ->
         @service
-          name: "openssh-server"
+          name: 'openssh-server'
         @service
-          name: "openssh-clients"
+          name: 'openssh-clients'
 
 ## Authorized Keys
 
