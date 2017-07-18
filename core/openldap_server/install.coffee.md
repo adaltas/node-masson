@@ -179,7 +179,7 @@ discovered at runtime based on the OS release.
             header: 'Suffix'
             unless_exec: """
             ldapsearch -Y EXTERNAL -H ldapi:/// \
-              -b "olcDatabase={2}hdb,cn=config" \
+              -b "olcDatabase={2}#{bdb},cn=config" \
             | grep -E "olcSuffix: #{openldap_server.suffix}"
             """
             cmd: """
