@@ -46,7 +46,7 @@ Skip Pakage installation, if provided by external deploy tool.
       @call header: 'Configuration', ->
         opts = []
         opts.push "--#{k}=#{v}" for k,v of options.other_args
-        opts.push '--tlsverify' if options.ssl?
+        opts.push '--tlsverify' if options.ssl.enabled
         for type, socketPaths of options.sockets
           opts.push "-H #{type}://#{path}" for path in socketPaths
         if options.block_device
@@ -100,7 +100,7 @@ Skip Pakage installation, if provided by external deploy tool.
 ## Download Certs
 
       @call
-        if: -> options.ssl?
+        if: -> options.ssl.enabled
         header: 'SSL Layout'
       , ->
         @file.download

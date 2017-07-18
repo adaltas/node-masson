@@ -76,7 +76,7 @@ are added docker `@config.docker` object, so it can be used in nikita docker act
 
       options.ssl ?= ssl
       # ptions.ssl.enabled ?= false
-      if options.ssl
+      if options.ssl.enabled
       # if options.ssl.enabled
         throw Error "Required Option: ssl.cert" if  not options.ssl.cert
         throw Error "Required Option: ssl.key" if not options.ssl.key
