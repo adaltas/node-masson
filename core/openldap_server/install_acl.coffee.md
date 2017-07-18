@@ -3,7 +3,6 @@
 
     module.exports = header: 'OpenLDAP Server ACL', handler: ->
 
-      
 After this call, the follwing command should execute with success:
 
 ```bash
@@ -63,5 +62,3 @@ ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=co
           binddn: openldap_server.root_dn
           passwd: openldap_server.root_password
           entry: openldap_server.proxy_group
-
-      

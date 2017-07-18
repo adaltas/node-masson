@@ -146,7 +146,7 @@ Note: For Now Ryba does not support automatic discovery for more than 2 master.
       options.server.my_cnf['mysqld']['innodb_log_buffer_size'] ?= '8M'
       options.server.my_cnf['mysqld']['innodb_flush_log_at_trx_commit'] ?= '1'
       options.server.my_cnf['mysqld']['innodb_lock_wait_timeout'] ?= '50'
-      
+
 ### SSL
 
       options.ssl ?= ssl
@@ -183,23 +183,22 @@ Note: For Now Ryba does not support automatic discovery for more than 2 master.
       options.server.my_cnf['mysqlhotcopy']['interactive-timeout'] ?= ''
 
 ## Client
-      
+
       options.server.my_cnf['client'] ?= {}
       options.server.my_cnf['client']['socket'] ?= options.server.my_cnf['mysqld']['socket']
 
 ## Safe
-      
+
       options.server.my_cnf['mysqld_safe'] ?= {}
       options.server.my_cnf['mysqld_safe']['pid-file'] = options.server.my_cnf['mysqld']['pid-file']
 
 ## Repo
-      
+
       options.repo ?= {}
       options.repo.source ?= null
       options.repo.target ?= 'mariadb.repo'
       options.repo.target = path.resolve '/etc/yum.repos.d', options.repo.target
       options.repo.replace ?= 'mariadb*'
-
 
 ## Dependencies
 

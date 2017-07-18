@@ -13,4 +13,3 @@
       commands:
         'install':
           'masson/core/system/install'
-          

@@ -4,6 +4,7 @@
     module.exports = header: 'FSTAB Install', handler: (options) ->
 
 ## Prepare Disks
+
 Format disks and update the fstab.volumes variables with devices names
 
       @call
@@ -30,8 +31,6 @@ Format disks and update the fstab.volumes variables with devices names
             group: disk.user
             mode: disk.mode
           @then callback
-        
-        
 
 ## Write fstab & Mount volume
 

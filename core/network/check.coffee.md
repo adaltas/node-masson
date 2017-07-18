@@ -14,7 +14,7 @@ be started before checking the forward and reverse dns of the server.
 Dig isn't available by default on CentOS and is installed by the 
 "masson/core/bind_client" dependency.
 
-    
+
     module.exports = header: 'Network Check', handler: (options) ->
 
 ## Check DNS Forward Lookup

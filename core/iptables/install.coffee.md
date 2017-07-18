@@ -1,5 +1,5 @@
 
-## Iptables Install
+# Iptables Install
 
 ## Package
 
@@ -7,7 +7,7 @@ The package "iptables" is installed.
 
     module.exports = header: 'Iptables Install', handler: (options) ->
       {action, startup} = @config.iptables
-      
+
       @service
         name: 'iptables'
         startup: startup

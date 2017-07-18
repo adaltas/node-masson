@@ -27,5 +27,3 @@ module.exports = ->
           module = action.module
           util.print "\x1b[32m#{module}\x1b[39m\n" if module and actions.length
         util.print "  #{action.name or action.id}\n" unless action.hidden
-
-    

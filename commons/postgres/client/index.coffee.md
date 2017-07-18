@@ -1,14 +1,14 @@
 
-# PostgreSQL
+# PostgreSQL Client
 
-Install the PotsgreSQL command-line tool.
+Install the PostgreSQL command-line tool.
 
     module.exports = ->
       'install': handler: ->
 
 ## Package
 
-Install the Mysql client.
+Install the PostgreSQL client.
 
         @service
           header: 'PostgreSQL Package'
@@ -16,7 +16,7 @@ Install the Mysql client.
 
 ## Connector
 
-Install the Mysql JDBC driver.
+Install the PostgreSQL JDBC driver.
 
         @service
           header: 'PostgreSQL Connector'

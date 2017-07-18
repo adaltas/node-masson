@@ -1,4 +1,4 @@
-  
+
 path = require 'path'
 fs = require 'fs'
 {merge} = require './misc'

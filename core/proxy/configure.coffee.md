@@ -7,9 +7,8 @@ contains the following properties:
 *   `system` (boolean|string)
     Should the proxy environment variable be written inside the
     system-wide "/etc/profile.d" directory. Default to false. A string value
-    defines the path where to place a shell script to export
-    proxy environmental variables, or it will default to 
-    "proxy.sh". Unless absolute, the path will 
+    defines the path where to place a shell script to export proxy environmental
+    variables, or it will default to "proxy.sh". Unless absolute, the path will 
     be relative to "/etc/profile.d".
 *   `host`
     The proxy host, not required. The value will determine

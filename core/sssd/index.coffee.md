@@ -1,7 +1,7 @@
 
 # SSSD Intall
 
-    module.exports = 
+    module.exports =
       use:
         yum:  module: 'masson/core/yum'
         openldap_client: 'masson/core/openldap_client'
@@ -16,4 +16,3 @@
         'start': 'masson/core/sssd/start'
         'status': 'masson/core/sssd/status'
         'stop': 'masson/core/sssd/stop'
-

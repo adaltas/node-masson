@@ -3,7 +3,6 @@
 
     module.exports = header: 'LVM Install', handler: ->
       {system} = @config
-      
 
 ## Initialize physical volume
 

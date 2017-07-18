@@ -5,7 +5,7 @@ TODO: https://dev.mysql.com/doc/refman/5.7/en/mysql-cluster.html
 
     module.exports =
       use:
-        iptables: module: 'masson/core/iptables' #implicit: true, 
+        iptables: module: 'masson/core/iptables' #implicit: true,
       configure:
         'masson/commons/mysql/server/configure'
       commands:

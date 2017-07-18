@@ -63,7 +63,7 @@ Example:
       sssd = @config.sssd ?= {}
       # sssd.certificates ?= []
       sssd.merge ?= false
-      
+
 ## Identities
 
       # Group
@@ -108,8 +108,6 @@ Example:
 
 The System Security Services Daemon (SSSD) provides access to different
 identity and authentication providers.
-      
-      
 
 ## Clean "sssd" Cache
 

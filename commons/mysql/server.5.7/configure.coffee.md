@@ -31,7 +31,6 @@ provision their databases and user access.
     module.exports = ->
       mysql = @config.mysql ?= {}
       mysql.server ?= {}
-        
 
 ## Environnment
 

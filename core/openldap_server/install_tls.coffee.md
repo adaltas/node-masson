@@ -443,13 +443,13 @@ Register the SSL support into the system configuration located inside the
 "/etc/sysconfig" directory.
 
       @call if_os: name: ['centos', 'redhat', 'oracle'], version: '6', ->
-        write.push 
+        write.push
           match: /^SLAPD_LDAPS.*/mg
           replace: 'SLAPD_LDAPS=yes'
           append: true
         sysconfig_file = '/etc/sysconfig/ldap'
       @call if_os: name: ['centos', 'redhat', 'oracle'], version: '7', ->
-        write.push 
+        write.push
           match: /^SLAPD_URLS.*/mg
           replace: "SLAPD_URLS=\"#{openldap_server.urls.join ' '}\""
           append: true

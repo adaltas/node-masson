@@ -2,7 +2,7 @@
 # Docker Configure
 
     module.exports = ->
-      ctx_iptables = @contexts('masson/core/iptables').filter (ctx) => ctx.config.host is @config.host 
+      ctx_iptables = @contexts('masson/core/iptables').filter (ctx) => ctx.config.host is @config.host
       {ssl} = @config
       options = @config.docker ?= {}
       options.nsenter ?= true
@@ -11,7 +11,7 @@
       options.group = name: options.group if typeof options.group is 'string'
 
 ## Repo
-      
+
       options.repo ?= {}
       options.repo.source ?= null
       options.repo.target ?= '/etc/yum.repos.d/docker-ce.repo'
@@ -128,7 +128,6 @@ Example
       #   'dm.thinpooldev': "/dev/mapper/#{options.vg_name}-#{options.thin_pool_name}"
       #   'dm.use_deferred_removal': true
       # options.env['DOCKER_STORAGE_OPTIONS'] ?= 
-      
 
 [socket-opts]:(https://docs.docker.com/engine/reference/commandline/dockerd/#/daemon-socket-option)
 [daemon-opts-resources]:(https://github.com/moby/moby/issues/21701)

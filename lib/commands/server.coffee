@@ -6,7 +6,7 @@ params = require '../params'
 module.exports = ->
   params = params.parse()
   module.exports[params.action]()
-      
+
 module.exports.start = ->
   bin = require.resolve 'http-server/bin/http-server'
   exec """
@@ -24,7 +24,7 @@ module.exports.start = ->
       process.exit 1
     console.log 'HTTP Server Started'
     process.exit 0
-      
+
 module.exports.stop = ->
   exec """
   set -e
@@ -45,7 +45,7 @@ module.exports.stop = ->
       process.exit 1
     console.log 'HTTP Server Stopped'
     process.exit 0
-    
+
 module.exports.status = ->
   exec """
   set -e
@@ -60,4 +60,3 @@ module.exports.status = ->
     else
       console.error "HTTP Server Started"
       process.exit 0
-  

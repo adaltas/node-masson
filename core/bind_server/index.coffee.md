@@ -6,7 +6,7 @@ Domain Name System (DNS) server, part of the BIND 9 distribution f
 rom ISC.
 
     module.exports =
-      use: 
+      use:
         iptables: implicit: true, module: 'masson/core/iptables'
         yum: module: 'masson/core/yum'
       configure:

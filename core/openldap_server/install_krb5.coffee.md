@@ -46,7 +46,7 @@ not allowed to be used for krb5 ldap containers.
         uri: true
         binddn: openldap_server.root_dn
         passwd: openldap_server.root_password
-        entry: 
+        entry:
           dn: "#{kerberos_dn}"
           objectClass: ['krbContainer']
 

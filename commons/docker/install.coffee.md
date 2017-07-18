@@ -40,7 +40,6 @@ Skip Pakage installation, if provided by external deploy tool.
         mount: '/var/run/docker'
         name: 'docker'
         perm: '0750'
-              
 
 ## Configuration
 
@@ -121,7 +120,7 @@ Skip Pakage installation, if provided by external deploy tool.
 For Production use, Docker should have its own devicemapper storage.
 Inspired from [docker storage setup][docker storage setup].
 [official doc](https://docs.docker.com/engine/userguide/storagedriver/device-mapper-driver/#configure-direct-lvm-mode-for-production)
-      
+
       @call
         header: 'Device Mapper'
         if: options.block_device?
@@ -182,10 +181,6 @@ Inspired from [docker storage setup][docker storage setup].
           cmd: """
             lvs -o+seg_monitor
           """
-          
-          
-          
-        
 
 ## Install docker-pid
 
@@ -243,7 +238,7 @@ share images and deploy them to testing, staging and production environments.
 
     #   @system.execute
     #     header: 'Registry 2.0'
-    #     cmd: "docker run -p 5000:5000 registry:2.0"    
+    #     cmd: "docker run -p 5000:5000 registry:2.0"
 
 ## Docker Compose
 Compose is a tool for defining and running multi-container Docker applications.

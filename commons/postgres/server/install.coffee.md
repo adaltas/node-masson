@@ -5,13 +5,12 @@
       {iptables, postgres} = @config
       tmp = postgres.image_dir ?= "/tmp_#{Date.now()}"
       md5 = postgres.md5 ?= true
-    
+
 ## IPTables
 
 | Service    | Port | Proto | Parameter |
 |------------|------|-------|-----------|
 | PostgreSQL | 5432 | tcp   | -         |
-
 
 IPTables rules are only inserted if the parameter "iptables.action" is set to
 "start" (default value).
@@ -22,7 +21,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
           { chain: 'INPUT', jump: 'ACCEPT', dport: postgres.server.port, protocol: 'tcp', state: 'NEW', comment: "PostgreSQL" }
         ]
         if: iptables.action is 'start'
-        
+
 ## Startup Script
 
       @service.init
@@ -61,7 +60,7 @@ Install the PostgreSQL database server.
             docker: if os.type in ['redhat','centos'] and os.release[0] is '6'
             then null
             else @config.docker #can not enable tls client verification centos/redhat6
-      
+
 ## Run Container
 
 Run the PostgreSQL server container

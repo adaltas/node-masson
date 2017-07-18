@@ -186,7 +186,7 @@ is running.
           local: options.ssl.cacert.local
           uid: options.server.user.name
           gid: options.server.group.name
-      
+
       @call header: 'Init data directory', handler: ->
         @system.execute
           cmd: "mysql_install_db --user=#{options.server.my_cnf['mysqld']['user']}  --datadir=#{options.server.my_cnf['mysqld']['datadir']}"
@@ -211,7 +211,7 @@ with the chosen params. Other action could be used to change the root password, 
 envrionment.
 The bug is fixed after version 5.7 of MariaDB.
 
-      @call 
+      @call
         header: 'Secure Installation'
         handler: ->
           {current_password, password, remove_anonymous, disallow_remote_root_login, remove_test_db, reload_privileges} = options.server
@@ -233,11 +233,11 @@ The bug is fixed after version 5.7 of MariaDB.
             match = /([0-9].){3}/.exec stdout
             version = match[0].split('.')[1] if match
             safe_start = not (version >= 7) or ((version <= 7) and options.server.my_cnf['mysqld']['socket'] is '/var/lib/mysql/mysql.sock')
-          @call 
+          @call
             header: 'Secure MariaDB'
             unless_exec: "#{db.cmd database, 'show databases'}"
             handler: ->
-              @call 
+              @call
                 if: -> safe_start
                 header: 'Configure Socket'
                 handler: ->

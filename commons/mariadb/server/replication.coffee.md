@@ -50,8 +50,7 @@ Grant privileges on the remote master server to the user used for replication.
 ## Setup Replication
 Gather the target master informations, then start the slave replication.
 
-        
-        @call 
+        @call
           header: 'Slave Setup'
           unless_exec: "#{db.cmd props, 'show slave status \\G'} | grep 'Master_Host' | grep '#{repl_master.host}'"
           handler: ->
@@ -78,7 +77,6 @@ Gather the target master informations, then start the slave replication.
                   MASTER_LOG_POS=#{master_pos} ;
                   START SLAVE ;
                 """
-              
 
 ## Dependencies
 

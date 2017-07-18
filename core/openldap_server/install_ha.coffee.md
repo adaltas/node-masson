@@ -4,7 +4,7 @@
     module.exports = header: 'OpenLDAP Server HA', handler: ->
       {openldap_server} = @config
       return unless Object.keys(openldap_server.server_ids).length > 1
-      
+
       @system.execute
         header: 'Module Install'
         unless_exec: """
@@ -20,7 +20,7 @@
         olcModuleLoad: syncprov.la
         EOF
         """
-        
+
       @system.execute
         header: 'Module Activation'
         unless_exec: """

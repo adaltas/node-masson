@@ -21,7 +21,7 @@ Wait connect action is used as a check n the port availability.
 
 ## Check Replication
 
-      @call 
+      @call
         header: 'Check Replication'
         if: options.ha_enabled
         handler: ->

@@ -171,7 +171,7 @@ If this is the first run, grab the temporary password from the log.
         password = / ([^ ]+)$/.exec(stdout)[1].trim() if status
 
 ## Mysql >5.7 Secure Root Password
-      
+
 Now we open a shell to change the password. Note, we can not pass the query as 
 a command argumet because it can not be run interractively.
 

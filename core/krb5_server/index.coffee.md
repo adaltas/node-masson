@@ -1,5 +1,5 @@
 
-## Kerberos Server
+# Kerberos Server
 
 Kerberos is a network authentication protocol. It is designed to provide strong
 authentication for client/server applications by using secret-key cryptography.

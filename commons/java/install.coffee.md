@@ -11,7 +11,7 @@ TODO: leverage /etc/alternative to switch between multiple JDKs.
 
     module.exports = header: 'JAVA Install', handler: ->
       {java} = @config
-      
+
 ## Install OpenJDK
 
       @service
@@ -57,7 +57,7 @@ have been copied or not (in case they already exist).
           stdout = '' unless executed
           installed_versions = (string.lines stdout.trim())
             .filter (out) -> out if /jdk(.*)/.exec out
-            .map (abs) -> "#{path.basename abs}" 
+            .map (abs) -> "#{path.basename abs}"
         @system.mkdir java.jdk.root_dir
         @service.install
           header: 'Dependency unzip'
@@ -110,10 +110,10 @@ have been copied or not (in case they already exist).
               target: "#{java.jdk.root_dir}/jdk#{version}/jre/lib/security/US_export_policy.jar"
             @system.remove "/tmp/#{path_name}", shy: true
           @then callback
-            
+
 ## Java Paths
 
-      @system.execute 
+      @system.execute
         header: 'Set JDK Version (default)'
         cmd: """
         if [ -L  "#{java.jdk.root_dir}/default" ] || [ -e "#{java.jdk.root_dir}/default" ] ; then 
@@ -133,7 +133,7 @@ have been copied or not (in case they already exist).
         """
         code_skipped: 3
         trap: true
-      @system.execute 
+      @system.execute
         header: 'Set JDK Version (latest)'
         cmd: """
         if [ -L  "#{java.jdk.root_dir}/latest" ] || [ -e "#{java.jdk.root_dir}/latest" ] ; then
@@ -153,7 +153,7 @@ have been copied or not (in case they already exist).
         """
         code_skipped: 3
         trap: true
-      @system.execute 
+      @system.execute
         header: 'Link Java home'
         unless: java.java_home is "#{java.jdk.root_dir}/default"
         cmd: """
@@ -189,7 +189,6 @@ have been copied or not (in case they already exist).
     path = require 'path'
     semver = require 'semver'
     string = require 'nikita/lib/misc/string'
-    
 
 ## Notes
 

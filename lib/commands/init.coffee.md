@@ -265,5 +265,3 @@ masson init \
         else if status
           rl.write 'Project initialized\n'
         rl.close()
-            
-              

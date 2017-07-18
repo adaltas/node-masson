@@ -68,7 +68,7 @@ Create a user principal for this host. The principal is named like
             kadmin_password: config.kadmin_password
             kadmin_server: config.admin_server
 
-## principals
+## Principals
 
 Populate the Kerberos database with new principals. The "wait" property is
 set to 10s because multiple instance of this handler may try to create the same
@@ -83,7 +83,6 @@ principals and generate concurrency errors.
       #         kadmin_password: config.kadmin_password
       #         kadmin_server: config.admin_server
       #       , principal
-      
       @call header: 'Principals', ->
         for realm, config of options.admin
           for principal in config.principals

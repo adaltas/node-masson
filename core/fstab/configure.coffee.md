@@ -59,5 +59,5 @@ Example 1 with format preparation
         throw Error "Invalid pass property for '#{mntpt}', please set to 0, 1, or 2" unless disk.pass in ['0', '1', '2']
 
 ## Dependencies
-    
+
     path = require 'path'

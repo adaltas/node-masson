@@ -6,8 +6,8 @@ installation, the web application will be accessible at the following URL:
 "http://localhost/ldap".
 
     module.exports = ->
-      'configure': 'masson/commons/phpldapadmin/configure'
-      'install': [
-        'masson/commons/httpd'
-        'masson/commons/phpldapadmin/install'
-      ]
+      use:
+        implicit: true, module: 'masson/commons/httpd'
+      configure: 'masson/commons/phpldapadmin/configure'
+      commands:
+        'install': 'masson/commons/phpldapadmin/install'

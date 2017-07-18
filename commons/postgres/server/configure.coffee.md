@@ -1,4 +1,5 @@
-# PostgreSQL Configure
+
+# PostgreSQL Server Configure
 
     module.exports = ->
       postgres = @config.postgres ?= {}

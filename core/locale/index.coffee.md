@@ -9,4 +9,3 @@
         'masson/core/ssh'
         'masson/core/locale/install'
       ]
-    

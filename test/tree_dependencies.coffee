@@ -67,7 +67,7 @@ describe 'tree dependencies', ->
           middlewares[0].should.have.properties name: 'middleware 2'
           middlewares[1].should.have.properties name: 'middleware 1'
           next()
-    
+
     it 'filter commands inside filtered out modules', (next) ->
       # We need to recompute module dependencies after module are filtered out
       # or the ordering may be wrong

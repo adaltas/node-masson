@@ -104,7 +104,6 @@ to wait for an available NTPD server.
         @service.stop 'ntpd'
         @system.execute "ntpdate #{ntp.servers[0]}"
         @service.start 'ntpd'
-      
 
 ## Module Dependencies
 

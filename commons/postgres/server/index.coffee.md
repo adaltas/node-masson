@@ -1,4 +1,5 @@
-# PostgreSQL
+
+# PostgreSQL Server
 
 PostgreSQL is a powerful, open source object-relational database system. 
 It has more than 15 years of active development and a proven architecture that
@@ -11,7 +12,6 @@ Run this command on the host to enter psql:
 ```
 docker exec -it -u postgres postgres_server psql
 ```
-
 
     module.exports =
       use:

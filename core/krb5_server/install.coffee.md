@@ -1,5 +1,5 @@
 
-## Kerberos Server Install
+# Kerberos Server Install
 
 Install the MIT Kerberos server with an OpenLDAP Back-End.
 
