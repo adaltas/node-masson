@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* yum: inject clean option from config and clean up
 * docker: refresh config and add devicemapper
 * log: add massson log archive
 * java: comment java 1.7

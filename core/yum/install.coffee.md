@@ -39,7 +39,7 @@ in "/etc/yum.repos.d"
         source: options.source
         update: options.update
         target: '/etc/yum.repos.d/centos.repo'
-        clean: 'CentOS*'
+        clean: options.clean
 
 ## Custom Repositories
 
@@ -60,10 +60,10 @@ Allow administrators to upload additional repos.
 
 ## Epel
 
-Install the Epel repository. This is by default activated and the repository is
-deployed by installing the "epel-release" package. It may also be installed from
-an url by defining the "yum.epel.url" property. To disable Epel, simply set the
-property "yum.epel" to false.
+Install the Epel repository. This is by default desactivated and the repository 
+is deployed by installing the "epel-release" package. It may also be installed 
+from an url by defining the "yum.epel.url" property. To activate Epel, simply 
+set the property "yum.epel.enabled" to "true".
 
       @call
         header: 'Epel'

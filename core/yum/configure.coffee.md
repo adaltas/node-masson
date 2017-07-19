@@ -22,41 +22,85 @@ Note, ntp is installed to encure correct date on the server or HTTPS will fail.
     key and mark it activate with the value. Default installed packages are
     "yum-plugin-priorities", "man" and "ksh".   
 
-Examples
+## Example - activate proxy and install the "git" package
 
 ```json
 {
-  "yum": {
-    "config": {
-      "proxy": null
-    },
-    "copy": "#{__dirname}/offline/*.repo"
+  "config": {
+    "proxy": "http://my.proxy:8080"
+  },
+  "packages": {
+    "git": true
   }
 }
 ```
 
+## Default Configurations
+
+```json
+{
+  "merge": true,
+  "config": {
+    "main": {
+      "keepcache": "0"
+    }
+  },
+  "proxy": false,
+  "source": null,
+  "update": true,
+  "clean": "CentOS*",
+  "epel": {
+    "enabled": false,
+    "url": "http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm",
+    "source": null
+  },
+  "packages": {
+    "yum-plugin-priorities": true,
+    "man": true,
+    "ksh": true
+  }
+}
+```
+
+## Source Code
+
     module.exports = ->
       options = @config.yum ?= {}
-      options.clean ?= false
-      options.copy ?= null
+
+## Configuration
+
       options.merge ?= true
-      options.update ?= true
-      options.proxy ?= true
       options.config ?= {}
       options.config.main ?= {}
       options.config.main.keepcache ?= '0'
-      options.packages ?= {}
-      options.packages['yum-plugin-priorities'] ?= true
-      options.packages['man'] ?= true
-      options.packages['ksh'] ?= true
+
+## Proxy Configuration
+
+      options.proxy ?= false
       {http_proxy_no_auth, username, password} = @config.proxy?
       if options.proxy
         options.config.main.proxy = http_proxy_no_auth
         options.config.main.proxy_username = username
         options.config.main.proxy_password = password
+
+## System Repository
+
+      options.source ?= null
+      options.update ?= true
+      options.clean ?= 'CentOS*'
+
+## Epel Repository
+
       options.epel ?= {}
       options.epel.enabled ?= false
-      if options.epel.enabled
+      if options.epel?.enabled
+        options.epel.url ?= 'http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm'
         options.epel.source ?= null
-        options.epel.url ?= 'http://download.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-9.noarch.rpm' unless options.epel.source?
-        options.epel.url = null if options.source? and options.url?
+        options.epel.url = null if options.epel.source?
+
+## Default Packages
+
+      options.packages ?= {}
+      options.packages['yum-plugin-priorities'] ?= true
+      options.packages['man'] ?= true
+      options.packages['ksh'] ?= true
