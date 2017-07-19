@@ -70,6 +70,14 @@ Package on Centos/Redhat 7 OS.
           uid: options.user.name
           gid: options.group.name
         @service
+          cmd: """
+          # Ensure one of the two command success
+          # We experienced situations where it wasn't the case
+          # in the first run leading to strange behaviors
+          yum info mysql-community-server || yum info mysql-server
+          """
+          shy:  true
+        @service
           header: 'Install'
           name: 'mysql-community-server'
           if_exec: 'yum info mysql-community-server'
@@ -90,6 +98,7 @@ Package on Centos/Redhat 7 OS.
 Write /etc/my.cnf configuration file.
 
       @file.ini
+        header: 'Configuration'
         target: '/etc/my.cnf'
         content: options.my_cnf
         stringify: misc.ini.stringify_single_key
