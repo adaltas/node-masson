@@ -226,7 +226,7 @@ Run::exec = (params='install') ->
         context.kv.engine engine: engine
         context.log.cli host: context.config.host, pad: host: 20, header: 60
         context.log.md basename: context.config.shortname, basedir: log.basedir, archive: false
-        context.ssh.open context.config.ssh, host: context.config.ip or context.config.host unless params.command is 'prepare'
+        context.ssh.open host: context.config.ip or context.config.host unless params.command is 'prepare'
         context.call ->
           for id, i in context.services then do (id, i) =>
             if_resume = ->

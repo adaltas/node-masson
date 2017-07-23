@@ -4,6 +4,7 @@
 ## Trunk
 
 * nginx: add nginx cookbook
+* ssh: move from global to nikita
 * yum: inject clean option from config and clean up
 * docker: refresh config and add devicemapper
 * log: add massson log archive
