@@ -1,13 +1,11 @@
 
-util = require 'util'
 each = require 'each'
 multimatch = require '../multimatch'
-connect = require 'ssh2-connect'
 exec = require 'ssh2-exec'
 {merge} = require '../misc'
 config = require '../config'
 params = require '../params'
-context = require '../context'
+nikita = require 'nikita'
 
 module.exports = ->
   params = params.parse()
@@ -17,9 +15,10 @@ module.exports = ->
     .parallel true
     .call (host, node, next) ->
       node.config ?= {}
+      node.config = merge {}, config.config, node.config
       return next() if params.hosts? and multimatch(node.config.host, params.hosts).indexOf(node.config.host) is -1
-      context [], params, node.services, merge {}, config.config, node.config
-      .ssh.open config.config.ssh , host: node.config.ip
+      nikita()
+      .ssh.open ssh: merge {}, node.config.nikita?.ssh, host: node.config.ip or node.config.host
       .call (options, callback) ->
         exec options.ssh, params.subcommand, (err, stdout, stderr) ->
           write if err
@@ -31,5 +30,6 @@ module.exports = ->
           write "\n"
           callback()
       .ssh.close()
+      .then next
     .then (err) ->
       # Done
