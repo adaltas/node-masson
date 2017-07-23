@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* package: lock file
 * nginx: add nginx cookbook
 * ssh: move from global to nikita
 * yum: inject clean option from config and clean up
