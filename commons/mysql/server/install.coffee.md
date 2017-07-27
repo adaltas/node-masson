@@ -44,13 +44,18 @@ Upload the YUM repository definitions files present in
 "options.copy" to the yum repository directory 
 in "/etc/yum.repos.d"
 
-      @tools.repo
-        if: options.repo?
-        header: 'Repo'
-        source: options.repo.source
-        update: options.repo.update
-        target: '/etc/yum.repos.d/mysql.repo'
-        clean: 'mysql*'
+      @call header: 'Repo', ->
+        @tools.repo
+          if: options.repo?
+          header: 'Repo'
+          source: options.repo.source
+          update: options.repo.update
+          target: '/etc/yum.repos.d/mysql.repo'
+          clean: 'mysql*'
+        @service.install
+          name: 'mysql-community-release'
+          unless: options.repo?
+          if_exec: 'yum info mysql-community-release'
 
 ## Package
 
@@ -58,9 +63,6 @@ Install the MySQL database server. Secure the temporary directory. Install Maria
 Package on Centos/Redhat 7 OS.
 
       @call header: 'Package', ->
-        @service.install
-          name: 'mysql-community-release'
-          if_exec: 'yum info mysql-community-release'
         @system.tmpfs
           header: 'TempFS pid'
           if_os: name: ['centos', 'redhat', 'oracle'], version: '7'

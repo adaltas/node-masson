@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* mysql server: fix repo installation
 * run: fix history file close
 * context: disable ssh auto connect
 * package: lock file
