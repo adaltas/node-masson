@@ -7,7 +7,6 @@
 * Set JAVA_HOME in the system profile
 
     module.exports =
-      Header: 'JAVA'
       configure:
         'masson/commons/java/configure'
       commands:

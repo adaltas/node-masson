@@ -6,12 +6,12 @@ Download the Oracle JDK.
     module.exports =
       header: 'Java Prepare'
       if: -> @contexts('masson/commons/java')[0]?.config.host is @config.host
+      ssh: null
       handler: ->
         {java} = @config
         for version, info of java.jdk.versions
           @file.cache
             header: "Oracle JDK #{version}"
-            ssh: null
             location: true
             headers: ['Cookie: oraclelicense=accept-securebackup-cookie']
             md5: info.md5
@@ -19,7 +19,6 @@ Download the Oracle JDK.
           , "#{info.jdk_location}"
           @file.cache
             header: "Oracle JCE #{version}"
-            ssh: null
             location: true
             headers: ['Cookie: oraclelicense=accept-securebackup-cookie']
             md5: info.md5
