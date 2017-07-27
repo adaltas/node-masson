@@ -208,8 +208,7 @@ Run::exec = (params='install') ->
       if: log.archive
       source: path.relative logdir_latest_command, path.resolve log.basedir
       target: path.join logdir_latest_command, 'latest'
-    .then (err) =>
-      throw err if err
+    .call (_, callback) =>
       each @contexts
       .parallel true
       .call (context, callback) ->
@@ -249,12 +248,13 @@ Run::exec = (params='install') ->
               error = true
               throw err
         context.then (err) ->
-          @ssh.close() if params.end
+          @ssh.close() if params.end and params.command isnt 'prepare'
           console.log 'ERROR', err if err and not error
-          @then callback
-      .then (err) =>
-        historyws.end()
-        @emit 'end'
+          callback err
+      .then callback
+    .then (err) =>
+      historyws.end()
+      @emit 'end'
   @
 
 module.exports = (params, config) ->

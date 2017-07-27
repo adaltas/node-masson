@@ -3,6 +3,8 @@
 
 ## Trunk
 
+* run: fix history file close
+* context: disable ssh auto connect
 * package: lock file
 * nginx: add nginx cookbook
 * ssh: move from global to nikita
