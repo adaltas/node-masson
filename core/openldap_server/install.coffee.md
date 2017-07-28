@@ -478,7 +478,7 @@ Enable ldapi:// access to root on our ldap tree
   # Add new olcAccess rule
   > olcAccess: {0}to *  by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=externa
   > l,cn=auth" manage  by * none
-  ldapsearch -LLLY EXTERNAL -H ldapi:/// -b dc=ryba 
+  ldapsearch -LLLY EXTERNAL -H ldapi:/// -b dc=ryba
 
 Resources:
 
