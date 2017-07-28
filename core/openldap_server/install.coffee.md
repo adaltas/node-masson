@@ -169,7 +169,10 @@ Usage and configuration of OpenLDAP monitoring is not clear, commented for now.
 The path of the bdb configuration file differ between RH6 and RH7. It is
 discovered at runtime based on the OS release.
 
-      @call header: 'DB bdb', handler: (options) ->
+      @call
+        header: 'DB bdb'
+        if: openldap_server.backend is 'hdb'
+      , (options) ->
         bdb = null
         @system.discover shy: true, (err, status, info) ->
           throw Error "Unsupported OS: #{JSON.stringify info.type}" unless info.type in ['centos', 'redhat']
@@ -220,6 +223,80 @@ discovered at runtime based on the OS release.
             password=`slappasswd -s #{openldap_server.root_password}`
             ldapmodify -c -Y EXTERNAL -H ldapi:/// <<-EOF
             dn: olcDatabase={2}#{bdb},cn=config
+            changetype: modify
+            replace: olcRootPW
+            olcRootPW: $password
+            EOF
+            """
+          @service.restart 'slapd', if: -> @status -1
+
+## DB mdb engine
+Set up the database with the mdb backend.
+
+      @call
+        header: 'DB mdb'
+        if: openldap_server.backend is 'mdb'
+      , (options) ->
+        @system.discover shy: true, (err, status, info) ->
+          throw Error "Unsupported OS: #{JSON.stringify info.type}" unless (info.type in ['centos', 'redhat']) and info.release[0] is '7'
+        @system.mkdir
+          target: openldap_server.db_dir
+          uid: openldap_server.user.name
+          gid: openldap_server.group.name
+        @call ->
+          @system.execute
+            header: 'Suffix'
+            unless_exec: """
+            ldapsearch -Y EXTERNAL -H ldapi:/// \
+              -b "olcDatabase={3}mdb,cn=config" \
+            | grep -E "olcSuffix: #{openldap_server.suffix}"
+            """
+            cmd: """
+            ldapadd -Y EXTERNAL -H ldapi:/// <<-EOF
+            dn: olcDatabase=mdb,cn=config
+            objectClass: olcDatabaseConfig
+            objectClass: olcMdbConfig
+            olcDbIndex: default pres,eq
+            olcDbIndex: uid
+            olcDbIndex: objectClass eq,pres
+            olcDbIndex: ou,cn,sn,mail,givenname eq,pres,sub
+            olcDbIndex: entryUUID eq,pres
+            olcDatabase: mdb
+            olcDbDirectory: #{openldap_server.db_dir}
+            olcDbMaxSize: #{openldap_server.db_max_size}
+            olcSuffix: #{openldap_server.suffix}
+            EOF
+            """
+          @system.execute
+            header: 'Root DN'
+            unless_exec: """
+            ldapsearch -Y EXTERNAL -H ldapi:/// \
+              -b "olcDatabase={3}mdb,cn=config" \
+            | grep -E "olcRootDN: #{openldap_server.root_dn}"
+            """
+            cmd: """
+            ldapmodify -Y EXTERNAL -H ldapi:/// <<-EOF
+            dn: olcDatabase={3}mdb,cn=config
+            changetype: modify
+            replace: olcRootDN
+            olcRootDN: #{openldap_server.root_dn}
+            EOF
+            """
+          @call (_, callback) ->  @system.execute
+            cmd: "ldapsearch -Y EXTERNAL -H ldapi:/// -b 'olcDatabase={3}mdb,cn=config'"
+          , (err, _, stdout) ->
+            return callback err if err
+            if match = /^olcRootPW: {SSHA}(.*)$/m.exec stdout
+              callback null, not check_password openldap_server.root_password, match[1]
+            else # First installation, password not yet defined
+              callback null, true
+          @system.execute
+            header: 'Root PW'
+            if: -> @status -1
+            cmd: """
+            password=`slappasswd -s #{openldap_server.root_password}`
+            ldapmodify -c -Y EXTERNAL -H ldapi:/// <<-EOF
+            dn: olcDatabase={3}mdb,cn=config
             changetype: modify
             replace: olcRootPW
             olcRootPW: $password
@@ -401,9 +478,15 @@ Enable ldapi:// access to root on our ldap tree
   # Add new olcAccess rule
   > olcAccess: {0}to *  by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=externa
   > l,cn=auth" manage  by * none
-  ldapsearch -LLLY EXTERNAL -H ldapi:/// -b dc=ryba
+  ldapsearch -LLLY EXTERNAL -H ldapi:/// -b dc=ryba 
 
 Resources:
 
 *   [How to fix "ldif_read_file: checksum error"](http://injustfiveminutes.com/2014/10/28/how-to-fix-ldif_read_file-checksum-error/)
 *   [script with just about everything](http://serverfault.com/questions/323497/how-do-i-configure-ldap-on-centos-6-for-user-authentication-in-the-most-secure-a)
+
+mdb backend resources:
+
+* [change-to-mdb](https://www.vincentliefooghe.net/content/openldap-changer-moteur-backend)
+* [openldap 2.4 admin guide](http://www.openldap.org/doc/admin24/guide.html)
+* [centos 7 mdb backend](http://blog.roeften.com/2015/03/openldap-24-on-centos-7-using-mdb.html)

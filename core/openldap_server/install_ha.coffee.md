@@ -3,6 +3,9 @@
 
     module.exports = header: 'OpenLDAP Server HA', handler: ->
       {openldap_server} = @config
+      db = switch openldap_server.backend
+        when 'mdb' then 'olcDatabase={3}mdb'
+        when 'hdb' then 'olcDatabase={2}hdb'
       return unless Object.keys(openldap_server.server_ids).length > 1
 
       @system.execute
@@ -29,7 +32,7 @@
         """
         cmd: """
         ldapadd -Y EXTERNAL -H ldapi:/// <<-EOF
-        dn: olcOverlay=syncprov,olcDatabase={2}hdb,cn=config
+        dn: olcOverlay=syncprov,#{db},cn=config
         objectClass: olcOverlayConfig
         objectClass: olcSyncProvConfig
         olcOverlay: syncprov
@@ -52,7 +55,7 @@
         replace: olcServerID
         olcServerID: #{serverId}
         
-        dn: olcDatabase={2}hdb,cn=config
+        dn: #{db},cn=config
         changetype: modify
         add: olcSyncRepl
         olcSyncRepl: rid=#{pad 3, serverId, '0'} 

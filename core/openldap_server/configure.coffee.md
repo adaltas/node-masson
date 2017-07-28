@@ -93,6 +93,21 @@ and should correspond to "openldap_server.config_password".
       openldap_server.proxy_group.gidNumber ?= '801'
       openldap_server.proxy_group.description ?= 'Network Service Switch Proxy'
 
+## Backend
+Select the backend for Openldap. It was originally bdb (Barkeley's DB), and moved to hdb.
+In Centos/RHEL it's by default hdb. However since openldap 2.4 the recommend backend is
+mdb (backend running inside slapd), which does provide the same functionalities than hdb
+but with better performances.
+
+Ryb does install hdb/bdb by default, but administrators can choose mdb.
+      
+      openldap_server.backend ?= 'hdb'
+      throw Error "Unsupported slapd backend #{openldap_server.backend}" unless openldap_server.backend in ['hdb','mdb']
+      if openldap_server.backend is 'mdb'
+        openldap_server.db_dir ?= "#{openldap_server.user.home}/mdb-db"
+        openldap_server.db_max_size ?= '1073741824'# 1 Gb
+      
+      
 ## Entries
 
 Provision users and groups
