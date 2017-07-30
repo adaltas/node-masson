@@ -49,7 +49,7 @@ Run = (params, @config) ->
   @setMaxListeners 100
   process.on 'uncaughtException', (err) =>
     @emit 'error', err
-  @config.config = merge {}, @config.config... if Array.isArray @config.config
+  # @config.config = merge {}, @config.config... if Array.isArray @config.config
   @config.services ?= {}
   @config.nodes ?= {}
   # Discover module inside parent project
@@ -64,6 +64,7 @@ Run = (params, @config) ->
   # Normalize nodes
   for id, node of @config.nodes
     node.id ?= id
+    node.nikita = merge null, @config.nikita, node.nikita
     node.config ?= {}
     node.config.host ?= id
     node.config.shortname ?= node.config.host.split('.')[0]
@@ -104,15 +105,12 @@ Run = (params, @config) ->
       node.services.push service_id
   # Merge global, node and service configuration
   for id, node of @config.nodes
-    config = {}
-    merge config, @config.config, node.config
     for service in node.services
-      merge config, @config.services[service].config
-    node.config = config
+      merge node.config, @config.services[service].config
   # Build Nikita context
   @contexts = []
   for id, node of @config.nodes
-    @contexts.push context @contexts, params, node.services, node.config
+    @contexts.push context @contexts, params, node.nikita, node.services, node.config
   # Configuration
   errors = []
   for service_id in service_ids

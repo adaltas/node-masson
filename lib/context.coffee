@@ -1,10 +1,10 @@
 
 nikita = require 'nikita'
 
-module.exports = (contexts, params, services, config) ->
+module.exports = (contexts, params, options, services, config) ->
   config.nikita ?= {}
   config.nikita.no_ssh = true
-  m = nikita config.nikita
+  m = nikita options
   m.params = params
   m.config = config
   m.services = services

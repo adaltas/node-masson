@@ -4,6 +4,7 @@
 ## Trunk
 
 * openldap: add mdb backend support
+* run: remove global configuration
 * mysql: client repo configuration
 * mysql server: fix repo installation
 * run: fix history file close
