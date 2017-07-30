@@ -29,21 +29,28 @@ provision their databases and user access.
     module.exports = ->
       @config.mysql ?= {}
       options = @config.mysql.server ?= {}
-      # Secure Installation
-      options.current_password ?= ''
       throw Error "Required Option: options.password" unless options.password
-      options.root_host ?= '%'
-      # Service Configuration
-      options.group ?= name: 'mysql'
+
+## Identities
+
+      # Group
+      options.group ?= {}
       options.group = name: options.group if typeof options.group is 'string'
-      options.my_cnf ?= {}
-      options.user ?= name: 'mysql'
+      options.group.name ?= 'mysql'
+      # User
+      options.user ?= {}
       options.user = name: options.user if typeof options.user is 'string'
+      options.user.name ?= 'mysql'
       options.user.home ?= "/var/lib/#{options.user.name}"
-      options.user.gid = options.group.name
+      options.user.gid ?= options.group.name
 
 ## Configuration
 
+      # Secure Installation
+      options.current_password ?= ''
+      options.root_host ?= '%'
+      # Main config file
+      options.my_cnf ?= {}
       options.my_cnf['mysqld'] ?= {}
       options.my_cnf['mysqld']['port'] ?= '3306'
       options.my_cnf['mysqld']['pid-file'] ?= '/var/run/mysqld/mysqld.pid'

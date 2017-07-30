@@ -43,11 +43,16 @@ provision their databases and user access.
 
 ## Identities
 
-      mysql.server.user ?= name: 'mysql'
-      mysql.server.user = name: mysql.server.user if typeof mysql.server.user is 'string'
-      mysql.server.user.home ?= "/var/lib/#{mysql.server.user.name}"
-      mysql.server.group ?= name: 'mysql'
-      mysql.server.group = name: mysql.server.group if typeof mysql.server.group is 'string'
+      # Group
+      options.group ?= {}
+      options.group = name: options.group if typeof options.group is 'string'
+      options.group.name ?= 'mysql'
+      # User
+      options.user ?= {}
+      options.user = name: options.user if typeof options.user is 'string'
+      options.user.name ?= 'mysql'
+      options.user.home ?= "/var/lib/#{options.user.name}"
+      options.user.gid ?= options.group.name
 
 ## Configuration
 

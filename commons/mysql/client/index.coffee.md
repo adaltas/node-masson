@@ -1,22 +1,10 @@
 
-# MySQL
+# MySQL client
 
 Install the MySQL command-line tool.
 
     module.exports =
+      use: 'masson/commons/mysql/server'
+      configure: 'masson/commons/mysql/client/configure'
       commands:
-        'install': header: 'MySQL Client', handler: (options) ->
-
-## Package
-
-Install the Mysql client.
-
-          @service.install 'mysql'
-
-## Connector
-
-Install the Mysql JDBC driver.
-
-          @service
-            header: 'Connector'
-            name: 'mysql-connector-java'
+        'install': 'masson/commons/mysql/client/install'
