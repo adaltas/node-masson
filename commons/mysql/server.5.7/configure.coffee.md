@@ -29,17 +29,20 @@ provision their databases and user access.
 ```
 
     module.exports = ->
-      mysql = @config.mysql ?= {}
-      mysql.server ?= {}
+      @config.mysql ?= {}
+      options = @config.mysql.server ?= {}
+
+## Validation
+
+      throw Error "Required Option: options.password" unless options.password
 
 ## Environnment
 
-      mysql.server.repo ?= false
-      mysql.server.current_password ?= ''
-      throw Error "Required Option: mysql.server.password" unless mysql.server.password
-      mysql.server.root_host ?= '%'
+      options.repo ?= false
+      options.current_password ?= ''
+      options.root_host ?= '%'
       # Service Configuration
-      mysql.server.my_cnf ?= {}
+      options.my_cnf ?= {}
 
 ## Identities
 
@@ -56,6 +59,6 @@ provision their databases and user access.
 
 ## Configuration
 
-      mysql.server.my_cnf['mysqld'] ?= {}
-      mysql.server.my_cnf['mysqld']['port'] ?= '3306'
-      mysql.server.my_cnf['mysqld']['pid-file'] ?= '/var/run/mysqld/mysqld.pid'
+      options.my_cnf['mysqld'] ?= {}
+      options.my_cnf['mysqld']['port'] ?= '3306'
+      options.my_cnf['mysqld']['pid-file'] ?= '/var/run/mysqld/mysqld.pid'

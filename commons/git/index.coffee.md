@@ -7,6 +7,8 @@ the "global" property is defined, the global property file
 in "/etc/gitconfig" will not be created or modified.
 
     module.exports =
+      use:
+        'proxy': module: 'masson/core/proxy'
       configure:
         'masson/commons/git/configure'
       commands:

@@ -24,8 +24,8 @@ contains the following properties:
     `password` property but used for secure https proxy. it
     default to the default http settings.
 
-    module.exports = (service) ->
-      options = {}
+    module.exports = ->
+      options = @config.proxy ?= {}
       options.system ?= "proxy.sh"
       options.system = path.resolve '/etc/profile.d', options.system if options.system
       options.host ?= null

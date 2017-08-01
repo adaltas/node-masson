@@ -2,7 +2,7 @@
 # Cloud9 Configure
 
     module.exports = ->
-      cloud9 = @config.cloud9 ?= {}
-      cloud9.path ?= '/usr/lib/cloud9'
-      cloud9.github ?= 'https://github.com/ajaxorg/cloud9.git'
-      cloud9.proxy ?= @config.proxy
+      options = @config.cloud9 ?= {}
+      options.path ?= '/usr/lib/cloud9'
+      options.github ?= 'https://github.com/ajaxorg/cloud9.git'
+      options.proxy ?= @config.proxy

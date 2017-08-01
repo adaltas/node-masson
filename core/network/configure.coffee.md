@@ -57,9 +57,9 @@ The module accept the following properties:
 
     module.exports = ->
       @config.hostname ?= @config.host
-      @config.network ?= {}
-      @config.network.hostname_disabled ?= false
-      @config.network.hosts_auto ?= false
       @config.shortname ?= @config.host.split('.')[0]
-      for host, server of @config.servers
-        server.shortname ?= server.host.split('.')[0]
+      options = @config.network ?= {}
+      options.hostname_disabled ?= false
+      options.hosts_auto ?= false
+      # for host, server of @config.servers
+      #   server.shortname ?= server.host.split('.')[0]

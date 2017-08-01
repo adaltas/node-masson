@@ -60,30 +60,29 @@ Example:
 ```
 
     module.exports = ->
-      sssd = @config.sssd ?= {}
-      # sssd.certificates ?= []
-      sssd.merge ?= false
+      options = @config.sssd ?= {}
+      options.merge ?= false
 
 ## Identities
 
       # Group
-      sssd.group = name: sssd.group if typeof sssd.group is 'string'
-      sssd.group ?= {}
-      sssd.group.name ?= 'sssd'
-      sssd.group.system ?= true
+      options.group = name: options.group if typeof options.group is 'string'
+      options.group ?= {}
+      options.group.name ?= 'sssd'
+      options.group.system ?= true
       # User
-      sssd.user = name: sssd.user if typeof sssd.user is 'string'
-      sssd.user ?= {}
-      sssd.user.name ?= 'sssd'
-      sssd.user.system ?= true
-      sssd.user.gid = 'sssd'
-      sssd.user.shell = false
-      sssd.user.comment ?= 'SSSD User'
-      sssd.user.home = '/'
+      options.user = name: options.user if typeof options.user is 'string'
+      options.user ?= {}
+      options.user.name ?= 'sssd'
+      options.user.system ?= true
+      options.user.gid = 'sssd'
+      options.user.shell = false
+      options.user.comment ?= 'SSSD User'
+      options.user.home = '/'
 
 ## Configuration
 
-      sssd.config = merge
+      options.config = merge
         'sssd':
           'config_file_version' : '2'
           'reconnection_retries' : '3'
@@ -103,8 +102,8 @@ Example:
           'offline_failed_login_attempts' : '3'
           'offline_failed_login_delay' : '5'
           'debug_level': '1'
-      , sssd.config or {}
-      sssd.test_user ?= null
+      , options.config or {}
+      options.test_user ?= null
 
 The System Security Services Daemon (SSSD) provides access to different
 identity and authentication providers.

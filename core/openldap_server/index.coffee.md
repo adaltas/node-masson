@@ -7,6 +7,8 @@
         iptables: module: 'masson/core/iptables'
         # network: module: 'masson/core/network'
         saslauthd: module: 'masson/core/saslauthd'
+        openldap_server: module: 'masson/core/openldap_server'
+        ssl: module: 'masson/core/ssl'
       configure: [
         'masson/core/openldap_server/configure'
         # 'masson/core/openldap_client/configure'

@@ -2,12 +2,11 @@
 # MariaDB Server Check
 
     module.exports = header: 'MariaDB Server Check', handler: (options) ->
-      {iptables} = @config
-      {ssl} = @config.ryba
+      
       props =
         database: null
         admin_username: 'root'
-        admin_password: options.server.password
+        admin_password: options.password
         engine: 'mysql'
         host: @config.host
         silent: false
@@ -16,7 +15,7 @@
 Wait connect action is used as a check n the port availability.
 
       @connection.wait
-        port: options.server.my_cnf['mysqld']['port']
+        port: options.my_cnf['mysqld']['port']
         host: @config.host
 
 ## Check Replication

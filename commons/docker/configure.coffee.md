@@ -3,8 +3,9 @@
 
     module.exports = ->
       ctx_iptables = @contexts('masson/core/iptables').filter (ctx) => ctx.config.host is @config.host
-      {ssl} = @config
+      [ssl_ctx] = @contexts('masson/core/ssl').filter (ctx) => ctx.config.host is @config.host
       options = @config.docker ?= {}
+      
       options.nsenter ?= true
       options.conf_dir ?= '/etc/docker'
       options.group ?= name: 'docker'
@@ -74,7 +75,7 @@ Docker Engine supports TLS authentication between the CLI and engine.
 When TLS is enabled, `tlscacert`, `tlscert`, `tlskey` and `tlsverify` properties
 are added docker `@config.docker` object, so it can be used in nikita docker actions.
 
-      options.ssl ?= ssl
+      options.ssl ?= ssl_ctx.config.ssl
       # ptions.ssl.enabled ?= false
       if options.ssl.enabled
       # if options.ssl.enabled

@@ -23,9 +23,9 @@ Example:
 ```
 
     module.exports = ->
-      ntp = @config.ntp ?= {}
-      ntp.servers ?= []
-      ntp.servers = @config.ntp.servers.split(',') if typeof @config.ntp.servers is 'string'
-      ntp.lag ?= 2000
-      ntp.fudge ?= false
-      ntp.fudge = if @config.host in ntp.servers then 10 else 14
+      options = @config.ntp ?= {}
+      options.servers ?= []
+      options.servers = options.servers.split(',') if typeof options.servers is 'string'
+      options.lag ?= 2000
+      options.fudge ?= false
+      options.fudge = if @config.host in options.servers then 10 else 14

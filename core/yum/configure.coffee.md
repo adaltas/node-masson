@@ -65,6 +65,7 @@ Note, ntp is installed to encure correct date on the server or HTTPS will fail.
 ## Source Code
 
     module.exports = ->
+      [proxy_ctx] = @contexts 'masson/core/proxy'
       options = @config.yum ?= {}
 
 ## Configuration
@@ -77,11 +78,10 @@ Note, ntp is installed to encure correct date on the server or HTTPS will fail.
 ## Proxy Configuration
 
       options.proxy ?= false
-      {http_proxy_no_auth, username, password} = @config.proxy?
-      if options.proxy
-        options.config.main.proxy = http_proxy_no_auth
-        options.config.main.proxy_username = username
-        options.config.main.proxy_password = password
+      if proxy_ctx and options.proxy
+        options.config.main.proxy ?= proxy_ctx.config.proxy.http_proxy_no_auth
+        options.config.main.proxy_username ?= proxy_ctx.config.proxy.username
+        options.config.main.proxy_password ?= proxy_ctx.config.proxy.password
 
 ## System Repository
 

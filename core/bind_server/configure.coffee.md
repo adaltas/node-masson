@@ -12,22 +12,22 @@
 See the the "resources section" for additional information.
 
     module.exports = ->
-      @config.bind_server ?= {}
+      options = @config.bind_server ?= {}
       # User
-      @config.bind_server.user = name: @config.bind_server.user if typeof @config.bind_server.user is 'string'
-      @config.bind_server.user ?= {}
-      @config.bind_server.user.name ?= 'named'
-      @config.bind_server.user.system ?= true
-      @config.bind_server.user.gid = 'named'
-      @config.bind_server.user.shell = false
-      @config.bind_server.user.comment ?= 'Named'
-      @config.bind_server.user.home = '/var/named'
+      options.user = name: options.user if typeof options.user is 'string'
+      options.user ?= {}
+      options.user.name ?= 'named'
+      options.user.system ?= true
+      options.user.gid = 'named'
+      options.user.shell = false
+      options.user.comment ?= 'Named'
+      options.user.home = '/var/named'
       # Group
-      @config.bind_server.group = name: @config.bind_server.group if typeof @config.bind_server.group is 'string'
-      @config.bind_server.group ?= {}
-      @config.bind_server.group.name ?= 'named'
-      @config.bind_server.group.system ?= true
+      options.group = name: options.group if typeof options.group is 'string'
+      options.group ?= {}
+      options.group.name ?= 'named'
+      options.group.system ?= true
       # Zones
-      @config.bind_server.zones ?= []
-      if typeof @config.bind_server.zones is 'string'
-        @config.bind_server.zones = [@config.bind_server.zones]
+      options.zones ?= []
+      if typeof options.zones is 'string'
+        options.zones = [options.zones]

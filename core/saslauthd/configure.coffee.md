@@ -35,59 +35,59 @@
 ```
 
     module.exports = ->
-      saslauthd = @config.saslauthd ?= {}
+      options = @config.saslauthd ?= {}
 
 ## Environnment
 
-      saslauthd.conf_file ?= '/etc/saslauthd.conf'
+      options.conf_file ?= '/etc/saslauthd.conf'
 
 ## Identities
 
       # Group
-      saslauthd.group = name: saslauthd.group if typeof saslauthd.group is 'string'
-      saslauthd.group ?= {}
-      saslauthd.group.name ?= 'saslauth'
-      saslauthd.group.system ?= true
+      options.group = name: options.group if typeof options.group is 'string'
+      options.group ?= {}
+      options.group.name ?= 'saslauth'
+      options.group.system ?= true
       # User
-      saslauthd.user = name: saslauthd.user if typeof saslauthd.user is 'string'
-      saslauthd.user ?= {}
-      saslauthd.user.name ?= 'saslauth'
-      saslauthd.user.system ?= true
-      saslauthd.user.gid = 'saslauth'
-      saslauthd.user.shell = false
-      saslauthd.user.comment ?= 'Saslauthd User'
-      saslauthd.user.home = '/run/saslauthd'
+      options.user = name: options.user if typeof options.user is 'string'
+      options.user ?= {}
+      options.user.name ?= 'saslauth'
+      options.user.system ?= true
+      options.user.gid = 'saslauth'
+      options.user.shell = false
+      options.user.comment ?= 'options User'
+      options.user.home = '/run/saslauthd'
 
 ## System
 
 The system configuration is written in "/run/saslauthd" and doesnt require any
 modification.
 
-      saslauthd.sysconfig ?= {}
-      saslauthd.sysconfig = merge {}, saslauthd.sysconfig,
+      options.sysconfig ?= {}
+      options.sysconfig = merge {}, options.sysconfig,
         'SOCKETDIR': '/run/saslauthd'
         'MECH': 'ldap'
-        'FLAGS': "-O #{saslauthd.conf_file}"
+        'FLAGS': "-O #{options.conf_file}"
 
 ## Configuration
 
 The configuration is written by default in "/etc/saslauthd.conf" and must be 
 entirely defined by the end user.
 
-      saslauthd.conf ?= {}
-      if saslauthd.sysconfig['MECH'] is 'ldap'
+      options.conf ?= {}
+      if options.sysconfig['MECH'] is 'ldap'
         # http://www.openldap.org/doc/admin24/security.html#Pass-Through%20authentication
-        throw Error "Required Property: \"conf.ldap_servers\"" unless saslauthd.conf.ldap_servers
-        throw Error "Required Property: \"conf.ldap_search_base\"" unless saslauthd.conf.ldap_search_base?
-        throw Error "Required Property: \"conf.ldap_bind_dn\"" unless saslauthd.conf.ldap_bind_dn?
-        throw Error "Required Property: \"conf.ldap_password\"" unless saslauthd.conf.ldap_password?
+        throw Error "Required Property: \"conf.ldap_servers\"" unless options.conf.ldap_servers
+        throw Error "Required Property: \"conf.ldap_search_base\"" unless options.conf.ldap_search_base?
+        throw Error "Required Property: \"conf.ldap_bind_dn\"" unless options.conf.ldap_bind_dn?
+        throw Error "Required Property: \"conf.ldap_password\"" unless options.conf.ldap_password?
 
 ## Check
 
 Use a provided username and password to validate the connection, not required.
 
-      saslauthd.check ?= {}
-      throw Error "Required Property: \"check.password\"" if saslauthd.check.username and not saslauthd.check.password
+      options.check ?= {}
+      throw Error "Required Property: \"check.password\"" if options.check.username and not options.check.password
 
 ## Dependencies
 

@@ -18,7 +18,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
       @tools.iptables
         header: 'IPTables'
         rules: [
-          { chain: 'INPUT', jump: 'ACCEPT', dport: options.server.my_cnf['mysqld']['port'], protocol: 'tcp', state: 'NEW', comment: "MariaDB" }
+          { chain: 'INPUT', jump: 'ACCEPT', dport: options.my_cnf['mysqld']['port'], protocol: 'tcp', state: 'NEW', comment: "MariaDB" }
         ]
         if: @has_service('masson/core/iptables') and iptables.action is 'start'
 
@@ -35,8 +35,8 @@ Note: Be careful if using different name thans 'mysql:mysql'
 User/group are hard coded in some of mariadb/mysql package scripts.
 
       @call header: 'Users & Groups', handler: ->
-        @system.group options.server.group
-        @system.user options.server.user
+        @system.group options.group
+        @system.user options.user
 
 ## Package
 
@@ -59,11 +59,11 @@ Package on Centos/Redhat 7 OS.
             chk_name: service_name
             startup: true
           @system.tmpfs
-            mount: "#{path.dirname options.server.my_cnf['mysqld']['pid-file']}"
+            mount: "#{path.dirname options.my_cnf['mysqld']['pid-file']}"
             name: 'mariadb'
             perm: '0750'
-            uid: options.server.user.name
-            gid: options.server.group.name
+            uid: options.user.name
+            gid: options.group.name
         @service
           if_os: name: ['redhat','centos'], version: '6'
           name: 'mysql-server'
@@ -76,57 +76,57 @@ Create the directories, needed by the database.
 
       @system.mkdir
         target: '/tmp/mysql'
-        uid: options.server.user.name
-        gid: options.server.group.name
+        uid: options.user.name
+        gid: options.group.name
         mode: 0o0774
       @system.mkdir
         header: 'Journal log dir'
         target: options.journal_log_dir
-        uid: options.server.user.name
-        gid: options.server.group.name
+        uid: options.user.name
+        gid: options.group.name
         mode: 0o0750
       @system.mkdir
         header: 'Bin log dir'
-        target: options.server.my_cnf['mysqld']['log-bin']
-        uid: options.server.user.name
-        gid: options.server.group.name
+        target: options.my_cnf['mysqld']['log-bin']
+        uid: options.user.name
+        gid: options.group.name
         mode: 0o0750
       @system.mkdir
         header: 'Data dir'
-        target: options.server.my_cnf['mysqld']['datadir']
-        uid: options.server.user.name
-        gid: options.server.group.name
+        target: options.my_cnf['mysqld']['datadir']
+        uid: options.user.name
+        gid: options.group.name
         mode: 0o0750
       @system.mkdir
         header: 'Priv file'
-        target: options.server.my_cnf['mysqld']['secure-file-priv']
-        uid: options.server.user.name
-        gid: options.server.group.name
+        target: options.my_cnf['mysqld']['secure-file-priv']
+        uid: options.user.name
+        gid: options.group.name
         mode: 0o0750
       @system.mkdir
         header: 'Log dir'
-        target: "#{path.dirname options.server.my_cnf['mysqld']['log-error']}"
-        uid: options.server.user.name
-        gid: options.server.group.name
+        target: "#{path.dirname options.my_cnf['mysqld']['log-error']}"
+        uid: options.user.name
+        gid: options.group.name
         mode: 0o0750
       @system.mkdir
         header: 'Run dir'
-        target: "#{path.dirname options.server.my_cnf['mysqld']['pid-file']}"
-        uid: options.server.user.name
-        gid: options.server.group.name
+        target: "#{path.dirname options.my_cnf['mysqld']['pid-file']}"
+        uid: options.user.name
+        gid: options.group.name
         mode: 0o0750
       @system.mkdir
         header: 'Socket Dir'
-        target: "#{path.dirname options.server.my_cnf['mysqld']['socket']}"
-        uid: options.server.user.name
-        gid: options.server.group.name
+        target: "#{path.dirname options.my_cnf['mysqld']['socket']}"
+        uid: options.user.name
+        gid: options.group.name
         mode: 0o0750
       @system.mkdir
         if: options.ha_enabled
         header: 'Replication dir'
         target: options.replication_dir
-        uid: options.server.user.name
-        gid: options.server.group.name
+        uid: options.user.name
+        gid: options.group.name
         mode: 0o0750
 
 ## Configuration
@@ -137,7 +137,7 @@ is running.
       @call header: 'Configuration', handler: ->
         @file.ini
           target: '/etc/my.cnf'
-          content: options.server.my_cnf
+          content: options.my_cnf
           stringify: misc.ini.stringify_single_key
           merge: false
           backup: true
@@ -159,7 +159,7 @@ is running.
       #       throw Error 'Failed to install mysqld' unless removed
       #     @service.start
       #       name: 'mysqld'
-      for sql, i in options.server.sql_on_install
+      for sql, i in options.sql_on_install
         @system.execute
           header: "Populate #{i}"
           cmd: "mysql -uroot -e \"#{escape sql}\""
@@ -170,27 +170,27 @@ is running.
       @call header: 'SSL', handler: ->
         @file.download
           source: options.ssl.cert.source
-          target: "#{options.server.my_cnf['mysqld']['ssl-cert']}"
+          target: "#{options.my_cnf['mysqld']['ssl-cert']}"
           local: options.ssl.cert.local
-          uid: options.server.user.name
-          gid: options.server.group.name
+          uid: options.user.name
+          gid: options.group.name
         @file.download
           source: options.ssl.key.source
-          target: "#{options.server.my_cnf['mysqld']['ssl-key']}"
+          target: "#{options.my_cnf['mysqld']['ssl-key']}"
           local: options.ssl.key.local
-          uid: options.server.user.name
-          gid: options.server.group.name
+          uid: options.user.name
+          gid: options.group.name
         @file.download
           source: options.ssl.cacert.source
-          target: "#{options.server.my_cnf['mysqld']['ssl-ca']}"
+          target: "#{options.my_cnf['mysqld']['ssl-ca']}"
           local: options.ssl.cacert.local
-          uid: options.server.user.name
-          gid: options.server.group.name
+          uid: options.user.name
+          gid: options.group.name
 
       @call header: 'Init data directory', handler: ->
         @system.execute
-          cmd: "mysql_install_db --user=#{options.server.my_cnf['mysqld']['user']}  --datadir=#{options.server.my_cnf['mysqld']['datadir']}"
-          unless_exists: "#{options.server.my_cnf['mysqld']['datadir']}/mysql"
+          cmd: "mysql_install_db --user=#{options.my_cnf['mysqld']['user']}  --datadir=#{options.my_cnf['mysqld']['datadir']}"
+          unless_exists: "#{options.my_cnf['mysqld']['datadir']}/mysql"
 
 ## Secure Installation
 
@@ -214,7 +214,7 @@ The bug is fixed after version 5.7 of MariaDB.
       @call
         header: 'Secure Installation'
         handler: ->
-          {current_password, password, remove_anonymous, disallow_remote_root_login, remove_test_db, reload_privileges} = options.server
+          {current_password, password, remove_anonymous, disallow_remote_root_login, remove_test_db, reload_privileges} = options
           test_password = true
           modified = false
           version = null
@@ -232,7 +232,7 @@ The bug is fixed after version 5.7 of MariaDB.
             throw err if err
             match = /([0-9].){3}/.exec stdout
             version = match[0].split('.')[1] if match
-            safe_start = not (version >= 7) or ((version <= 7) and options.server.my_cnf['mysqld']['socket'] is '/var/lib/mysql/mysql.sock')
+            safe_start = not (version >= 7) or ((version <= 7) and options.my_cnf['mysqld']['socket'] is '/var/lib/mysql/mysql.sock')
           @call
             header: 'Secure MariaDB'
             unless_exec: "#{db.cmd database, 'show databases'}"
@@ -246,7 +246,7 @@ The bug is fixed after version 5.7 of MariaDB.
                   @system.execute
                     cmd: "mysqld_safe --socket=/var/lib/mysql/mysql.sock > /dev/null 2>&1 &"
                   @wait.exist
-                    target: options.server.my_cnf['mysqld_safe']['pid-file']
+                    target: options.my_cnf['mysqld_safe']['pid-file']
                   @wait.exist
                     target: '/var/lib/mysql/mysql.sock'
               @call
@@ -321,11 +321,11 @@ The bug is fixed after version 5.7 of MariaDB.
                           handler: ->
                             @system.execute
                               cmd: """
-                                  pid=$(cat #{options.server.my_cnf['mysqld']['pid-file']})
+                                  pid=$(cat #{options.my_cnf['mysqld']['pid-file']})
                                   kill $pid
                                 """
                             @wait.execute
-                              cmd: "if [ -f \"#{options.server.my_cnf['mysqld']['pid-file']}\" ]; then exit 1; else exit 0 ; fi"
+                              cmd: "if [ -f \"#{options.my_cnf['mysqld']['pid-file']}\" ]; then exit 1; else exit 0 ; fi"
                             @service.start
                               name: service_name
                         @then callback

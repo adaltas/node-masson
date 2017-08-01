@@ -4,18 +4,18 @@
 *   `krb5_server.{realm}.ldap_manager_dn` (string)   
     The LDAP user with read and write access to the realm dn
     defined by the `ldap_realms_dn` property. Default to the 
-    `openldap_server_krb5.manager_dn` property if you have one OpenLDAP server with 
+    `openldap_server.krb5.manager_dn` property if you have one OpenLDAP server with 
     kerberos support declared inside the cluster by the 
     "masson/core/openldap\_server\_krb5" module, otherwise required.      
 *   `krb5_server.{realm}.ldap_manager_password` (string)   
     The password of the LDAP user with read and write access to the realm dn
     defined by the `ldap_realms_dn` property. Default to the 
-    `openldap_server_krb5.manager_password` property if you have one OpenLDAP server with 
+    `openldap_server.krb5.manager_password` property if you have one OpenLDAP server with 
     kerberos support declared inside the cluster by the 
     "masson/core/openldap\_server\_krb5" module, otherwise required.      
 *   `krb5_server.{realm}.ldap_realms_dn` (string)   
     The location where to store the realms inside the LDAP tree. Default to the 
-    `openldap_server_krb5.realms_dn` property if you have one OpenLDAP server with 
+    `openldap_server.krb5.realms_dn` property if you have one OpenLDAP server with 
     kerberos support declared inside the cluster by the 
     "masson/core/openldap\_server\_krb5" module, otherwise required.   
 
@@ -46,14 +46,19 @@ Example:
       openldap_ctxs = @contexts 'masson/core/openldap_server'
       krb5_servers_ctxs = @contexts 'masson/core/krb5_server'
       [openldap_ctx] = openldap_ctxs
+      {openldap_server} = openldap_ctx.config
       options = @config.krb5_server ?= {}
+
+## Validation
+
       throw new Error "Expect at least one server with action \"masson/core/openldap_server\"" if openldap_ctxs.length is 0
+
+## Configuration
+
       options.iptables ?= @has_service('masson/core/iptables') and @config.iptables.action is 'start'
       # Prepare configuration for "kdc.conf"
       options.root_dn ?= openldap_ctx.config.openldap_server.root_dn
       options.root_password ?= openldap_ctx.config.openldap_server.root_password
-      # Generate dynamic "options.dbmodules" object
-      {openldap_server_krb5} = openldap_ctx.config
 
 ## HA
 
@@ -102,13 +107,13 @@ configuration profile.
         options.kdc_conf.dbmodules ?= {}
         options.kdc_conf.dbmodules[admin.database_module] = merge {},
           'db_library': 'kldap'
-          'ldap_kerberos_container_dn': openldap_server_krb5.kerberos_dn
-          'ldap_kdc_dn': openldap_server_krb5.kdc_user.dn
-          'ldap_kdc_password': openldap_server_krb5.kdc_user.userPassword
+          'ldap_kerberos_container_dn': openldap_server.krb5.kerberos_dn
+          'ldap_kdc_dn': openldap_server.krb5.kdc_user.dn
+          'ldap_kdc_password': openldap_server.krb5.kdc_user.userPassword
            # this object needs to have read rights on
            # the realm container, principal container and realm sub-trees
-          'ldap_kadmind_dn': openldap_server_krb5.krbadmin_user.dn
-          'ldap_kadmind_password': openldap_server_krb5.krbadmin_user.userPassword
+          'ldap_kadmind_dn': openldap_server.krb5.krbadmin_user.dn
+          'ldap_kadmind_password': openldap_server.krb5.krbadmin_user.userPassword
            # this object needs to have read and write rights on
            # the realm container, principal container and realm sub-trees
           'ldap_service_password_file': "/etc/krb5.d/#{admin.database_module}.stash.keyfile"

@@ -2,6 +2,7 @@
 # SSH Install
 
     module.exports = header: 'SSH Install', handler: ->
+      options = @config.ssh
 
 ## Package
 
@@ -19,7 +20,7 @@ defined inside "users.[].authorized_keys".
       @call
         header: 'Authorized Keys'
       , ->
-        for _, user of @config.system.users
+        for _, user of options.users
           @system.mkdir
             target: "#{user.home or '/home/'+user.name}/.ssh"
             uid: user.name
@@ -43,10 +44,10 @@ properties found in the "ssh.sshd_config" object.
 
       @call
         header: 'Configure'
-        if: -> @config.ssh.sshd_config
+        if: -> options.sshd_config
       , ->
         @file
-          write: for k, v of @config.ssh.sshd_config
+          write: for k, v of options.sshd_config
             match: new RegExp "^#{k}.*$", 'mg'
             replace: "#{k} #{v}"
             append: true
@@ -92,16 +93,15 @@ service will be restarted if this action had any effect.
 
       @call
         header: 'Banner'
-        if: -> @config.ssh.banner
+        if: -> options.banner
       , ->
-        {banner} = @config.ssh
-        banner.content += '\n\n' if banner.content
+        options.banner.content += '\n\n' if options.banner.content
         @file
-          target: banner.target
-          content: banner.content
+          target: options.banner.target
+          content: options.banner.content
         @file
           match: new RegExp "^Banner.*$", 'mg'
-          replace: "Banner #{banner.target}"
+          replace: "Banner #{options.banner.target}"
           append: true
           target: '/etc/ssh/sshd_config'
         @service.restart

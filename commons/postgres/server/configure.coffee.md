@@ -2,11 +2,12 @@
 # PostgreSQL Server Configure
 
     module.exports = ->
-      postgres = @config.postgres ?= {}
+      options = @config.postgres ?= {}
+      
       # docker image version
-      postgres.version ?= '9.5'
-      postgres.server ?= {}
-      postgres.server.password ?= 'root'
-      postgres.server.user ?= 'root'
-      postgres.server.port ?= '5432'
-      postgres.server.container_name ?= 'postgres_server'
+      options.version ?= '9.5'
+      options.server ?= {}
+      options.server.password ?= 'root'
+      options.server.user ?= 'root'
+      options.server.port ?= '5432'
+      options.server.container_name ?= 'postgres_server'

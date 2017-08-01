@@ -45,13 +45,14 @@ any settings from the proxy action.
 ```
 
     module.exports = ->
-      {proxy} = @config
-      git = @config.git ?= {}
-      git.merge ?= true
-      git.properties ?= {}
-      git.proxy ?= true
-      git.global ?= false
-      git.global = {} if @config.git.global is true
-      git.users ?= {}
-      git.properties.http ?= {}
-      git.properties.http.proxy ?= proxy?.http_proxy if @config.git.proxy
+      [proxy_ctx] = @contexts('masson/core/proxy').filter (ctx) => ctx.config.host is @config.host
+      options = @config.git ?= {}
+
+      options.merge ?= true
+      options.properties ?= {}
+      options.proxy ?= true
+      options.global ?= false
+      options.global = {} if options.global is true
+      options.users ?= {}
+      options.properties.http ?= {}
+      options.properties.http.proxy ?= proxy_ctx.config.proxy.http_proxy if proxy_ctx and options.proxy

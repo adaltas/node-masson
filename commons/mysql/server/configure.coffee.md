@@ -29,6 +29,9 @@ provision their databases and user access.
     module.exports = ->
       @config.mysql ?= {}
       options = @config.mysql.server ?= {}
+
+## Validation
+
       throw Error "Required Option: options.password" unless options.password
 
 ## Identities

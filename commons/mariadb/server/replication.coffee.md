@@ -9,7 +9,7 @@ consistency reasons.
 
     module.exports = header: 'MariaDB Server Replication', handler: (options) ->
       return unless options.ha_enabled
-      {repl_master} = options.server
+      {repl_master} = options
       [master_ctx] = @contexts('masson/commons/mariadb/server').filter (ctx) -> ctx.config.host is repl_master.host
       remote_master =
         database: null
@@ -21,7 +21,7 @@ consistency reasons.
       props =
         database: null
         admin_username: 'root'
-        admin_password: options.server.password
+        admin_password: options.password
         engine: 'mysql'
         host: @config.host
         silent: false

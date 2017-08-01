@@ -6,8 +6,7 @@ Install the [OpenLDAP backend for the MIT Kerberos server](https://web.mit.edu/k
 ## Configuration
 
     module.exports = header: 'OpenLDAP Server Krb5', handler: ->
-      {kerberos_dn, krbadmin_user, krbadmin_group} = @config.openldap_server_krb5
-      {openldap_server} = @config
+      options = @config.openldap_server
 
 ## Install schema
 
@@ -30,8 +29,8 @@ the command `ldapsearch  -D cn=admin,cn=config -w test -b "cn=config"`.
           @ldap.schema
             name: 'kerberos'
             schema: schema
-            binddn: openldap_server.config_dn
-            passwd: openldap_server.config_password
+            binddn: options.config_dn
+            passwd: options.config_password
             uri: true
 
 ## Insert Container
@@ -42,12 +41,12 @@ not allowed to be used for krb5 ldap containers.
 
       @ldap.add
         header: 'Container DN'
-        # uri: openldap_server.uri
+        # uri: options.uri
         uri: true
-        binddn: openldap_server.root_dn
-        passwd: openldap_server.root_password
+        binddn: options.root_dn
+        passwd: options.root_password
         entry:
-          dn: "#{kerberos_dn}"
+          dn: "#{options.krb5.kerberos_dn}"
           objectClass: ['krbContainer']
 
 ## Insert Group
@@ -56,11 +55,11 @@ Create the kerberos administrator's group.
 
       @ldap.add
         header: 'Group DN'
-        # uri: openldap_server.uri
+        # uri: options.uri
         uri: true
-        binddn: openldap_server.root_dn
-        passwd: openldap_server.root_password
-        entry: krbadmin_group
+        binddn: options.root_dn
+        passwd: options.root_password
+        entry: options.krb5.krbadmin_group
 
 # Insert Admin User
 
@@ -68,11 +67,11 @@ Create the kerberos administrator's user.
 
       @ldap.user
         header: 'User DN'
-        # uri: openldap_server.uri
+        # uri: options.uri
         uri: true
-        binddn: openldap_server.root_dn
-        passwd: openldap_server.root_password
-        user: krbadmin_user
+        binddn: options.root_dn
+        passwd: options.root_password
+        user: options.krb5.krbadmin_user
 
 ## Krb5 User permissions
 
@@ -81,31 +80,31 @@ Create the kerberos administrator's user.
       , ->
         @ldap.acl
           header: 'Create'
-          suffix: openldap_server.suffix
+          suffix: options.suffix
           acls: [
-            place_before: "dn.subtree=\"#{openldap_server.suffix}\""
-            to: "dn.subtree=\"#{kerberos_dn}\""
+            place_before: "dn.subtree=\"#{options.suffix}\""
+            to: "dn.subtree=\"#{options.krb5.kerberos_dn}\""
             by: [
-              "dn.exact=\"#{krbadmin_user.dn}\" write"
+              "dn.exact=\"#{options.krb5.krbadmin_user.dn}\" write"
               "dn.base=\"gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth\" read"
               "* none"
             ]
           # ,
-          #   to: "dn.subtree=\"#{openldap_server.suffix}\""
+          #   to: "dn.subtree=\"#{options.suffix}\""
           #   by: [
-          #     "dn.exact=\"#{krbadmin_user.dn}\" write"
+          #     "dn.exact=\"#{options.krb5.krbadmin_user.dn}\" write"
           #   ]
           ]
         @system.execute
           header: 'Check'
           if: -> @status -1
-          cmd: "ldapsearch -H ldapi:// -x -D #{krbadmin_user.dn} -w #{krbadmin_user.userPassword} -b #{kerberos_dn}"
+          cmd: "ldapsearch -H ldapi:// -x -D #{options.krb5.krbadmin_user.dn} -w #{options.krb5.krbadmin_user.userPassword} -b #{options.krb5.kerberos_dn}"
 
 ## Krb5 Index
 
       @ldap.index
         header: 'Krb5 Index'
-        suffix: openldap_server.suffix
+        suffix: options.suffix
         indexes:
           krbPrincipalName: 'sub,eq'
 

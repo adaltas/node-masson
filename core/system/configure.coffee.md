@@ -18,74 +18,75 @@ The module accept the following properties:
 ## Default Configuration
 
 ```json
-{ "system": {
-    "selinux": true,
-    "reboot": true,
-    "limits": {
-      "memlock": {
-        "hard": 130
-      }
-    },
-    "profile": {},
-    "groups": {},
-    "users": {}
-} }
+{
+  "selinux": true,
+  "reboot": true,
+  "limits": {
+    "memlock": {
+      "hard": 130
+    }
+  },
+  "profile": {},
+  "groups": {},
+  "users": {}
+}
 ```
 
 ## Example
 
 ```json
-{ "system": {
-    "selinux": true,
-    "reboot": true,
-    "limits": {
-      "nproc": 2048,
-      "nofile": {
-        "soft": 2048,
-        "hard": 4096
-      }
-    },
-    "profile": {
-      "tmout.sh": "export TMOUT=0"
-    },
-    "groups": {
-      "my_group": {
-        "uid": 2300,
-        "system": true
-      }
-    },
-    "users": {
-      "my_user": {
-        "uid": 2301,
-        "gid": "my_user",
-        "groups": ["my_group"],
-        "system": true
-        "shell": "/bin/bash"
-      }
+{
+  "selinux": true,
+  "reboot": true,
+  "limits": {
+    "nproc": 2048,
+    "nofile": {
+      "soft": 2048,
+      "hard": 4096
     }
-} }
+  },
+  "profile": {
+    "tmout.sh": "export TMOUT=0"
+  },
+  "groups": {
+    "my_group": {
+      "uid": 2300,
+      "system": true
+    }
+  },
+  "users": {
+    "my_user": {
+      "uid": 2301,
+      "gid": "my_user",
+      "groups": ["my_group"],
+      "system": true
+      "shell": "/bin/bash"
+    }
+  }
+}
 ```
 
     module.exports = ->
-      system = @config.system ?= {}
+      options = @config.system ?= {}
       # SELinux
-      system.selinux ?= true
-      system.selinux = 'enforcing' if system.selinux is true
-      system.selinux = 'disabled' if system.selinux is false
-      throw Error "Invalid option \"system.selinux\": #{JSON.stringify system.selinux}" unless system.selinux in ['enforcing', 'permissive', 'disabled']
+      options.selinux ?= true
+      options.selinux = 'enforcing' if options.selinux is true
+      options.selinux = 'disabled' if options.selinux is false
+      throw Error "Invalid option \"options.selinux\": #{JSON.stringify options.selinux}" unless options.selinux in ['enforcing', 'permissive', 'disabled']
       # Limits
-      system.limits ?= {}
-      system.limits.memlock ?= {}
-      #system.limits.memlock.soft ?= 130
-      system.limits.memlock.hard ?= 130
+      options.limits ?= {}
+      options.limits.memlock ?= {}
+      #options.limits.memlock.soft ?= 130
+      options.limits.memlock.hard ?= 130
       # Groups
-      system.groups ?= {}
-      for name, group of system.groups
+      options.groups ?= {}
+      for name, group of options.groups
         group.name ?= name
       # Users
-      system.users ?= {}
-      for name, user of system.users
+      options.users ?= {}
+      for name, user of options.users
         user.name ?= name
         user.home ?= '/root' if name is 'root'
       # Profile
-      @config.profile ?= {}
+      # @config.profile ?= {}
+      options

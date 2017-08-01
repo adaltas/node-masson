@@ -7,18 +7,18 @@
 
     module.exports = ->
       openldap_server_ctxs = @contexts 'masson/core/openldap_server'
-      openldap_client = @config.openldap_client ?= {}
-      openldap_client.certificates ?= []
-      openldap_client.certificates = for cert in openldap_client.certificates
+      options = @config.openldap_client ?= {}
+      options.certificates ?= []
+      options.certificates = for cert in options.certificates
         cert = source: cert if typeof cert is 'string'
         cert.local ?= false
         cert
-      openldap_client.config ?= {}
+      options.config ?= {}
       uris = for openldap_server_ctx in openldap_server_ctxs
         openldap_server_ctx.config.openldap_server.uri
-      openldap_client.config['BASE'] ?= openldap_server_ctxs[0].config.openldap_server.suffix
-      openldap_client.config['URI'] ?= uris.join ' '
-      openldap_client.config['TLS_CACERTDIR'] ?= '/etc/openldap/cacerts'
-      openldap_client.config['TLS_REQCERT'] ?= 'demand' # Allow self-signed certificates, use "demand" otherwise
-      openldap_client.config['TIMELIMIT'] ?= '15'
-      openldap_client.config['TIMEOUT'] ?= '20'
+      options.config['BASE'] ?= openldap_server_ctxs[0].config.openldap_server.suffix
+      options.config['URI'] ?= uris.join ' '
+      options.config['TLS_CACERTDIR'] ?= '/etc/openldap/cacerts'
+      options.config['TLS_REQCERT'] ?= 'demand' # Allow self-signed certificates, use "demand" otherwise
+      options.config['TIMELIMIT'] ?= '15'
+      options.config['TIMEOUT'] ?= '20'

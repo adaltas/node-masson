@@ -23,17 +23,6 @@ two new properties "sshd\_config" and "banner".
 
 ```json
 {
-  "users": {
-    "root": {
-      "authorized_keys": [ "ssh-rsa AAAA...ZZZZ me@email.com" ],
-      "rsa": "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCA...PKToe4z7C9BqMT7Og==\n-----END RSA PRIVATE KEY-----",
-      "rsa_pub": "ssh-rsa AAAA...YYYY user@hadoop"
-    },
-    "sweet": {
-      "home": "/home/sweet",
-      "authorized_keys": [ "ssh-rsa AAAA...XXXX you@email.com" ]
-    }
-  },
   "ssh": {
     "sshd_config": {
       "UsePAM": "yes",
@@ -42,14 +31,27 @@ two new properties "sshd\_config" and "banner".
     "banner": {
       "target": "/etc/banner",
       "content": "Welcome to Hadoop!"
-    }
+    },
+    "users": {
+      "root": {
+        "authorized_keys": [ "ssh-rsa AAAA...ZZZZ me@email.com" ],
+        "rsa": "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCA...PKToe4z7C9BqMT7Og==\n-----END RSA PRIVATE KEY-----",
+        "rsa_pub": "ssh-rsa AAAA...YYYY user@hadoop"
+      },
+      "sweet": {
+        "home": "/home/sweet",
+        "authorized_keys": [ "ssh-rsa AAAA...XXXX you@email.com" ]
+      }
+    },
   }
 }
 ```
 
     module.exports = ->
-      ssh = @config.ssh ?= {}
-      ssh.sshd_config ?= null
-      for _, user of @config.system.users
+      [system_ctx] = @contexts('masson/core/system').filter (ctx) => ctx.config.host is @config.host
+      options = @config.ssh ?= {}
+      options.sshd_config ?= null
+      for username, user of options.users
+        user.home = system_ctx.config.system.users[user]?.home or "/home/#{username}"
         user.authorized_keys ?= []
         user.authorized_keys = [user.authorized_keys] if typeof user.authorized_keys is 'string'
