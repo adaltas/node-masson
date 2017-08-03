@@ -355,35 +355,35 @@ ldapsearch -H ldaps://master3.hadoop:636 -x -D cn=Manager,dc=ryba -w test -b dc=
 ldapsearch -Y EXTERNAL -H ldapi:/// -b dc=ryba
 ```
 
-    module.exports = header: 'OpenLDAP Server TLS Deploy', handler: ->
-      {openldap_server} = @config
-      return unless openldap_server.tls
-      openldap_server.tls_ca_cert_target = "/etc/openldap/certs/#{path.basename openldap_server.tls_ca_cert_file}"
-      openldap_server.tls_cert_target = "/etc/openldap/certs/#{path.basename openldap_server.tls_cert_file}"
-      openldap_server.tls_key_target = "/etc/openldap/certs/#{path.basename openldap_server.tls_key_file}"
+    module.exports = header: 'OpenLDAP Server TLS Deploy', handler: (options) ->
+
+      return unless options.tls
+      options.tls_ca_cert_target = "/etc/openldap/certs/#{path.basename options.tls_ca_cert_file}"
+      options.tls_cert_target = "/etc/openldap/certs/#{path.basename options.tls_cert_file}"
+      options.tls_key_target = "/etc/openldap/certs/#{path.basename options.tls_key_file}"
 
 ## Deploy
 
 Place the certificates into their final destinations.
 
-      (if openldap_server.tls_ca_cert_local then @file.download else @system.copy)
+      (if options.tls_ca_cert_local then @file.download else @system.copy)
         header: 'Deploy CA'
-        source: openldap_server.tls_ca_cert_file
-        target: "#{openldap_server.tls_ca_cert_target}"
+        source: options.tls_ca_cert_file
+        target: "#{options.tls_ca_cert_target}"
         uid: 'ldap'
         gid: 'ldap'
         mode: 0o0400
-      (if openldap_server.tls_cert_local then @file.download else @system.copy)
+      (if options.tls_cert_local then @file.download else @system.copy)
         header: 'Deploy Cert'
-        source: openldap_server.tls_cert_file
-        target: "#{openldap_server.tls_cert_target}"
+        source: options.tls_cert_file
+        target: "#{options.tls_cert_target}"
         uid: 'ldap'
         gid: 'ldap'
         mode: 0o0400
-      (if openldap_server.tls_key_local then @file.download else @system.copy)
+      (if options.tls_key_local then @file.download else @system.copy)
         header: 'Deploy Key'
-        source: openldap_server.tls_key_file
-        target: "#{openldap_server.tls_key_target}"
+        source: options.tls_key_file
+        target: "#{options.tls_key_target}"
         uid: 'ldap'
         gid: 'ldap'
         mode: 0o0400
@@ -396,52 +396,52 @@ Register the certificates inside the internal LDAP config database.
         header: 'Register CA'
         unless_exec: """
         ldapsearch -Y EXTERNAL -H ldapi:/// -b "cn=config" \
-        | grep -E "olcTLSCACertificateFile: #{openldap_server.tls_ca_cert_target}"
+        | grep -E "olcTLSCACertificateFile: #{options.tls_ca_cert_target}"
         """
         cmd: """
         ldapmodify -Y EXTERNAL -H ldapi:/// <<-EOF
         dn: cn=config
         changetype: modify
         replace: olcTLSCACertificateFile
-        olcTLSCACertificateFile: #{openldap_server.tls_ca_cert_target}
+        olcTLSCACertificateFile: #{options.tls_ca_cert_target}
         EOF
         """
       @system.execute
         header: 'Register Cert'
         unless_exec: """
         ldapsearch -Y EXTERNAL -H ldapi:/// -b "cn=config" \
-        | grep -E "olcTLSCertificateFile: #{openldap_server.tls_cert_target}"
+        | grep -E "olcTLSCertificateFile: #{options.tls_cert_target}"
         """
         cmd: """
         ldapmodify -Y EXTERNAL -H ldapi:/// <<-EOF
         dn: cn=config
         changetype: modify
         replace: olcTLSCertificateFile
-        olcTLSCertificateFile: #{openldap_server.tls_cert_target}
+        olcTLSCertificateFile: #{options.tls_cert_target}
         EOF
         """
       @system.execute
         header: 'Register Key'
         unless_exec: """
         ldapsearch -Y EXTERNAL -H ldapi:/// -b "cn=config" \
-        | grep -E "olcTLSCertificateKeyFile: #{openldap_server.tls_key_target}"
+        | grep -E "olcTLSCertificateKeyFile: #{options.tls_key_target}"
         """
         cmd: """
         ldapmodify -Y EXTERNAL -H ldapi:/// <<-EOF
         dn: cn=config
         changetype: modify
         replace: olcTLSCertificateKeyFile
-        olcTLSCertificateKeyFile: #{openldap_server.tls_key_target}
+        olcTLSCertificateKeyFile: #{options.tls_key_target}
         EOF
         """
-      write = []
-      sysconfig_file = null
 
 ## Activation
 
 Register the SSL support into the system configuration located inside the
 "/etc/sysconfig" directory.
 
+      sysconfig_file = null
+      write = []
       @call if_os: name: ['centos', 'redhat', 'oracle'], version: '6', ->
         write.push
           match: /^SLAPD_LDAPS.*/mg
@@ -451,7 +451,7 @@ Register the SSL support into the system configuration located inside the
       @call if_os: name: ['centos', 'redhat', 'oracle'], version: '7', ->
         write.push
           match: /^SLAPD_URLS.*/mg
-          replace: "SLAPD_URLS=\"#{openldap_server.urls.join ' '}\""
+          replace: "SLAPD_URLS=\"#{options.urls.join ' '}\""
           append: true
         sysconfig_file = '/etc/sysconfig/slapd'
       @call unless_os: name: ['centos', 'redhat', 'oracle'], ->

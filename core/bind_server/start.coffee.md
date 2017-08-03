@@ -1,5 +1,5 @@
 
-# Bind server Start
+# Bind Server Start
 
 Start the "named" service.
 

@@ -1,8 +1,7 @@
 
 # Cloud9 Install
 
-    module.exports = header: 'Cloud9 Install', handler: ->
-      {proxy, github}} = @config.cloud9
+    module.exports = header: 'Cloud9 Install', handler: (options) ->
 
 Install the libxml2 package and the SM plugin manager using NPM.
 
@@ -12,7 +11,7 @@ Install the libxml2 package and the SM plugin manager using NPM.
 Download source code from github.
 
       @tools.git
-        source: cloud9.github
+        source: options.github
         target: '/usr/lib/cloud9'
 
 Run package installation.

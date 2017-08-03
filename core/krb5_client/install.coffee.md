@@ -12,8 +12,7 @@ Institute of Technology](http://web.mit.edu).
 
 The package "krb5-workstation" is installed.
 
-    module.exports = header: 'Krb5 Client Install', handler: ->
-      options = @config.krb5_client
+    module.exports = header: 'Krb5 Client Install', handler: (options) ->
 
 ## Package
 
@@ -42,8 +41,8 @@ which create a Kerberos file with complementary information.
 
 Wait for the Kerberos servers to be started.
 
-      @call 'masson/core/krb5_server/wait'
-      @call 'masson/core/krb5_client/wait'
+      # @call 'masson/core/krb5_server/wait', options.wait_kdc
+      @call 'masson/core/krb5_client/wait', options.wait
 
 ## Host Principal
 

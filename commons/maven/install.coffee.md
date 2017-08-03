@@ -1,10 +1,9 @@
 
 # Maven install
 
-    module.exports = header: 'Maven Install', handler: ->
-      {maven} = @config
+    module.exports = header: 'Maven Install', handler: (options) ->
       @file.download
-        source: maven.source
+        source: options.source
         target: '/var/tmp/maven.tar.gz'
       @system.mkdir
         target: "/usr/ryba"
@@ -12,7 +11,7 @@
         source: '/var/tmp/maven.tar.gz'
         target: '/usr/ryba'
       @system.link
-        source: "/usr/ryba/#{maven.dirname}"
+        source: "/usr/ryba/#{options.dirname}"
         target: '/usr/ryba/maven'
       @system.link
         source: '/usr/ryba/maven/bin/mvn'

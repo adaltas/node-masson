@@ -23,20 +23,23 @@ The module accept the following properties:
     Content of the '/etc/resolv.conf' file, optional.   
 *   `network.host_replace` (string)   
     Custom hostname to replace in /etc/hosts, optional.   
+*   `ifcg` (object)   
+    Network interfaces configuration, keys are the interface name and filename 
+    inside "/etc/sysconfig/network-scripts", value the configuration content.
 
 ## Default configuration
 
 ```json
-{ "network": {
+{
   "hostname_disabled": false,
   "hosts_auto": false,
-} }
+}
 ```
 
 ## Example
 
 ```json
-{ "network": {
+{
     "hosts_auto": true,
     "hosts": {
       "10.10.10.15": "myserver.hadoop"
@@ -52,14 +55,35 @@ The module accept the following properties:
       "10.10.10.12": "master2.new.ryba",
       "10.10.10.13": "master3.new.ryba"
     }
-} }
+}
 ```
 
     module.exports = ->
       @config.hostname ?= @config.host
       @config.shortname ?= @config.host.split('.')[0]
-      options = @config.network ?= {}
+      service = migration.call @, service, 'masson/core/network', ['network'], require('nikita/lib/misc').merge require('.').use,
+        bind_server: key: ['bind_server']
+      options = @config.network = service.options
+      
+      options.ip = service.node.ip
+      options.fqdn = service.node.fqdn
+      options.hostname = service.node.hostname
+      options.nodes = service.nodes
+      
       options.hostname_disabled ?= false
+      
+## Hosts
+
       options.hosts_auto ?= false
-      # for host, server of @config.servers
-      #   server.shortname ?= server.host.split('.')[0]
+      options.hosts ?= {}
+
+## DNS Resolver
+
+      options.dns = for bind in service.use.bind_server
+        continue if bind.node.host is service.node.host
+        host: bind.node.host
+        port: bind.options.port
+
+## Dependencies
+
+    migration = require '../../lib/migration'

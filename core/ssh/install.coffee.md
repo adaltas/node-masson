@@ -1,8 +1,7 @@
 
 # SSH Install
 
-    module.exports = header: 'SSH Install', handler: ->
-      options = @config.ssh
+    module.exports = header: 'SSH Install', handler: (options) ->
 
 ## Package
 
@@ -22,12 +21,12 @@ defined inside "users.[].authorized_keys".
       , ->
         for _, user of options.users
           @system.mkdir
-            target: "#{user.home or '/home/'+user.name}/.ssh"
+            target: "#{user.ssh_dir}"
             uid: user.name
             gid: null
             mode: 0o0700 # was "permissions: 16832"
           @file
-            target: "#{user.home or '/home/'+user.name}/.ssh/authorized_keys"
+            target: "#{user.ssh_dir}/authorized_keys"
             write: for key in user.authorized_keys
               match: new RegExp ".*#{misc.regexp.escape key}.*", 'mg'
               replace: key
@@ -65,20 +64,20 @@ the "users.[].rsa\_pub" propery and is written in "~/.ssh/id\_rsa.pub".
       @call
         header: 'Public and Private Key'
       , ->
-        users = for _, user of @config.users then user
+        users = for _, user of options.users then user
         for _, user of users
           throw Error "Property rsa_pub required if rsa defined" if user.rsa and not user.rsa_pub
           throw Error "Property rsa required if rsa_pub defined" if user.rsa_pub and not user.rsa
           @file
             if: user.rsa
-            target: "#{user.home or '/home/'+user.name}/.ssh/id_rsa"
+            target: "#{user.ssh_dir}/id_rsa"
             content: user.rsa
             uid: user.name
             gid: null
             mode: 0o600
           @file
             if: user.rsa
-            target: "#{user.home or '/home/'+user.name}/.ssh/id_rsa.pub"
+            target: "#{user.ssh_dir}/id_rsa.pub"
             content: user.rsa_pub
             uid: user.name
             gid: null

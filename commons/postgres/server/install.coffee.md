@@ -1,10 +1,7 @@
 
 # PostgreSQL Server Install
 
-    module.exports = header: 'PostgreSQL Server Install', handler: ->
-      {iptables, postgres} = @config
-      tmp = postgres.image_dir ?= "/tmp_#{Date.now()}"
-      md5 = postgres.md5 ?= true
+    module.exports = header: 'PostgreSQL Server Install', handler: (options) ->
 
 ## IPTables
 
@@ -18,9 +15,9 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
       @tools.iptables
         header: 'IPTables'
         rules: [
-          { chain: 'INPUT', jump: 'ACCEPT', dport: postgres.server.port, protocol: 'tcp', state: 'NEW', comment: "PostgreSQL" }
+          { chain: 'INPUT', jump: 'ACCEPT', dport: options.port, protocol: 'tcp', state: 'NEW', comment: "PostgreSQL" }
         ]
-        if: iptables.action is 'start'
+        if: options.iptables
 
 ## Startup Script
 
@@ -29,7 +26,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
         source: "#{__dirname}/resources/postgres-server.j2"
         local: true
         target: "/etc/init.d/postgres-server"
-        context: container: postgres.server.container_name
+        context: container: options.container_name
 
 ## Package
 
@@ -52,11 +49,11 @@ Install the PostgreSQL database server.
             binary: true
             md5: true
             source: "#{@config.nikita.cache_dir}/postgres.tar"
-            target: "#{tmp}/postgres.tar"
+            target: "#{options.image_dir}/postgres.tar"
           @docker.load
             header: 'Load Container'
             unless: -> exists
-            source: "#{tmp}/postgres.tar"
+            source: "#{options.image_dir}/postgres.tar"
             docker: if os.type in ['redhat','centos'] and os.release[0] is '6'
             then null
             else @config.docker #can not enable tls client verification centos/redhat6
@@ -70,14 +67,14 @@ Run the PostgreSQL server container
           header: 'Run PostgreSQL Container'
           label_true: 'RUNNED'
           force: -> @status(-1)
-          image: "postgres:#{postgres.version}"
+          image: "postgres:#{options.version}"
           env: [
-            "POSTGRES_PASSWORD=#{postgres.server.password}"
-            "POSTGRES_USER=#{postgres.server.user}"
+            "POSTGRES_PASSWORD=#{options.password}"
+            "POSTGRES_USER=#{options.user}"
           ]
-          port: "#{postgres.server.port}:5432"
+          port: "#{options.port}:5432"
           service: true
-          name: postgres.server.container_name
+          name: options.container_name
           docker: if os.type in ['redhat','centos'] and os.release[0] is '6'
           then null
           else @config.docker #can not enable tls client verification centos/redhat6

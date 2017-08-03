@@ -3,13 +3,15 @@
 
 The SSL service is a central place to define and obtain SSL certificates.
 
-Services which require SSL activation are encourage to leverage this service. It
+Services which require SSL activation are encouraged to leverage this service. It
 can also upload the certificates into the host filesystem.
 
     module.exports =
       use:
-        'java': 'masson/commons/java'
+        'java': module: 'masson/commons/java'
       configure:
         'masson/core/ssl/configure'
       commands:
-        'install': 'masson/core/ssl/install'
+        'install': ->
+          options = @config.ssl
+          @call 'masson/core/ssl/install', options

@@ -1,17 +1,16 @@
 
 # Iptables Install
 
+    module.exports = header: 'Iptables Install', handler: (options) ->
+
 ## Package
 
-The package "iptables" is installed.
-
-    module.exports = header: 'Iptables Install', handler: (options) ->
-      {action, startup} = @config.iptables
+Install the "iptables" package and "iptables-services" on RH7.
 
       @service
         name: 'iptables'
-        startup: startup
-        action: action
+        startup: options.startup
+        action: options.action
       @service
         if_os: name: ['redhat','centos'], version: '7'
         header: 'Iptable Service'
@@ -23,13 +22,13 @@ Redirect input logs in "/var/log/messages".
 
       @call
         header: 'Log'
-        unless: -> @config.iptables.action isnt 'start' or @config.iptables.log is false
-        handler: ->
-          @tools.iptables
-            rules: @config.iptables.log_rules
-          @service
-            srv_name: 'restart'
-            if: -> @status -1
+        unless: -> options.action isnt 'start' or options.redirect_log is false
+      , ->
+        @tools.iptables
+          rules: options.log_rules
+        @service
+          srv_name: 'restart'
+          if: -> @status -1
 
 ## Rules
 
@@ -37,5 +36,5 @@ Add user defined rules to IPTables.
 
       @tools.iptables
         header: 'Rules'
-        if: @config.iptables.action is 'start'
-        rules: @config.iptables.rules
+        if: options.action is 'start'
+        rules: options.rules

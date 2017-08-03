@@ -27,12 +27,20 @@ provision their databases and user access.
 ```
 
     module.exports = ->
-      @config.mysql ?= {}
-      options = @config.mysql.server ?= {}
+      service = migration.call @, service, 'masson/commons/mysql/server', ['mysql', 'server'], require('nikita/lib/misc').merge require('.').use,
+        iptables: key: ['iptables']
+      options = @config.mysql.server = service.options
 
 ## Validation
 
       throw Error "Required Option: options.password" unless options.password
+
+## Environnment
+
+      # Secure Installation
+      options.current_password ?= ''
+      options.root_host ?= '%'
+      options.iptables ?= service.use.iptables and service.use.iptables.options.action is 'start'
 
 ## Identities
 
@@ -48,10 +56,6 @@ provision their databases and user access.
       options.user.gid ?= options.group.name
 
 ## Configuration
-
-      # Secure Installation
-      options.current_password ?= ''
-      options.root_host ?= '%'
       # Main config file
       options.my_cnf ?= {}
       options.my_cnf['mysqld'] ?= {}
@@ -64,3 +68,9 @@ provision their databases and user access.
       # options.repo.url ?= 'http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm'
       options.repo.source ?= null
       options.repo.url = null if options.repo.repo?
+
+## Wait
+
+      options.wait_tcp = {}
+      options.wait_tcp.fqdn = service.node.fqdn
+      options.wait_tcp.port = options.my_cnf['mysqld']['port']

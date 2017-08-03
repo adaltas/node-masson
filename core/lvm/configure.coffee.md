@@ -17,8 +17,14 @@ The module accept the following properties:
     With the + sign the value is added to the actual size of the logical volume. 
 
     module.exports = ->
-      options = @config.lvm ?= {}
+      service = migration.call @, service, 'masson/core/lvm', ['lvm'], {}
+      options = @config.lvm = service.options
+      
       throw Error "Invalid device format. Please provide a string (device path or UUID='<uuid>')" unless typeof options.disk is 'string'
       throw Error "Please provide a target volume group" unless typeof options.vg is 'string'
       throw Error "Please provide a target logical volume" unless typeof options.lv is 'string'
       throw Error "Please provide a target logical volume" unless typeof options.size is 'string'
+
+## Dependencies
+
+    migration = require '../../lib/migration'

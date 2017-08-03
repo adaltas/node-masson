@@ -66,18 +66,26 @@ The module accept the following properties:
 }
 ```
 
-    module.exports = ->
-      options = @config.system ?= {}
-      # SELinux
+    module.exports = (service) ->
+      service = migration.call @, service, 'masson/core/system', ['system'], {}
+      options = @config.system = service.options
+      
+## SELinux
+
       options.selinux ?= true
       options.selinux = 'enforcing' if options.selinux is true
       options.selinux = 'disabled' if options.selinux is false
       throw Error "Invalid option \"options.selinux\": #{JSON.stringify options.selinux}" unless options.selinux in ['enforcing', 'permissive', 'disabled']
-      # Limits
+
+## Limits
+
       options.limits ?= {}
       options.limits.memlock ?= {}
       #options.limits.memlock.soft ?= 130
       options.limits.memlock.hard ?= 130
+
+## Identities
+
       # Groups
       options.groups ?= {}
       for name, group of options.groups
@@ -90,3 +98,7 @@ The module accept the following properties:
       # Profile
       # @config.profile ?= {}
       options
+
+## Dependencies
+
+    migration = require '../../lib/migration'

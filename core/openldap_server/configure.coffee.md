@@ -28,8 +28,15 @@ and should correspond to "openldap_server.config_password".
 ```
 
     module.exports = ->
-      openldap_ctxs = @contexts 'masson/core/openldap_server'
-      options = @config.openldap_server
+      service = migration.call @, service, 'masson/core/openldap_server', ['openldap_server'], require('nikita/lib/misc').merge require('.').use,
+        iptables: key: ['iptables']
+        ssl: key: ['ssl']
+        saslauthd: key: ['saslauthd']
+        openldap_server: key: ['openldap_server']
+      options = @config.openldap_server = service.options
+
+## Validation
+
       # Todo: Generate '*_slappasswd' with command `slappasswd -s $password`, but only the first time, we
       # need a mechanism to store configuration properties before.
       throw new Error "Missing \"options.suffix\" property" unless options.suffix
@@ -37,6 +44,13 @@ and should correspond to "openldap_server.config_password".
       # throw new Error "Missing \"options.root_slappasswd\" property" unless options.root_slappasswd
       throw new Error "Missing \"options.config_dn\" property" unless options.config_dn
       throw new Error "Missing \"options.config_password\" property" unless options.config_password
+
+## Ennvironment
+
+      options.iptables ?= service.use.iptables and service.use.iptables.options.action is 'start'
+
+## Identities
+
       # Group
       options.group = name: options.group if typeof options.group is 'string'
       options.group ?= {}
@@ -51,48 +65,42 @@ and should correspond to "openldap_server.config_password".
       options.user.shell = false
       options.user.comment ?= 'LDAP User'
       options.user.home = '/var/lib/ldap'
-      # Configuration
+
+## Configuration
+      
       options.root_dn ?= "cn=Manager,#{options.suffix}"
       options.log_level ?= 256
       options.users_dn ?= "ou=users,#{options.suffix}"
       options.groups_dn ?= "ou=groups,#{options.suffix}"
-      options.ldapadd ?= []
-      options.ldapdelete ?= []
-      options.tls ?= false
       options.config_file ?= '/etc/openldap/slapd.d/cn=config/olcDatabase={0}config.ldif'
       options.monitor_file ?= '/etc/openldap/slapd.d/cn=config/olcDatabase={1}monitor.ldif'
-      if options.tls
-        throw Error 'TLS mode requires "tls_cert_file"' unless options.tls_cert_file
-        throw Error 'TLS mode requires "tls_key_file"' unless options.tls_key_file
-        options.uri = "ldaps://#{@config.host}"
-      else
-        options.uri = "ldap://#{@config.host}"
 
 ## ACL
 
       throw Error 'Missing required "options.users_dn" property' unless options.users_dn
       throw Error 'Missing required "options.groups_dn" property' unless options.groups_dn
-      options.proxy_user ?= {}
-      options.proxy_user.dn ?= "cn=nssproxy,#{options.users_dn}"
-      options.proxy_user.uid ?= 'nssproxy'
-      options.proxy_user.gecos ?= 'Network Service Switch Proxy User'
-      options.proxy_user.objectClass ?= ['top', 'account', 'posixAccount', 'shadowAccount']
-      options.proxy_user.userPassword ?= 'test'
-      options.proxy_user.shadowLastChange ?= '15140'
-      options.proxy_user.shadowMin ?= '0'
-      options.proxy_user.shadowMax ?= '99999'
-      options.proxy_user.shadowWarning ?= '7'
-      options.proxy_user.loginShell ?= '/bin/false'
-      options.proxy_user.uidNumber ?= '801'
-      options.proxy_user.gidNumber ?= '801'
-      options.proxy_user.homeDirectory ?= '/home/nssproxy'
-      options.proxy_group ?= {}
-      options.proxy_group.dn ?= "cn=nssproxy,#{options.groups_dn}"
-      options.proxy_group.objectClass ?= ['top', 'posixGroup']
-      options.proxy_group.gidNumber ?= '801'
-      options.proxy_group.description ?= 'Network Service Switch Proxy'
+      # options.proxy_user ?= {}
+      # options.proxy_user.dn ?= "cn=nssproxy,#{options.users_dn}"
+      # options.proxy_user.uid ?= 'nssproxy'
+      # options.proxy_user.gecos ?= 'Network Service Switch Proxy User'
+      # options.proxy_user.objectClass ?= ['top', 'account', 'posixAccount', 'shadowAccount']
+      # options.proxy_user.userPassword ?= 'test'
+      # options.proxy_user.shadowLastChange ?= '15140'
+      # options.proxy_user.shadowMin ?= '0'
+      # options.proxy_user.shadowMax ?= '99999'
+      # options.proxy_user.shadowWarning ?= '7'
+      # options.proxy_user.loginShell ?= '/bin/false'
+      # options.proxy_user.uidNumber ?= '801'
+      # options.proxy_user.gidNumber ?= '801'
+      # options.proxy_user.homeDirectory ?= '/home/nssproxy'
+      # options.proxy_group ?= {}
+      # options.proxy_group.dn ?= "cn=nssproxy,#{options.groups_dn}"
+      # options.proxy_group.objectClass ?= ['top', 'posixGroup']
+      # options.proxy_group.gidNumber ?= '801'
+      # options.proxy_group.description ?= 'Network Service Switch Proxy'
 
 ## Backend
+
 Select the backend for Openldap. It was originally bdb (Barkeley's DB), and moved to hdb.
 In Centos/RHEL it's by default hdb. However since openldap 2.4 the recommend backend is
 mdb (backend running inside slapd), which does provide the same functionalities than hdb
@@ -105,12 +113,44 @@ Ryb does install hdb/bdb by default, but administrators can choose mdb.
       if options.backend is 'mdb'
         options.db_dir ?= "#{options.user.home}/mdb-db"
         options.db_max_size ?= '1073741824'# 1 Gb
-      
+
+## SSL/TLS
+
+      options.tls ?= false
+      unless options.tls
+        options.port ?= 389
+        options.uri ?= "ldap://#{service.node.fqdn}:#{options.port}"
+      else
+        throw Error 'TLS mode requires "tls_cert_file"' unless options.tls_cert_file
+        throw Error 'TLS mode requires "tls_key_file"' unless options.tls_key_file
+        options.port ?= 636
+        options.uri ?= "ldaps://#{service.node.fqdn}:#{options.port}"
+
+## Slapd
+
+      options.urls ?= [ 'ldapi:///','ldap:///' ]
+      options.urls.push 'ldaps:///' if options.tls and options.urls.indexOf('ldaps:///') is -1
+
+## High Availability (HA)
+
+      options.server_ids = {}
+      for openldap_srv, i in service.use.openldap_server.sort( (srv) -> srv.node.fqdn )
+        options.server_ids[openldap_srv.node.fqdn] ?= "#{i+1}"
+        if openldap_srv.node.fqdn isnt service.node.fqdn
+          options.remote_provider = unless openldap_srv.options.tls
+          then "ldap://#{openldap_srv.node.fqdn}:#{openldap_srv.options.port or 389}"
+          else "ldaps://#{openldap_srv.node.fqdn}:#{openldap_srv.options.port or 636}"
+
+## SASL
+
+      options.saslauthd = service.use.saslauthd
       
 ## Entries
 
 Provision users and groups
 
+      options.ldapadd ?= []
+      options.ldapdelete ?= []
       options.entries ?= {}
       options.entries.groups ?= {}
       for name, group of options.entries.groups
@@ -201,21 +241,7 @@ Provision users and groups
         description: 'Kerberos administrator\'s group.'
       , options.krb5.krbadmin_group
 
-## Slapd
-
-      options.urls ?= [ 'ldapi:///','ldap:///' ]
-      options.urls.push 'ldaps:///' if options.tls and options.urls.indexOf('ldaps:///') is -1
-
-## High Availability (HA)
-
-      options.server_ids = {}
-      for openldap_ctx, i in openldap_ctxs.sort( (ctx) -> ctx.config.host )
-        options.server_ids[openldap_ctx.config.host] ?= "#{i+1}"
-        if openldap_ctx.config.host isnt @config.host
-          options.remote_provider = if openldap_ctx.config.openldap_server.tls
-          then "ldaps://#{openldap_ctx.config.host}"
-          else "ldap://#{openldap_ctx.config.host}"
-
 ## Dependencies
 
     misc = require 'nikita/lib/misc'
+    migration = require '../../lib/migration'

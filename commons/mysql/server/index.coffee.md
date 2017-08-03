@@ -5,14 +5,17 @@ TODO: https://dev.mysql.com/doc/refman/5.7/en/mysql-cluster.html
 
     module.exports =
       use:
-        iptables: module: 'masson/core/iptables' #implicit: true,
+        iptables: module: 'masson/core/iptables', local: true
       configure:
         'masson/commons/mysql/server/configure'
       commands:
-        'install': [
-          'masson/commons/mysql/server/install'
-          'masson/commons/mysql/server/check'
-        ]
+        'check': ->
+          options = @config.mysql.server
+          @call 'masson/commons/mysql/server/check', options
+        'install': ->
+          options = @config.mysql.server
+          @call 'masson/commons/mysql/server/install', options
+          @call 'masson/commons/mysql/server/check', options
         'start':
           'masson/commons/mysql/server/start'
         'stop':

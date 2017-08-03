@@ -1,7 +1,13 @@
 
 # PostgreSQL Server Check
 
-    module.exports =  header: 'PostgreSQL Server Check', label_true: 'CHECKED', handler: ->
-      @connection.wait
-        host: @config.host
-        port: 5432
+    module.exports =  header: 'PostgreSQL Server Check', label_true: 'CHECKED', handler: (options) ->
+
+## TCP
+
+Ensure the port is listening.
+
+      @connection.assert
+        header: 'TCP'
+        host: options.wait_tcp.fqdn
+        port: options.wait_tcp.port

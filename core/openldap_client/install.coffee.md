@@ -6,7 +6,7 @@ file "/etc/openldap/ldap.conf" is configured by the "openldap_client.config"
 object property. The property "openldap\_client.ca\_cert" may reference a 
 certificate to upload.
 
-    module.exports = header: 'OpenLDAP Client Install', handler: ->
+    module.exports = header: 'OpenLDAP Client Install', handler: (options) ->
 
 ## Package
 
@@ -14,10 +14,9 @@ certificate to upload.
 
 ## Configuration
 
-      {openldap_client} = @config
       @file
         header: 'Configure'
-        write: for k, v of openldap_client.config
+        write: for k, v of options.config
           v = v.join(' ') if Array.isArray v
           match: new RegExp "^#{k}.*$", 'mg'
           replace: "#{k} #{v}"
@@ -45,7 +44,7 @@ Certificates are temporarily uploaded to the "/tmp" folder and registered with
 the command `authconfig --update --ldaploadcacert={file}`.
 
       @call header: 'Certificate', handler: ->
-        for certificate in openldap_client.certificates then do (certificate) =>
+        for certificate in options.certificates then do (certificate) =>
           filename = null
           if certificate.local
             hash = crypto.createHash('md5').update(certificate.source).digest('hex')
@@ -54,18 +53,23 @@ the command `authconfig --update --ldaploadcacert={file}`.
               target: "/tmp/#{hash}"
               mode: 0o0640
               shy: true
-            @system.execute # openssh is executed remotely
+            @system.execute
               cmd: "openssl x509 -noout -hash -in /tmp/#{hash}; rm -rf /tmp/#{hash}"
               shy: true
             , (err, _, stdout) ->
               filename = stdout.trim() unless err
+            # Clean up uploaded certificate
+            # TODO: always execute this action, even on error
+            @system.remove
+              target: "/tmp/#{hash}"
+              shy: true
             @call ->
               @file
                 source: certificate.source
                 local: true
-                target: "#{openldap_client.config.TLS_CACERTDIR}/#{filename}.0"
+                target: "#{options.config.TLS_CACERTDIR}/#{filename}.0"
           else
-            @system.execute # openssh is executed remotely
+            @system.execute
               cmd: "openssl x509 -noout -hash -in #{certificate.source}"
               shy: true
             , (err, _, stdout) ->
@@ -73,7 +77,7 @@ the command `authconfig --update --ldaploadcacert={file}`.
             @call ->
               @file
                 source: certificate.source
-                target: "#{openldap_client.config.TLS_CACERTDIR}/#{filename}.0"
+                target: "#{options.config.TLS_CACERTDIR}/#{filename}.0"
 
 ## Dependencies
 

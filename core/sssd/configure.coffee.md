@@ -60,8 +60,11 @@ Example:
 ```
 
     module.exports = ->
-      options = @config.sssd ?= {}
-      options.merge ?= false
+      service = migration.call @, service, 'masson/core/sssd', ['sssd'], require('nikita/lib/misc').merge require('.').use,
+        yum: key: ['yum']
+        openldap_client: key: ['openldap_client']
+      options = @config.sssd = service.options
+      
 
 ## Identities
 
@@ -82,6 +85,7 @@ Example:
 
 ## Configuration
 
+      options.merge ?= false
       options.config = merge
         'sssd':
           'config_file_version' : '2'
@@ -121,3 +125,4 @@ service sssd restart
 ## Dependencies
 
     {merge} = require 'nikita/lib/misc'
+    migration = require '../../lib/migration'

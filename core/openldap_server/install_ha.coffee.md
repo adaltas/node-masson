@@ -1,12 +1,12 @@
 
 # OpenLDAP ACL
 
-    module.exports = header: 'OpenLDAP Server HA', handler: ->
-      {openldap_server} = @config
-      db = switch openldap_server.backend
+    module.exports = header: 'OpenLDAP Server HA', handler: (options) ->
+
+      db = switch options.backend
         when 'mdb' then 'olcDatabase={3}mdb'
         when 'hdb' then 'olcDatabase={2}hdb'
-      return unless Object.keys(openldap_server.server_ids).length > 1
+      return unless Object.keys(options.server_ids).length > 1
 
       @system.execute
         header: 'Module Install'
@@ -41,7 +41,7 @@
         """
 
       # TODO: create replication user instead of root_dn
-      serverId = "#{openldap_server.server_ids[@config.host]}"
+      serverId = "#{options.server_ids[@config.host]}"
       @system.execute
         header: 'Registration'
         unless_exec: """
@@ -59,11 +59,11 @@
         changetype: modify
         add: olcSyncRepl
         olcSyncRepl: rid=#{pad 3, serverId, '0'} 
-         provider=#{openldap_server.remote_provider} 
+         provider=#{options.remote_provider} 
          bindmethod=simple 
-         binddn="#{openldap_server.root_dn}" 
-         credentials=#{openldap_server.root_password} 
-         searchbase="#{openldap_server.suffix}" 
+         binddn="#{options.root_dn}" 
+         credentials=#{options.root_password} 
+         searchbase="#{options.suffix}" 
          scope=sub 
          schemachecking=on 
          type=refreshAndPersist 

@@ -4,9 +4,8 @@
     module.exports =
       header: 'Maven Prepare'
       if: -> @contexts('masson/commons/maven')[0]?.config.host is @config.host
-      handler: ->
-        {maven} = @config
+      ssh: null
+      handler: (options) ->
         @file.cache
-          ssh: null
-          source: "#{maven.source}"
+          source: "#{options.source}"
           location: true

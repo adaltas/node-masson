@@ -5,8 +5,7 @@ Install the [OpenLDAP backend for the MIT Kerberos server](https://web.mit.edu/k
 
 ## Configuration
 
-    module.exports = header: 'OpenLDAP Server Krb5', handler: ->
-      options = @config.openldap_server
+    module.exports = header: 'OpenLDAP Server Krb5', handler: (options) ->
 
 ## Install schema
 
@@ -41,7 +40,6 @@ not allowed to be used for krb5 ldap containers.
 
       @ldap.add
         header: 'Container DN'
-        # uri: options.uri
         uri: true
         binddn: options.root_dn
         passwd: options.root_password
@@ -55,7 +53,6 @@ Create the kerberos administrator's group.
 
       @ldap.add
         header: 'Group DN'
-        # uri: options.uri
         uri: true
         binddn: options.root_dn
         passwd: options.root_password
@@ -67,7 +64,6 @@ Create the kerberos administrator's user.
 
       @ldap.user
         header: 'User DN'
-        # uri: options.uri
         uri: true
         binddn: options.root_dn
         passwd: options.root_password

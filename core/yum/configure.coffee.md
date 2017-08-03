@@ -65,11 +65,14 @@ Note, ntp is installed to encure correct date on the server or HTTPS will fail.
 ## Source Code
 
     module.exports = ->
-      [proxy_ctx] = @contexts 'masson/core/proxy'
-      options = @config.yum ?= {}
+      service = migration.call @, service, 'masson/core/yum', ['yum'], require('nikita/lib/misc').merge require('.').use,
+        proxy: key: ['proxy']
+      options = @config.yum = service.options
 
 ## Configuration
 
+      options.fqdn = service.node.fqdn
+      options.prepare = service.nodes[0].fqdn is options.fqdn
       options.merge ?= true
       options.config ?= {}
       options.config.main ?= {}
@@ -78,10 +81,10 @@ Note, ntp is installed to encure correct date on the server or HTTPS will fail.
 ## Proxy Configuration
 
       options.proxy ?= false
-      if proxy_ctx and options.proxy
-        options.config.main.proxy ?= proxy_ctx.config.proxy.http_proxy_no_auth
-        options.config.main.proxy_username ?= proxy_ctx.config.proxy.username
-        options.config.main.proxy_password ?= proxy_ctx.config.proxy.password
+      if service.use.proxy and options.proxy
+        options.config.main.proxy ?= service.use.proxy.config.proxy.http_proxy_no_auth
+        options.config.main.proxy_username ?= service.use.proxy.config.proxy.username
+        options.config.main.proxy_password ?= service.use.proxy.config.proxy.password
 
 ## System Repository
 
@@ -104,3 +107,7 @@ Note, ntp is installed to encure correct date on the server or HTTPS will fail.
       options.packages['yum-plugin-priorities'] ?= true
       options.packages['man'] ?= true
       options.packages['ksh'] ?= true
+
+## Dependencies
+
+    migration = require '../../lib/migration'

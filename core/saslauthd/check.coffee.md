@@ -2,7 +2,6 @@
 # SASLAuthd Check
 
     module.exports = header: 'SASLAuthd Check', handler: (options) ->
-      {saslauthd} = @config
 
 First check that the DN and password that saslauthd will use when it connects to AD are valid:
 
@@ -44,5 +43,5 @@ testsaslauthd -u user@ad.example.com -p wrongpassword
 
       @execute
         header: 'Cmd testsaslauthd'
-        if: saslauthd.check.username
-        cmd: "testsaslauthd -u #{saslauthd.check.username} -p #{saslauthd.check.password}"
+        if: options.check.username
+        cmd: "testsaslauthd -u #{options.check.username} -p #{options.check.password}"

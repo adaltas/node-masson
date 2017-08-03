@@ -2,21 +2,29 @@
 # MariaDB Server Check
 
     module.exports = header: 'MariaDB Server Check', handler: (options) ->
-      
-      props =
-        database: null
-        admin_username: 'root'
-        admin_password: options.password
-        engine: 'mysql'
-        host: @config.host
-        silent: false
 
-## Wait Connect
-Wait connect action is used as a check n the port availability.
+## Runing Sevrice
+
+Ensure the "ntpd" service is up and running.
+
+      @service.assert
+        header: 'Service'
+        name: 'mariadb-server'
+        srv_name: 'mariadb'
+        installed: true
+        started: true
+
+## TCP Connection
+
+Ensure the port is listening.
 
       @connection.wait
-        port: options.my_cnf['mysqld']['port']
-        host: @config.host
+        retry: 3
+        interval: 10000
+      @connection.assert
+        header: 'TCP'
+        host: options.wait_tcp.fqdn
+        port: options.wait_tcp.port
 
 ## Check Replication
 
@@ -30,14 +38,14 @@ Wait connect action is used as a check n the port availability.
       @call
         header: 'Check Replication'
         if: options.ha_enabled
-        handler: ->
-          @system.execute
-            retry: 3
-            cmd: "#{db.cmd props,'show slave status \\G ;'} | grep Slave_IO_State"
-          , (err, status, stdout) ->
-            throw err if err
-            ok = /^Slave_IO_State:\sWaiting for master to send event/.test(stdout.trim() )or /^Slave_IO_State:\sConnecting to master/.test(stdout.trim())
-            throw Error 'Error in Replication state' unless ok
+      , ->
+        @system.execute
+          retry: 3
+          cmd: "#{db.cmd props,'show slave status \\G ;'} | grep Slave_IO_State"
+        , (err, status, stdout) ->
+          throw err if err
+          ok = /^Slave_IO_State:\sWaiting for master to send event/.test(stdout.trim() )or /^Slave_IO_State:\sConnecting to master/.test(stdout.trim())
+          throw Error 'Error in Replication state' unless ok
 
 ## Dependencies
 

@@ -8,11 +8,11 @@ in "/etc/gitconfig" will not be created or modified.
 
     module.exports =
       use:
-        'proxy': module: 'masson/core/proxy'
-        'system': module:  'masson/core/system'
+        'system': module: 'masson/core/system', local: true
+        'proxy': module: 'masson/core/proxy', local: true
       configure:
         'masson/commons/git/configure'
       commands:
-        'install': [
-          'masson/commons/git/install'
-        ]
+        'install': ->
+          options = @config.git
+          @call 'masson/commons/git/install', options

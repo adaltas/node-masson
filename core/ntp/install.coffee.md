@@ -5,8 +5,7 @@ The installation follows the procedure published on [cyberciti][cyberciti]. The
 "ntp" server is installed as a startup service and `ntpdate` is run a first
 time when the `ntpd` daemon isnt yet started.
 
-    module.exports = header: 'NTP Install', handler: ->
-      {ntp} = @config
+    module.exports = header: 'NTP Install', handler: (options) ->
 
 ## Package
 
@@ -27,11 +26,11 @@ It should only be used in a pure offline configuration,
 and when only ONE ntp server is configured
 
       @call header: 'Configure', handler: (_, callback) ->
-        servers = ntp.servers.slice 0
+        servers = options.servers.slice 0
         return callback() unless servers?.length
-        if @config.host in servers
-          servers = servers.filter (e) => e isnt @config.host
-        servers.push '127.127.1.0' if ntp.fudge
+        if options.fqdn in servers
+          servers = servers.filter (fqdn) => fqdn isnt options.fqdn
+        servers.push '127.127.1.0' if options.fudge
         @fs.readFile '/etc/ntp.conf', 'ascii', (err, content) =>
           return callback err if err
           lines = string.lines content
@@ -61,10 +60,10 @@ and when only ONE ntp server is configured
               commented = match[1] is '#'
               opts = match[2]
               found_fudge = true
-              if commented and ntp.fudge
+              if commented and options.fudge
                 lines[i] = "fudge #{opts}"
                 modified = true
-              else if not commented and not ntp.fudge
+              else if not commented and not options.fudge
                 lines[i] = "#fudge #{opts}"
                 modified = true
           for server in servers
@@ -72,8 +71,8 @@ and when only ONE ntp server is configured
               lines.splice position+1, 0, "server #{server} iburst"
               position++
               modified = true
-          if ntp.fudge and not found_fudge
-            lines.splice position+1, 0, "fudge 127.127.1.0 stratum #{ntp.fudge}"
+          if options.fudge and not found_fudge
+            lines.splice position+1, 0, "fudge 127.127.1.0 stratum #{options.fudge}"
             position++
             modified = true
           return callback null, false unless modified
@@ -96,13 +95,13 @@ to wait for an available NTPD server.
       @system.execute
         header: 'Synchronization'
         cmd: """
-        lag=`ntpdate -q #{ntp.servers[0]} | head -n 1| sed 's/.*offset -*\\([0-9]*\\).*/\\1/'`
-        [ "$lag" -gt "#{Math.round(ntp.lag/1000)}" ] || exit 3
+        lag=`ntpdate -q #{options.servers[0]} | head -n 1| sed 's/.*offset -*\\([0-9]*\\).*/\\1/'`
+        [ "$lag" -gt "#{Math.round(options.lag/1000)}" ] || exit 3
         """
         code_skipped: 3
       @call if: (-> @status -1), ->
         @service.stop 'ntpd'
-        @system.execute "ntpdate #{ntp.servers[0]}"
+        @system.execute "ntpdate #{options.servers[0]}"
         @service.start 'ntpd'
 
 ## Module Dependencies

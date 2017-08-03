@@ -5,10 +5,13 @@ Currently being written, not yet registered in any config.
 
 ## Configuration
 
-    module.exports = ->
+    module.exports =
       'configure':
         'masson/commons/maven/configure'
-      'install':
-        'masson/commons/maven/install'
-      'prepare':
-        'masson/commons/maven/prepare'
+      commands:
+        'install': ->
+          options = @config.maven
+          @call 'masson/commons/maven/install', options
+        'prepare': ->
+          options = @config.maven
+          @call 'masson/commons/maven/prepare', options

@@ -27,17 +27,15 @@ any settings from the proxy action.
 
 ```json
 {
-  "git": {
-    "merge": true,
-    "global": {
-      "user": { "name": 'default user', email: "default_user@domain.com" }
-    },
-    "users": {
-      "a_user": {
-        "user": { "name": 'a user', email: "a_user@domain.com" }
-        "http": {
-          "proxy": "http://some.proxy:9823"
-        }
+  "merge": true,
+  "global": {
+    "user": { "name": "default user", email: "default_user@domain.com" }
+  },
+  "users": {
+    "a_user": {
+      "user": { "name": "a user", email: "a_user@domain.com" },
+      "http": {
+        "proxy": "http://some.proxy:9823"
       }
     }
   }
@@ -45,14 +43,41 @@ any settings from the proxy action.
 ```
 
     module.exports = ->
-      [proxy_ctx] = @contexts('masson/core/proxy').filter (ctx) => ctx.config.host is @config.host
-      options = @config.git ?= {}
+      service = migration.call @, service, 'masson/commons/git', ['git'], require('nikita/lib/misc').merge require('.').use,
+        proxy: key: ['proxy']
+        system: key: ['system']
+      options = @config.git = service.options
+
+## Environment
 
       options.merge ?= true
-      options.properties ?= {}
       options.proxy ?= true
       options.global ?= false
       options.global = {} if options.global is true
-      options.users ?= {}
+
+## Configuration
+
+      options.properties ?= {}
       options.properties.http ?= {}
-      options.properties.http.proxy ?= proxy_ctx.config.proxy.http_proxy if proxy_ctx and options.proxy
+      options.properties.http.proxy ?= service.use.proxy.options.http_proxy if service.use.proxy and options.proxy
+
+## User Configuration
+
+Npm properties can be defined by the system module through the "gitconfig" user 
+configuration.
+
+      options.users ?= {}
+      for username, user of options.users
+        throw Error "User Not Defined: module system must define the user #{username}" unless service.use.system.options.users[username]
+        user = merge {}, service.use.system.options.users[username], user
+        user.target ?= "#{user.home}/.gitconfig"
+        user.uid ?= user.uid or user.name
+        user.gid ?= user.gid or user.group
+        user.content ?= merge {}, options.properties, user.gitconfig, user.properties
+        user.merge ?= options.merge
+
+## Dependencies
+
+    {merge} = require 'nikita/lib/misc'
+    migration = require '../../lib/migration'
+      

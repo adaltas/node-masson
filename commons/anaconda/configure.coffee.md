@@ -2,7 +2,9 @@
 # Anaconda Configure
 
     module.exports = ->
-      options = @config.anaconda ?= {}
+      service = migration.call @, service, 'masson/commons/anaconda', ['anaconda'], {}
+      options = @config.anaconda = service.options
+      
       options.tmp_dir ?= '/tmp'
       options.install_dir ?= '/opt/anaconda'
       options.version ?= '4.3.0'

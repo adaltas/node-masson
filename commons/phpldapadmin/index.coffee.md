@@ -5,9 +5,11 @@ Install the phpLDAPadmin and register it to the Apache HTTPD server. Upon
 installation, the web application will be accessible at the following URL:
 "http://localhost/ldap".
 
-    module.exports = ->
+    module.exports =
       use:
-        implicit: true, module: 'masson/commons/httpd'
+        'httpd': module: 'masson/commons/httpd', local: true
       configure: 'masson/commons/phpldapadmin/configure'
       commands:
-        'install': 'masson/commons/phpldapadmin/install'
+        'install': ->
+          options = @config.phpldapadmin
+          @call 'masson/commons/phpldapadmin/install', options
