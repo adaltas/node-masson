@@ -1,8 +1,7 @@
 
-# Bind server Install
+# Bind Server Install
 
     module.exports = header: 'Bind Server Install', handler: (options) ->
-      {bind_server} = @config
 
 ## Users & Groups
 
@@ -15,8 +14,8 @@ cat /etc/group | grep named
 named:x:25:
 ```
 
-      @system.group bind_server.group
-      @system.user bind_server.user
+      @system.group options.group
+      @system.user options.user
 
 ## IPTables
 
@@ -31,10 +30,10 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
       @tools.iptables
         header: 'IPTables'
         rules: [
-          { chain: 'INPUT', jump: 'ACCEPT', dport: 53, protocol: 'tcp', state: 'NEW', comment: "Named" }
-          { chain: 'INPUT', jump: 'ACCEPT', dport: 53, protocol: 'udp', state: 'NEW', comment: "Named" }
+          { chain: 'INPUT', jump: 'ACCEPT', dport: options.port, protocol: 'tcp', state: 'NEW', comment: "Named" }
+          { chain: 'INPUT', jump: 'ACCEPT', dport: options.port, protocol: 'udp', state: 'NEW', comment: "Named" }
         ]
-        if: @config.iptables.action is 'start'
+        if: options.iptables
 
 ## Install
 
@@ -50,8 +49,8 @@ The packages "bind" is installed as a startup item and not yet installed.
         mount: '/run/named'
         name: 'named'
         perm: '0750'
-        uid: bind_server.user.name
-        gid: bind_server.group.name
+        uid: options.user.name
+        gid: options.group.name
 
 ## Configure
 
@@ -84,7 +83,7 @@ Upload the zones definition files provided in the configuration file.
       @call header: 'Zones', handler: ->
         @file
           target: '/etc/named.conf'
-          write: for zone in bind_server.zones
+          write: for zone in options.zones
             # /^zone "hadoop" IN \{[\s\S]*?\n\}/gm.exec f
             match: RegExp "^zone \"#{quote path.basename zone}\" IN \\{[\\s\\S]*?\\n\\};", 'gm'
             replace: """
@@ -100,10 +99,10 @@ Upload the zones definition files provided in the configuration file.
           source: zone
           local: true
           mode: 0o644
-          uid: bind_server.user.name
-          gid: bind_server.group.name
+          uid: options.user.name
+          gid: options.group.name
           target: "/var/named/#{path.basename zone}"
-        ) for zone in bind_server.zones
+        ) for zone in options.zones
 
 ## rndc Key
 
@@ -115,8 +114,8 @@ Generates configuration files for rndc.
           unless_exists: '/etc/rndc.key'
         @system.chown
           target: '/etc/rndc.key'
-          uid: bind_server.user.name
-          gid: bind_server.group.name
+          uid: options.user.name
+          gid: options.group.name
         @service
           srv_name: 'named'
           action: 'restart'

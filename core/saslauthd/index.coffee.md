@@ -13,10 +13,12 @@ LDAP server.
       configure:
         'masson/core/saslauthd/configure'
       commands:
-        'check':
-          'masson/core/saslauthd/check'
-        'install':
-          'masson/core/saslauthd/install'
+        'check': ->
+          options = @config.saslauthd
+          @call 'masson/core/saslauthd/check', options
+        'install': ->
+          options = @config.saslauthd
+          @call 'masson/core/saslauthd/install', options
         'start':
           'masson/core/saslauthd/start'
         'stop':

@@ -1,8 +1,7 @@
 
 # Mysql Server Check
 
-    module.exports = header: 'Mysql Server Check', handler: ->
-      {mysql} = @config
+    module.exports = header: 'Mysql Server Check', handler: (options) ->
 
 ## Runing Sevrice
 
@@ -20,11 +19,12 @@ Ensure the "ntpd" service is up and running.
         started: true
 
 ## Wait Connect
-Wait connect action is used as a check n the port availability.
 
-      @connection.wait
-        port: mysql.server.my_cnf['mysqld']['port']
-        host: @config.host
+Wait connect action is used as a check of the port availability.
+
+      @connection.assert
+        host: options.wait_tcp.fqdn
+        port: options.wait_tcp.port
 
 ## Dependencies
 

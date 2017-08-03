@@ -5,7 +5,7 @@ Configure the HTTPD server.
 
     module.exports =
       use:
-        iptables: module: 'masson/core/iptables' # implicit: true
+        iptables: module: 'masson/core/iptables', local: true
       configure:
         'masson/commons/httpd/configure'
       commands:

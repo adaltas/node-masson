@@ -7,9 +7,8 @@ Download the Oracle JDK.
       header: 'Java Prepare'
       if: -> @contexts('masson/commons/java')[0]?.config.host is @config.host
       ssh: null
-      handler: ->
-        {java} = @config
-        for version, info of java.jdk.versions
+      handler: (options) ->
+        for version, info of options.jdk.versions
           @file.cache
             header: "Oracle JDK #{version}"
             location: true

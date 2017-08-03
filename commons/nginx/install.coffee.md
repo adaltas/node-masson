@@ -1,8 +1,7 @@
 
 # NGINX Web Server Install
 
-    module.exports = header: 'NGINX Install', handler: ->
-      options = @config.nginx
+    module.exports = header: 'NGINX Install', handler: (options) ->
 
 ## Users & Groups
 

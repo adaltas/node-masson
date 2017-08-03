@@ -10,7 +10,7 @@ Check the health of the SSH server.
 Ensure the "sshd" service is up and running.
 
       @service.assert
-        header: 'Serrvice'
+        header: 'Service'
         name: 'openssh-server'
         srv_name: 'sshd'
         installed: true

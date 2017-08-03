@@ -11,5 +11,6 @@
       configure:
         'masson/core/system/configure'
       commands:
-        'install':
-          'masson/core/system/install'
+        'install': ->
+          options = @config.system
+          @call 'masson/core/system/install', options

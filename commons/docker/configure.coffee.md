@@ -2,9 +2,10 @@
 # Docker Configure
 
     module.exports = ->
-      ctx_iptables = @contexts('masson/core/iptables').filter (ctx) => ctx.config.host is @config.host
-      [ssl_ctx] = @contexts('masson/core/ssl').filter (ctx) => ctx.config.host is @config.host
-      options = @config.docker ?= {}
+      service = migration.call @, service, 'masson/commons/docker', ['docker'], require('nikita/lib/misc').merge require('.').use,
+        iptables: key: ['iptables']
+        ssl: key: ['ssl']
+      options = @config.docker = service.options
       
       options.nsenter ?= true
       options.conf_dir ?= '/etc/docker'
@@ -42,13 +43,13 @@ types of Socket: unix, tcp, and fd.
 Example:
 
 ```json
-  { docker: {
-    sockets: {
-      unix: ['/var/run/docker.sock'],
-      tcp: ['master3.ryba:2376'],
-      fd: ['2']
-    }
+{
+  sockets: {
+    unix: ["/var/run/docker.sock"],
+    tcp: ["master3.ryba:2376"],
+    fd: ["2"]
   }
+}
 ```
 
       options.sockets ?= {}
@@ -60,7 +61,7 @@ Example:
       # see https://docs.docker.com/v1.5/articles/networking/
       options.other_opts ?= ''
       options.other_args ?= {}
-      options.other_args.iptables ?= if ctx_iptables.length and ctx_iptables[0].config.iptables.action is 'start' then 'true' else 'false'
+      options.other_args.iptables ?= if service.use.iptables and service.use.iptables.options.action is 'start' then 'true' else 'false'
       options.source ?= 'https://github.com/docker/compose/releases/download/1.12.0/docker-compose-Linux-x86_64'
       options.daemon ?= {}
       # the /etc/docker/daemon.json file can also be used to specify starting options for docker daemon
@@ -75,7 +76,7 @@ Docker Engine supports TLS authentication between the CLI and engine.
 When TLS is enabled, `tlscacert`, `tlscert`, `tlskey` and `tlsverify` properties
 are added docker `@config.docker` object, so it can be used in nikita docker actions.
 
-      options.ssl ?= ssl_ctx.config.ssl
+      options.ssl ?= service.use.ssl.options
       # ptions.ssl.enabled ?= false
       if options.ssl.enabled
       # if options.ssl.enabled
@@ -108,14 +109,10 @@ configure device mapper for production use.It creates a logical volume configure
 as a thin pool to use as backing for the storage pool.
 To use it just specify the `options.block_device`.
 
-Example
 ```json
-  config: {
-    docker: {
-      block_device: '/dev/xvdf'
-    }
-  }
-
+{
+  block_device: "/dev/xvdf"
+}
 ```
 
       options.block_device ?= null
@@ -129,6 +126,10 @@ Example
       #   'dm.thinpooldev': "/dev/mapper/#{options.vg_name}-#{options.thin_pool_name}"
       #   'dm.use_deferred_removal': true
       # options.env['DOCKER_STORAGE_OPTIONS'] ?= 
+
+## Dependencies
+
+    migration = require '../../lib/migration'
 
 [socket-opts]:(https://docs.docker.com/engine/reference/commandline/dockerd/#/daemon-socket-option)
 [daemon-opts-resources]:(https://github.com/moby/moby/issues/21701)

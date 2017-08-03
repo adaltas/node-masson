@@ -1,9 +1,7 @@
 
 # Network Install
 
-    module.exports = header: 'Network Install', handler: ->
-      {network} = @config
-      network_ctxs = @contexts 'masson/core/network'
+    module.exports = header: 'Network Install', handler: (options) ->
 
 ## Hosts
 
@@ -14,9 +12,9 @@ set. Set the "network.hosts_disabled" to "true" if you dont wish to overwrite
 this file.
 
       content = []
-      if network.hosts_auto then for ctx in network_ctxs
-        content.push "#{ctx.config.ip} #{ctx.config.host} #{ctx.config.shortname}"
-      for ip, hostnames of network.hosts
+      if options.hosts_auto then for node in options.nodes
+        content.push "#{node.ip} #{node.fqdn} #{node.hostname}"
+      for ip, hostnames of options.hosts
         content.push "#{ip} #{hostnames}"
       @file
         header: 'Hosts'
@@ -29,13 +27,13 @@ this file.
         backup: true
         eof: true
       write = []
-      if network.host_replace then for ip in Object.keys network.host_replace
+      if options.host_replace then for ip in Object.keys options.host_replace
         write.push
           match: RegExp "^#{quote ip}\\s.*$", 'm'
-          replace: "#{ip} #{network.host_replace[ip]}"
+          replace: "#{ip} #{options.host_replace[ip]}"
       @file
         header: 'Host replace'
-        if: network.host_replace?
+        if: options.host_replace?
         target: '/etc/hosts'
         write: write
 
@@ -46,22 +44,18 @@ relevant file is "/etc/sysconfig/network".
 
       @call
         header: 'Hostname'
-        unless: -> @config.network.hostname_disabled
+        unless: -> options.hostname_disabled
         handler: ->
-          {hostname, shortname, network} = @config
-          restart = false
           @call
             if_os: name: ['centos','redhat'], version: '6'
           , ->
             @file
               match: /^HOSTNAME=.*/mg
-              replace: "HOSTNAME=#{shortname}"
+              replace: "HOSTNAME=#{options.hostname}"
               target: '/etc/sysconfig/network'
-            , (err, replaced) ->
-              restart = true if replaced
             @system.execute
-              cmd: "hostname #{shortname} && service network restart"
-              if: -> restart
+              cmd: "hostname #{options.hostname} && service network restart"
+              if: -> @status -1
           @call
             if_os: name: ['centos','redhat'], version: '7'
           , ->
@@ -69,8 +63,8 @@ relevant file is "/etc/sysconfig/network".
               header: 'FQDN'
               cmd: """
               fqdn=`hostnamectl status | grep 'Static hostname' | sed 's/^.* \\(.*\\)$/\\1/'`
-              [[ $fqdn == "#{hostname}" ]] && exit 3
-              hostnamectl set-hostname #{hostname} --static
+              [[ $fqdn == "#{options.fqdn}" ]] && exit 3
+              hostnamectl set-hostname #{options.fqdn} --static
               """
               code_skipped: 3
             # Note, transient hostname must be set after static
@@ -78,13 +72,13 @@ relevant file is "/etc/sysconfig/network".
             @system.execute
               header: 'Hostname'
               cmd: """
-              fqdn=`hostnamectl status | grep 'Transient hostname' | sed 's/^.* \\(.*\\)$/\\1/'`
-              [[ $fqdn == "#{shortname}" ]] && exit 3
-              hostnamectl set-hostname #{shortname}
+              hostname=`hostnamectl status | grep 'Transient hostname' | sed 's/^.* \\(.*\\)$/\\1/'`
+              [[ $hostname == "#{options.hostname}" ]] && exit 3
+              hostnamectl set-hostname #{options.hostname}
               """
               code_skipped: 3
 
-## Network # DNS resolv
+## DNS resolv
 
 Write the DNS configuration. On RH like system, this is configured 
 by the "/etc/resolv" file.
@@ -96,18 +90,15 @@ configuration file is considered a trusted source of DNS information.
 
       @call
         header: 'DNS Resolver'
-        if: -> @config.network.resolv
+        if: -> options.resolv
         handler: ->
           @file
-            content:  @config.network.resolv
+            content:  options.resolv
             target: '/etc/resolv.conf'
             backup: true
             eof: true
           @connection.wait
-            servers: for bs_ctx in @contexts 'masson/core/bind_server'
-              continue if bs_ctx is @
-              host: bs_ctx.config.ip or bs_ctx.config.host
-              port: 53
+            servers: options.dns
 
 ## Interfaces
 
@@ -116,7 +107,7 @@ Customize the network interfaces configured present inside the
 
       @file (
         header: 'Interfaces'
-        if: -> @config.network.ifcg
+        if: -> options.ifcg
         target: "/etc/sysconfig/network-scripts/ifcfg-#{name}"
         write: for k, v of config
           match: ///^#{quote k}=.*$///mg
@@ -124,7 +115,7 @@ Customize the network interfaces configured present inside the
           append: true
         backup: false
         eof: true
-      ) for name, config of @config.network
+      ) for name, config of options.ifcg
 
 ## Dependencies
 

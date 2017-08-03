@@ -6,7 +6,6 @@ The default ports used by OpenLdap server are 389 and 636.
 todo: add migrationtools
 
     module.exports = header: 'OpenLDAP Server Install', handler: (options) ->
-      {openldap_server} = @config
 
 ## IPTables
 
@@ -18,13 +17,15 @@ todo: add migrationtools
 IPTables rules are only inserted if the parameter "iptables.action" is set to
 "start" (default value).
 
+      comment = unless options.tls
+      then 'LDAP (non-secured)'
+      else 'LDAP (secured)' 
       @tools.iptables
         header: 'IPTables'
         rules: [
-          { chain: 'INPUT', jump: 'ACCEPT', dport: 389, protocol: 'tcp', state: 'NEW', comment: "LDAP (non-secured)" }
-          { chain: 'INPUT', jump: 'ACCEPT', dport: 636, protocol: 'tcp', state: 'NEW', comment: "LDAP (secured)" }
+          { chain: 'INPUT', jump: 'ACCEPT', dport: options.port, protocol: 'tcp', state: 'NEW', comment: comment }
         ]
-        if: @has_service('masson/core/iptables') and @config.iptables.action is 'start'
+        if: options.iptables
 
 ## Users & Groups
 
@@ -37,9 +38,8 @@ cat /etc/group | grep ldap
 ldap:x:55:
 ```
 
-      @call header: 'User & Group', ->
-        @system.group openldap_server.group
-        @system.user openldap_server.user
+      @system.group header: 'Group', options.group
+      @system.user header: 'User', options.user
 
 ## Packages
 
@@ -57,8 +57,8 @@ ldap:x:55:
             if: -> (os.type in ['redhat','centos']) and (os.release[0] is '7')
             mount: '/var/run/openldap'
             name: 'openldap'
-            uid: openldap_server.user.name
-            gid: openldap_server.group.name
+            uid: options.user.name
+            gid: options.group.name
             perm: '0750'
         @service.start 'slapd'
 
@@ -66,7 +66,7 @@ ldap:x:55:
 
 http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
 
-      @call header: 'Logging', handler: (options) ->
+      @call header: 'Logging', handler: ->
         options.log 'Check rsyslog dependency'
         @service
           name: 'rsyslog'
@@ -84,18 +84,19 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
         @system.execute
           unless_exec: """
           ldapsearch -Y EXTERNAL -H ldapi:/// -b "cn=config" \
-          | grep -E "olcLogLevel: #{openldap_server.log_level}"
+          | grep -E "olcLogLevel: #{options.log_level}"
           """
           cmd: """
           ldapmodify -Y EXTERNAL -H ldapi:/// <<-EOF
           dn: cn=config
           changetype: modify
           replace: olcLogLevel
-          olcLogLevel: #{openldap_server.log_level}
+          olcLogLevel: #{options.log_level}
           EOF
           """
 
 ## Import Basic Schema
+
 On Redhat/Centos 7, Basic schema must be manually imported.
 Check section[3](https://www.server-world.info/en/note?os=CentOS_7&p=openldap).
 
@@ -112,24 +113,27 @@ Check section[3](https://www.server-world.info/en/note?os=CentOS_7&p=openldap).
 ## Database config
 
 Borrowed from:
+
 * http://docs.adaptivecomputing.com/viewpoint/hpc/Content/topics/1-setup/installSetup/settingUpOpenLDAPOnCentos6.htm
+
 Interesting posts also include:
+
 * http://itdavid.blogspot.ca/2012/05/howto-centos-6.html
 * http://www.6tech.org/2013/01/ldap-server-and-centos-6-3/
 
-      @call header: 'Database config', handler: (options) ->
+      @call header: 'Database config', handler: ->
         @system.execute
           header: 'Root DN'
           unless_exec: """
           ldapsearch -Y EXTERNAL -H ldapi:/// -b "olcDatabase={0}config,cn=config" \
-          | grep -E "olcRootDN: #{openldap_server.config_dn}"
+          | grep -E "olcRootDN: #{options.config_dn}"
           """
           cmd: """
           ldapmodify -Y EXTERNAL -H ldapi:/// <<-EOF
           dn: olcDatabase={0}config,cn=config
           changetype: modify
           replace: olcRootDN
-          olcRootDN: #{openldap_server.config_dn}
+          olcRootDN: #{options.config_dn}
           EOF
           """
         @call (_, callback) -> @system.execute
@@ -137,14 +141,14 @@ Interesting posts also include:
         , (err, _, stdout) ->
           return callback err if err
           if match = /^olcRootPW: {SSHA}(.*)$/m.exec stdout
-            callback null, not check_password openldap_server.config_password, match[1]
+            callback null, not check_password options.config_password, match[1]
           else # First installation, password not yet defined
             callback null, true
         @system.execute
           header: 'Root PW'
           if: -> @status -1
           cmd: """
-          password=`slappasswd -s #{openldap_server.config_password}`
+          password=`slappasswd -s #{options.config_password}`
           ldapmodify -c -Y EXTERNAL -H ldapi:/// <<-EOF
           dn: olcDatabase={0}config,cn=config
           changetype: modify
@@ -160,9 +164,9 @@ Usage and configuration of OpenLDAP monitoring is not clear, commented for now.
 
       # @file
       #   header: 'DB monitor root DN'
-      #   target: openldap_server.monitor_file
+      #   target: options.monitor_file
       #   match: /^(.*)dc=my-domain,dc=com(.*)$/m
-      #   replace: "$1#{openldap_server.suffix}$2"
+      #   replace: "$1#{options.suffix}$2"
 
 ## Database hdb
 
@@ -171,8 +175,8 @@ discovered at runtime based on the OS release.
 
       @call
         header: 'DB bdb'
-        if: openldap_server.backend is 'hdb'
-      , (options) ->
+        if: options.backend is 'hdb'
+      , ->
         bdb = null
         @system.discover shy: true, (err, status, info) ->
           throw Error "Unsupported OS: #{JSON.stringify info.type}" unless info.type in ['centos', 'redhat']
@@ -183,14 +187,14 @@ discovered at runtime based on the OS release.
             unless_exec: """
             ldapsearch -Y EXTERNAL -H ldapi:/// \
               -b "olcDatabase={2}#{bdb},cn=config" \
-            | grep -E "olcSuffix: #{openldap_server.suffix}"
+            | grep -E "olcSuffix: #{options.suffix}"
             """
             cmd: """
             ldapmodify -Y EXTERNAL -H ldapi:/// <<-EOF
             dn: olcDatabase={2}#{bdb},cn=config
             changetype: modify
             replace: olcSuffix
-            olcSuffix: #{openldap_server.suffix}
+            olcSuffix: #{options.suffix}
             EOF
             """
           @system.execute
@@ -198,14 +202,14 @@ discovered at runtime based on the OS release.
             unless_exec: """
             ldapsearch -Y EXTERNAL -H ldapi:/// \
               -b "olcDatabase={2}#{bdb},cn=config" \
-            | grep -E "olcRootDN: #{openldap_server.root_dn}"
+            | grep -E "olcRootDN: #{options.root_dn}"
             """
             cmd: """
             ldapmodify -Y EXTERNAL -H ldapi:/// <<-EOF
             dn: olcDatabase={2}#{bdb},cn=config
             changetype: modify
             replace: olcRootDN
-            olcRootDN: #{openldap_server.root_dn}
+            olcRootDN: #{options.root_dn}
             EOF
             """
           @call (_, callback) ->  @system.execute
@@ -213,14 +217,14 @@ discovered at runtime based on the OS release.
           , (err, _, stdout) ->
             return callback err if err
             if match = /^olcRootPW: {SSHA}(.*)$/m.exec stdout
-              callback null, not check_password openldap_server.root_password, match[1]
+              callback null, not check_password options.root_password, match[1]
             else # First installation, password not yet defined
               callback null, true
           @system.execute
             header: 'Root PW'
             if: -> @status -1
             cmd: """
-            password=`slappasswd -s #{openldap_server.root_password}`
+            password=`slappasswd -s #{options.root_password}`
             ldapmodify -c -Y EXTERNAL -H ldapi:/// <<-EOF
             dn: olcDatabase={2}#{bdb},cn=config
             changetype: modify
@@ -235,21 +239,21 @@ Set up the database with the mdb backend.
 
       @call
         header: 'DB mdb'
-        if: openldap_server.backend is 'mdb'
-      , (options) ->
+        if: options.backend is 'mdb'
+      , ->
         @system.discover shy: true, (err, status, info) ->
           throw Error "Unsupported OS: #{JSON.stringify info.type}" unless (info.type in ['centos', 'redhat']) and info.release[0] is '7'
         @system.mkdir
-          target: openldap_server.db_dir
-          uid: openldap_server.user.name
-          gid: openldap_server.group.name
+          target: options.db_dir
+          uid: options.user.name
+          gid: options.group.name
         @call ->
           @system.execute
             header: 'Suffix'
             unless_exec: """
             ldapsearch -Y EXTERNAL -H ldapi:/// \
               -b "olcDatabase={3}mdb,cn=config" \
-            | grep -E "olcSuffix: #{openldap_server.suffix}"
+            | grep -E "olcSuffix: #{options.suffix}"
             """
             cmd: """
             ldapadd -Y EXTERNAL -H ldapi:/// <<-EOF
@@ -262,9 +266,9 @@ Set up the database with the mdb backend.
             olcDbIndex: ou,cn,sn,mail,givenname eq,pres,sub
             olcDbIndex: entryUUID eq,pres
             olcDatabase: mdb
-            olcDbDirectory: #{openldap_server.db_dir}
-            olcDbMaxSize: #{openldap_server.db_max_size}
-            olcSuffix: #{openldap_server.suffix}
+            olcDbDirectory: #{options.db_dir}
+            olcDbMaxSize: #{options.db_max_size}
+            olcSuffix: #{options.suffix}
             EOF
             """
           @system.execute
@@ -272,14 +276,14 @@ Set up the database with the mdb backend.
             unless_exec: """
             ldapsearch -Y EXTERNAL -H ldapi:/// \
               -b "olcDatabase={3}mdb,cn=config" \
-            | grep -E "olcRootDN: #{openldap_server.root_dn}"
+            | grep -E "olcRootDN: #{options.root_dn}"
             """
             cmd: """
             ldapmodify -Y EXTERNAL -H ldapi:/// <<-EOF
             dn: olcDatabase={3}mdb,cn=config
             changetype: modify
             replace: olcRootDN
-            olcRootDN: #{openldap_server.root_dn}
+            olcRootDN: #{options.root_dn}
             EOF
             """
           @call (_, callback) ->  @system.execute
@@ -287,14 +291,14 @@ Set up the database with the mdb backend.
           , (err, _, stdout) ->
             return callback err if err
             if match = /^olcRootPW: {SSHA}(.*)$/m.exec stdout
-              callback null, not check_password openldap_server.root_password, match[1]
+              callback null, not check_password options.root_password, match[1]
             else # First installation, password not yet defined
               callback null, true
           @system.execute
             header: 'Root PW'
             if: -> @status -1
             cmd: """
-            password=`slappasswd -s #{openldap_server.root_password}`
+            password=`slappasswd -s #{options.root_password}`
             ldapmodify -c -Y EXTERNAL -H ldapi:/// <<-EOF
             dn: olcDatabase={3}mdb,cn=config
             changetype: modify
@@ -310,13 +314,13 @@ ACLs can be retrieved with the command:
 
 `ldapsearch -LLL -Y EXTERNAL -H ldapi:/// -b "cn=config" '(olcAccess=*)'`
 
-      @call header: "ACLs", handler: (options) ->
+      @call header: "ACLs", handler: ->
         # We used: http://itdavid.blogspot.fr/2012/05/howto-centos-62-kerberos-kdc-with.html
         # But this is also interesting: http://web.mit.edu/kerberos/krb5-current/doc/admin/conf_ldap.html
         # says that a user with the group id and user id of 0 (root), matched using EXTERNAL SASL on localhost
         @ldap.acl
           header: 'Global Rules'
-          suffix: openldap_server.suffix
+          suffix: options.suffix
           acls: [
             to: 'attrs=userPassword,userPKCS12'
             by: [
@@ -336,23 +340,23 @@ ACLs can be retrieved with the command:
 
 ## Users and Groups
 
-      [_, suffix_k, suffix_v] = /(\w+)=([^,]+)/.exec openldap_server.suffix
+      [_, suffix_k, suffix_v] = /(\w+)=([^,]+)/.exec options.suffix
       @system.execute
         header: 'Users and Groups'
         cmd: """
-        ldapadd -c -H ldapi:/// -D #{openldap_server.root_dn} -w #{openldap_server.root_password} <<-EOF
-        dn: #{openldap_server.suffix}
+        ldapadd -c -H ldapi:/// -D #{options.root_dn} -w #{options.root_password} <<-EOF
+        dn: #{options.suffix}
         #{suffix_k}: #{suffix_v}
         objectClass: top
         objectClass: domain
 
-        dn: #{openldap_server.users_dn}
+        dn: #{options.users_dn}
         ou: Users
         objectClass: top
         objectClass: organizationalUnit
         description: Central location for UNIX users
 
-        dn: #{openldap_server.groups_dn}
+        dn: #{options.groups_dn}
         ou: Groups
         objectClass: top
         objectClass: organizationalUnit
@@ -362,11 +366,11 @@ ACLs can be retrieved with the command:
         code_skipped: 68
       # @ldap.acl
       #   header: 'ACL'
-      #   suffix: openldap_server.suffix
+      #   suffix: options.suffix
       #   acls: [
-      #     to: 'dn.subtree=#{openldap_server.users_dn}'
+      #     to: 'dn.subtree=#{options.users_dn}'
       #     by: [
-      #       'dn.children="#{openldap_server.users_dn}" read'
+      #       'dn.children="#{options.users_dn}" read'
       #     ]
       #   ]
 
@@ -395,14 +399,14 @@ ACLs can be retrieved with the command:
         @call -> @ldap.schema
           name: 'sudo'
           schema: schema
-          binddn: openldap_server.config_dn
-          passwd: openldap_server.config_password
+          binddn: options.config_dn
+          passwd: options.config_password
           uri: true
 
 ## Delete ldif data
 
       @call header: 'Delete ldif data', handler: ->
-        for path in openldap_server.ldapdelete
+        for path in options.ldapdelete
           target = "/tmp/ryba_#{Date.now()}"
           @file.download
             source: path
@@ -418,7 +422,7 @@ ACLs can be retrieved with the command:
 
       @call header: 'Add ldif data', handler: ->
         status = false
-        for path in openldap_server.ldapadd
+        for path in options.ldapadd
           target = "/tmp/ryba_#{Date.now()}"
           @file.download
             source: path

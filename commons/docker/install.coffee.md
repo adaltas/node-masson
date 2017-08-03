@@ -245,7 +245,7 @@ Compose is a tool for defining and running multi-container Docker applications.
 
       @file.download
         header: 'Docker Compose'
-        source: "#{@config.nikita.cache_dir}/docker-compose"
+        source: "#{options.cache_dir}/docker-compose"
         target: '/usr/local/bin/docker-compose'
         local: true
         unless_exec: 'which docker-compose'

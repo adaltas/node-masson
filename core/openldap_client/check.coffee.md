@@ -5,7 +5,7 @@ Make sure we can execute the command `ldapsearch` with the default URL found
 inside "/etc/openldap/ldap.conf". The success of the test rely on the command
 exit code.
 
-    module.exports = header: 'OpenLDAP Client Check', label_true: 'CHECKED', handler: ->
+    module.exports = header: 'OpenLDAP Client Check', label_true: 'CHECKED', handler: (options) ->
       [openldap_server_ctx] = @contexts 'masson/core/openldap_server'
       {suffix, root_dn, root_password} = openldap_server_ctx.config.openldap_server
 
@@ -13,7 +13,7 @@ exit code.
 
 Wait for OpenLDAP servers to start.
 
-      @call 'masson/core/openldap_client/wait'
+      @call 'masson/core/openldap_client/wait', options.wait
 
 ## Check Search
 

@@ -3,16 +3,18 @@
 
     module.exports =
       use:
-        yum:  module: 'masson/core/yum'
-        openldap_client: 'masson/core/openldap_client'
+        yum: module: 'masson/core/yum'
+        openldap_client: module: 'masson/core/openldap_client'
       configure: 'masson/core/sssd/configure'
       commands:
-        'check': 'masson/core/sssd/check'
-        'install': [
-          'masson/core/sssd/install'
-          'masson/core/sssd/start'
-          'masson/core/sssd/check'
-        ]
+        'check': ->
+          options = @coonfig.sssd
+          @call 'masson/core/sssd/check', options
+        'install': ->
+          options = @coonfig.sssd
+          @call 'masson/core/sssd/install', options
+          @call 'masson/core/sssd/start', options
+          @call 'masson/core/sssd/check', options
         'start': 'masson/core/sssd/start'
         'status': 'masson/core/sssd/status'
         'stop': 'masson/core/sssd/stop'

@@ -1,8 +1,7 @@
 
 # System Install
 
-    module.exports = header: 'System Install', handler: ->
-      {system} = @config
+    module.exports = header: 'System Install', handler: (options) ->
 
 ## SELinux
 
@@ -16,12 +15,12 @@ OS will reboot if SELINUX was modified.
         header: 'SELinux'
         target: '/etc/selinux/config'
         match: /^SELINUX=.*/mg
-        replace: "SELINUX=#{system.selinux}"
+        replace: "SELINUX=#{options.selinux}"
         backup: true
       @system.execute
         header: 'Reboot'
         cmd: 'shutdown -r now'
-        if: -> @status -1 and system.reboot
+        if: -> @status -1 and options.reboot
 
 ## Limits
 
@@ -40,7 +39,7 @@ root       soft    nproc     unlimited
         target: '/etc/security/limits.conf'
         backup: true
         system: true
-      , system.limits
+      , options.limits
 
 ## Groups
 
@@ -48,7 +47,7 @@ Create the users defined inside the "hdp.groups" configuration. See the
 [nikita "group" documentation][nikita_group] for additionnal information.
 
       @call header: 'Groups', ->
-        @system.group group for _, group of system.groups
+        @system.group group for _, group of options.groups
 
 ## Users
 
@@ -56,7 +55,7 @@ Create the users defined inside the "hdp.users" configuration. See the
 [nikita "user" documentation][nikita_user] for additionnal information.
 
       @call header: 'Users', ->
-        @system.user user for _, user of system.users
+        @system.user user for _, user of options.users
 
 ## Profile
 

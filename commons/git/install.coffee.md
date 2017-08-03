@@ -1,7 +1,7 @@
 
 # GIT Install
 
-    module.exports = header: 'Git Install', handler: ->
+    module.exports = header: 'Git Install', handler: (options) ->
 
 ## Package
 
@@ -15,28 +15,24 @@ Install the git package.
 
 Deploy the git configuration.
 
-      @call header: 'Config', ->
-        {merge, properties, global, users} = @config.git
-        @registry.register 'git_config', (options) ->
-          throw Error unless options.config
-          options.content = misc.merge {}, properties, options.config
-          options.merge ?= merge
-          @file.ini options
-        @git_config
+      @call header: 'Config', (options) ->
+        @file.ini
+          if: options.global
+          target: '/etc/gitconfig'
+          content: misc.merge {}, options.properties, options.global
+          merge: options.merge
           uid: 'root'
           gid: 'root'
-          target: '/etc/gitconfig'
-          config: global
-          if: global
         @system.remove
           if: global is false
           target: '/etc/gitconfig'
         @git_config (
-          target: @config.users[user].home or "/home/#{user}"
-          uid: @config.users[user].uid or @config.users[user].name
-          gid: @config.users[user].gid or @config.users[user].group
-          config: config
-        ) for user, config in users
+          if: !!user.config
+          target: user.target
+          config: user.config
+          uid: user.uid or user.name
+          gid: user.gid or user.group
+        ) for _, user of options.users
 
 ## Dependencies
 

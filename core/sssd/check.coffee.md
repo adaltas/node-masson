@@ -1,5 +1,5 @@
 
-    module.exports = header: 'SSSD Check', handler: ->
+    module.exports = header: 'SSSD Check', handler: (options) ->
 
 ## Runing Sevrice
 
@@ -19,7 +19,7 @@ $user`. The command is only executed if a test user is defined by the
 
       @call
         header: 'NSS'
-        if: -> @config.sssd.test_user
+        if: -> options.test_user
         handler: ->
           {test_user} = ctx.config.sssd
           @system.execute
@@ -33,7 +33,7 @@ user is defined by the "sssd.test_user" property.
 
       @call
         header: 'PAM'
-        if: -> @config.sssd.test_user
+        if: -> options.test_user
         handler: ->
           {test_user} = ctx.config.sssd
           @system.execute

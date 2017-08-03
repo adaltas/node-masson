@@ -1,9 +1,7 @@
 
 # MySQL Server Install
 
-    module.exports = header: 'MySQL Server Install', handler: ->
-      {iptables} = @config
-      options = @config.mysql.server
+    module.exports = header: 'MySQL Server Install', handler: (options) ->
 
 ## IPTables
 
@@ -20,7 +18,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
         rules: [
           { chain: 'INPUT', jump: 'ACCEPT', dport: options.my_cnf['mysqld']['port'], protocol: 'tcp', state: 'NEW', comment: "MySQL" }
         ]
-        if: @has_service('masson/core/iptables') and iptables.action is 'start'
+        if: options.iptables
 
 ## User & groups
 
@@ -34,9 +32,8 @@ Actions present to be able to change uid/gid:
 Note: Be careful if using different name thans 'mysql:mysql'
 User/group are hard coded in some of mariadb/mysql package scripts.
 
-      @call header: 'Users & Groups', handler: ->
-        @system.group options.group
-        @system.user options.user
+      @system.group 'Group' options.group
+      @system.user 'User', options.user
 
 ## Yum Repositories
 

@@ -11,20 +11,23 @@ provides a good description on how Kerberos is negotiated by GSSAPI and SSPI.
 
     module.exports =
       use:
-        iptables: 'masson/core/iptables/configure'
-        openldap_client: implicit: true, module: 'masson/core/openldap_client'
-        openldap_server: 'masson/core/openldap_server'
-        krb5_server: 'masson/core/krb5_server'
+        iptables: module: 'masson/core/iptables/configure', local: true
+        openldap_client: module: 'masson/core/openldap_client', local: true, auto: true, implicit: true
+        openldap_server:  module: 'masson/core/openldap_server', min: 1, max: 2
+        krb5_server:  module: 'masson/core/krb5_server'
       configure:
         'masson/core/krb5_server/configure'
       commands:
+        'check': ->
+          options = @config.krb5_server
+          @call 'masson/core/krb5_server/check', options
         'install': ->
           options = @config.krb5_server
-          @call 'masson/bootstrap/fs', options
           @call 'masson/core/krb5_server/install', options
           @call 'masson/core/krb5_server/start', options
-        'reload':
-          'masson/core/krb5_server/install'
+          @call 'masson/core/krb5_server/check', options
+        # 'reload':
+        #   'masson/core/krb5_server/install'
         'start':
           'masson/core/krb5_server/start'
         'status':

@@ -9,21 +9,20 @@ consistency reasons.
 
     module.exports = header: 'MariaDB Server Replication', handler: (options) ->
       return unless options.ha_enabled
-      {repl_master} = options
-      [master_ctx] = @contexts('masson/commons/mariadb/server').filter (ctx) -> ctx.config.host is repl_master.host
+      
       remote_master =
         database: null
-        admin_username: 'root'
-        admin_password: master_ctx.config.mariadb.server.password
+        admin_username: options.repl_master.admin_username
+        admin_password: options.repl_master.admin_password
         engine: 'mysql'
-        host: master_ctx.config.host
+        host: options.repl_master.fqdn
         silent: false
       props =
         database: null
-        admin_username: 'root'
-        admin_password: options.password
+        admin_username: options.admin_username
+        admin_password: options.admin_password
         engine: 'mysql'
-        host: @config.host
+        host: options.fqdn
         silent: false
 
 ## Wait
@@ -42,17 +41,17 @@ Grant privileges on the remote master server to the user used for replication.
         @system.execute
           header: 'Slave Privileges'
           cmd: db.cmd remote_master, """
-            GRANT REPLICATION SLAVE ON *.* TO '#{repl_master.user}'@'%' IDENTIFIED BY '#{repl_master.pwd}';
+            GRANT REPLICATION SLAVE ON *.* TO '#{options.repl_master.username}'@'%' IDENTIFIED BY '#{options.repl_master.password}';
             FLUSH PRIVILEGES;
           """
-          unless_exec: "#{db.cmd remote_master, 'select User from mysql.user ;'} | grep '#{repl_master.user}'"
+          unless_exec: "#{db.cmd remote_master, 'select User from mysql.user ;'} | grep '#{options.repl_master.username}'"
 
 ## Setup Replication
 Gather the target master informations, then start the slave replication.
 
         @call
           header: 'Slave Setup'
-          unless_exec: "#{db.cmd props, 'show slave status \\G'} | grep 'Master_Host' | grep '#{repl_master.host}'"
+          unless_exec: "#{db.cmd props, 'show slave status \\G'} | grep 'Master_Host' | grep '#{options.repl_master.fqdn}'"
           handler: ->
             @system.execute
               header: 'Master Infos'
@@ -70,9 +69,9 @@ Gather the target master informations, then start the slave replication.
                   STOP SLAVE ;
                   RESET SLAVE ;
                   CHANGE MASTER TO \
-                  MASTER_HOST = '#{repl_master.host}', \
-                  MASTER_USER = '#{repl_master.user}', \
-                  MASTER_PASSWORD = '#{repl_master.pwd}',
+                  MASTER_HOST = '#{options.repl_master.fqdn}', \
+                  MASTER_USER = '#{options.repl_master.username}', \
+                  MASTER_PASSWORD = '#{options.repl_master.password}',
                   MASTER_LOG_FILE='#{master_file}', \
                   MASTER_LOG_POS=#{master_pos} ;
                   START SLAVE ;

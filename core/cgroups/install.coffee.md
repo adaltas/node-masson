@@ -2,11 +2,12 @@
 # Cgroups Install
 
     module.exports = header: 'Cgroups Install', handler: (options) ->
-      {cgroups} = @config
 
 ## Packages
+
 Install 'libcroup' packages. On Centos/Redhat 7 libcgroup-tools is needed to provide
 centos/Redhat 6 like behavior.
+
 Centos/Redhat 7 moves the resource management settings from the process level to
 the application level by binding the system of cgroup hierarchies with the systemd unit tree.
 
@@ -19,8 +20,3 @@ the application level by binding the system of cgroup hierarchies with the syste
         name: 'cgconfig'
         startup: true
         action: 'start'
-
-## Dependencies
-
-    string = require 'nikita/lib/misc/string'
-    path = require 'path'

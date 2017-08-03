@@ -43,22 +43,23 @@ Example:
 ```
 
     module.exports = ->
-      openldap_ctxs = @contexts 'masson/core/openldap_server'
-      krb5_servers_ctxs = @contexts 'masson/core/krb5_server'
-      [openldap_ctx] = openldap_ctxs
-      {openldap_server} = openldap_ctx.config
-      options = @config.krb5_server ?= {}
+      service = migration.call @, service, 'masson/core/krb5_server', ['krb5_server'], require('nikita/lib/misc').merge require('.').use,
+        iptables: key: ['iptables']
+        openldap_client: key: ['openldap_client']
+        openldap_server: key: ['openldap_server']
+        krb5_server: key: ['krb5_server']
+      options = @config.krb5_server = service.options
 
 ## Validation
 
-      throw new Error "Expect at least one server with action \"masson/core/openldap_server\"" if openldap_ctxs.length is 0
+      throw new Error "Expect at least one server with action \"masson/core/openldap_server\"" if not service.use.openldap_server or service.use.openldap_server.length is 0
 
 ## Configuration
 
-      options.iptables ?= @has_service('masson/core/iptables') and @config.iptables.action is 'start'
+      options.iptables ?= service.use.iptables and service.use.iptables.options.action is 'start'
       # Prepare configuration for "kdc.conf"
-      options.root_dn ?= openldap_ctx.config.openldap_server.root_dn
-      options.root_password ?= openldap_ctx.config.openldap_server.root_password
+      options.root_dn ?= service.use.openldap_server[0].options.root_dn
+      options.root_password ?= service.use.openldap_server[0].options.root_password
 
 ## HA
 
@@ -68,13 +69,12 @@ declare the master server, set the property "config.{realm}.master" to "true"
 on the appropriate node.
 
       for realm, config of options.admin
-        config.ha ?= krb5_servers_ctxs.length > 1
+        config.ha ?= service.use.krb5_server.length > 1
         if config.ha
-          master_ctxs = krb5_servers_ctxs.filter( (krb5_servers_ctx) -> krb5_servers_ctx.config.krb5_server?.admin?[realm]?.master )
-          throw Error 'Invalid configuration: more than one KDC server' if master_ctxs.length > 1
-          if master_ctxs.length is 0
-            krb5_servers_ctxs[0].config.krb5_server = merge krb5_servers_ctxs[0].config.krb5_server,
-              admin: "#{realm}": master: true
+          master_count = service.use.krb5_server.filter( (srv) -> srv.options.admin?[realm]?.master ).length
+          throw Error 'Invalid configuration: more than one KDC server' if master_count > 1
+          if master_count is 0
+            merge service.use.krb5_server[0].options, admin: "#{realm}": master: true
 
 ## kdc.conf
 
@@ -107,18 +107,18 @@ configuration profile.
         options.kdc_conf.dbmodules ?= {}
         options.kdc_conf.dbmodules[admin.database_module] = merge {},
           'db_library': 'kldap'
-          'ldap_kerberos_container_dn': openldap_server.krb5.kerberos_dn
-          'ldap_kdc_dn': openldap_server.krb5.kdc_user.dn
-          'ldap_kdc_password': openldap_server.krb5.kdc_user.userPassword
+          'ldap_kerberos_container_dn': service.use.openldap_server[0].options.krb5.kerberos_dn
+          'ldap_kdc_dn': service.use.openldap_server[0].options.krb5.kdc_user.dn
+          'ldap_kdc_password': service.use.openldap_server[0].options.krb5.kdc_user.userPassword
            # this object needs to have read rights on
            # the realm container, principal container and realm sub-trees
-          'ldap_kadmind_dn': openldap_server.krb5.krbadmin_user.dn
-          'ldap_kadmind_password': openldap_server.krb5.krbadmin_user.userPassword
+          'ldap_kadmind_dn': service.use.openldap_server[0].options.krb5.krbadmin_user.dn
+          'ldap_kadmind_password': service.use.openldap_server[0].options.krb5.krbadmin_user.userPassword
            # this object needs to have read and write rights on
            # the realm container, principal container and realm sub-trees
           'ldap_service_password_file': "/etc/krb5.d/#{admin.database_module}.stash.keyfile"
           # 'ldap_servers': 'ldapi:///'
-          'ldap_servers': openldap_ctxs.map((ctx) -> ctx.config.openldap_server.uri).join ' '
+          'ldap_servers': service.use.openldap_server.map((srv) -> srv.options.uri).join ' '
           'ldap_conns_per_server': 5
           'kdc_master_key': admin.kdc_master_key
         , options.kdc_conf.dbmodules[admin.database_module]
@@ -163,6 +163,15 @@ configuration profile.
         throw new Error "Kerberos property `dbmodules.#{name}.ldap_kdc_dn` is required" unless config.ldap_kdc_dn
         throw new Error "Kerberos property `dbmodules.#{name}.ldap_kadmind_dn` is required" unless config.ldap_kadmind_dn
 
+## Wait
+    
+      options.wait = {}
+      options.wait.ldap_client = service.use.openldap_client.options.wait
+      options.wait_kdc = for realm, config of options.kdc_conf.realms
+        host: service.node.fqdn
+        port: config.kadmind_port
+
 ## Dependencies
 
     {merge} = require 'nikita/lib/misc'
+    migration = require '../../lib/migration'

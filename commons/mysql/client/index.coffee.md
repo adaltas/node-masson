@@ -4,7 +4,8 @@
 Install the MySQL command-line tool.
 
     module.exports =
-      use: 'masson/commons/mysql/server'
+      use:
+        mysql_server: module: 'masson/commons/mysql/server'
       configure: 'masson/commons/mysql/client/configure'
       commands:
         'install': 'masson/commons/mysql/client/install'

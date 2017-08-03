@@ -10,6 +10,7 @@ Usefull server commands:
 *   Stash password: `kdb5_ldap_util -D "cn=Manager,dc=adaltas,dc=com" -w test stashsrvpw -f /etc/krb5.d/stash.keyfile cn=krbadmin,ou=users,dc=adaltas,dc=com`
 
 Resources:
+
 *   [Kerberos with LDAP backend on centos](http://itdavid.blogspot.fr/2012/05/howto-centos-62-kerberos-kdc-with.html)
 *   [Propagation](http://www-old.grantcohoe.com/guides/services/krb5-kdc)
 *   [Replication](http://tldp.org/HOWTO/Kerberos-Infrastructure-HOWTO/server-replication.html)
@@ -17,7 +18,7 @@ Resources:
 *   [On Load Balancers and Kerberos](https://ssimo.org/blog/id_019.html)
 *   [Kerberos With LDAP on centos 7](http://www.rjsystems.nl/en/2100-d6-kerberos-openldap-provider.php)
 
-    module.exports = header: 'Krb5 Server Install', handler: (options) ->
+    module.exports = header: 'Kerberos Server Install', handler: (options) ->
 
 ## IPTables
 
@@ -112,7 +113,7 @@ The following files are updated:
         @call
           if: -> @status()
         , ->
-          @call 'masson/core/openldap_client/wait'
+          @call 'masson/core/openldap_client/wait', options.wait.ldap_client
           @service
             srv_name: 'krb5kdc'
             action: 'restart'
@@ -125,7 +126,7 @@ The following files are updated:
 
 ## Ldap Krb5 entries
 
-      @call header: 'LDAP Insert Entries', ->
+      @call header: 'LDAP DN', ->
         for realm, config of options.kdc_conf.realms
           continue unless config.database_module
           {kdc_master_key, ldap_kerberos_container_dn, ldap_servers} = options.kdc_conf.dbmodules[config.database_module]

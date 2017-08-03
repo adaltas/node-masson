@@ -38,7 +38,9 @@ Example 1 with format preparation
 ```
 
     module.exports = ->
-      options = @config.fstab ?= {}
+      service = migration.call @, service, 'masson/core/fstab', ['fstab'], {}
+      options = @config.fstab = service.options
+      
       options.enabled ?= false
       options.exhaustive ?= false
       options.volumes ?= {}
@@ -61,3 +63,4 @@ Example 1 with format preparation
 ## Dependencies
 
     path = require 'path'
+    migration = require '../../lib/migration'

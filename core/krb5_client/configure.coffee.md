@@ -33,25 +33,52 @@ Example:
 ```
 
     module.exports = ->
-      krb5_server_ctxs = @contexts 'masson/core/krb5_server'
-      options = @config.krb5_client ?= {}
-      options.fqdn ?= @config.host
+      service = migration.call @, service, 'masson/core/krb5_server', ['krb5_server'], require('nikita/lib/misc').merge require('.').use,
+        ntp: key: ['ntp']
+        ssh: key: ['ssh']
+        krb5_server: key: ['krb5_server']
+      options = @config.krb5_client = service.options
+      
+      options.fqdn ?= service.node.fqdn
       options.sshd ?= {}
       options.kinit ?= '/usr/bin/kinit'
-      options.admin = merge {}, krb5_server_ctxs[0].config.krb5_server.admin, options.admin if krb5_server_ctxs.length > 0
+      options.admin = merge {}, service.use.krb5_server[0].options.admin, options.admin if service.use.krb5_server
       options.etc_krb5_conf = merge {}, module.exports.etc_krb5_conf, options.etc_krb5_conf
       # Merge global with server-based configuration
       # options.etc_krb5_conf.realms = merge {}, options.etc_krb5_conf.realms, options.etc_krb5_conf.realms
-      for krb5_server_ctx in krb5_server_ctxs
-        for realm, config of krb5_server_ctx.config.krb5_server.admin
+      for krb5_server_srv in service.use.krb5_server
+        for realm, config of krb5_server_srv.options.admin
           options.etc_krb5_conf.realms[realm] ?= {}
           options.etc_krb5_conf.realms[realm].kdc ?= []
-          options.etc_krb5_conf.realms[realm].kdc.push krb5_server_ctx.config.host
+          options.etc_krb5_conf.realms[realm].kdc.push krb5_server_srv.node.fqdn
           # realms[realm].kdc = [realms[realm].kdc] unless Array.isArray realms[realm].kdc
           options.etc_krb5_conf.realms[realm].admin_server ?= []
-          options.etc_krb5_conf.realms[realm].admin_server.push krb5_server_ctx.config.host
+          options.etc_krb5_conf.realms[realm].admin_server.push krb5_server_srv.node.fqdn
           # realms[realm].default_domain ?= realm.toLowerCase()
           options.etc_krb5_conf.libdefaults.default_realm = realm
+
+## Wait
+
+      options.wait = {}
+      options.wait.kdc_tcp = for realm, config of options.etc_krb5_conf.realms
+        for kdc in config.kdc
+          [kdc, port] = kdc.split ':'
+          host: kdc, port: port or '88'
+      options.wait.kdc_tcp = array.flatten options.wait.kdc_tcp
+      options.wait.kadmin_tcp = for realm, config of options.etc_krb5_conf.realms
+        continue unless config.admin_server?.length
+        for server in config.admin_server
+          [host, port] = server.split ':'
+          host: host, port: port or 749
+      options.wait.kadmin_tcp = array.flatten options.wait.kadmin_tcp
+      options.wait.kadmin_listprincs = for realm, config of options.admin
+        continue unless config.kadmin_principal and config.admin_server
+        misc.kadmin
+          realm: realm
+          kadmin_principal: config.kadmin_principal
+          kadmin_password: config.kadmin_password
+          kadmin_server: config.admin_server
+        , 'listprincs'
 
     module.exports.etc_krb5_conf =
       'logging':
@@ -81,4 +108,7 @@ Example:
 
 ## Dependencies
 
+    misc = require 'nikita/lib/misc'
+    array = require 'nikita/lib/misc/array'
     {merge} = require 'nikita/lib/misc'
+    migration = require '../../lib/migration'

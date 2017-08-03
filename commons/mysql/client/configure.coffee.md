@@ -2,11 +2,11 @@
 # Mysql client configuration
 
     module.exports = ->
-      [my_srv_ctx] = @contexts 'masson/commons/mysql/server'
-      @config.mysql ?= {}
-      options = @config.mysql.client ?= {}
+      service = migration.call @, service, 'masson/commons/mysql/client', ['mysql', 'client'], require('nikita/lib/misc').merge require('.').use,
+        mysql_server: key: ['mysql', 'server']
+      options = @config.mysql = service.options
 
 ## Repository
 
-      options.repo ?= my_srv_ctx.config.mysql.server.repo
+      options.repo ?= service.use.mysql_server.options.repo
       

@@ -1,7 +1,7 @@
 
 # OpenLDAP ACL
 
-    module.exports = header: 'OpenLDAP Server ACL', handler: ->
+    module.exports = header: 'OpenLDAP Server ACL', handler: (options) ->
 
 After this call, the follwing command should execute with success:
 
@@ -9,18 +9,14 @@ After this call, the follwing command should execute with success:
 ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=com -w test
 ```
 
-      {kerberos_dn, krbadmin_user, krbadmin_group} = @config.openldap_server_krb5
-      {openldap_server} = @config
-
       @call header: 'ACL for nssproxy', handler: ->
-        {suffix} = @config.openldap_server
         @ldap.acl
-          suffix: suffix
+          suffix: options.suffix
           acls: [
             to: 'attrs=userPassword,userPKCS12'
             by: [
               'dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage'
-              "dn.exact=\"cn=nssproxy,ou=users,#{suffix}\" read"
+              "dn.exact=\"cn=nssproxy,ou=users,#{options.suffix}\" read"
               'self write'
               'anonymous auth'
               '* none'
@@ -30,13 +26,13 @@ ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=co
             by: [
               'self write'
               'dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage'
-              "dn.exact=\"cn=nssproxy,ou=users,#{suffix}\" read"
+              "dn.exact=\"cn=nssproxy,ou=users,#{options.suffix}\" read"
               '* none'
             ]
           ,
-            to: "dn.subtree=\"#{suffix}\""
+            to: "dn.subtree=\"#{options.suffix}\""
             by: [
-              "dn.exact=\"cn=nssproxy,ou=users,#{suffix}\" read"
+              "dn.exact=\"cn=nssproxy,ou=users,#{options.suffix}\" read"
               '* none'
             ]
           ]
@@ -48,17 +44,15 @@ ldapsearch -H ldap://master3.hadoop:389 -D cn=nssproxy,ou=users,dc=adaltas,dc=co
         # host_ctx = @hosts[host]
         # require('./openldap_server').configure host_ctx
         # {url, root_dn, root_password, users_dn, groups_dn} = host_@config.openldap_server
-        {openldap_server} = @config
         @ldap.user
-          uri: openldap_server.uri
-          binddn: openldap_server.root_dn
-          passwd: openldap_server.root_password
-          user: openldap_server.proxy_user
+          uri: options.uri
+          binddn: options.root_dn
+          passwd: options.root_password
+          user: options.proxy_user
 
       @call header: 'ACL Insert Group', handler: ->
-        {openldap_server} = @config
         @ldap.add
-          uri: openldap_server.uri,
-          binddn: openldap_server.root_dn
-          passwd: openldap_server.root_password
-          entry: openldap_server.proxy_group
+          uri: options.uri,
+          binddn: options.root_dn
+          passwd: options.root_password
+          entry: options.proxy_group

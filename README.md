@@ -1,10 +1,5 @@
 
-<pre>
-     _ __ ___   __ _ ___ ___  ___  _ __  
-    | '_ ` _ \ / _` / __/ __|/ _ \| '_ \ 
-    | | | | | | (_| \__ \__ \ (_) | | | |
-    |_| |_| |_|\__,_|___/___/\___/|_| |_| New BSD License
-</pre>
+# Masson
 
 Masson is a configuration management, orchestration and do-anything-you-want
 tools. It is here to simplify your life installing complex setup and maintaining
@@ -28,6 +23,8 @@ help for a particular command.
     for any client to run on the servers.
 *   Documentation: CoffeeScript Literate provides easy to read and self
     documented code.
+*   Code as the single source of thruth
+*   Work entirely offline
 
 ## Contributors
  

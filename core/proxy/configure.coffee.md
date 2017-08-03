@@ -25,7 +25,9 @@ contains the following properties:
     default to the default http settings.
 
     module.exports = ->
-      options = @config.proxy ?= {}
+      service = migration.call @, service, 'masson/core/proxy', ['proxy'], {}
+      options = @config.proxy = service.options
+      
       options.system ?= "proxy.sh"
       options.system = path.resolve '/etc/profile.d', options.system if options.system
       options.host ?= null
@@ -72,3 +74,4 @@ configuration will be enriched with the `http_proxy`, the
 ## Dependencies
 
     path = require 'path'
+    migration = require '../../lib/migration'

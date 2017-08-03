@@ -12,15 +12,16 @@ Modify the various network related configuration files such as
 
     module.exports =
       use:
-        bind_server: 'masson/core/bind_server'
+        bind_server: module: 'masson/core/bind_server'
       configure:
         'masson/core/network/configure'
       commands:
-        'check': [
-          'masson/core/bind_client'
-          'masson/core/network/check'
-        ]
-        'install':
-          'masson/core/network/install'
+        'check': ->
+          options = @config.network
+          @call 'masson/core/bind_client', options
+          @call 'masson/core/network/check', options
+        'install': ->
+          options = @config.network
+          @call 'masson/core/network/install', options
         'restart':
           'masson/core/network/restart'

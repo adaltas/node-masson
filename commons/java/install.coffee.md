@@ -9,14 +9,13 @@ developers on Solaris, Linux, Mac OS X or Windows.
 
 TODO: leverage /etc/alternative to switch between multiple JDKs.
 
-    module.exports = header: 'JAVA Install', handler: ->
-      {java} = @config
+    module.exports = header: 'JAVA Install', handler: (options) ->
 
 ## Install OpenJDK
 
       @service
         header: 'OpenJDK'
-        if: -> @config.java.openjdk
+        if: -> options.openjdk
         name: 'java-1.8.0-openjdk-devel'
 
 ## Install Oracle JDK && Java Cryptography Extension
@@ -44,12 +43,12 @@ have been copied or not (in case they already exist).
 
       @call
         header: 'Oracle JDKs'
-        if: -> @config.java.jdk
-      , (options) ->
+        if: -> options.jdk
+      , ->
         installed_versions = null
         @system.execute
           header: "List Installed JDK"
-          cmd: "ls -d #{java.jdk.root_dir}/*"
+          cmd: "ls -d #{options.jdk.root_dir}/*"
           code_skipped: 2
           shy: true
         , (err, executed, stdout, stderr) ->
@@ -58,14 +57,14 @@ have been copied or not (in case they already exist).
           installed_versions = (string.lines stdout.trim())
             .filter (out) -> out if /jdk(.*)/.exec out
             .map (abs) -> "#{path.basename abs}"
-        @system.mkdir java.jdk.root_dir
+        @system.mkdir options.jdk.root_dir
         @service.install
           header: 'Dependency unzip'
-          if: Object.keys(java.jdk.versions).length
+          if: Object.keys(options.jdk.versions).length
           name: 'unzip'
-        @each java.jdk.versions, (options, callback) ->
-          version = options.key
-          jdk = options.value
+        @each options.jdk.versions, (jdk, callback) ->
+          version = jdk.key
+          jdk = jdk.value
           installed = installed_versions.indexOf("jdk#{version}") isnt -1
           path_name = "#{path.basename jdk.jce_location, '.zip'}"
           now = Date.now()
@@ -78,10 +77,10 @@ have been copied or not (in case they already exist).
               target: "/tmp/java.#{now}/#{path.basename jdk.jdk_location}"
               location: true
               headers: ['Cookie: oraclelicense=accept-securebackup-cookie']
-            @system.mkdir "#{java.jdk.root_dir}/jdk#{version}"
+            @system.mkdir "#{options.jdk.root_dir}/jdk#{version}"
             @tools.extract
               source: "/tmp/java.#{now}/#{path.basename jdk.jdk_location}"
-              target: "#{java.jdk.root_dir}/jdk#{version}"
+              target: "#{options.jdk.root_dir}/jdk#{version}"
               strip: 1
             @system.remove "/tmp/java.#{now}/#{path.basename jdk.jdk_location}"
           @call
@@ -104,10 +103,10 @@ have been copied or not (in case they already exist).
               shy: true
             @system.copy
               source: "/tmp/#{path_name}/local_policy.jar"
-              target: "#{java.jdk.root_dir}/jdk#{version}/jre/lib/security/local_policy.jar"
+              target: "#{options.jdk.root_dir}/jdk#{version}/jre/lib/security/local_policy.jar"
             @system.copy
               source: "/tmp/#{path_name}/US_export_policy.jar"
-              target: "#{java.jdk.root_dir}/jdk#{version}/jre/lib/security/US_export_policy.jar"
+              target: "#{options.jdk.root_dir}/jdk#{version}/jre/lib/security/US_export_policy.jar"
             @system.remove "/tmp/#{path_name}", shy: true
           @then callback
 
@@ -116,18 +115,18 @@ have been copied or not (in case they already exist).
       @system.execute
         header: 'Set JDK Version (default)'
         cmd: """
-        if [ -L  "#{java.jdk.root_dir}/default" ] || [ -e "#{java.jdk.root_dir}/default" ] ; then 
-          source=`readlink #{java.jdk.root_dir}/default`
-          if [ "$source" == "#{java.jdk.root_dir}/jdk#{java.jdk.version}" ]; then
+        if [ -L  "#{options.jdk.root_dir}/default" ] || [ -e "#{options.jdk.root_dir}/default" ] ; then 
+          source=`readlink #{options.jdk.root_dir}/default`
+          if [ "$source" == "#{options.jdk.root_dir}/jdk#{options.jdk.version}" ]; then
             exit 3
           else
-            rm -f #{java.jdk.root_dir}/default
-            ln -sf #{java.jdk.root_dir}/jdk#{java.jdk.version} #{java.jdk.root_dir}/default
+            rm -f #{options.jdk.root_dir}/default
+            ln -sf #{options.jdk.root_dir}/jdk#{options.jdk.version} #{options.jdk.root_dir}/default
             exit 0
           fi
         else
-          rm -f #{java.jdk.root_dir}/default
-          ln -sf #{java.jdk.root_dir}/jdk#{java.jdk.version} #{java.jdk.root_dir}/default
+          rm -f #{options.jdk.root_dir}/default
+          ln -sf #{options.jdk.root_dir}/jdk#{options.jdk.version} #{options.jdk.root_dir}/default
           exit 0
         fi
         """
@@ -136,18 +135,18 @@ have been copied or not (in case they already exist).
       @system.execute
         header: 'Set JDK Version (latest)'
         cmd: """
-        if [ -L  "#{java.jdk.root_dir}/latest" ] || [ -e "#{java.jdk.root_dir}/latest" ] ; then
-          source=`readlink #{java.jdk.root_dir}/latest`
-          if [ "$source" == "#{java.jdk.root_dir}/jdk#{java.jdk.version}" ]; then
+        if [ -L  "#{options.jdk.root_dir}/latest" ] || [ -e "#{options.jdk.root_dir}/latest" ] ; then
+          source=`readlink #{options.jdk.root_dir}/latest`
+          if [ "$source" == "#{options.jdk.root_dir}/jdk#{options.jdk.version}" ]; then
             exit 3
           else
-            rm -f #{java.jdk.root_dir}/latest
-            ln -sf #{java.jdk.root_dir}/jdk#{java.jdk.version} #{java.jdk.root_dir}/latest
+            rm -f #{options.jdk.root_dir}/latest
+            ln -sf #{options.jdk.root_dir}/jdk#{options.jdk.version} #{options.jdk.root_dir}/latest
             exit 0
           fi
         else
-          rm -f #{java.jdk.root_dir}/latest
-          ln -sf #{java.jdk.root_dir}/jdk#{java.jdk.version} #{java.jdk.root_dir}/latest
+          rm -f #{options.jdk.root_dir}/latest
+          ln -sf #{options.jdk.root_dir}/jdk#{options.jdk.version} #{options.jdk.root_dir}/latest
           exit 0
         fi
         """
@@ -155,20 +154,20 @@ have been copied or not (in case they already exist).
         trap: true
       @system.execute
         header: 'Link Java home'
-        unless: java.java_home is "#{java.jdk.root_dir}/default"
+        unless: options.java_home is "#{options.jdk.root_dir}/default"
         cmd: """
-        if [ -L  "#{java.java_home}" ] || [ -e "#{java.java_home}" ] ; then
-          source=`readlink #{java.java_home}`
-          if [ "$source" == "#{java.java_home}" ]; then
+        if [ -L  "#{options.java_home}" ] || [ -e "#{options.java_home}" ] ; then
+          source=`readlink #{options.java_home}`
+          if [ "$source" == "#{options.java_home}" ]; then
             exit 3
           else
-            rm -f #{java.java_home}
-            ln -sf #{java.jdk.root_dir}/default #{java.java_home}
+            rm -f #{options.java_home}
+            ln -sf #{options.jdk.root_dir}/default #{options.java_home}
             exit 0
           fi
         else
-          rm -f #{java.java_home}
-          ln -sf #{java.jdk.root_dir}/default #{java.java_home}
+          rm -f #{options.java_home}
+          ln -sf #{options.jdk.root_dir}/default #{options.java_home}
           exit 0
         fi
         """
@@ -179,8 +178,8 @@ have been copied or not (in case they already exist).
         target: '/etc/profile.d/java.sh'
         mode: 0o0644
         content: """
-        export JAVA_HOME=#{java.java_home}
-        export PATH=#{java.java_home}/bin:$PATH
+        export JAVA_HOME=#{options.java_home}
+        export PATH=#{options.java_home}/bin:$PATH
         """
 
 ## Dependencies

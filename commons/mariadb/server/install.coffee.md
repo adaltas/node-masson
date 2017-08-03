@@ -2,8 +2,6 @@
 # MariaDB Server Install
 
     module.exports = header: 'MariaDB Server Install', handler: (options) ->
-      {iptables} = @config
-      service_name = 'mariadb'
 
 ## IPTables
 
@@ -20,7 +18,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
         rules: [
           { chain: 'INPUT', jump: 'ACCEPT', dport: options.my_cnf['mysqld']['port'], protocol: 'tcp', state: 'NEW', comment: "MariaDB" }
         ]
-        if: @has_service('masson/core/iptables') and iptables.action is 'start'
+        if: options.iptables
 
 ## User & groups
 
@@ -56,7 +54,7 @@ Package on Centos/Redhat 7 OS.
         , ->
           @service
             name: 'mariadb-server'
-            chk_name: service_name
+            chk_name: 'mariadb'
             startup: true
           @system.tmpfs
             mount: "#{path.dirname options.my_cnf['mysqld']['pid-file']}"
@@ -67,7 +65,7 @@ Package on Centos/Redhat 7 OS.
         @service
           if_os: name: ['redhat','centos'], version: '6'
           name: 'mysql-server'
-          chk_name: service_name
+          chk_name: 'mariadb'
           startup: true
 
 ## Layout
@@ -142,11 +140,11 @@ is running.
           merge: false
           backup: true
         @service.status
-          name: service_name
+          name: 'mariadb'
           unless: -> @status -1
         @service.restart
           header: 'Restart'
-          name: service_name
+          name: 'mariadb'
           if: -> @status(-2) and @status(-1)
       # TODO: wait for error in nikita
       # @call 
@@ -189,8 +187,8 @@ is running.
 
       @call header: 'Init data directory', handler: ->
         @system.execute
-          cmd: "mysql_install_db --user=#{options.server.my_cnf['mysqld']['user']}  --datadir=#{options.server.my_cnf['mysqld']['datadir']}"
-          unless_exists: "#{options.server.my_cnf['mysqld']['datadir']}/mysql/db.frm"
+          cmd: "mysql_install_db --user=#{options.my_cnf['mysqld']['user']}  --datadir=#{options.my_cnf['mysqld']['datadir']}"
+          unless_exists: "#{options.my_cnf['mysqld']['datadir']}/mysql/db.frm"
 
 ## Secure Installation
 
@@ -214,15 +212,14 @@ The bug is fixed after version 5.7 of MariaDB.
       @call
         header: 'Secure Installation'
         handler: ->
-          {current_password, password, remove_anonymous, disallow_remote_root_login, remove_test_db, reload_privileges} = options
           test_password = true
           modified = false
           version = null
           safe_start = false
           database =
             database: null
-            admin_username: 'root'
-            admin_password: password
+            admin_username: options.admin_username
+            admin_password: options.admin_password
             engine: 'mysql'
             host: 'localhost'
           @system.execute
@@ -242,7 +239,7 @@ The bug is fixed after version 5.7 of MariaDB.
                 header: 'Configure Socket'
                 handler: ->
                   @service.stop
-                    name: service_name
+                    name: 'mariadb'
                   @system.execute
                     cmd: "mysqld_safe --socket=/var/lib/mysql/mysql.sock > /dev/null 2>&1 &"
                   @wait.exist
@@ -266,7 +263,7 @@ The bug is fixed after version 5.7 of MariaDB.
                       switch
                         when /Enter current password for root/.test data
                           options.log data
-                          stream.write "#{if test_password then password else current_password}\n"
+                          stream.write "#{if test_password then options.admin_password else options.current_password}\n"
                           data = ''
                         when /ERROR 1045/.test(data) and test_password
                           options.log data
@@ -283,23 +280,23 @@ The bug is fixed after version 5.7 of MariaDB.
                           data = ''
                         when /New password/.test(data) or /Re-enter new password/.test(data)
                           options.log data
-                          stream.write "#{password}\n"
+                          stream.write "#{options.admin_password}\n"
                           data = ''
                         when /Remove anonymous users/.test data
                           options.log data
-                          stream.write "#{if remove_anonymous then 'y' else 'n'}\n"
+                          stream.write "#{if options.remove_anonymous then 'y' else 'n'}\n"
                           data = ''
                         when /Disallow root login remotely/.test data
                           options.log data
-                          stream.write "#{if disallow_remote_root_login then 'y' else 'n'}\n"
+                          stream.write "#{if options.disallow_remote_root_login then 'y' else 'n'}\n"
                           data = ''
                         when /Remove test database and access to it/.test data
                           options.log data
-                          stream.write "#{if remove_test_db then 'y' else 'n'}\n"
+                          stream.write "#{if options.remove_test_db then 'y' else 'n'}\n"
                           data = ''
                         when /Reload privilege tables now/.test data
                           options.log data
-                          stream.write "#{if reload_privileges then 'y' else 'n'}\n"
+                          stream.write "#{if options.reload_privileges then 'y' else 'n'}\n"
                           data = ''
                         when /All done/.test data
                           options.log data
@@ -327,24 +324,24 @@ The bug is fixed after version 5.7 of MariaDB.
                             @wait.execute
                               cmd: "if [ -f \"#{options.my_cnf['mysqld']['pid-file']}\" ]; then exit 1; else exit 0 ; fi"
                             @service.start
-                              name: service_name
+                              name: 'mariadb'
                         @then callback
           @call
             header: 'Allow Root Remote Login'
-            unless: disallow_remote_root_login
+            unless: options.disallow_remote_root_login
             handler: ->
               # Note, "WITH GRANT OPTION" is required for root
-              query = (query) -> "mysql -uroot -p#{password} -s -e \"#{query}\""
+              query = (query) -> "mysql -uroot -p#{options.admin_password} -s -e \"#{query}\""
               sql =
-              @service.start service_name
+              @service.start 'mariadb'
               @system.execute
                 cmd: query """
                 USE mysql;
-                GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '#{password}' WITH GRANT OPTION;
+                GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '#{options.admin_password}' WITH GRANT OPTION;
                 FLUSH PRIVILEGES;
                 """
                 unless_exec: """
-                password=`#{query "SELECT PASSWORD('#{password}');"}`
+                password=`#{query "SELECT PASSWORD('#{options.admin_password}');"}`
                 #{query "SHOW GRANTS FOR root;"} | grep $password
                 """
 

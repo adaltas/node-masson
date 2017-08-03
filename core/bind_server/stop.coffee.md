@@ -1,5 +1,5 @@
 
-# Bind server Stop
+# Bind Server Stop
 
 Stop the "named" service.
 

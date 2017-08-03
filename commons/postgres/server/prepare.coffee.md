@@ -6,11 +6,11 @@ Download the PostgreSQL Container
     module.exports =
       header: 'PostgreSQL'
       if: -> @contexts('masson/commons/postgres/server')[0]?.config.host is @config.host
-      handler: ->
-        {postgres} = @config
+      ssh: null
+      handler: (options) ->
         @docker.pull
           tag: 'postgres'
-          version: postgres.version
+          version: options.version
         @docker.save
-          image: "postgres:#{postgres.version}"
-          output: "#{@config.nikita.cache_dir}/postgres.tar"
+          image: "postgres:#{options.version}"
+          output: "#{options.cache_dir}/postgres.tar"

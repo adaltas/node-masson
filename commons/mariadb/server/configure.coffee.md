@@ -32,29 +32,45 @@ Default configuration:
 }
 ```
 
-    module.exports = ->
-      mysql_ctxs = @contexts 'masson/commons/mariadb/server'
-      [ssl_ctx] = @contexts('masson/core/ssl').filter (ctx) => ctx.config.host is @config.host
-      @config.mariadb ?= {}
-      options = @config.mariadb.server ?= {}
+    module.exports = (service) ->
+      service = migration.call @, service, 'masson/commons/mariadb/server', ['mariadb', 'server'], require('nikita/lib/misc').merge require('.').use,
+        iptables: key: ['iptables']
+        ssl: key: ['ssl']
+        mariadb: key: ['mariadb', 'server']
+      options = @config.mariadb.server = service.options
+      
+## Environnment
 
       # User SQL
       options.sql_on_install ?= []
       options.sql_on_install = [options.sql_on_install] if typeof options.sql_on_install is 'string'
       # Secure Installation
       options.current_password ?= ''
-      options.password ?= ''
+      options.admin_username ?= 'root'
+      throw Error 'Required Option: admin_password' unless options.admin_password
+      # options.password ?= ''
       options.remove_anonymous ?= true
       options.disallow_remote_root_login ?= false
       options.remove_test_db ?= true
       options.reload_privileges ?= true
-      # Service Configuration
-      options.group ?= name: 'mysql'
+      options.fqdn ?= service.node.fqdn
+      options.iptables ?= service.use.iptables and service.use.iptables.options.action is 'start'
+
+## Identities
+
+      # Group
+      options.group ?= {}
       options.group = name: options.group if typeof options.group is 'string'
-      options.user ?= name: 'mysql'
+      options.group.name ?= 'mysql'
+      # User
+      options.user ?= {}
       options.user = name: options.user if typeof options.user is 'string'
+      options.user.name ?= 'mysql'
       options.user.home ?= "/var/lib/#{options.user.name}"
-      options.user.gid = options.group.name
+      options.user.gid ?= options.group.name
+
+## Configuration
+
       options.my_cnf ?= {}
       options.my_cnf['mysqld'] ?= {}
 
@@ -66,24 +82,28 @@ If the DBA need more than two Masters, Ring like architecture should be used.
 
 Note: For Now Ryba does not support automatic discovery for more than 2 master.
 
-      options.ha_enabled ?= if mysql_ctxs.length > 1 then true else false
+      options.ha_enabled ?= if service.use.mariadb.length > 1 then true else false
       if options.ha_enabled
+        throw Error "Invalid HA Configuration: expect only 2 nodes" unless service.use.mariadb.length is 2
         options.replication_dir ?= "#{options.user.home}/replication"
-        mysql_hosts = mysql_ctxs.map (ctx) -> ctx.config.host
+        mysql_fqdns = service.use.mariadb.map( (srv) -> srv.node.fqdn ).sort()
         # Attribute an id to mysql server
         # This line is to be changed by admin to set replication architecture.
-        options.id ?= mysql_hosts.indexOf(@config.host)+1
+        options.id ?= mysql_fqdns.indexOf(service.node.fqdn)+1
         options.my_cnf['mysqld']['server-id'] = options.id
         # automatic discovery
         # for ryba each mysql sever is a master, for enabling the replication,
         # a slave host hould be defined.
-        if mysql_ctxs.length is 2
+        for mariadb_srv in service.use.mariadb
+          continue if mariadb_srv.node.fqdn is service.node.fqdn
           options.repl_master ?= {}
-          options.repl_master.host ?= mysql_hosts.filter( (host) => host isnt @config.host)[0]
-          options.repl_master.user ?= 'repl'
-          options.repl_master.pwd ?= 'repl123'
-        else
-          throw Error 'No slave configured' unless options.repl_master?.host?
+          options.repl_master.fqdn ?= mariadb_srv.node.fqdn
+          options.repl_master.admin_username ?= mariadb_srv.options.admin_username or 'root'
+          options.repl_master.admin_password ?= mariadb_srv.options.admin_password or throw Error "Required Option: admin_password"
+          mariadb_srv.options.repl_master ?= {}
+          options.repl_master.username ?= mariadb_srv.options.repl_master.username or 'repl'
+          options.repl_master.password ?= mariadb_srv.options.repl_master.password or throw Error "Required Option: repl_master.password"
+        throw Error 'No slave configured' unless options.repl_master.fqdn
         # attribute a the master and check if every mster has unique id
         options.my_cnf['mysqld']['relay-log'] ?= "#{options.replication_dir}/mysql-relay-bin"
         options.my_cnf['mysqld']['relay-log-index'] ?= "#{options.replication_dir}/mysql-relay-bin.index"
@@ -150,7 +170,7 @@ Note: For Now Ryba does not support automatic discovery for more than 2 master.
 
 ### SSL
 
-      options.ssl ?= ssl_ctx.config.ssl
+      options.ssl ?= service.use.ssl?.options
       if options.ssl
         throw Error "Required Option: ssl.cert" if  not options.ssl.cert
         throw Error "Required Option: ssl.key" if not options.ssl.key
@@ -201,6 +221,13 @@ Note: For Now Ryba does not support automatic discovery for more than 2 master.
       options.repo.target = path.resolve '/etc/yum.repos.d', options.repo.target
       options.repo.replace ?= 'mariadb*'
 
+## Wait
+
+      options.wait_tcp = {}
+      options.wait_tcp.fqdn = service.node.fqdn
+      options.wait_tcp.port = options.my_cnf['mysqld']['port']
+
 ## Dependencies
 
     path = require 'path'
+    migration = require '../../../lib/migration'

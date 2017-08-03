@@ -55,8 +55,10 @@ Java home are:
 }}
 ```
 
-    module.exports = ->
-      options = @config.java ?= {}
+    module.exports = (service) ->
+      service = migration.call @, service, 'masson/commons/java', ['java'], {}
+      options = @config.java = service.options
+
       # OpenJDK
       options.openjdk ?= false
       # Oracle JDK
@@ -79,3 +81,7 @@ Java home are:
       options.java_home = options.java_home.replace /\/+$/, "" # remove trailing slashes
       options.jre_home ?= "#{options.java_home}/jre"
       options.jre_home = options.jre_home.replace /\/+$/, "" # remove trailing slashes
+
+## Dependencies
+
+    migration = require '../../lib/migration'

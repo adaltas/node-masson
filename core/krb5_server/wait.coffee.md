@@ -3,9 +3,20 @@
 
 Wait for all the Kerberos servers deployed by Masson.
 
-    module.exports = header: 'Krb5 Server Wait', label_true: 'READY', handler: ->
+## Options
+
+* `wait_kdc` ([[obj]])   
+  Array or multi-dimentianal array containing objects with the host and port
+  information to the KDC.
+
+## Source Code
+
+    module.exports = header: 'Kerberos Server Wait', label_true: 'READY', handler: (options) ->
+      console.log options.wait_kdc
       @connection.wait
         header: 'Kadmin'
-        servers: for context in @contexts 'masson/core/krb5_server'
-          for realm, config of context.config.krb5_server.kdc_conf.realms
-            host: context.config.host, port: config.kadmind_port
+        servers: array.flatten options.wait_kdc
+
+## Dependencies
+
+    array = require 'nikita/lib/misc/array'

@@ -14,14 +14,15 @@ the clock of the virtual box with the command
       configure:
         'masson/core/ntp/configure'
       commands:
-        'check':
-          'masson/core/ntp/check'
-        'install': [
-          'masson/bootstrap/fs'
-          'masson/core/ntp/install'
-          'masson/core/ntp/start'
-          'masson/core/ntp/check'
-        ]
+        'check': ->
+          options = @config.ntp
+          @call 'masson/core/ntp/check', options
+        'install': ->
+          options = @config.ntp
+          @call 'masson/bootstrap/fs', options
+          @call 'masson/core/ntp/install', options
+          @call 'masson/core/ntp/start', options
+          @call 'masson/core/ntp/check', options
         'start':
           'masson/core/ntp/start'
         'stop':

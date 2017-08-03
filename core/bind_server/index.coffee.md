@@ -7,17 +7,18 @@ rom ISC.
 
     module.exports =
       use:
-        iptables: implicit: true, module: 'masson/core/iptables'
+        iptables: module: 'masson/core/iptables', local: true
         yum: module: 'masson/core/yum'
       configure:
         'masson/core/bind_server/configure'
       commands:
-        'check':
-          'masson/core/bind_server/check'
-        'install': [
-          'masson/core/bind_server/install'
-          'masson/core/bind_server/start'
-        ]
+        'check': ->
+          options = @config.bind_server
+          @call 'masson/core/bind_server/check', options
+        'install': ->
+          options = @config.bind_server
+          @call 'masson/core/bind_server/install', options
+          @call 'masson/core/bind_server/start', options
         'start':
           'masson/core/bind_server/start'
         'stop':
