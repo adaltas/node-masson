@@ -8,10 +8,15 @@
 
     module.exports =
       use:
-        system: 'masson/core/system'
-        yum: 'masson/core/yum'
+        system: module: 'masson/core/system', local: true
+        yum: module: 'masson/core/yum', local: true
       configure:
         'masson/core/ssh/configure'
       commands:
-        'install':
-          'masson/core/ssh/install'
+        'check': ->
+          options = @config.ssh
+          @call 'masson/core/ssh/check', options
+        'install': ->
+          options = @config.ssh
+          @call 'masson/core/ssh/install', options
+          @call 'masson/core/ssh/check', options

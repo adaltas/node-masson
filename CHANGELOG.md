@@ -4,6 +4,7 @@
 ## Trunk
 
 * context: reflect move in nikita of flatten into array
+* all: assert packages are installed and services running
 * openldap: add mdb backend support
 * run: remove global configuration
 * mysql: client repo configuration

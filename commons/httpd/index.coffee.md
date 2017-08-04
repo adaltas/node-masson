@@ -9,14 +9,14 @@ Configure the HTTPD server.
       configure:
         'masson/commons/httpd/configure'
       commands:
-        'check': [
-          'masson/commons/httpd/status'
-          'masson/commons/httpd/check'
-        ]
-        'install': [
-          'masson/commons/httpd/install'
-          'masson/commons/httpd/start'
-        ]
+        'check': ->
+          options = @config.httpd
+          @call 'masson/commons/httpd/status', options
+          @call 'masson/commons/httpd/check', options
+        'install': ->
+          options = @config.httpd
+          @call 'masson/commons/httpd/install', options
+          @call 'masson/commons/httpd/start', options
         'start':
           'masson/commons/httpd/start'
         'status':

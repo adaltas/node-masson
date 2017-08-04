@@ -24,10 +24,14 @@ setup TLS, sockets etc. Configuration which are mandatory if you want to use doc
       configure:
         'masson/commons/docker/configure'
       commands:
+        'check': ->
+          options = @config.docker
+          @call 'masson/commons/docker/check', options
         'install': ->
           options = @config.docker
           @call 'masson/commons/docker/install', options
           @call 'masson/commons/docker/start', options
+          @call 'masson/commons/docker/check', options
         'prepare': ->
           options = @config.docker
           @call 'masson/commons/docker/prepare', options

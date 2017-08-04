@@ -12,6 +12,8 @@ rom ISC.
       configure:
         'masson/core/bind_server/configure'
       commands:
+        'check':
+          'masson/core/bind_server/check'
         'install': [
           'masson/core/bind_server/install'
           'masson/core/bind_server/start'

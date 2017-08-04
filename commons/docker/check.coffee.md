@@ -1,7 +1,9 @@
 
-# NTP Check
+# Docker Check
 
-    module.exports = header: 'NTP Check', handler: (options) ->
+Check the health of the Docker daemon.
+
+    module.exports = header: 'Docker Check', handler: (options) ->
 
 ## Runing Sevrice
 
@@ -9,7 +11,6 @@ Ensure the "ntpd" service is up and running.
 
       @service.assert
         header: 'Service'
-        name: 'ntp'
-        srv_name: 'ntpd'
+        name: 'docker'
         installed: true
         started: true
