@@ -1,6 +1,16 @@
 
     module.exports = header: 'SSSD Check', handler: ->
 
+## Runing Sevrice
+
+Ensure the "sshd" service is up and running.
+
+      @service.assert
+        header: 'Service'
+        name: 'sssd'
+        installed: true
+        started: true
+
 ## Check NSS
 
 Check if NSS is correctly configured by executing the command `getent passwd

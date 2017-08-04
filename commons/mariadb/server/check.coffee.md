@@ -20,6 +20,13 @@ Wait connect action is used as a check n the port availability.
 
 ## Check Replication
 
+      props =
+        database: null
+        admin_username: options.admin_username
+        admin_password: options.admin_password
+        engine: 'mysql'
+        host: 'localhost'
+        silent: false
       @call
         header: 'Check Replication'
         if: options.ha_enabled
