@@ -18,10 +18,10 @@ module.exports = (contexts, params, options, services, config) ->
       return false
   m.has_service = (services...) ->
     # service = [service] if typeof service is 'string'
-    services = misc.array.flatten services
+    services = array.flatten services
     services.some (srv) =>
       m.services.indexOf(srv) isnt -1
   m
 
-misc = require 'nikita/lib/misc'
+array = require 'nikita/lib/misc/array'
 minimatch = require 'minimatch'

@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* context: reflect move in nikita of flatten into array
 * openldap: add mdb backend support
 * run: remove global configuration
 * mysql: client repo configuration
