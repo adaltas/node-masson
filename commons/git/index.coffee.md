@@ -9,10 +9,10 @@ in "/etc/gitconfig" will not be created or modified.
     module.exports =
       use:
         'proxy': module: 'masson/core/proxy'
+        'system': module:  'masson/core/system'
       configure:
         'masson/commons/git/configure'
       commands:
         'install': [
-          'masson/core/users'
           'masson/commons/git/install'
         ]
