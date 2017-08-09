@@ -189,8 +189,8 @@ is running.
 
       @call header: 'Init data directory', handler: ->
         @system.execute
-          cmd: "mysql_install_db --user=#{options.server.my_cnf['mysqld']['user']}  --datadir=#{options.server.my_cnf['mysqld']['datadir']}"
-          unless_exists: "#{options.server.my_cnf['mysqld']['datadir']}/mysql/db.frm"
+          cmd: "mysql_install_db --user=#{options.my_cnf['mysqld']['user']}  --datadir=#{options.my_cnf['mysqld']['datadir']}"
+          unless_exists: "#{options.my_cnf['mysqld']['datadir']}/mysql/db.frm"
 
 ## Secure Installation
 
