@@ -39,6 +39,7 @@
         options.key.target = "#{@config.shortname}.key.pem" if options.key.target is true
         throw Error "Invalid Target" unless typeof options.key.target is 'string'
         options.key.target = path.resolve '/etc/security/certs', options.key.target
+      options.key.name ?= service.node.hostname
 
 ## JKS Truststore
 
