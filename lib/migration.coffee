@@ -2,6 +2,12 @@
 ###
 migration(service, module, module_key, uses)
 
+Possible dependency attributes:
+* local (boolean)   
+  use point to the local service definition instead of an array
+* single (boolean)
+  use enforce and return only one service definition
+
 ###
 
 module.exports = (service, srv, keys, uses) ->
@@ -11,9 +17,14 @@ module.exports = (service, srv, keys, uses) ->
     nikita_options[k] = v
   use = {}
   for use_srv_key, use_srv of uses
-    srv_ctxs = @contexts use_srv.module
+    try
+      srv_ctxs = @contexts use_srv.module
+    catch e
+      throw Error "Failed to get context: #{use_srv_key}"
     if use_srv.local
-      srv_ctxs.filter (ctx) => ctx.config.host is @config.host
+      srv_ctxs = srv_ctxs.filter (ctx) => ctx.config.host is @config.host
+    if use_srv.single
+      throw Error if srv_ctxs.length > 1
     srv_ctxs = srv_ctxs.map (ctx) =>
       options = null
       throw Error 'No key' unless use_srv.key
@@ -35,6 +46,8 @@ module.exports = (service, srv, keys, uses) ->
       options: merge {}, nikita_options, options
     # console.log '>>', srv_ctxs
     if use_srv.local
+      srv_ctxs = srv_ctxs[0]
+    if use_srv.single
       srv_ctxs = srv_ctxs[0]
     use[use_srv_key] = srv_ctxs
   options = null

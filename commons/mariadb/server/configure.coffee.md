@@ -172,9 +172,9 @@ Note: For Now Ryba does not support automatic discovery for more than 2 master.
 
       options.ssl ?= service.use.ssl?.options
       if options.ssl
-        throw Error "Required Option: ssl.cert" if  not options.ssl.cert
-        throw Error "Required Option: ssl.key" if not options.ssl.key
         throw Error "Required Option: ssl.cacert" if not options.ssl.cacert
+        throw Error "Required Option: ssl.key" if not options.ssl.key
+        throw Error "Required Option: ssl.cert" if not options.ssl.cert
         options.my_cnf['mysqld']['ssl-ca'] ?= "#{options.user.home}/data/ca.pem"
         options.my_cnf['mysqld']['ssl-cert'] ?= "#{options.user.home}/data/server-cert.pem"
         options.my_cnf['mysqld']['ssl-key'] ?= "#{options.user.home}/data/server-key.pem"
