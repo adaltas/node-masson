@@ -49,6 +49,8 @@ module.exports = (service, srv, keys, uses) ->
       srv_ctxs = srv_ctxs[0]
     if use_srv.single
       srv_ctxs = srv_ctxs[0]
+    # Note, in real future world, we will accept empty array if a service is define but not defined anywhere
+    srv_ctxs = null if srv_ctxs?.length is 0
     use[use_srv_key] = srv_ctxs
   options = null
   for key in keys
