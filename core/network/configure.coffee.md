@@ -79,10 +79,11 @@ The module accept the following properties:
 
 ## DNS Resolver
 
-      options.dns = for bind in service.use.bind_server
-        continue if bind.node.host is service.node.host
-        host: bind.node.host
-        port: bind.options.port
+      if service.use.bind_server
+        options.dns = for bind in service.use.bind_server
+          continue if bind.node.host is service.node.host
+          host: bind.node.host
+          port: bind.options.port
 
 ## Dependencies
 
