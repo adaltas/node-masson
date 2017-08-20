@@ -9,8 +9,8 @@ Ensure the "ntpd" service is up and running.
 
       @service.assert
         header: 'Service'
-        name: 'mariadb-server'
-        srv_name: 'mariadb'
+        name: options.name
+        srv_name: options.srv_name
         installed: true
         started: true
 
