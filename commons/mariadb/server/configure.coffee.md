@@ -69,6 +69,13 @@ Default configuration:
       options.user.home ?= "/var/lib/#{options.user.name}"
       options.user.gid ?= options.group.name
 
+## Service
+parametrize service options as the name depends on how the service is installed.
+      
+      options.name ?= 'mariadb-server'
+      options.srv_name ?= 'mariadb'
+      options.chk_name ?= 'mariadb'
+
 ## Configuration
 
       options.my_cnf ?= {}

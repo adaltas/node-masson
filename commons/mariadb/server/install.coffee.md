@@ -53,8 +53,8 @@ Package on Centos/Redhat 7 OS.
           if_os: name: ['redhat','centos'], version: '7'
         , ->
           @service
-            name: 'mariadb-server'
-            chk_name: 'mariadb'
+            name: options.name
+            chk_name: options.chk_name
             startup: true
           @system.tmpfs
             mount: "#{path.dirname options.my_cnf['mysqld']['pid-file']}"
@@ -140,11 +140,11 @@ is running.
           merge: false
           backup: true
         @service.status
-          name: 'mariadb'
+          name: options.srv_name
           unless: -> @status -1
         @service.restart
           header: 'Restart'
-          name: 'mariadb'
+          name: options.srv_name
           if: -> @status(-2) and @status(-1)
       # TODO: wait for error in nikita
       # @call 
@@ -239,7 +239,7 @@ The bug is fixed after version 5.7 of MariaDB.
                 header: 'Configure Socket'
                 handler: ->
                   @service.stop
-                    name: 'mariadb'
+                    name: options.srv_name
                   @system.execute
                     cmd: "mysqld_safe --socket=/var/lib/mysql/mysql.sock > /dev/null 2>&1 &"
                   @wait.exist
@@ -324,7 +324,7 @@ The bug is fixed after version 5.7 of MariaDB.
                             @wait.execute
                               cmd: "if [ -f \"#{options.my_cnf['mysqld']['pid-file']}\" ]; then exit 1; else exit 0 ; fi"
                             @service.start
-                              name: 'mariadb'
+                              name: options.srv_name
                         @then callback
           @call
             header: 'Allow Root Remote Login'
@@ -333,7 +333,7 @@ The bug is fixed after version 5.7 of MariaDB.
               # Note, "WITH GRANT OPTION" is required for root
               query = (query) -> "mysql -uroot -p#{options.admin_password} -s -e \"#{query}\""
               sql =
-              @service.start 'mariadb'
+              @service.start options.srv_name
               @system.execute
                 cmd: query """
                 USE mysql;

@@ -5,6 +5,7 @@
 
 * context: merge no_ssh with nikita options
 * commons/java: update version
+* mariadb: parametrize service name
 * context: reflect move in nikita of flatten into array
 * all: assert packages are installed and services running
 * openldap: add mdb backend support
