@@ -33,7 +33,7 @@ module.exports = (service, srv, keys, uses) ->
           unless ctx.config[key]
             options = null
             break
-          options = merge {}, ctx.config[key]
+          options = ctx.config[key]
         else
           unless options[key]
             options = null
@@ -43,7 +43,7 @@ module.exports = (service, srv, keys, uses) ->
         ip: ctx.config.ip
         hostname: ctx.config.shortname
         fqdn: ctx.config.host
-      options: merge {}, nikita_options, options
+      options: merge options, nikita_options, options
     # console.log '>>', srv_ctxs
     if use_srv.local
       srv_ctxs = srv_ctxs[0]
@@ -58,13 +58,13 @@ module.exports = (service, srv, keys, uses) ->
       unless @config[key]
         options = null
         continue
-      options = merge {}, @config[key]
+      options = @config[key]
     else
       unless options[key]
         options = null
         continue
       options = options[key]
-  options = merge {}, nikita_options, options
+  options = merge options, nikita_options, options
   use: use
     # ssl: @contexts('masson/core/ssl').filter( (ctx) => ctx.config.host is @config.host ).map (ctx) -> options: ctx.config.ssh
     # mariadb: @contexts('masson/commons/mariadb/server').map (ctx) -> options: ctx.config.mariadb.server
