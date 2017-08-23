@@ -226,6 +226,18 @@ Run::exec = (params='install') ->
         context.ssh.open host: context.config.ip or context.config.host unless params.command is 'prepare'
         context.call ->
           for id, i in context.services then do (id, i) =>
+            service = services[id]
+            return unless service.plugin
+            try
+              @call service.plugin, (err) ->
+                console.log 'ERROR', context.config.host, id, err if err
+                error = true if err
+            catch err
+              console.log 'ERROR', context.config.host, id, err if err
+              error = true
+              throw err
+        context.call ->
+          for id, i in context.services then do (id, i) =>
             if_resume = ->
               ! (params.resume and "#{context.config.shortname},#{id},#{i}" in history)
             service = services[id]
