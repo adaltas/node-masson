@@ -29,28 +29,29 @@ integrator responsibility to download the jdk manually and reference it
 inside the configuration. The properties "jce\_local\_policy" and
 "jce\_us\_export_policy" must be modified accordingly with an appropriate location.
 
-The Java Cryptography Extension (JCE) provides a framework and implementation for encryption, 
-key generation and key agreement, and Message Authentication Code (MAC) algorithms. JCE 
-supplements the Java platform, which already includes interfaces and implementations of 
+The Java Cryptography Extension (JCE) provides a framework and implementation for encryption,
+key generation and key agreement, and Message Authentication Code (MAC) algorithms. JCE
+supplements the Java platform, which already includes interfaces and implementations of
 message digests and digital signatures.
 
-Like for the Oracle Java JDK, for licensing reason, the JCE is not available from a Yum 
-repository. It is the phyla integrator responsibility to download the jdk manually and 
-reference it inside the configuration. The properties "jce\_local\_policy" and 
+Like for the Oracle Java JDK, for licensing reason, the JCE is not available from a Yum
+repository. It is the phyla integrator responsibility to download the jdk manually and
+reference it inside the configuration. The properties "jce\_local\_policy" and
 "jce\_us\_export_policy" must be modified accordingly with an appropriate location.
 
-Modified status is only needed on the last two copy commands, which means the jars 
-have been copied or not (in case they already exist).  
+Modified status is only needed on the last two copy commands, which means the jars
+have been copied or not (in case they already exist).
 
       @call
         header: 'Oracle JDKs'
         if: -> @config.java.jdk
       , (options) ->
         installed_versions = null
+        @system.mkdir
+          target: java.jdk.root_dir
         @system.execute
-          header: "List Installed JDK"
-          cmd: "ls -d #{java.jdk.root_dir}/*"
-          code_skipped: 2
+          # Better than ls, it ignores links and empty dirs
+          cmd: "find #{java.jdk.root_dir} -mindepth 1 -maxdepth 1 -not -empty -type d"
           shy: true
         , (err, executed, stdout, stderr) ->
           throw err if err
@@ -60,7 +61,6 @@ have been copied or not (in case they already exist).
             .map (abs) -> "#{path.basename abs}"
         @system.mkdir java.jdk.root_dir
         @service.install
-          header: 'Dependency unzip'
           if: Object.keys(java.jdk.versions).length
           name: 'unzip'
         @each java.jdk.versions, (options, callback) ->
@@ -114,9 +114,9 @@ have been copied or not (in case they already exist).
 ## Java Paths
 
       @system.execute
-        header: 'Set JDK Version (default)'
+        header: 'Set default JDK'
         cmd: """
-        if [ -L  "#{java.jdk.root_dir}/default" ] || [ -e "#{java.jdk.root_dir}/default" ] ; then 
+        if [ -L  "#{java.jdk.root_dir}/default" ] || [ -e "#{java.jdk.root_dir}/default" ] ; then
           source=`readlink #{java.jdk.root_dir}/default`
           if [ "$source" == "#{java.jdk.root_dir}/jdk#{java.jdk.version}" ]; then
             exit 3
@@ -134,7 +134,7 @@ have been copied or not (in case they already exist).
         code_skipped: 3
         trap: true
       @system.execute
-        header: 'Set JDK Version (latest)'
+        header: 'Set latest JDK'
         cmd: """
         if [ -L  "#{java.jdk.root_dir}/latest" ] || [ -e "#{java.jdk.root_dir}/latest" ] ; then
           source=`readlink #{java.jdk.root_dir}/latest`
@@ -197,4 +197,4 @@ and removing the GCJ package also remove the MySQL connector package.
 
 ## Resources
 
-*   [Instructions to install Oracle JDK with alternative](http://www.if-not-true-then-false.com/2010/install-sun-oracle-java-jdk-jre-6-on-fedora-centos-red-hat-rhel/) 
+*   [Instructions to install Oracle JDK with alternative](http://www.if-not-true-then-false.com/2010/install-sun-oracle-java-jdk-jre-6-on-fedora-centos-red-hat-rhel/)
