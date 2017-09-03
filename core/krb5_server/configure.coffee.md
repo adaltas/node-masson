@@ -69,7 +69,7 @@ declare the master server, set the property "config.{realm}.master" to "true"
 on the appropriate node.
 
       for realm, config of options.admin
-        config.ha ?= service.use.krb5_server.length > 1
+        config.ha = service.use.krb5_server.length > 1
         if config.ha
           master_count = service.use.krb5_server.filter( (srv) -> srv.options.admin?[realm]?.master ).length
           throw Error 'Invalid configuration: more than one KDC server' if master_count > 1
@@ -165,9 +165,9 @@ configuration profile.
 
 ## Wait
     
+      options.wait_ldap_client = service.use.openldap_client.options.wait
       options.wait = {}
-      options.wait.ldap_client = service.use.openldap_client.options.wait
-      options.wait_kdc = for realm, config of options.kdc_conf.realms
+      options.wait.kadmin = for realm, config of options.kdc_conf.realms
         host: service.node.fqdn
         port: config.kadmind_port
 

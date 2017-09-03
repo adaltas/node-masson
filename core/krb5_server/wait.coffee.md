@@ -12,10 +12,9 @@ Wait for all the Kerberos servers deployed by Masson.
 ## Source Code
 
     module.exports = header: 'Kerberos Server Wait', label_true: 'READY', handler: (options) ->
-      console.log options.wait_kdc
       @connection.wait
         header: 'Kadmin'
-        servers: array.flatten options.wait_kdc
+        servers: options.kadmin
 
 ## Dependencies
 
