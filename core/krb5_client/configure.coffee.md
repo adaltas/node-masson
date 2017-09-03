@@ -33,7 +33,7 @@ Example:
 ```
 
     module.exports = ->
-      service = migration.call @, service, 'masson/core/krb5_server', ['krb5_server'], require('nikita/lib/misc').merge require('.').use,
+      service = migration.call @, service, 'masson/core/krb5_client', ['krb5_client'], require('nikita/lib/misc').merge require('.').use,
         ntp: key: ['ntp']
         ssh: key: ['ssh']
         krb5_server: key: ['krb5_server']
@@ -46,14 +46,14 @@ Example:
       options.etc_krb5_conf = merge {}, module.exports.etc_krb5_conf, options.etc_krb5_conf
       # Merge global with server-based configuration
       # options.etc_krb5_conf.realms = merge {}, options.etc_krb5_conf.realms, options.etc_krb5_conf.realms
-      for krb5_server_srv in service.use.krb5_server
-        for realm, config of krb5_server_srv.options.admin
+      for srv in service.use.krb5_server
+        for realm, config of srv.options.admin
           options.etc_krb5_conf.realms[realm] ?= {}
           options.etc_krb5_conf.realms[realm].kdc ?= []
-          options.etc_krb5_conf.realms[realm].kdc.push krb5_server_srv.node.fqdn
+          options.etc_krb5_conf.realms[realm].kdc.push srv.node.fqdn
           # realms[realm].kdc = [realms[realm].kdc] unless Array.isArray realms[realm].kdc
           options.etc_krb5_conf.realms[realm].admin_server ?= []
-          options.etc_krb5_conf.realms[realm].admin_server.push krb5_server_srv.node.fqdn
+          options.etc_krb5_conf.realms[realm].admin_server.push srv.node.fqdn
           # realms[realm].default_domain ?= realm.toLowerCase()
           options.etc_krb5_conf.libdefaults.default_realm = realm
 
