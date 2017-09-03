@@ -7,7 +7,7 @@ Check the health of the Bind server.
 
 ## Runing Sevrice
 
-Ensure the "named" service is up and running.
+Ensure the services are up and running.
 
       @service.assert
         header: 'Package Installed'
@@ -21,6 +21,12 @@ Ensure the "named" service is up and running.
         header: 'Service kadmin'
         name: 'krb5kdc'
         started: true
+
+## Connections
+
+      @connection.assert
+        header: 'Kadmin'
+        servers: options.kadmin
 
 ## Local kadmin Client
 

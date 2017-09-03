@@ -113,7 +113,7 @@ The following files are updated:
         @call
           if: -> @status()
         , ->
-          @call 'masson/core/openldap_client/wait', options.wait.ldap_client
+          @call 'masson/core/openldap_client/wait', options.wait_ldap_client
           @service
             srv_name: 'krb5kdc'
             action: 'restart'
