@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* context: merge no_ssh with nikita options
 * commons/java: update version
 * context: reflect move in nikita of flatten into array
 * openldap: add mdb backend support

@@ -4,7 +4,7 @@ nikita = require 'nikita'
 module.exports = (contexts, params, options, services, config) ->
   config.nikita ?= {}
   config.nikita.no_ssh = true
-  m = nikita options
+  m = nikita merge {}, options, config.nikita
   m.params = params
   m.config = config
   m.services = services
@@ -24,4 +24,5 @@ module.exports = (contexts, params, options, services, config) ->
   m
 
 array = require 'nikita/lib/misc/array'
+{merge} = require 'nikita/lib/misc'
 minimatch = require 'minimatch'
