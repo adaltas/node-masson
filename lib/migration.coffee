@@ -25,6 +25,8 @@ module.exports = (service, srv, keys, uses) ->
       srv_ctxs = srv_ctxs.filter (ctx) => ctx.config.host is @config.host
     if use_srv.single
       throw Error "Service #{use_srv_key} is marked as unique" if srv_ctxs.length > 1
+    if use_srv.required
+      throw Error "Service #{use_srv_key} is marked as required" unless srv_ctxs.length
     srv_ctxs = srv_ctxs.map (ctx) =>
       options = null
       throw Error "No key for sevice: #{use_srv_key}" unless use_srv.key
@@ -48,11 +50,11 @@ module.exports = (service, srv, keys, uses) ->
       srv_ctxs = srv_ctxs[0]
     if use_srv.single
       srv_ctxs = srv_ctxs[0]
-    if use_srv.required
-      if use_srv.local or use_srv.single
-        throw Error "Service #{use_srv_key} is marked as required" unless srv_ctxs
-      else
-        throw Error "Service #{use_srv_key} is marked as required" unless srv_ctxs.length
+    # if use_srv.required
+    #   if use_srv.local or use_srv.single
+    #     throw Error "Service #{use_srv_key} is marked as required" unless srv_ctxs
+    #   else
+    #     throw Error "Service #{use_srv_key} is marked as required" unless srv_ctxs.length
     # Note, in real future world, we will accept empty array if a service is define but not defined anywhere
     srv_ctxs = null if srv_ctxs?.length is 0
     use[use_srv_key] = srv_ctxs
