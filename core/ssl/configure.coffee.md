@@ -52,12 +52,32 @@
 
 ## JKS Keystore
 
+The final keystore object will look like:
+
+```
+{
+  "target": "/etc/security/jks/keystore.jks",
+  "name": "{current hostname}",
+  "caname": "ryba_root_ca",
+  "password": "{required user password}",
+  "keypass": "{often same as password}"
+}
+```
+
+To create the keystore, the certificate paths are retrieved from the "ssl"
+option. 
+
+In Tomcat servers, the key password must match the keystore password. This is confirmed by the 
+[Tomcat documentation](https://tomcat.apache.org/tomcat-6.0-doc/ssl-howto.html#Prepare_the_Certificate_Keystore) 
+which state: "You MUST use the same password here as was used for the keystore 
+password itself. This is a restriction of the Tomcat implementation."
+
       options.keystore ?= disabled: true
       unless options.keystore.disabled
         throw Error "Required Option: options.key" unless options.key
         throw Error "Required Option: options.cert" unless options.cert
         options.keystore.target ?= path.resolve '/etc/security/jks', 'keystore.jks'
-        options.keystore.name ?= @config.shortname
+        options.keystore.name ?= service.node.hostname
         options.keystore.caname ?= "ryba_root_ca"
         throw Error "Required options: options.keystore.password" unless options.keystore.password
         throw Error "Required options: options.keystore.keypass" unless options.keystore.keypass
