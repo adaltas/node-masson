@@ -3,19 +3,19 @@
 
     module.exports = header: 'Mysql Server Check', handler: (options) ->
 
-## Runing Sevrice
-
-Ensure the "ntpd" service is up and running.
+## Runing Service
 
       @service.assert
         header: 'Service'
         if_exec: 'yum info mysql-community-server'
         name: 'mysql-community-server'
+        srv_name: 'mysqld'
         started: true
       @service.assert
         header: 'Service'
         if_exec: 'yum info mysql-server'
         name: 'mysql-server'
+        srv_name: 'mysqld'
         started: true
 
 ## Wait Connect

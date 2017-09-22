@@ -31,6 +31,7 @@
         options.cert.target = "#{@config.shortname}.cert.pem" if options.cert.target is true
         throw Error "Invalid Target" unless typeof options.cert.target is 'string'
         options.cert.target = path.resolve '/etc/security/certs', options.cert.target
+      options.cert.name ?= service.node.hostname
 
 ## Private Key
 
