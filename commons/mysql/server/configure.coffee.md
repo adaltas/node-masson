@@ -26,14 +26,14 @@ provision their databases and user access.
 } } }
 ```
 
-    module.exports = ->
+    module.exports = (service) ->
       service = migration.call @, service, 'masson/commons/mysql/server', ['mysql', 'server'], require('nikita/lib/misc').merge require('.').use,
         iptables: key: ['iptables']
       options = @config.mysql.server = service.options
 
 ## Validation
 
-      throw Error "Required Option: options.password" unless options.password
+      throw Error "Required Option: options.admin_password" unless options.admin_password
 
 ## Environnment
 
@@ -56,6 +56,7 @@ provision their databases and user access.
       options.user.gid ?= options.group.name
 
 ## Configuration
+
       # Main config file
       options.my_cnf ?= {}
       options.my_cnf['mysqld'] ?= {}
@@ -74,3 +75,7 @@ provision their databases and user access.
       options.wait_tcp = {}
       options.wait_tcp.fqdn = service.node.fqdn
       options.wait_tcp.port = options.my_cnf['mysqld']['port']
+
+## Dependencies
+
+    migration = require '../../../lib/migration'

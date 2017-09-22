@@ -3,8 +3,7 @@
 
 Start the `ntpd` daemon if it isnt yet running.
 
-    module.exports = header: 'NTP Start', label_true: 'STARTED', handler: ->
-      {ntp} = @config
+    module.exports = header: 'NTP Start', label_true: 'STARTED', handler: (options) ->
 
 ## Synchronization
 
@@ -14,13 +13,13 @@ to wait for an available NTPD server.
       @system.execute
         header: 'Synchronization'
         cmd: """
-        lag=`ntpdate -q #{ntp.servers[0]} | head -n 1| sed 's/.*offset -*\\([0-9]*\\).*/\\1/'`
-        [ "$lag" -gt "#{Math.round(ntp.lag/1000)}" ] || exit 3
+        lag=`ntpdate -q #{options.servers[0]} | head -n 1| sed 's/.*offset -*\\([0-9]*\\).*/\\1/'`
+        [ "$lag" -gt "#{Math.round(options.lag/1000)}" ] || exit 3
         """
         code_skipped: 3
       @call if: (-> @status -1), ->
         @service.stop 'ntpd'
-        @system.execute "ntpdate #{ntp.servers[0]}"
+        @system.execute "ntpdate #{options.servers[0]}"
 
 ## Service Start
 

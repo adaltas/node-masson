@@ -23,7 +23,9 @@ the clock of the virtual box with the command
           @call 'masson/core/ntp/install', options
           @call 'masson/core/ntp/start', options
           @call 'masson/core/ntp/check', options
-        'start':
-          'masson/core/ntp/start'
-        'stop':
-          'masson/core/ntp/stop'
+        'start': ->
+          options = @config.ntp
+          @call 'masson/core/ntp/start', options
+        'stop': ->
+          options = @config.ntp
+          @call 'masson/core/ntp/stop', options

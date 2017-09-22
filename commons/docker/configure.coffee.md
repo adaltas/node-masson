@@ -22,6 +22,7 @@
       #https://download.docker.com/linux/centos/docker-ce.repo"
 
 ## How to configure
+
 Masson does configure mainly two part of the docker engine:
 - TLS
 - Startup options
@@ -76,15 +77,15 @@ Docker Engine supports TLS authentication between the CLI and engine.
 When TLS is enabled, `tlscacert`, `tlscert`, `tlskey` and `tlsverify` properties
 are added docker `@config.docker` object, so it can be used in nikita docker actions.
 
-      options.ssl ?= service.use.ssl.options
-      # ptions.ssl.enabled ?= false
-      if options.ssl.enabled
-      # if options.ssl.enabled
+      options.ssl = merge {}, service.use.ssl?.options, options.ssl
+      options.ssl.enabled = !!service.use.ssl
+      unless options.ssl.enabled
+        options.default_port ?= 2375
+      else
+        options.default_port ?= 2376
         throw Error "Required Option: ssl.cert" if  not options.ssl.cert
         throw Error "Required Option: ssl.key" if not options.ssl.key
         throw Error "Required Option: ssl.cacert" if not options.ssl.cacert
-      options.default_port ?= if options.ssl? then 2376 else 2375
-      if options.ssl?
         options.env['DOCKER_CERT_PATH'] ?= "#{options.conf_dir}/certs.d"
         options.host ?= "tcp://#{@config.host}:#{options.default_port}"
         # this ca MUST be at #{docker.conf_dir}/certs.d/ca.pem

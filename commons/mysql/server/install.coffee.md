@@ -32,8 +32,8 @@ Actions present to be able to change uid/gid:
 Note: Be careful if using different name thans 'mysql:mysql'
 User/group are hard coded in some of mariadb/mysql package scripts.
 
-      @system.group 'Group' options.group
-      @system.user 'User', options.user
+      @system.group header: 'Group', options.group
+      @system.user header: 'User', options.user
 
 ## Yum Repositories
 
@@ -119,15 +119,17 @@ the following ways:
       @call
         header: 'Secure'
         if_exec: 'echo "show databases" | mysql -uroot'
-      , (options, callback) ->
+      , (_, callback) ->
         options.ssh.shell (err, stream) =>
           return callback err if err
           stream.write '/usr/bin/mysql_secure_installation\n'
           stream.on 'data', (data, extended) =>
             data = data.toString()
+            console.log 'read': data
             switch
               when /Enter current password for root/.test data
                 options.log data
+                console.log 'write: ', options.current_password
                 stream.write "#{options.current_password}\n"
               when /Change the root password/.test data
                 options.log data
@@ -137,7 +139,7 @@ the following ways:
                 stream.write "y\n"
               when /New password/.test(data) or /Re-enter new password/.test(data)
                 options.log data
-                stream.write "#{options.password}\n"
+                stream.write "#{options.admin_password}\n"
               when /Remove anonymous users/.test data
                 options.log data
                 stream.write "y\n"
@@ -154,8 +156,10 @@ the following ways:
                 options.log data
                 stream.end 'exit\n'
           stream.on 'error', (err) ->
+            console.log 'exit'
             callback err
           stream.on 'exit', =>
+            console.log 'exit'
             @service.restart 'mysqld' unless err
             @then (err) -> callback err, true
 
@@ -170,7 +174,7 @@ If this is the first run, grab the temporary password from the log.
           engine: 'mysql'
           host: 'localhost'
           username: 'root'
-          password: "#{options.password}"
+          password: "#{options.admin_password}"
         , "SHOW STATUS"
         cmd: "grep 'temporary password' /var/log/mysqld.log"
         shy: true
@@ -205,7 +209,7 @@ a command argumet because it can not be run interractively.
               stream.end 'exit\n'
               called = 3
             else if called is 0 and /mysql>/.test data
-              stream.write "ALTER USER 'root'@'localhost' IDENTIFIED BY '#{options.password}';\n"
+              stream.write "ALTER USER 'root'@'localhost' IDENTIFIED BY '#{options.admin_password}';\n"
               called++
             else if called is 1 and /mysql>/.test data
               stream.write 'quit\n'
@@ -224,7 +228,7 @@ a command argumet because it can not be run interractively.
           read query
           mysql \
            -hlocalhost -P#{options.my_cnf['mysqld']['port']} \
-           -uroot -p#{options.password} \
+           -uroot -p#{options.admin_password} \
            -N -s -r -e \
            "$query" 2>/dev/null
         }
@@ -237,7 +241,7 @@ a command argumet because it can not be run interractively.
         mysql_exec <<SQL
         GRANT ALL PRIVILEGES \
          ON *.* TO 'root'@'#{options.root_host}' \
-         IDENTIFIED BY '#{options.password}' \
+         IDENTIFIED BY '#{options.admin_password}' \
          WITH GRANT OPTION;
         GRANT SUPER ON *.* TO 'root'@'#{options.root_host}';
         # UPDATE mysql.user \

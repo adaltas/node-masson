@@ -20,7 +20,7 @@ module.exports = (service, srv, keys, uses) ->
     try
       srv_ctxs = @contexts use_srv.module
     catch e
-      throw Error "Failed to get context: #{use_srv_key}"
+      throw Error "Failed to get context: #{use_srv_key} in #{use_srv.module}", e
     if use_srv.local
       srv_ctxs = srv_ctxs.filter (ctx) => ctx.config.host is @config.host
     if use_srv.single
