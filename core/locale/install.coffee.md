@@ -1,8 +1,7 @@
 
 # Users Locale Install
 
-    module.exports = header: 'Locale Install', handler: ->
-      {users, locale} = @config
+    module.exports = header: 'Locale Install', handler: (options) ->
 
 ## LC_* Properties
 
@@ -12,12 +11,12 @@ such as LC_ALL= . We set all variable to `en_US.UTF-8` by default.
 
       props = {}
       @system.execute
-        cmd: "locale | grep \'LANG=#{locale.lang}\'"
+        cmd: "locale | grep \'LANG=#{options.lang}\'"
         code_skipped: 1
         shy: true
       , (err, exists, stdout) ->
         throw err if err
-        props['LANG'] = "#{locale.lang}" unless exists
+        props['LANG'] = "#{options.lang}" unless exists
       @system.execute
         cmd: 'locale | grep \'LC_*\''
         shy: true
@@ -26,7 +25,7 @@ such as LC_ALL= . We set all variable to `en_US.UTF-8` by default.
         for line in string.lines(stdout.trim())
           [_, key, value] = /(LC_.*)=(.*)/.exec line
           continue unless /^\s*$/.test value
-          props[key] = if key is 'LC_ALL' then 'C' else "#{locale.lang}"
+          props[key] = if key is 'LC_ALL' then 'C' else "#{options.lang}"
       @call
         header: 'SSH Env'
         handler: ->
@@ -41,7 +40,7 @@ such as LC_ALL= . We set all variable to `en_US.UTF-8` by default.
             uid: user.name
             gid: null
             mode: 0o600
-          ) for _, user of users
+          ) for _, user of options.users
 
 # Dependencies
 
