@@ -9,7 +9,7 @@ Download the PostgreSQL Container
       ssh: null
       handler: (options) ->
         @docker.pull
-          tag: 'postgres'
+          tag: 'postgresql'
           version: options.version
         @docker.save
           image: "postgres:#{options.version}"
