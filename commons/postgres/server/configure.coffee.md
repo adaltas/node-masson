@@ -2,7 +2,7 @@
 # PostgreSQL Server Configure
 
     module.exports = ->
-      service = migration.call @, service, 'masson/commons/postgres/server', ['postgres', 'server'], require('nikita/lib/misc').merge require('.').use,
+      service = migration.call @, service, 'masson/commons/postgres/server', ['postgresql', 'server'], require('nikita/lib/misc').merge require('.').use,
         iptables: key: ['iptables']
         docker: key: ['docker']
       options = @config.postgres.server = service.options

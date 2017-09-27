@@ -36,7 +36,7 @@ Install the PostgreSQL database server.
         @call header: 'Download Container', handler: ->
           exists = false
           @docker.checksum
-            image: 'postgres'
+            image: 'postgresql'
             tag: postgres.version
             docker: if os.type in ['redhat','centos'] and os.release[0] is '6'
             then null
