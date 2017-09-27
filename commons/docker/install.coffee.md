@@ -8,7 +8,9 @@
 Users who belong to the group will be allowed to write into docker sockets and,
 therefore, use docker commands
 
-      @system.group header: 'Identities', options.group
+      @system.group header: 'Group', options.group
+      @system.group header: 'Group dockerroot', options.group_dockerroot
+      @system.user header: 'User dockerroot', options.user_dockerroot
 
 ## Install
 

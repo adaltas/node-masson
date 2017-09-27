@@ -179,7 +179,7 @@ The following files are updated:
             @options.ssh.shell (err, stream) =>
               return callback err if err
               cmd = "kdb5_ldap_util -D \"#{options.root_dn}\" -w #{options.root_password} stashsrvpw -f #{ldap_service_password_file} #{ldap_kadmind_dn}"
-              options.log "Run #{cmd}"
+              options.log "Run `#{cmd}`"
               reentered = done = false
               stream.write "#{cmd}\n"
               stream.on 'data', (data, stderr) =>
