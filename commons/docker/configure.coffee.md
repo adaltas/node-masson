@@ -6,11 +6,28 @@
         iptables: key: ['iptables']
         ssl: key: ['ssl']
       options = @config.docker = service.options
-      
+
+## Identities
+
+      # Group
+      options.group ?= {}
+      options.group = name: options.group if typeof options.group is 'string'
+      options.group.name ?= 'docker'
+      options.group_dockerroot ?= {}
+      options.group_dockerroot = name: options.group if typeof options.group is 'string'
+      options.group_dockerroot.name ?= 'dockerroot'
+      # User
+      options.user_dockerroot ?= {}
+      options.user_dockerroot = name: options.user_dockerroot if typeof options.user_dockerroot is 'string'
+      options.user_dockerroot.name ?= 'dockerroot'
+      options.user_dockerroot.home ?= "/var/lib/#{options.user_dockerroot.name}"
+      options.user_dockerroot.gid ?= options.group_dockerroot.name
+
+
+## Environnment
+
       options.nsenter ?= true
       options.conf_dir ?= '/etc/docker'
-      options.group ?= name: 'docker'
-      options.group = name: options.group if typeof options.group is 'string'
 
 ## Repo
 
@@ -38,6 +55,7 @@ socket options by reading the `docker.sockets` variable. Three types of socket a
 Unix, tcp, and fd (file descriptor).
 
 ## Sockets for docker daemon
+
 The [Docker daemon][socket-opts] can listen for Docker Remote API requests via three different
 types of Socket: unix, tcp, and fd.
 
@@ -68,17 +86,19 @@ Example:
       # the /etc/docker/daemon.json file can also be used to specify starting options for docker daemon
 
 ## Docker Environnment
+
 The environment properties are written to /etc/sysconfg/docker file and change how the daemons run.
 
       options.env ?= {}
 
 ## TLS for docker daemon
+
 Docker Engine supports TLS authentication between the CLI and engine.
 When TLS is enabled, `tlscacert`, `tlscert`, `tlskey` and `tlsverify` properties
 are added docker `@config.docker` object, so it can be used in nikita docker actions.
 
       options.ssl = merge {}, service.use.ssl?.options, options.ssl
-      options.ssl.enabled = !!service.use.ssl
+      options.ssl.enabled ?= !!service.use.ssl
       unless options.ssl.enabled
         options.default_port ?= 2375
       else
@@ -94,8 +114,7 @@ are added docker `@config.docker` object, so it can be used in nikita docker act
         options.other_args['tlskey'] ?= "#{options.env['DOCKER_CERT_PATH']}/key.pem"
         # configure tcp socket to  communicate with docker
         tlsverify_socket = "#{@config.host}:#{options.default_port}"
-        if (options.sockets.tcp.indexOf tlsverify_socket < 0 )
-        then options.sockets.tcp.push tlsverify_socket
+        options.sockets.tcp.push tlsverify_socket if options.sockets.tcp.indexOf tlsverify_socket < 0
         # indeed when executing a nikita.docker action, it will build the docker command
         # to communicate with local daemon engine
         # for example docker --host tcp://master2.ryba:3376 --tlscacert /etc/docker/certs.d/cacert.pem
@@ -106,7 +125,8 @@ are added docker `@config.docker` object, so it can be used in nikita docker act
         options.tlsverify = ' '
 
 ## Devicemapper
-configure device mapper for production use.It creates a logical volume configured
+
+Configure device mapper for production use.It creates a logical volume configured
 as a thin pool to use as backing for the storage pool.
 To use it just specify the `options.block_device`.
 
@@ -130,6 +150,7 @@ To use it just specify the `options.block_device`.
 
 ## Dependencies
 
+    {merge} = require 'nikita/lib/misc'
     migration = require '../../lib/migration'
 
 [socket-opts]:(https://docs.docker.com/engine/reference/commandline/dockerd/#/daemon-socket-option)
