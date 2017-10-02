@@ -1,7 +1,7 @@
 
 #  OpenLDAP Server Check
 
-    module.exports = header: 'OpenLDAP Server Check', label_true: 'CHECKED', handler: (options) ->
+    module.exports = header: 'OpenLDAP Server Check', handler: (options) ->
 
 ## TCP Connection
 

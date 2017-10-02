@@ -90,10 +90,10 @@ module.exports = ->
         line = ''
         line += pad "#{styles.fqdn ctx.config.shortname or ctx.config.host}", hostlength
         line += pad "#{styles.label middleware.header}", 40
-        statusmsg = if err then "#{styles.status_error middleware.label_error or 'ERROR'}"
+        statusmsg = if err then "#{styles.status_error 'ERROR'}"
         else if typeof status is 'string' then status
-        else if status then "#{styles.status_true middleware.label_true or 'MODIFIED'}"
-        else "#{styles.status_false middleware.label_false or '--'}"
+        else if status then "#{styles.status_true 'MODIFIED'}"
+        else "#{styles.status_false '--'}"
         line += pad "#{statusmsg}", 20
         line += "#{styles.time print_time time}"
         refresh() if multihost

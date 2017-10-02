@@ -22,7 +22,7 @@ Option "retry" is set to "2" because we get a lot of "null exit code" errors
 and we couldnt dig the exact nature of this error.
 
       @wait.execute (
-        header: 'Command kadmin'
+        header: 'kadmin'
         retry: 10
         interval: 10000
         cmd: cmd

@@ -3,7 +3,7 @@
 
 Start the `ntpd` daemon if it isnt yet running.
 
-    module.exports = header: 'NTP Start', label_true: 'STARTED', handler: (options) ->
+    module.exports = header: 'NTP Start', handler: (options) ->
 
 ## Synchronization
 

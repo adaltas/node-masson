@@ -6,7 +6,7 @@ Check the health of the HTTPD service.
 Note, we've seen case where the status command print "httpd dead but subsys
 locked".
 
-    module.exports = header: 'HTTPD Check', label_true: 'CHECKED', handler: (options) ->
+    module.exports = header: 'HTTPD Check', handler: (options) ->
 
 ## Runing Sevrice
 

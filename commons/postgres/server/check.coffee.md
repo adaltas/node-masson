@@ -1,7 +1,7 @@
 
 # PostgreSQL Server Check
 
-    module.exports =  header: 'PostgreSQL Server Check', label_true: 'CHECKED', handler: (options) ->
+    module.exports =  header: 'PostgreSQL Server Check', handler: (options) ->
 
 ## TCP
 

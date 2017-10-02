@@ -1,5 +1,5 @@
 
 # SSSD Status
 
-    module.exports = header: 'SSSD Status', label_true: 'STARTED', label_false: 'STOPPED', handler: ->
+    module.exports = header: 'SSSD Status', handler: ->
       @service.status name: 'sssd'

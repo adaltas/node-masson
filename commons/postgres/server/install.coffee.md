@@ -65,7 +65,6 @@ Run the PostgreSQL server container
         @docker.service
           machine: @config.nikita.machine
           header: 'Run PostgreSQL Container'
-          label_true: 'RUNNED'
           force: -> @status(-1)
           image: "postgres:#{options.version}"
           env: [

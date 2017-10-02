@@ -28,7 +28,6 @@ I assume the A record to always be printed on the last line.
 
       @system.execute
         header: 'DNS Forward Lookup'
-        label_true: 'CHECKED'
         cmd: "dig #{@config.host}. +short"
         code_skipped: 1
         shy: true
@@ -45,7 +44,6 @@ Check reverse DNS lookup using the configured DNS configuration present inside
 
       @system.execute
         header: 'DNS Reverse Lookup'
-        label_true: 'CHECKED'
         cmd: "dig -x #{@config.ip} +short"
         code_skipped: 1
         shy: true
@@ -63,7 +61,6 @@ command uses "getent".
 
       @system.execute
         header: 'System Forward Lookup'
-        label_true: 'CHECKED'
         cmd: "getent hosts #{@config.host}"
         code_skipped: 2
         shy: true
@@ -82,7 +79,6 @@ command uses "getent".
 
       @system.execute
         header: 'System Reverse Lookup'
-        label_true: 'CHECKED'
         cmd: "getent hosts #{@config.ip}"
         code_skipped: 2
         shy: true
@@ -101,7 +97,6 @@ the executed command is `hostname --fqdn`.
 
       @system.execute
         header: 'Hostname'
-        label_true: 'CHECKED'
         cmd: 'hostname --fqdn'
         shy: true
       , (err, _, stdout) ->
