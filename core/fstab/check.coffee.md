@@ -3,7 +3,7 @@
 
 Checks fstab and mounted points.
 
-    module.exports = header: 'FSTAB Check', label_true: 'CHECKED', handler: (options) ->
+    module.exports = header: 'FSTAB Check', handler: (options) ->
       {fstab} = @config
       for mntpt, disk of fstab.volumes
         @system.execute

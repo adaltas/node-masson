@@ -3,5 +3,5 @@
 
 Start the NGINX service
 
-    module.exports = header: 'NGINX Start', label_true: 'STARTED', handler: ->
+    module.exports = header: 'NGINX Start', handler: ->
       @service.start name: 'nginx'

@@ -1,6 +1,6 @@
 
 # SASLAuthd Stop
 
-    module.exports = header: 'SASLAuthd Stop', label_true: 'STOPPED', handler: ->
+    module.exports = header: 'SASLAuthd Stop', handler: ->
         @service.stop
           name: 'saslauthd'

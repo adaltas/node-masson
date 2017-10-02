@@ -3,5 +3,5 @@
 
 Start the HTTPD service by executing the command `service httpd stop`.
 
-    module.exports = header: 'HTTPD Stop', label_true: 'STOPPED', handler: ->
+    module.exports = header: 'HTTPD Stop', handler: ->
       @service.stop name: 'httpd'

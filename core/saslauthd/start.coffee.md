@@ -1,6 +1,6 @@
 
 # SASLAuthd Start
 
-    module.exports = header: 'SASLAuthd Start', label_true: 'STARTED', handler: ->
+    module.exports = header: 'SASLAuthd Start', handler: ->
         @service.start
           name: 'saslauthd'

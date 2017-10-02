@@ -50,7 +50,7 @@
 * krb5: split client & server
 * sssd: ldap certificates delegated to openldap client
 * openldap: provision users and groups
-* ssl: jks keystore and trustore
+* ssl: jks keystore and truststore
 * saslauthd: fix mode and indentation
 * ntp: handle negative time synchronization
 * saslauthd: set user and group
