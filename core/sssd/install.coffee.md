@@ -20,9 +20,8 @@ cat /etc/group | grep sssd
 sssd:x:994:
 ```
 
-      @call header: 'Identities', ->
-        @system.group options.group
-        @system.user options.user
+      @system.group options.group
+      @system.user options.user
 
 ## Packages
 
@@ -79,7 +78,7 @@ default overwritten unless the "sssd.merge" is `true`.
           merge: options.merge
           mode: 0o0600
           backup: true
-        options =
+        opts =
           # Configures the password, shadow, group, and netgroups services maps to use the SSSD module
           # https://access.redhat.com/site/documentation/en-US/Red_Hat_Enterprise_Linux/6/html/Deployment_Guide/Configuration_Options-NSS_Configuration_Options.html
           sssd: true
@@ -94,7 +93,7 @@ default overwritten unless the "sssd.merge" is `true`.
           sssdauth: true # Allow ldap user to login with their password
         # Update configuration files with changed settings
         cmd = 'authconfig --update'
-        for k, v of options
+        for k, v of opts
           cmd += if v then " --enable#{k}" else " --disable#{k}"
         {ldap_uri, ldap_search_base} = options.config['domain/default']?
         cmd += "--ldapserver=#{ldap_uri}" if ldap_uri
