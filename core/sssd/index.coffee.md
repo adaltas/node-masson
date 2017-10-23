@@ -8,13 +8,19 @@
       configure: 'masson/core/sssd/configure'
       commands:
         'check': ->
-          options = @coonfig.sssd
+          options = @config.sssd
           @call 'masson/core/sssd/check', options
         'install': ->
-          options = @coonfig.sssd
+          options = @config.sssd
           @call 'masson/core/sssd/install', options
           @call 'masson/core/sssd/start', options
           @call 'masson/core/sssd/check', options
-        'start': 'masson/core/sssd/start'
-        'status': 'masson/core/sssd/status'
-        'stop': 'masson/core/sssd/stop'
+        'start': ->
+          options = @config.sssd
+          @call 'masson/core/sssd/start', options
+        'status': ->
+          options = @config.sssd
+          @call 'masson/core/sssd/status', options
+        'stop': ->
+          options = @config.sssd
+          @call 'masson/core/sssd/stop', options
