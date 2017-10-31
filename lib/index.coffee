@@ -1,14 +1,35 @@
 
+parameters = require 'parameters'
 params = require './params'
-params = params.parse()
-params.command ?= 'help'
-# Print help
-params.command ?= 'run'
-switch params.command
-  when 'help' then require('./commands/help')()
-  when 'exec' then require('./commands/exec')()
-  when 'server' then require('./commands/server')()
-  when 'tree' then require('./commands/tree')()
-  when 'init' then require('./commands/init')()
-  when 'configure' then require('./commands/configure')()
-  else require('./commands/run')()
+load = require './config/load'
+normalize = require './config/normalize'
+store = require './config/store'
+merge = require './utils/merge'
+
+orgparams = parameters(merge {}, params, main: name: 'main').parse()
+
+# Read configuration
+load orgparams.config, (err, config) ->
+  # Normalize coniguration
+  config = normalize config
+  # Enrich configuration with command discovery
+  for command in store(config).commands()
+    params.commands.push 
+      name: command
+      description: "Run the #{command} command"
+      run: 'masson/lib/commands/run'
+      options: [
+        name: 'nodes', shortcut: 'n', type: 'array'
+        description: 'Limit to a list of server FQDNs'
+      ,
+        name: 'tags', shortcut: 't', type: 'array'
+        description: 'Limit to servers that honor a list of tags'
+      ,
+        name: 'modules', shortcut: 'm', type: 'array'
+        description: 'Limit to a list of modules'
+      ,
+        name: 'resume', shortcut: 'r', type: 'boolean'
+        description: 'Resume from previous run'
+      ]
+  # config.params = parameters(params).parse()
+  parameters(params).run(process, config)

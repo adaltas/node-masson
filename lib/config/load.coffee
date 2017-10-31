@@ -1,13 +1,10 @@
 
 path = require 'path'
 fs = require 'fs'
-{merge} = require './misc'
-# params = require './params'
-# params = params.parse()
+merge = require '../utils/merge'
 
 module.exports = (paths, callback) ->
   # Load configuration
-  # try
   configs = []
   for config in paths
     location = "#{path.resolve process.cwd(), config}"
@@ -29,8 +26,3 @@ module.exports = (paths, callback) ->
     v.shortname ?= k.split('.')[0]
     v
   callback null, config
-  # catch e
-  #   callback Error e
-    # process.stderr.write "Fail to load configuration file: #{params.config}\n"
-    # console.log e.stack
-    # process.exit()

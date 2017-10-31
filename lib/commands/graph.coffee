@@ -8,12 +8,9 @@ load = require '../config/load'
 normalize = require '../config/normalize'
 store = require '../config/store'
 
-# ./bin/ryba configure -o output_file -p JSON
+# ./bin/ryba graph -o output_file -p JSON
 module.exports = (config, params) ->
-  # EXAMPLE START
-  # params = params.parse argv
   params.output ?= 'export'
-  # params.format ?= 'coffee'
   params.output = path.resolve process.cwd(), params.output
   params.hosts = [params.hosts] if typeof params.hosts is 'string'
   # Print host cfg on path
@@ -34,17 +31,13 @@ module.exports = (config, params) ->
     process.stdout.write config
   s = store config
   if params.nodes
-    print s.nodes()
-  else if params.node
-    print s.node params.node
-  else if params.service
-    throw Error "Required Option: #{params.cluster}" unless params.cluster
-    print s.service params.cluster, params.service
-  else if params.cluster
-    print s.cluster params.cluster
-  else if params.cluster_names
-    print s.cluster_names()
-  else if params.service_names
-    print s.service_names()
+    output = for service in config.graph
+      [cname, sname] = service.split ':'
+      service = config.clusters[cname].services[sname]
+      cluster: service.cluster
+      id: service.id
+      module: service.module
+      nodes: service.nodes
+    print output
   else
-    print config
+    print config.graph
