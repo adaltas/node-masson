@@ -3,8 +3,7 @@
 server = require 'http-server'
 params = require '../params'
 
-module.exports = ->
-  params = params.parse()
+module.exports = (config, params) ->
   module.exports[params.action]()
 
 module.exports.start = ->
