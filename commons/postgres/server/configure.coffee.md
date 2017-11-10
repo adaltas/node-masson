@@ -1,18 +1,15 @@
 
 # PostgreSQL Server Configure
 
-    module.exports = ->
-      service = migration.call @, service, 'masson/commons/postgres/server', ['postgresql', 'server'], require('nikita/lib/misc').merge require('.').use,
-        iptables: key: ['iptables']
-        docker: key: ['docker']
-      options = @config.postgres.server = service.options
+    module.exports = (service) ->
+      options = service.options
 
 ## Configuration
 
       options.password ?= 'root'
       options.user ?= 'root'
       options.port ?= '5432'
-      options.iptables ?= service.use.iptables and service.use.iptables.options.action is 'start'
+      options.iptables ?= service.deps.iptables and service.deps.iptables.options.action is 'start'
 
 ## Docker
 

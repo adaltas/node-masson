@@ -5,7 +5,7 @@ Download the epel release rpm
 
     module.exports =
       header: 'Yum Prepare'
-      if: (options) -> options.prepare  
+      if: (options) -> options.prepare
       ssh: null
       handler: (options) ->
         @file.cache

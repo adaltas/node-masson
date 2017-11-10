@@ -4,27 +4,23 @@
 TODO: https://dev.mysql.com/doc/refman/5.7/en/mysql-cluster.html
 
     module.exports =
-      use:
+      deps:
         iptables: module: 'masson/core/iptables', local: true
         ssl: module: 'masson/core/ssl', local: true
         mariadb: module: 'masson/commons/mariadb/server'
       configure:
         'masson/commons/mariadb/server/configure'
       commands:
-        'check': ->
-          options = @config.mariadb.server
-          @call 'masson/commons/mariadb/server/check', options
-        'install': ->
-          options = @config.mariadb.server
-          @call 'masson/commons/mariadb/server/install', options
-          @call 'masson/commons/mariadb/server/replication', options
-          @call 'masson/commons/mariadb/server/check', options
-        'stop': ->
-          options = @config.mariadb.server
-          @call 'masson/commons/mariadb/server/stop', options
-        'start': ->
-          options = @config.mariadb.server
-          @call 'masson/commons/mariadb/server/start', options
-        'check': ->
-          options = @config.mariadb.server
-          @call 'masson/commons/mariadb/server/check', options
+        'check':
+          'masson/commons/mariadb/server/check'
+        'install': [
+          'masson/commons/mariadb/server/install'
+          'masson/commons/mariadb/server/replication'
+          'masson/commons/mariadb/server/check'
+        ]
+        'stop':
+          'masson/commons/mariadb/server/stop'
+        'start':
+          'masson/commons/mariadb/server/start'
+        'check':
+          'masson/commons/mariadb/server/check'

@@ -45,38 +45,38 @@ relevant file is "/etc/sysconfig/network".
       @call
         header: 'Hostname'
         unless: -> options.hostname_disabled
-        handler: ->
-          @call
-            if_os: name: ['centos','redhat'], version: '6'
-          , ->
-            @file
-              match: /^HOSTNAME=.*/mg
-              replace: "HOSTNAME=#{options.hostname}"
-              target: '/etc/sysconfig/network'
-            @system.execute
-              cmd: "hostname #{options.hostname} && service network restart"
-              if: -> @status -1
-          @call
-            if_os: name: ['centos','redhat'], version: '7'
-          , ->
-            @system.execute
-              header: 'FQDN'
-              cmd: """
-              fqdn=`hostnamectl status | grep 'Static hostname' | sed 's/^.* \\(.*\\)$/\\1/'`
-              [[ $fqdn == "#{options.fqdn}" ]] && exit 3
-              hostnamectl set-hostname #{options.fqdn} --static
-              """
-              code_skipped: 3
-            # Note, transient hostname must be set after static
-            # or only static will be set if static wasnt previously defined
-            @system.execute
-              header: 'Hostname'
-              cmd: """
-              hostname=`hostnamectl status | grep 'Transient hostname' | sed 's/^.* \\(.*\\)$/\\1/'`
-              [[ $hostname == "#{options.hostname}" ]] && exit 3
-              hostnamectl set-hostname #{options.hostname}
-              """
-              code_skipped: 3
+      , ->
+        @call
+          if_os: name: ['centos','redhat'], version: '6'
+        , ->
+          @file
+            match: /^HOSTNAME=.*/mg
+            replace: "HOSTNAME=#{options.hostname}"
+            target: '/etc/sysconfig/network'
+          @system.execute
+            cmd: "hostname #{options.hostname} && service network restart"
+            if: -> @status -1
+        @call
+          if_os: name: ['centos','redhat'], version: '7'
+        , ->
+          @system.execute
+            header: 'FQDN'
+            cmd: """
+            fqdn=`hostnamectl status | grep 'Static hostname' | sed 's/^.* \\(.*\\)$/\\1/'`
+            [[ $fqdn == "#{options.fqdn}" ]] && exit 3
+            hostnamectl set-hostname #{options.fqdn} --static
+            """
+            code_skipped: 3
+          # Note, transient hostname must be set after static
+          # or only static will be set if static wasnt previously defined
+          @system.execute
+            header: 'Hostname'
+            cmd: """
+            hostname=`hostnamectl status | grep 'Transient hostname' | sed 's/^.* \\(.*\\)$/\\1/'`
+            [[ $hostname == "#{options.hostname}" ]] && exit 3
+            hostnamectl set-hostname #{options.hostname}
+            """
+            code_skipped: 3
 
 ## DNS resolv
 
@@ -91,14 +91,14 @@ configuration file is considered a trusted source of DNS information.
       @call
         header: 'DNS Resolver'
         if: -> options.resolv
-        handler: ->
-          @file
-            content:  options.resolv
-            target: '/etc/resolv.conf'
-            backup: true
-            eof: true
-          @connection.wait
-            servers: options.dns
+      , ->
+        @file
+          content:  options.resolv
+          target: '/etc/resolv.conf'
+          backup: true
+          eof: true
+        @connection.wait
+          servers: options.dns
 
 ## Interfaces
 

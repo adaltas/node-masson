@@ -11,10 +11,8 @@
 } }
 ```
 
-    module.exports = ->
-      service = migration.call @, service, 'masson/core/ssl', ['ssl'], require('nikita/lib/misc').merge require('.').use,
-        java: key: ['java']
-      options = @config.ssl = service.options
+    module.exports = (service) ->
+      options = service.options
 
 ## CA Certiticate
 
@@ -28,7 +26,7 @@
 
       options.cert = source: options.cert, local: false if typeof options.cert is 'string'
       if options.cert?.target
-        options.cert.target = "#{@config.shortname}.cert.pem" if options.cert.target is true
+        options.cert.target = "#{service.node.hostname}.cert.pem" if options.cert.target is true
         throw Error "Invalid Target" unless typeof options.cert.target is 'string'
         options.cert.target = path.resolve '/etc/security/certs', options.cert.target
       options.cert.name ?= service.node.hostname
@@ -37,7 +35,7 @@
 
       options.key = source: options.key, local: false if typeof options.key is 'string'
       if options.key?.target
-        options.key.target = "#{@config.shortname}.key.pem" if options.key.target is true
+        options.key.target = "#{service.node.hostname}.key.pem" if options.key.target is true
         throw Error "Invalid Target" unless typeof options.key.target is 'string'
         options.key.target = path.resolve '/etc/security/certs', options.key.target
       options.key.name ?= service.node.hostname
@@ -86,4 +84,3 @@ password itself. This is a restriction of the Tomcat implementation."
 ## Dependencies
 
     path = require('path').posix
-    migration = require '../../lib/migration'

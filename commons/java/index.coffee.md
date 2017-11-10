@@ -10,12 +10,10 @@
       configure:
         'masson/commons/java/configure'
       commands:
-        'prepare': ->
-          options = @config.java
-          @call 'masson/commons/java/prepare', options
-        'install': ->
-          options = @config.java
-          @call 'masson/commons/java/install', options
+        'prepare':
+          'masson/commons/java/prepare'
+        'install':
+          'masson/commons/java/install'
 
 ## Resources
 

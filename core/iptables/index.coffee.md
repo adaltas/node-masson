@@ -36,13 +36,14 @@ Example:
 ```
 
     module.exports =
-      use:
+      deps:
         yum: module: 'masson/core/yum', local: true
       configure:
         'masson/core/iptables/configure'
       commands:
-        'install': ->
-          options = @config.iptables
-          @call 'masson/core/iptables/install', options
-        'start': 'masson/core/iptables/start'
-        'stop': 'masson/core/iptables/stop'
+        'install':
+          'masson/core/iptables/install'
+        'start':
+          'masson/core/iptables/start'
+        'stop':
+          'masson/core/iptables/stop'

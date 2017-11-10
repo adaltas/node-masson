@@ -33,11 +33,7 @@ Default configuration:
 ```
 
     module.exports = (service) ->
-      service = migration.call @, service, 'masson/commons/mariadb/server', ['mariadb', 'server'], require('nikita/lib/misc').merge require('.').use,
-        iptables: key: ['iptables']
-        ssl: key: ['ssl']
-        mariadb: key: ['mariadb', 'server']
-      options = @config.mariadb.server = service.options
+      options = service.options
       
 ## Environnment
 
@@ -54,7 +50,7 @@ Default configuration:
       options.remove_test_db ?= true
       options.reload_privileges ?= true
       options.fqdn ?= service.node.fqdn
-      options.iptables ?= service.use.iptables and service.use.iptables.options.action is 'start'
+      options.iptables ?= service.deps.iptables and service.deps.iptables.options.action is 'start'
 
 ## Identities
 
@@ -89,11 +85,11 @@ If the DBA need more than two Masters, Ring like architecture should be used.
 
 Note: For Now Ryba does not support automatic discovery for more than 2 master.
 
-      options.ha_enabled ?= if service.use.mariadb.length > 1 then true else false
+      options.ha_enabled ?= if service.deps.mariadb.length > 1 then true else false
       if options.ha_enabled
-        throw Error "Invalid HA Configuration: expect only 2 nodes" unless service.use.mariadb.length is 2
+        throw Error "Invalid HA Configuration: expect only 2 nodes" unless service.deps.mariadb.length is 2
         options.replication_dir ?= "#{options.user.home}/replication"
-        mysql_fqdns = service.use.mariadb.map( (srv) -> srv.node.fqdn ).sort()
+        mysql_fqdns = service.deps.mariadb.map( (srv) -> srv.node.fqdn ).sort()
         # Attribute an id to mysql server
         # This line is to be changed by admin to set replication architecture.
         options.id ?= mysql_fqdns.indexOf(service.node.fqdn)+1
@@ -101,7 +97,7 @@ Note: For Now Ryba does not support automatic discovery for more than 2 master.
         # automatic discovery
         # for ryba each mysql sever is a master, for enabling the replication,
         # a slave host hould be defined.
-        for mariadb_srv in service.use.mariadb
+        for mariadb_srv in service.deps.mariadb
           continue if mariadb_srv.node.fqdn is service.node.fqdn
           options.repl_master ?= {}
           options.repl_master.fqdn ?= mariadb_srv.node.fqdn
@@ -177,7 +173,7 @@ Note: For Now Ryba does not support automatic discovery for more than 2 master.
 
 ### SSL
 
-      options.ssl ?= service.use.ssl?.options
+      options.ssl ?= service.deps.ssl?.options
       if options.ssl
         throw Error "Required Option: ssl.cacert" if not options.ssl.cacert
         throw Error "Required Option: ssl.key" if not options.ssl.key
@@ -237,4 +233,3 @@ Note: For Now Ryba does not support automatic discovery for more than 2 master.
 ## Dependencies
 
     path = require 'path'
-    migration = require '../../../lib/migration'

@@ -7,15 +7,15 @@ stability, rich feature set, simple configuration, and low resource consumption.
 
 
     module.exports =
-      use:
+      deps:
         iptables: module: 'masson/core/iptables', local: true
       configure:
         'masson/commons/nginx/configure'
       commands:
-        'install': ->
-          options = @config.nginx
-          @call 'masson/commons/nginx/install', options
-          @call 'masson/commons/nginx/start', options
+        'install': [
+          'masson/commons/nginx/install'
+          'masson/commons/nginx/start'
+        ]
         'start':
           'masson/commons/nginx/start'
         'status':

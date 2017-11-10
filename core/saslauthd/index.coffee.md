@@ -9,16 +9,14 @@ on behalf of Couchbase Server while the LDAP protocol is used to connect to the
 LDAP server. 
 
     module.exports =
-      use: {}
+      deps: {}
       configure:
         'masson/core/saslauthd/configure'
       commands:
-        'check': ->
-          options = @config.saslauthd
-          @call 'masson/core/saslauthd/check', options
-        'install': ->
-          options = @config.saslauthd
-          @call 'masson/core/saslauthd/install', options
+        'check':
+          'masson/core/saslauthd/check'
+        'install':
+          'masson/core/saslauthd/install'
         'start':
           'masson/core/saslauthd/start'
         'stop':

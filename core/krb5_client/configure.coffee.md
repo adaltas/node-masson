@@ -32,21 +32,17 @@ Example:
 }
 ```
 
-    module.exports = ->
-      service = migration.call @, service, 'masson/core/krb5_client', ['krb5_client'], require('nikita/lib/misc').merge require('.').use,
-        ntp: key: ['ntp']
-        ssh: key: ['ssh']
-        krb5_server: key: ['krb5_server']
-      options = @config.krb5_client = service.options
+    module.exports = (service) ->
+      options = service.options
       
       options.fqdn ?= service.node.fqdn
       options.sshd ?= {}
       options.kinit ?= '/usr/bin/kinit'
-      options.admin = merge {}, service.use.krb5_server[0].options.admin, options.admin if service.use.krb5_server
+      options.admin = merge {}, service.deps.krb5_server[0].options.admin, options.admin if service.deps.krb5_server
       options.etc_krb5_conf = merge {}, module.exports.etc_krb5_conf, options.etc_krb5_conf
       # Merge global with server-based configuration
       # options.etc_krb5_conf.realms = merge {}, options.etc_krb5_conf.realms, options.etc_krb5_conf.realms
-      for srv in service.use.krb5_server
+      for srv in service.deps.krb5_server
         for realm, config of srv.options.admin
           options.etc_krb5_conf.realms[realm] ?= {}
           options.etc_krb5_conf.realms[realm].kdc ?= []
@@ -111,4 +107,3 @@ Example:
     misc = require 'nikita/lib/misc'
     array = require 'nikita/lib/misc/array'
     {merge} = require 'nikita/lib/misc'
-    migration = require '../../lib/migration'

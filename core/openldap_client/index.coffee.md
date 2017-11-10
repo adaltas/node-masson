@@ -48,17 +48,16 @@ Example:
 ```
 
     module.exports =
-      use:
+      deps:
         yum: module: 'masson/core/yum', local: true
         ssl: module: 'masson/core/ssl', local: true
         openldap_server: module: 'masson/core/openldap_server'
       configure:
         'masson/core/openldap_client/configure'
       commands:
-        'check': ->
-          options = @config.openldap_client
-          @call 'masson/core/openldap_client/check', options
-        'install': ->
-          options = @config.openldap_client
-          @call 'masson/core/openldap_client/install', options
-          @call 'masson/core/openldap_client/check', options
+        'check':
+          'masson/core/openldap_client/check'
+        'install': [
+          'masson/core/openldap_client/install'
+          'masson/core/openldap_client/check'
+        ]

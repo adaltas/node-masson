@@ -1,10 +1,8 @@
 
 # NGINX Web Server Configure
 
-    module.exports = ->
-      service = migration.call @, service, 'masson/commons/nginx', ['nginx'], require('nikita/lib/misc').merge require('.').use,
-        iptables: key: ['iptables']
-      options = @config.nginx = service.options
+    module.exports = (service) ->
+      options = service.options
 
 ## Environment
 

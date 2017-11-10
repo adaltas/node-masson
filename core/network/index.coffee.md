@@ -11,17 +11,16 @@ Modify the various network related configuration files such as
 * Customize the network interfaces if option "ifcg" is provided
 
     module.exports =
-      use:
+      deps:
         bind_server: module: 'masson/core/bind_server'
       configure:
         'masson/core/network/configure'
       commands:
-        'check': ->
-          options = @config.network
-          @call 'masson/core/bind_client', options
-          @call 'masson/core/network/check', options
-        'install': ->
-          options = @config.network
-          @call 'masson/core/network/install', options
+        'check': [
+          'masson/core/bind_client'
+          'masson/core/network/check'
+        ]
+        'install':
+          'masson/core/network/install'
         'restart':
           'masson/core/network/restart'

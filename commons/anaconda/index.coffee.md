@@ -10,9 +10,7 @@ Anaconda and the Anaconda changelog.
       configure:
         'masson/commons/anaconda/configure'
       commands:
-        'install': ->
-          options = @config.anaconda
-          @call 'masson/commons/anaconda/install', options
-        'prepare': ->
-          options = @config.anaconda
-          @call 'masson/commons/anaconda/prepare', options
+        'install':
+          'masson/commons/anaconda/install'
+        'prepare':
+          'masson/commons/anaconda/prepare'

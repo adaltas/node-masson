@@ -1,9 +1,8 @@
 
 # IPTables Configure
 
-    module.exports = ->
-      service = migration.call @, service, 'masson/core/iptables', ['iptables'], {}
-      options = @config.iptables = service.options
+    module.exports = (service) ->
+      options = service.options
       
       options.action ?= 'start'
       # Service supports chkconfig, but is not referenced in any runlevel
@@ -18,7 +17,3 @@
         { chain: 'LOGGING', command: '-A', '--limit': '2/min', jump: 'LOG', 'log-prefix': options.log_prefix, 'log-level': options.log_level }
         { chain: 'LOGGING', command: '-A', jump: 'DROP' }
       ]
-
-## Dependencies
-
-    migration = require '../../lib/migration'

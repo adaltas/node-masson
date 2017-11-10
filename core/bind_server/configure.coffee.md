@@ -11,11 +11,8 @@
 
 See the the "resources section" for additional information.
 
-    module.exports = ->
-      service = migration.call @, service, 'masson/core/bind_server', ['bind_server'], require('nikita/lib/misc').merge require('.').use,
-        iptables: key: ['iptables']
-        yum: key: ['yum']
-      options = @config.bind_server = service.options
+    module.exports = (service) ->
+      options = service.options
 
 ## Indentities
 
@@ -40,14 +37,10 @@ Note, port is not honored by the configuration files but used in iptables and
 the network dependencies.
 
       options.port ?= 53
-      options.iptables ?= service.use.iptables and service.use.iptables.options.action is 'start'
+      options.iptables ?= service.deps.iptables and service.deps.iptables.options.action is 'start'
 
 ## Zones
 
       options.zones ?= []
       if typeof options.zones is 'string'
         options.zones = [options.zones]
-
-## Dependencies
-
-    migration = require '../../lib/migration'

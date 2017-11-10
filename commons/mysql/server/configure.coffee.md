@@ -27,9 +27,7 @@ provision their databases and user access.
 ```
 
     module.exports = (service) ->
-      service = migration.call @, service, 'masson/commons/mysql/server', ['mysql', 'server'], require('nikita/lib/misc').merge require('.').use,
-        iptables: key: ['iptables']
-      options = @config.mysql.server = service.options
+      options = service.options
 
 ## Validation
 
@@ -40,7 +38,7 @@ provision their databases and user access.
       # Secure Installation
       options.current_password ?= ''
       options.root_host ?= '%'
-      options.iptables ?= service.use.iptables and service.use.iptables.options.action is 'start'
+      options.iptables ?= service.deps.iptables and service.deps.iptables.options.action is 'start'
 
 ## Identities
 
@@ -75,7 +73,3 @@ provision their databases and user access.
       options.wait_tcp = {}
       options.wait_tcp.fqdn = service.node.fqdn
       options.wait_tcp.port = options.my_cnf['mysqld']['port']
-
-## Dependencies
-
-    migration = require '../../../lib/migration'

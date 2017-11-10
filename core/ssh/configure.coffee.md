@@ -48,15 +48,13 @@ two new properties "sshd\_config" and "banner".
 ```
 
     module.exports = (service) ->
-      service = migration.call @, service, 'masson/core/ssh', ['ssh'], require('nikita/lib/misc').merge require('.').use,
-        system: key: ['system']
-        yum: key: ['yum']
-      options = @config.ssh = service.options
+      options = service.options
       
       options.sshd_config ?= null
+      options.users ?= {}
       for username, config of options.users
-        throw Error "User Not Defined: module system must define the user #{username}" unless username is 'root' or service.use.system.options.users[username]
-        user = merge {}, service.use.system.options.users[username] or {}, config
+        throw Error "User Not Defined: module system must define the user #{username}" unless username is 'root' or service.deps.system.options.users[username]
+        user = merge {}, service.deps.system.options.users[username] or {}, config
         user.home ?= '/root' if username is 'root'
         config.ssh_dir ?= "#{user.home}/.ssh"
         config.authorized_keys ?= []
@@ -65,4 +63,3 @@ two new properties "sshd\_config" and "banner".
 ## Dependencies
 
     {merge} = require 'nikita/lib/misc'
-    migration = require '../../lib/migration'

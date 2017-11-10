@@ -31,7 +31,7 @@ and when only ONE ntp server is configured
         if options.fqdn in servers
           servers = servers.filter (fqdn) => fqdn isnt options.fqdn
         servers.push '127.127.1.0' if options.fudge
-        @fs.readFile '/etc/ntp.conf', 'ascii', (err, content) =>
+        fs.readFile options.ssh, '/etc/ntp.conf', 'ascii', (err, content) =>
           return callback err if err
           lines = string.lines content
           modified = false
@@ -106,6 +106,7 @@ to wait for an available NTPD server.
 
 ## Module Dependencies
 
+    fs = require 'ssh2-fs'
     string = require 'nikita/lib/misc/string'
 
 [cyberciti]: http://www.cyberciti.biz/faq/howto-install-ntp-to-synchronize-server-clock/
