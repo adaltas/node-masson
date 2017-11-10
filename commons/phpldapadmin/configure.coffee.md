@@ -1,10 +1,8 @@
 
 # phpLDAPadmin Configure
 
-    module.exports = handler: ->
-      service = migration.call @, service, 'masson/commons/phpldapadmin', ['phpldapadmin'], require('nikita/lib/misc').merge require('.').use,
-        httpd: key: ['httpd']
-      options = @config.phpldapadmin = service.options
+    module.exports = (service) ->
+      options = service.options
       
       options.config_path ?= '/etc/phpldapadmin/config.php'
       options.config_httpd_path ?= '/etc/httpd/conf.d/phpldapadmin.conf'

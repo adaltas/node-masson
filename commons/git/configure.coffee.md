@@ -42,11 +42,8 @@ any settings from the proxy action.
 }
 ```
 
-    module.exports = ->
-      service = migration.call @, service, 'masson/commons/git', ['git'], require('nikita/lib/misc').merge require('.').use,
-        proxy: key: ['proxy']
-        system: key: ['system']
-      options = @config.git = service.options
+    module.exports = (service) ->
+      options = service.options
 
 ## Environment
 
@@ -59,7 +56,7 @@ any settings from the proxy action.
 
       options.properties ?= {}
       options.properties.http ?= {}
-      options.properties.http.proxy ?= service.use.proxy.options.http_proxy if service.use.proxy and options.proxy
+      options.properties.http.proxy ?= service.deps.proxy.options.http_proxy if service.deps.proxy and options.proxy
 
 ## User Configuration
 
@@ -68,8 +65,8 @@ configuration.
 
       options.users ?= {}
       for username, user of options.users
-        throw Error "User Not Defined: module system must define the user #{username}" unless service.use.system.options.users[username]
-        user = merge {}, service.use.system.options.users[username], user
+        throw Error "User Not Defined: module system must define the user #{username}" unless service.deps.system.options.users[username]
+        user = merge {}, service.deps.system.options.users[username], user
         user.target ?= "#{user.home}/.gitconfig"
         user.uid ?= user.uid or user.name
         user.gid ?= user.gid or user.group
@@ -79,5 +76,4 @@ configuration.
 ## Dependencies
 
     {merge} = require 'nikita/lib/misc'
-    migration = require '../../lib/migration'
       

@@ -22,17 +22,12 @@ Example:
 }
 ```
 
-    module.exports = ->
-      service = migration.call @, service, 'masson/core/ntp', ['ntp'], {}
-      options = @config.ntp = service.options
+    module.exports = (service) ->
+      options = service.options
       
       options.fqdn ?= service.node.fqdn
       options.servers ?= []
       options.servers = options.servers.split(',') if typeof options.servers is 'string'
       options.lag ?= 2000
       options.fudge ?= false
-      options.fudge = if @config.host in options.servers then 10 else 14
-
-## Dependencies
-
-    migration = require '../../lib/migration'
+      options.fudge = if options.fqdn in options.servers then 10 else 14

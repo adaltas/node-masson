@@ -34,9 +34,8 @@
 } }
 ```
 
-    module.exports = ->
-      service = migration.call @, service, 'masson/core/saslauthd', ['saslauthd'], {}
-      options = @config.saslauthd = service.options
+    module.exports = (service) ->
+      options = service.options
 
 ## Environnment
 
@@ -93,4 +92,3 @@ Use a provided username and password to validate the connection, not required.
 ## Dependencies
 
     {merge} = require 'nikita/lib/misc'
-    migration = require '../../lib/migration'

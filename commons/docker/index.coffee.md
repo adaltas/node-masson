@@ -18,29 +18,24 @@ Indeed this module care about installing docker daemon, configure startup option
 setup TLS, sockets etc. Configuration which are mandatory if you want to use docker cluster.
 
     module.exports =
-      use:
+      deps:
         iptables: module: 'masson/core/iptables', local: true
         ssl: module: 'masson/core/ssl', local: true
       configure:
         'masson/commons/docker/configure'
       commands:
-        'check': ->
-          options = @config.docker
-          @call 'masson/commons/docker/check', options
-        'install': ->
-          options = @config.docker
-          @call 'masson/commons/docker/install', options
-          @call 'masson/commons/docker/start', options
-          @call 'masson/commons/docker/check', options
-        'prepare': ->
-          options = @config.docker
-          @call 'masson/commons/docker/prepare', options
-        'start': ->
-          options = @config.docker
-          @call 'masson/commons/docker/start', options
-        'status': ->
-          options = @config.docker
-          @call 'masson/commons/docker/status', options
-        'stop': ->
-          options = @config.docker
-          @call 'masson/commons/docker/status', options
+        'check':
+          'masson/commons/docker/check'
+        'install': [
+          'masson/commons/docker/install'
+          'masson/commons/docker/start'
+          'masson/commons/docker/check'
+        ]
+        'prepare':
+          'masson/commons/docker/prepare'
+        'start':
+          'masson/commons/docker/start'
+        'status':
+          'masson/commons/docker/status'
+        'stop':
+          'masson/commons/docker/status'

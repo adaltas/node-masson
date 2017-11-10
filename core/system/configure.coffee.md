@@ -67,8 +67,7 @@ The module accept the following properties:
 ```
 
     module.exports = (service) ->
-      service = migration.call @, service, 'masson/core/system', ['system'], {}
-      options = @config.system = service.options
+      options = service.options
       
 ## SELinux
 
@@ -98,7 +97,3 @@ The module accept the following properties:
       # Profile
       # @config.profile ?= {}
       options
-
-## Dependencies
-
-    migration = require '../../lib/migration'

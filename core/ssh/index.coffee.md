@@ -7,16 +7,15 @@
 * Defined user authorized keys
 
     module.exports =
-      use:
+      deps:
         system: module: 'masson/core/system', local: true
         yum: module: 'masson/core/yum', local: true
       configure:
         'masson/core/ssh/configure'
       commands:
-        'check': ->
-          options = @config.ssh
-          @call 'masson/core/ssh/check', options
-        'install': ->
-          options = @config.ssh
-          @call 'masson/core/ssh/install', options
-          @call 'masson/core/ssh/check', options
+        'check':
+          'masson/core/ssh/check'
+        'install': [
+          'masson/core/ssh/install'
+          'masson/core/ssh/check'
+        ]

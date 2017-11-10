@@ -8,6 +8,5 @@ providing configuration properties which other modules may use.
       configure:
         'masson/core/proxy/configure'
       commands:
-        'install': ->
-          options = @config.proxy
-          @call 'masson/core/proxy/install', options
+        'install':
+          'masson/core/proxy/install'

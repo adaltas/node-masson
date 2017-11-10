@@ -35,6 +35,17 @@ Note, ntp is installed to encure correct date on the server or HTTPS will fail.
 }
 ```
 
+## Exemple - custom epel URL
+
+```json
+{
+  "epel": {
+    "enabled": true,
+    "url": "http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm"
+  }
+}
+```
+
 ## Default Configurations
 
 ```json
@@ -51,7 +62,7 @@ Note, ntp is installed to encure correct date on the server or HTTPS will fail.
   "clean": "CentOS*",
   "epel": {
     "enabled": false,
-    "url": "http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm",
+    "url": "null",
     "source": null
   },
   "packages": {
@@ -64,10 +75,8 @@ Note, ntp is installed to encure correct date on the server or HTTPS will fail.
 
 ## Source Code
 
-    module.exports = ->
-      service = migration.call @, service, 'masson/core/yum', ['yum'], require('nikita/lib/misc').merge require('.').use,
-        proxy: key: ['proxy']
-      options = @config.yum = service.options
+    module.exports = (service) ->
+      options = service.options
 
 ## Configuration
 
@@ -81,10 +90,10 @@ Note, ntp is installed to encure correct date on the server or HTTPS will fail.
 ## Proxy Configuration
 
       options.proxy ?= false
-      if service.use.proxy and options.proxy
-        options.config.main.proxy ?= service.use.proxy.config.proxy.http_proxy_no_auth
-        options.config.main.proxy_username ?= service.use.proxy.config.proxy.username
-        options.config.main.proxy_password ?= service.use.proxy.config.proxy.password
+      if service.deps.proxy and options.proxy
+        options.config.main.proxy ?= service.deps.proxy.config.proxy.http_proxy_no_auth
+        options.config.main.proxy_username ?= service.deps.proxy.config.proxy.username
+        options.config.main.proxy_password ?= service.deps.proxy.config.proxy.password
 
 ## System Repository
 
@@ -97,7 +106,7 @@ Note, ntp is installed to encure correct date on the server or HTTPS will fail.
       options.epel ?= {}
       options.epel.enabled ?= false
       if options.epel?.enabled
-        options.epel.url ?= 'http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm'
+        options.epel.url ?= null
         options.epel.source ?= null
         options.epel.url = null if options.epel.source?
 
@@ -107,7 +116,3 @@ Note, ntp is installed to encure correct date on the server or HTTPS will fail.
       options.packages['yum-plugin-priorities'] ?= true
       options.packages['man'] ?= true
       options.packages['ksh'] ?= true
-
-## Dependencies
-
-    migration = require '../../lib/migration'

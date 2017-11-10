@@ -1,11 +1,8 @@
 
 # Docker Configure
 
-    module.exports = ->
-      service = migration.call @, service, 'masson/commons/docker', ['docker'], require('nikita/lib/misc').merge require('.').use,
-        iptables: key: ['iptables']
-        ssl: key: ['ssl']
-      options = @config.docker = service.options
+    module.exports = (service) ->
+      options = service.options
 
 ## Identities
 
@@ -80,7 +77,7 @@ Example:
       # see https://docs.docker.com/v1.5/articles/networking/
       options.other_opts ?= ''
       options.other_args ?= {}
-      options.other_args.iptables ?= if service.use.iptables and service.use.iptables.options.action is 'start' then 'true' else 'false'
+      options.other_args.iptables ?= if service.deps.iptables and service.deps.iptables.options.action is 'start' then 'true' else 'false'
       options.source ?= 'https://github.com/docker/compose/releases/download/1.12.0/docker-compose-Linux-x86_64'
       options.daemon ?= {}
       # the /etc/docker/daemon.json file can also be used to specify starting options for docker daemon
@@ -97,8 +94,8 @@ Docker Engine supports TLS authentication between the CLI and engine.
 When TLS is enabled, `tlscacert`, `tlscert`, `tlskey` and `tlsverify` properties
 are added docker `@config.docker` object, so it can be used in nikita docker actions.
 
-      options.ssl = merge {}, service.use.ssl?.options, options.ssl
-      options.ssl.enabled ?= !!service.use.ssl
+      options.ssl = merge {}, service.deps.ssl?.options, options.ssl
+      options.ssl.enabled ?= !!service.deps.ssl
       unless options.ssl.enabled
         options.default_port ?= 2375
       else
@@ -151,7 +148,6 @@ To use it just specify the `options.block_device`.
 ## Dependencies
 
     {merge} = require 'nikita/lib/misc'
-    migration = require '../../lib/migration'
 
 [socket-opts]:(https://docs.docker.com/engine/reference/commandline/dockerd/#/daemon-socket-option)
 [daemon-opts-resources]:(https://github.com/moby/moby/issues/21701)

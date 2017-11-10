@@ -2,13 +2,11 @@
 # HTTPD Web Server Configure
 
     module.exports = (service) ->
-      service = migration.call @, service, 'masson/commons/httpd', ['httpd'], require('nikita/lib/misc').merge require('.').use,
-        iptables: key: ['iptables']
-      options = @config.httpd = service.options
+      options = service.options
 
 ## Environment
 
-      options.iptables ?= service.use.iptables and service.use.iptables.options.action is 'start'
+      options.iptables ?= service.deps.iptables and service.deps.iptables.options.action is 'start'
       
 ## Service
 
@@ -37,7 +35,3 @@
       options.wait_tcp = {}
       options.wait_tcp.fqdn = service.node.fqdn
       options.wait_tcp.port = 80
-
-## Dependencies
-
-    migration = require '../../lib/migration'

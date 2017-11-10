@@ -56,12 +56,14 @@ Java home are:
 ```
 
     module.exports = (service) ->
-      service = migration.call @, service, 'masson/commons/java', ['java'], {}
-      options = @config.java = service.options
+      options = service.options
 
-      # OpenJDK
+## OpenJDK
+
       options.openjdk ?= false
-      # Oracle JDK
+
+## Oracle JDK
+
       options.jdk ?= {}
       options.jdk.root_dir ?= '/usr/java'
       options.jdk.version ?= '1.8.0_101'
@@ -76,12 +78,10 @@ Java home are:
       options.jdk.versions['1.8.0_101'].jdk_sha256 ?= "467f323ba38df2b87311a7818bcbf60fe0feb2139c455dfa0e08ba7ed8581328"
       options.jdk.versions['1.8.0_101'].jce_location ?= "http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip"
       options.jdk.versions['1.8.0_101'].jce_sha256 ?= "f3020a3922efd6626c2fff45695d527f34a8020e938a49292561f18ad1320b59"
-      # Java properties
+
+## Java properties
+
       options.java_home ?= "#{options.jdk.root_dir}/default"
       options.java_home = options.java_home.replace /\/+$/, "" # remove trailing slashes
       options.jre_home ?= "#{options.java_home}/jre"
       options.jre_home = options.jre_home.replace /\/+$/, "" # remove trailing slashes
-
-## Dependencies
-
-    migration = require '../../lib/migration'

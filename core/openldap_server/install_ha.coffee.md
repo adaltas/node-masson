@@ -2,7 +2,7 @@
 # OpenLDAP ACL
 
     module.exports = header: 'OpenLDAP Server HA', handler: (options) ->
-
+    
       db = switch options.backend
         when 'mdb' then 'olcDatabase={3}mdb'
         when 'hdb' then 'olcDatabase={2}hdb'
@@ -23,7 +23,6 @@
         olcModuleLoad: syncprov.la
         EOF
         """
-
       @system.execute
         header: 'Module Activation'
         unless_exec: """
@@ -41,7 +40,8 @@
         """
 
       # TODO: create replication user instead of root_dn
-      serverId = "#{options.server_ids[@config.host]}"
+      serverId = "#{options.server_ids[options.fqdn]}"
+      
       @system.execute
         header: 'Registration'
         unless_exec: """

@@ -9,23 +9,19 @@ the clock of the virtual box with the command
 `VBoxManage modifyvm ${vmname} --biossystemtimeoffset -0`.
 
     module.exports =
-      use:
+      deps:
         network: 'masson/core/network'
       configure:
         'masson/core/ntp/configure'
       commands:
-        'check': ->
-          options = @config.ntp
-          @call 'masson/core/ntp/check', options
-        'install': ->
-          options = @config.ntp
-          @call 'masson/bootstrap/fs', options
-          @call 'masson/core/ntp/install', options
-          @call 'masson/core/ntp/start', options
-          @call 'masson/core/ntp/check', options
-        'start': ->
-          options = @config.ntp
-          @call 'masson/core/ntp/start', options
-        'stop': ->
-          options = @config.ntp
-          @call 'masson/core/ntp/stop', options
+        'check':
+          'masson/core/ntp/check'
+        'install': [
+          'masson/core/ntp/install'
+          'masson/core/ntp/start'
+          'masson/core/ntp/check'
+        ]
+        'start':
+          'masson/core/ntp/start'
+        'stop':
+          'masson/core/ntp/stop'

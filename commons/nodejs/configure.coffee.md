@@ -29,9 +29,8 @@ Example:
 }
 ```
 
-    module.exports = ->
-      service = migration.call @, service, 'masson/commons/nodejs', ['nodejs'], {}
-      options = @config.nodejs = service.options
+    module.exports = (service) ->
+      options = service.options
 
 ## Environment
 

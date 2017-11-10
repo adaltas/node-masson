@@ -2,11 +2,10 @@
 # Users Locale
 
     module.exports =
-      use:
-        system: module: 'masson/core/system', implicit: true, local: true
+      deps:
+        system: module: 'masson/core/system', local: true, required: true
       configure:
         'masson/core/locale/configure'
       commands:
-        'install': ->
-          options = @config.locale
-          @call 'masson/core/locale/install', options
+        'install':
+          'masson/core/locale/install'

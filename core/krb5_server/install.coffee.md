@@ -166,7 +166,7 @@ The following files are updated:
           keyfileContent = null
           @call (_, callback) ->
             options.log 'Read current keyfile if it exists'
-            @fs.readFile "#{ldap_service_password_file}", 'utf8', (err, content) ->
+            fs.readFile options.ssh, "#{ldap_service_password_file}", 'utf8', (err, content) ->
               return callback null, true if err and err.code is 'ENOENT'
               return callback err if err
               keyfileContent = content
@@ -197,7 +197,7 @@ The following files are updated:
                 callback()
           @call (_, callback) ->
             return callback null, true  unless keyfileContent
-            @fs.readFile "#{ldap_service_password_file}", 'utf8', (err, content) ->
+            fs.readFile options.ssh, "#{ldap_service_password_file}", 'utf8', (err, content) ->
               return callback err if err
               modified = if keyfileContent is content then false else true
               callback null, keyfileContent isnt content
@@ -208,14 +208,15 @@ The following files are updated:
           config = options.value
           return next() unless config.ha
           @call if: config.master, ->
-            @fs.readFile "/var/kerberos/krb5kdc/.k5.#{config.realm}", (err, buf) =>
+            fs.readFile options.ssh, "/var/kerberos/krb5kdc/.k5.#{config.realm}", (err, buf) =>
               return next err if err
-              @kv.set key: "krb5_ha.#{config.realm}", value: buf
+              @kv.set(key: "krb5_ha.#{config.realm}", value: buf)
               @then next
           @call unless: config.master, ->
-            @kv.get key: "krb5_ha.#{config.realm}", (err, status, key, value) =>
-              @fs.writeFile "/var/kerberos/krb5kdc/.k5.#{config.realm}", value, (err) =>
+            @kv.get(key: "krb5_ha.#{config.realm}", (err, status, key, value) =>
+              fs.writeFile options.ssh, "/var/kerberos/krb5kdc/.k5.#{config.realm}", value, (err) =>
                 next err
+            )
 
       @call header: 'Log', ->
         @file.touch
@@ -274,6 +275,7 @@ The following files are updated:
 
 ## Dependencies
 
+    fs = require 'ssh2-fs'
     path = require('path').posix
     each = require 'each'
     misc = require 'nikita/lib/misc'

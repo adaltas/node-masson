@@ -58,18 +58,13 @@ The module accept the following properties:
 }
 ```
 
-    module.exports = ->
-      @config.hostname ?= @config.host
-      @config.shortname ?= @config.host.split('.')[0]
-      service = migration.call @, service, 'masson/core/network', ['network'], require('nikita/lib/misc').merge require('.').use,
-        bind_server: key: ['bind_server']
-      options = @config.network = service.options
+    module.exports = (service) ->
+      options = service.options
       
       options.ip = service.node.ip
       options.fqdn = service.node.fqdn
       options.hostname = service.node.hostname
       options.nodes = service.nodes
-      
       options.hostname_disabled ?= false
       
 ## Hosts
@@ -79,12 +74,8 @@ The module accept the following properties:
 
 ## DNS Resolver
 
-      if service.use.bind_server
-        options.dns = for bind in service.use.bind_server
+      if service.deps.bind_server
+        options.dns = for bind in service.deps.bind_server
           continue if bind.node.host is service.node.host
           host: bind.node.host
           port: bind.options.port
-
-## Dependencies
-
-    migration = require '../../lib/migration'

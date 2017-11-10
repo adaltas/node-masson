@@ -27,13 +27,8 @@ and should correspond to "openldap_server.config_password".
 } } }
 ```
 
-    module.exports = ->
-      service = migration.call @, service, 'masson/core/openldap_server', ['openldap_server'], require('nikita/lib/misc').merge require('.').use,
-        iptables: key: ['iptables']
-        ssl: key: ['ssl']
-        saslauthd: key: ['saslauthd']
-        openldap_server: key: ['openldap_server']
-      options = @config.openldap_server = service.options
+    module.exports = (service) ->
+      options = service.options
 
 ## Validation
 
@@ -47,7 +42,8 @@ and should correspond to "openldap_server.config_password".
 
 ## Ennvironment
 
-      options.iptables ?= service.use.iptables and service.use.iptables.options.action is 'start'
+      options.iptables ?= service.deps.iptables and service.deps.iptables.options.action is 'start'
+      options.fqdn = service.node.fqdn
 
 ## Identities
 
@@ -134,7 +130,7 @@ Ryb does install hdb/bdb by default, but administrators can choose mdb.
 ## High Availability (HA)
 
       options.server_ids = {}
-      for openldap_srv, i in service.use.openldap_server.sort( (srv) -> srv.node.fqdn )
+      for openldap_srv, i in service.deps.openldap_server.sort( (srv) -> srv.node.fqdn )
         options.server_ids[openldap_srv.node.fqdn] ?= "#{i+1}"
         if openldap_srv.node.fqdn isnt service.node.fqdn
           options.remote_provider = unless openldap_srv.options.tls
@@ -143,7 +139,7 @@ Ryb does install hdb/bdb by default, but administrators can choose mdb.
 
 ## SASL
 
-      options.saslauthd = service.use.saslauthd
+      options.saslauthd = service.deps.saslauthd
       
 ## Entries
 
@@ -244,4 +240,3 @@ Provision users and groups
 ## Dependencies
 
     misc = require 'nikita/lib/misc'
-    migration = require '../../lib/migration'

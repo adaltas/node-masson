@@ -7,10 +7,9 @@
 * Add system profile scripts
 
     module.exports =
-      use: {}
+      deps: {}
       configure:
         'masson/core/system/configure'
       commands:
-        'install': ->
-          options = @config.system
-          @call 'masson/core/system/install', options
+        'install':
+          'masson/core/system/install'

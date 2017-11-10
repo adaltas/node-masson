@@ -24,9 +24,8 @@ contains the following properties:
     `password` property but used for secure https proxy. it
     default to the default http settings.
 
-    module.exports = ->
-      service = migration.call @, service, 'masson/core/proxy', ['proxy'], {}
-      options = @config.proxy = service.options
+    module.exports = (service) ->
+      options = service.options
       
       options.system ?= "proxy.sh"
       options.system = path.resolve '/etc/profile.d', options.system if options.system
@@ -74,4 +73,3 @@ configuration will be enriched with the `http_proxy`, the
 ## Dependencies
 
     path = require 'path'
-    migration = require '../../lib/migration'
