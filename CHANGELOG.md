@@ -3,6 +3,7 @@
 
 ## Version 0.1.6
 
+* deps: validate required with local
 * context: merge no_ssh with nikita options
 * commons/java: update version
 * package: release commands

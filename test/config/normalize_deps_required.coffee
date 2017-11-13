@@ -65,3 +65,23 @@ describe 'normalize deps required', ->
           deps: 'dep_a': module: "#{tmp}/dep_a", required: true
       .service 'cluster_a', 'service_a'
     ).should.throw "Required Dependency: unsatisfied dependency \"dep_a\" in service \"cluster_a:service_a\", module \"#{tmp}/dep_a\" in cluster \"cluster_a\" is not defined"
+
+  it 'validate local', ->
+    fs.writeFileSync "#{tmp}/dep_a.json", JSON.stringify {}
+    fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
+    ( ->
+      store normalize
+        clusters: 'cluster_a': services:
+          'dep_a':
+            module: "#{tmp}/dep_a"
+            affinity: type: 'nodes', match: 'any', values: ['a.fqdn', 'c.fqdn']
+          'service_a':
+            module: "#{tmp}/a"
+            affinity: type: 'nodes', match: 'any', values: 'b.fqdn'
+            deps: 'dep_a': module: "#{tmp}/dep_a", local: true, required: true
+        nodes:
+          'a.fqdn': {}
+          'b.fqdn': {}
+          'c.fqdn': {}
+      .service 'cluster_a', 'service_a'
+    ).should.throw 'Required Local Dependency: service "service_a" in cluster "cluster_a" require service "dep_a" in cluster "cluster_a" to be present on node b.fqdn'

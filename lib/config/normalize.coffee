@@ -150,7 +150,7 @@ module.exports = (config) ->
         config.nodes[node].services[i].module ?= service.module
       else
         config.nodes[node].services.push cluster: cname, service: sname, module: service.module
-    # Enrich affinity for dependecies marked as auto
+    # Enrich affinity for dependencies marked as auto
     for dname, dep of service.deps
       continue unless dep.auto
       continue if dep.disabled
@@ -163,6 +163,16 @@ module.exports = (config) ->
   for nname, node of config.nodes
     node.services.sort (a, b)->
       services.indexOf("#{a.cluster}:#{a.service}") - services.indexOf("#{b.cluster}:#{b.service}")
+  # Re-validate required dependency ensuring affinity is compatible with local
+  for cname, cluster of config.clusters
+    for sname, service of cluster.services
+      for dname, dep of service.deps
+        continue unless dep.local and dep.required
+        for snode in service.nodes
+          dservice = config.clusters[dep.cluster].services[dep.service]
+          continue if snode in dservice.nodes
+          throw Error "Required Local Dependency: service #{JSON.stringify sname} in cluster #{JSON.stringify cname} require service #{JSON.stringify dep.service} in cluster #{JSON.stringify dep.cluster} to be present on node #{snode}"
+
   # Enrich configuration
   for service in services
     [cname, sname] = service.split ':'
