@@ -3,6 +3,8 @@
 
 ## Trunk
 
+* params: inject custom module loaded
+* package: complete engine rewrite
 * mariadb: parametrize service name
 * context: reflect move in nikita of flatten into array
 * all: assert packages are installed and services running

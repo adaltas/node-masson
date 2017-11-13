@@ -2,6 +2,7 @@
 module.exports =
   name: 'masson'
   description: 'Cluster deployment and management'
+  load: require './utils/load'
   options: [
     name: 'config', shortcut: 'c', type: 'array'
     description: 'One or multiple configuration files'
