@@ -109,6 +109,17 @@ module.exports = (config) ->
     node.fqdn ?= nname
     node.hostname ?= nname.split('.').shift()
     node.services ?= []
+    # Convert services to an array
+    if is_object node.services
+      node.services = for sid, service of node.services
+        [cname, sname] = sid.split ':'
+        # console.log
+        #   cluster: cname
+        #   service: sname
+        #   options: service
+        cluster: cname
+        service: sname
+        options: service
     # Validate service registration
     for service in node.services
       if service.service
