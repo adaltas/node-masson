@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* deps: validate required with local
 * package: release commands
 * params: inject custom module loaded
 * package: complete engine rewrite
