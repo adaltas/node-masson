@@ -3,6 +3,7 @@
 
 ## Version 0.1.6
 
+* graph: nodes with humam output
 * deps: validate required with local
 * context: merge no_ssh with nikita options
 * commons/java: update version

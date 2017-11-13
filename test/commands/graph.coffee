@@ -39,7 +39,7 @@ describe 'command graph', ->
       'cluster_a:service_a'
     ]
 
-  it 'with nodes', ->
+  it 'with nodes, JSON format', ->
     write = process.stdout.write
     data = null
     process.stdout.write = (d)->
@@ -49,20 +49,55 @@ describe 'command graph', ->
       clusters: 'cluster_a': services:
         'dep_a':
           module: "#{tmp}/a"
+          affinity: type: 'nodes', values: 'b.fqdn'
           options: 'key': 'value'
         'service_a':
           module: "#{tmp}/a"
+          affinity: type: 'nodes', values: 'a.fqdn'
           deps: 'my_dep_a': module: "#{tmp}/dep_a", local: true
+      nodes:
+        'a.fqdn': true
+        'b.fqdn': true
     parameters(params).run(['graph', '--nodes', '-f', 'json'], config)
     process.stdout.write = write
     JSON.parse(data).should.eql [
       cluster: 'cluster_a'
       id: 'dep_a'
       module: "#{tmp}/a"
-      nodes: []
+      nodes: ['b.fqdn']
     ,
       cluster: 'cluster_a'
       id: 'service_a'
       module: "#{tmp}/a"
-      nodes: []
+      nodes: ['a.fqdn']
     ]
+
+  it 'with nodes, human format', ->
+    write = process.stdout.write
+    data = ''
+    process.stdout.write = (d)->
+      data += d
+    fs.writeFileSync "#{tmp}/dep_a.json", JSON.stringify {}
+    fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
+    config = normalize
+      clusters: 'cluster_a': services:
+        "#{tmp}/dep_a":
+          affinity: type: 'nodes', values: 'b.fqdn'
+          options: 'key': 'value'
+        'service_a':
+          module: "#{tmp}/a"
+          affinity: type: 'nodes', values: 'a.fqdn'
+          deps: 'my_dep_a': module: "#{tmp}/dep_a", local: true
+      nodes:
+        'a.fqdn': true
+        'b.fqdn': true
+    parameters(params).run(['graph', '--nodes'], config)
+    process.stdout.write = write
+    data.substr(-2, 2).should.eql '\n\n'
+    data.trim().should.eql """
+    * cluster_a:#{tmp}/dep_a
+      * b.fqdn
+    
+    * cluster_a:service_a (#{tmp}/a)
+      * a.fqdn
+    """
