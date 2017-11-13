@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* package: release commands
 * params: inject custom module loaded
 * package: complete engine rewrite
 * mariadb: parametrize service name
