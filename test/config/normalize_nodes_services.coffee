@@ -4,7 +4,7 @@ store = require '../../lib/config/store'
 nikita = require 'nikita'
 fs = require 'fs'
 
-describe 'normalize nodes', ->
+describe 'normalize nodes services', ->
 
   tmp = '/tmp/masson-test'
   beforeEach ->
@@ -27,6 +27,26 @@ describe 'normalize nodes', ->
             cluster: 'cluster_a', service: 'service_a', options: a_key: 'a value'
           ]
     ).should.throw 'Node Invalid Service: node "b.fqdn" references missing service "service_a" in cluster "cluster_a"'
+
+  it 'can be declared as an object', ->
+    fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
+    store normalize
+      clusters: 'cluster_a': services:
+        'service_a':
+          module: "#{tmp}/a"
+          affinity: type: 'nodes', values: 'b.fqdn'
+      nodes:
+        'a.fqdn': ip: '10.10.10.1'
+        'b.fqdn': ip: '10.10.10.2', services:
+          'cluster_a:service_a': 'a_key': 'a value'
+    .chain()
+    .node 'b.fqdn', (node) ->
+      node.services.length is 1
+      node.services[0].should.eql
+        cluster: 'cluster_a'
+        service: 'service_a'
+        module: "#{tmp}/a"
+        options: 'a_key': 'a value'
 
   it 'merge options', ->
     fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
