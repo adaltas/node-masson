@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* graph: nodes with humam output
 * deps: validate required with local
 * package: release commands
 * params: inject custom module loaded

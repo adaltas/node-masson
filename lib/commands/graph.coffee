@@ -31,13 +31,26 @@ module.exports = (config, params) ->
     process.stdout.write config
   s = store config
   if params.nodes
-    output = for service in config.graph
-      [cname, sname] = service.split ':'
-      service = config.clusters[cname].services[sname]
-      cluster: service.cluster
-      id: service.id
-      module: service.module
-      nodes: service.nodes
-    print output
+    if params.format
+      output = for service in config.graph
+        [cname, sname] = service.split ':'
+        service = config.clusters[cname].services[sname]
+        cluster: service.cluster
+        id: service.id
+        module: service.module
+        nodes: service.nodes
+      print output
+    else
+      for service, i in config.graph
+        [cname, sname] = service.split ':'
+        service = config.clusters[cname].services[sname]
+        process.stdout.write [
+          "* #{service.cluster}:#{service.id}"
+          " (#{service.module})" unless service.id is service.module
+          '\n'
+        ].join ''
+        for node in service.nodes
+          process.stdout.write "  * #{node}\n"
+        process.stdout.write '\n'
   else
     print config.graph
