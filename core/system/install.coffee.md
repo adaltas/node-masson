@@ -66,7 +66,7 @@ Publish scripts inside the profile directory, located in "/etc/profile.d".
           target: "/etc/profile.d/#{filename}"
           content: content
           eof: true
-        ) for filename, content of @config.profile
+        ) for filename, content of options.profile
 
 ## Dependencies
 
