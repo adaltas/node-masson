@@ -42,7 +42,7 @@ Example:
       options.etc_krb5_conf = merge {}, module.exports.etc_krb5_conf, options.etc_krb5_conf
       # Merge global with server-based configuration
       # options.etc_krb5_conf.realms = merge {}, options.etc_krb5_conf.realms, options.etc_krb5_conf.realms
-      if srv.deps.krb5_server
+      if service.deps.krb5_server
         for srv in service.deps.krb5_server
           for realm, config of srv.options.admin
             options.etc_krb5_conf.realms[realm] ?= {}
