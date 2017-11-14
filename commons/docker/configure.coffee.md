@@ -21,7 +21,7 @@
       options.user_dockerroot.gid ?= options.group_dockerroot.name
 
 
-## Environnment
+## Environment
 
       options.nsenter ?= true
       options.conf_dir ?= '/etc/docker'
@@ -82,7 +82,7 @@ Example:
       options.daemon ?= {}
       # the /etc/docker/daemon.json file can also be used to specify starting options for docker daemon
 
-## Docker Environnment
+## Docker Environment
 
 The environment properties are written to /etc/sysconfg/docker file and change how the daemons run.
 
@@ -92,7 +92,7 @@ The environment properties are written to /etc/sysconfg/docker file and change h
 
 Docker Engine supports TLS authentication between the CLI and engine.
 When TLS is enabled, `tlscacert`, `tlscert`, `tlskey` and `tlsverify` properties
-are added docker `@config.docker` object, so it can be used in nikita docker actions.
+are added to the docker configuration, so it can be used by other docker actions.
 
       options.ssl = merge {}, service.deps.ssl?.options, options.ssl
       options.ssl.enabled ?= !!service.deps.ssl
@@ -104,13 +104,13 @@ are added docker `@config.docker` object, so it can be used in nikita docker act
         throw Error "Required Option: ssl.key" if not options.ssl.key
         throw Error "Required Option: ssl.cacert" if not options.ssl.cacert
         options.env['DOCKER_CERT_PATH'] ?= "#{options.conf_dir}/certs.d"
-        options.host ?= "tcp://#{@config.host}:#{options.default_port}"
+        # options.host ?= "tcp://#{service.node.fqdn}:#{options.default_port}"
         # this ca MUST be at #{docker.conf_dir}/certs.d/ca.pem
         options.other_args['tlscacert'] ?= "#{options.env['DOCKER_CERT_PATH']}/ca.pem"
         options.other_args['tlscert'] ?= "#{options.env['DOCKER_CERT_PATH']}/cert.pem"
         options.other_args['tlskey'] ?= "#{options.env['DOCKER_CERT_PATH']}/key.pem"
         # configure tcp socket to  communicate with docker
-        tlsverify_socket = "#{@config.host}:#{options.default_port}"
+        tlsverify_socket = "#{service.node.fqdn}:#{options.default_port}"
         options.sockets.tcp.push tlsverify_socket if options.sockets.tcp.indexOf tlsverify_socket < 0
         # indeed when executing a nikita.docker action, it will build the docker command
         # to communicate with local daemon engine

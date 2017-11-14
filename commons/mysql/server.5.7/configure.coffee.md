@@ -35,7 +35,7 @@ provision their databases and user access.
 
       throw Error "Required Option: options.password" unless options.password
 
-## Environnment
+## Environment
 
       options.repo ?= false
       options.current_password ?= ''

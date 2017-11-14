@@ -37,7 +37,7 @@
     module.exports = (service) ->
       options = service.options
 
-## Environnment
+## Environment
 
       options.conf_file ?= '/etc/saslauthd.conf'
 

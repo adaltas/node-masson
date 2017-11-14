@@ -21,6 +21,7 @@ module.exports =
   ,
     name: 'exec'
     description: "Distribute a shell command"
+    run: 'masson/lib/commands/exec'
     main:
       name: 'subcommand'
       description: 'The subcommand to execute'

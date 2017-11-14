@@ -33,7 +33,7 @@ provision their databases and user access.
 
       throw Error "Required Option: options.admin_password" unless options.admin_password
 
-## Environnment
+## Environment
 
       # Secure Installation
       options.current_password ?= ''
