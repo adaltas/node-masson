@@ -35,7 +35,7 @@ Default configuration:
     module.exports = (service) ->
       options = service.options
       
-## Environnment
+## Environment
 
       # User SQL
       options.sql_on_install ?= []
