@@ -30,12 +30,14 @@ Skip Pakage installation, if provided by external deploy tool.
         header: 'Service'
         name: 'docker'
         yum_name: 'docker-io'
+        unless: options.external
         startup: true
       @service
         if_os: name: ['redhat','centos'], version: '7'
         header: 'Service'
         name: 'docker'
-        yum_name: 'docker'
+        unless: options.external
+        yum_name: options.yum_name
         startup: true
       @system.tmpfs
         if_os: name: ['redhat','centos'], version: '7'
