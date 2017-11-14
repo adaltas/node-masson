@@ -121,6 +121,11 @@ are added to the docker configuration, so it can be used by other docker actions
         options.tlskey = options.other_args['tlskey']
         options.tlsverify = ' '
 
+## Allow Other package name
+In the case adminsitrators want to install docker-ce, the yum name must be docker-ce instead of docker.
+      
+      options.yum_name ?= 'docker'
+
 ## Devicemapper
 
 Configure device mapper for production use.It creates a logical volume configured
