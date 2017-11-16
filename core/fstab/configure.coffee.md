@@ -37,9 +37,8 @@ Example 1 with format preparation
 }
 ```
 
-    module.exports = ->
+    module.exports = (service) ->
       options = service.options
-      
       options.enabled ?= false
       options.exhaustive ?= false
       options.volumes ?= {}

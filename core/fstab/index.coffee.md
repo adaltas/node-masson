@@ -7,8 +7,11 @@ This module handles fstab and mountpoints.
       configure:
         'masson/core/fstab/configure'
       commands:
-        'check':
+        'check': [
           'masson/core/fstab/check'
-        'install':
+        ]
+        'install': [
           'masson/core/fstab/install'
           'masson/core/fstab/check'
+        ]
+          
