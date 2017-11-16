@@ -92,6 +92,22 @@ module.exports =
       description: 'Run list holding the list of modules'
       one_of: ['start', 'stop', 'status']
       required: true
+    ,
+      name: 'port', shortcut: 'p', type: 'integer'
+      description: 'Port listening by the server'
+      default: 5680
+    ,
+      name: 'port', shortcut: 'p'
+      description: 'Port used by the server'
+      default: 5680
+    ,
+      name: 'directory', shortcut: 'd'
+      description: 'Directory to serve'
+      default: '../ryba-repos/public'
+    ,
+      name: 'pidfile'
+      description: 'File storing the process ID'
+      default: './conf/server.pid'
     ]
   ,
   #   name: 'prepare'
