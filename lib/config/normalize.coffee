@@ -179,8 +179,8 @@ module.exports = (config) ->
     for sname, service of cluster.services
       for dname, dep of service.deps
         continue unless dep.local and dep.required
+        dservice = config.clusters[dep.cluster].services[dep.service]
         for snode in service.nodes
-          dservice = config.clusters[dep.cluster].services[dep.service]
           continue if snode in dservice.nodes
           throw Error "Required Local Dependency: service #{JSON.stringify sname} in cluster #{JSON.stringify cname} require service #{JSON.stringify dep.service} in cluster #{JSON.stringify dep.cluster} to be present on node #{snode}"
 
@@ -216,7 +216,7 @@ module.exports = (config) ->
         # Get dependency service
         deps[dname] = Object.values config.clusters[dep.cluster].services[dep.service].service_by_nodes
         if dep.single
-          throw Error "Invalid Option: single only appy to 0 or 1 dependencies, found #{deps[dname].length}" if deps[dname].length isnt 1
+          throw Error "Invalid Option: single only apply to 1 dependencies, found #{deps[dname].length}" if deps[dname].length isnt 1
           deps[dname] = deps[dname][0] or null
         if dep.local
           deps[dname] = [deps[dname]] if dep.single

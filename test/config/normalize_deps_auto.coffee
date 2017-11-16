@@ -21,7 +21,7 @@ describe 'normalize deps auto', ->
     fs.writeFileSync "#{tmp}/dep_a.json", JSON.stringify {}
     fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
     services = []
-    s = store normalize
+    store normalize
       clusters: 'cluster_a': services:
         'service_a':
           module: "#{tmp}/a"

@@ -66,6 +66,19 @@ describe 'normalize deps single', ->
       then service.deps.my_dep_a.node.id
       else null
     .should.eql [null, 'b.fqdn']
+
+  it 'dependency not loaded', ->
+    fs.writeFileSync "#{tmp}/dep_a.json", JSON.stringify {}
+    fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
+    normalize
+      clusters: 'cluster_a': services:
+        'service_a':
+          module: "#{tmp}/a"
+          affinity: type: 'nodes', match: 'any', values: ['a.fqdn', 'b.fqdn']
+          deps: 'my_dep_a': module: "#{tmp}/dep_a", single: true
+      nodes:
+        'a.fqdn': ip: '10.10.10.1'
+        'b.fqdn': ip: '10.10.10.2'
       
   it 'single throw if multiple', ->
     fs.writeFileSync "#{tmp}/dep_a.json", JSON.stringify {}
@@ -85,4 +98,4 @@ describe 'normalize deps single', ->
           'a.fqdn': ip: '10.10.10.1'
           'b.fqdn': ip: '10.10.10.2'
           'c.fqdn': ip: '10.10.10.3'
-    ).should.throw 'Invalid Option: single only appy to 0 or 1 dependencies, found 3'
+    ).should.throw 'Invalid Option: single only apply to 1 dependencies, found 3'
