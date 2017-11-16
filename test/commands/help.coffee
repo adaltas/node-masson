@@ -66,6 +66,10 @@ describe 'command help', ->
           -n --nodes          Print nodes information
         server              Print the execution plan
           -a --action         Run list holding the list of modules
+          -p --port           Port listening by the server
+          -p --port           Port used by the server
+          -d --directory      Directory to serve
+          --pidfile           File storing the process ID
         init                Create a project with a default layout and configuration
           -d --debug          Print debug output
           -i --description    Project description
