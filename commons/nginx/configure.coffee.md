@@ -26,3 +26,7 @@
       options.user.comment ?= 'NGINX Web Server User'
       options.user.home ?= '/var/lib/nginx'
       options.user.shell ?= false
+
+## Dependencies
+    
+    migration = require '../../lib/migration'
