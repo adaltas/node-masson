@@ -11,6 +11,7 @@ module.exports = (config) ->
     throw Error "Invalid Services: expect an object, got #{JSON.stringify config.services}"
   if config.nodes? and not is_object config.nodes
     throw Error "Invalid Nodes: expect an object, got #{JSON.stringify config.nodes}"
+  config.params ?= {}
   config.clusters ?= {}
   config.nodes ?= {}
   discover_service = (cname, sname, service)->
