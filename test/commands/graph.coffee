@@ -6,7 +6,7 @@ nikita = require 'nikita'
 parameters = require 'parameters'
 
 describe 'command graph', ->
-  
+
   tmp = '/tmp/masson-test'
   beforeEach ->
     require('module')._cache = {}

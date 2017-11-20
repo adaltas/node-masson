@@ -66,7 +66,6 @@ describe 'command help', ->
           -n --nodes          Print nodes information
         server              Print the execution plan
           -a --action         Run list holding the list of modules
-          -p --port           Port listening by the server
           -p --port           Port used by the server
           -d --directory      Directory to serve
           --pidfile           File storing the process ID
@@ -77,7 +76,7 @@ describe 'command help', ->
           -n --name           Project name
           -p --path           Path to the project directory, default to the current directory.
     EXAMPLES
-        masson help       Show this message
+        masson help         Show this message
     
     """
       

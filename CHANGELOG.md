@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* params: merge from config
 * server: inject params and split command with lib
 * nodes: services as an object
 * graph: nodes with humam output
