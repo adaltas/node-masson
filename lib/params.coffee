@@ -13,11 +13,47 @@ module.exports =
   ]
   commands:
     'help':
-      description: 'Print this help and exit'
       run: 'masson/lib/commands/help'
-      main:
-        name: 'subcommand'
-        description: 'Print the help relative to the command'
+    # 'help':
+    #   description: 'Print this help and exit'
+    #   run: 'masson/lib/commands/help'
+    #   main:
+    #     name: 'name'
+    #     description: 'Print the help relative to the command'
+      # help: true
+    'pki':
+      description: 'Certificate Management for development usage'
+      run: 'masson/lib/commands/pki'
+      options: [
+        name: 'dir', shortcut: 'd', type: 'string'
+        required: true
+        description: 'Output directory'
+      ]
+      command: 'action'
+      commands:
+        'ca':
+          description: 'Generate the Certificate Authority'
+        'cacert-view':
+          description: 'Display detailed information of a certificate'
+        'check':
+          description: 'Validate the certificate against the authority'
+          main:
+            name: 'fqdn'
+            required: true
+            description: 'The FQDN associated with the certificate'
+        'cert':
+          description: "Generate the private and public key pair for a given FQDN"
+          run: 'masson/lib/commands/pki'
+          main:
+            name: 'fqdn'
+            required: true
+            description: 'The FQDN associated with the certificate'
+        'cert-view':
+          description: 'Display detailed information of a certificate'
+          run: 'masson/lib/commands/pki'
+          main:
+            name: 'fqdn'
+            description: 'The FQDN associated with the certificate'
     'exec':
       description: "Distribute a shell command"
       run: 'masson/lib/commands/exec'
@@ -69,28 +105,44 @@ module.exports =
     'server':
       description: 'Print the execution plan'
       run: 'masson/lib/commands/server'
-      options: [
-        name: 'action', shortcut: 'a'
-        description: 'Run list holding the list of modules'
-        one_of: ['start', 'stop', 'status']
-        required: true
-      ,
-        name: 'port', shortcut: 'p', type: 'integer'
-        description: 'Port listening by the server'
-        default: 5680
-      ,
-        name: 'port', shortcut: 'p'
-        description: 'Port used by the server'
-        default: 5680
-      ,
-        name: 'directory', shortcut: 'd'
-        description: 'Directory to serve'
-        default: '../ryba-repos/public'
-      ,
-        name: 'pidfile'
-        description: 'File storing the process ID'
-        default: './conf/server.pid'
-      ]
+      command: 'action'
+      commands:
+        'start':
+          description: 'Start the server'
+          options:
+            'directory':
+              description: 'Directory to serve'
+              default: '../ryba-repos/public'
+              shortcut: 'd'
+            'pidfile':
+              description: 'File storing the process ID'
+              default: './conf/server.pid'
+            'port':
+              description: 'Port used by the server'
+              default: 5680
+              shortcut: 'p'
+              type: 'integer'
+        'stop':
+          description: 'Stop the server'
+          options:
+            'port':
+              description: 'Port used by the server'
+              default: 5680
+              shortcut: 'p'
+              type: 'integer'
+            'directory':
+              description: 'Directory to serve'
+              default: '../ryba-repos/public'
+              shortcut: 'd'
+            'pidfile':
+              description: 'File storing the process ID'
+              default: './conf/server.pid'
+        'status':
+          description: 'Is the server running?'
+          options:
+            'pidfile':
+              description: 'File storing the process ID'
+              default: './conf/server.pid'
     'init':
       description: 'Create a project with a default layout and configuration'
       run: 'masson/lib/commands/init'

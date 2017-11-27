@@ -3,10 +3,10 @@
 server = require 'http-server'
 server = require '../server'
 
-module.exports = (config, params) ->
-  module.exports[params.action](config, params)
+module.exports = (params, config) ->
+  module.exports[params.action] params, config
 
-module.exports.start = (config, params) ->
+module.exports.start = (params, config) ->
   server.start
     directory: params.directory
     pidfile: params.pidfile
@@ -29,7 +29,7 @@ module.exports.start = (config, params) ->
       console.error 'HTTP Server Already Running'
       process.exit 3
 
-module.exports.stop = (config, params)->
+module.exports.stop = (params, config)->
   server.stop
     pidfile: params.pidfile
   , (err, stopped) ->
@@ -43,11 +43,11 @@ module.exports.stop = (config, params)->
       console.error 'HTTP Server Already Stopped'
       process.exit 3
 
-module.exports.status = (config, params) ->
+module.exports.status = (params, config) ->
   server.status
     pidfile: params.pidfile
-  , (err, status) ->
-    if status
+  , (err, started) ->
+    if started
       console.error "HTTP Server Started"
       process.exit 0
     else

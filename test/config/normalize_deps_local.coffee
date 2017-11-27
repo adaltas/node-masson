@@ -65,3 +65,30 @@ describe 'normalize deps local', ->
       service.deps.my_dep_a.node.id
     .should.eql ['a.fqdn', 'c.fqdn']
       
+  it.skip 'local but defined elsewhere', ->
+    # Not yet implemented, proposal as for now
+    fs.writeFileSync "#{tmp}/dep_a.json", JSON.stringify {}
+    fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
+    services = []
+    normalize
+      clusters: 'cluster_a': services:
+        'dep_a':
+          module: "#{tmp}/dep_a"
+          affinity: type: 'nodes', match: 'any', values: ['b.fqdn']
+          options: 'key': 'value'
+        'service_a':
+          module: "#{tmp}/a"
+          affinity: type: 'nodes', match: 'any', values: ['a.fqdn', 'c.fqdn']
+          deps: 'my_dep_a': module: "#{tmp}/dep_a", local: true
+          configure: (service) ->
+            services.push service
+      nodes:
+        'a.fqdn': ip: '10.10.10.1'
+        'b.fqdn': ip: '10.10.10.2'
+        'c.fqdn': ip: '10.10.10.3'
+    services.map (service) ->
+      console.log service.deps.my_dep_a
+      service.deps.my_dep_a.id.should.eql 'dep_a'
+      service.deps.my_dep_a.node.id
+    .should.eql ['a.fqdn', 'c.fqdn']
+      

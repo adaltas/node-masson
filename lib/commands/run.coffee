@@ -7,7 +7,7 @@ flatten = require '../utils/flatten'
 multimatch = require '../utils/multimatch'
 merge = require '../utils/merge'
 
-module.exports = (config, params) ->
+module.exports = (params, config, callback) ->
   # params.end ?= true
   s = store(config)
   engine = require('nikita/lib/core/kv/engines/memory')()
@@ -44,7 +44,9 @@ module.exports = (config, params) ->
         console.log err if err
         callback err
   .next (err) ->
-    process.stdout.write if err
+    message = if err
     then 'Finish with err: ' + err.message
     else 'Finish with success'
+    process.stdout.write '\n' + message + '\n\n'
+    callback err
     

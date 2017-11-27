@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* pki: new commands
 * params: merge from config
 * server: inject params and split command with lib
 * nodes: services as an object

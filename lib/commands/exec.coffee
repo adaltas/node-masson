@@ -5,7 +5,7 @@ exec = require 'ssh2-exec'
 merge = require '../utils/merge'
 nikita = require 'nikita'
 
-module.exports = (config, params) ->
+module.exports = (params, config) ->
   config.nikita.no_ssh = true
   write = (msg) -> process.stdout.write msg
   each config.nodes

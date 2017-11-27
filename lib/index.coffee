@@ -6,15 +6,15 @@ normalize = require './config/normalize'
 store = require './config/store'
 merge = require './utils/merge'
 
-module.exports = (procOrArgv, callback) ->
+module.exports = (processOrArgv, callback) ->
   if arguments.length is 1
     callback = proc
-    procOrArgv = process
+    processOrArgv = process
   callback ?= (->)
-  procOrArgv ?= process
+  processOrArgv ?= process
 
   # Parse the first part of the arguments, without the user command
-  orgparams = parameters(merge {}, params, main: name: 'main').parse(procOrArgv)
+  orgparams = parameters(merge {}, params, main: name: 'main').parse(processOrArgv, help: false)
   # Read configuration
   load orgparams.config, (err, config) ->
     return callback err if err
@@ -41,5 +41,7 @@ module.exports = (procOrArgv, callback) ->
         ]
     # Merge default parameters with discovered parameters and user parameters
     merge params, commands: commands, config.params
-    parameters(params).run(procOrArgv, config)
-    callback()
+    # paramsvc = parameters params
+    # paramsnew = paramsvc.parse processOrArgv
+    # paramsvc.run paramsnew, config, callback
+    parameters(params).run processOrArgv, config, callback
