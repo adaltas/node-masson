@@ -33,7 +33,7 @@ current implementation.
 
 ### Option `deps`
 
-* `Single`
+* `single`
   Inject a single dependency instead of an array of dependencies.
   Throw an error if more than one service is present
   Equals to null if no service is present
@@ -58,26 +58,26 @@ current implementation.
 
 ### Usecases:
 
-Considering a service A is declared on a node tagged as "client". A service B is
-declared on a node tagged as "master" and define a dependency on service A to be 
-colocalized on the same node.
+Considering a service A declared on one node and a service B declared on a 
+second node, we defined service B with a dependency of service A with the 
+following options:
 
-* Use `local: true` to automatically declare service A on the same node as 
-  service B if and only if service A is already defined elsewhere. In the
-  service configuration, the dependency will be set as "null" if service A
+* Use `local: true` to automatically declare service b on the same node as 
+  service A if and only if service B is already defined elsewhere. In the
+  service configuration, the dependency will be set as "null" if service B
   was not activated elsewhere.
-* Use `local: true, required: true` to automatically declare service A on the
-  same node as service B and ensure service B is activated elsewhere.
-* Use `local: true, single: true` to automatically declare service A on the
-  same node as service B. In the service configuration, the dependency will
-  be set as the service  object relative to the current node instead of an array
+* Use `local: true, required: true` to automatically declare service B on the
+  same node as service A and ensure service A is activated elsewhere.
+* Use `local: true, single: true` to automatically declare service B on the
+  same node as service A. In the service configuration, the dependency will
+  be set as the service object relative to the current node instead of an array
   of services for every nodes.
-* Use `auto: true` to automatically activate service A. The service will not
+* Use `auto: true` to automatically activate service B. The service will not
   be declared on any node. In the service configuration, the dependency will
   be set as an empty array if the dependency affinity doesnt match any affinity.
   of services for every nodes.
-* Use `auto: true, local: true` to automatically activate service A and declare 
-  service A as a dependency of service B.
+* Use `auto: true, local: true` to automatically activate service B and declare 
+  service B as a dependency of service a.
 
 ## Contributors
  

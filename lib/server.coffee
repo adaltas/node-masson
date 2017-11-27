@@ -47,5 +47,5 @@ module.exports =
     pid=`cat #{options.pidfile}`
     ( ! kill -0 $pid ) && exit 1
     exit 0
-    """, (err) ->
-      callback null, !!err
+    """, (err, stdout, stderr) ->
+      callback null, !err

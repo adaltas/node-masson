@@ -9,7 +9,7 @@ normalize = require '../config/normalize'
 store = require '../config/store'
 
 # ./bin/ryba configure -o output_file -p JSON
-module.exports = (config, params) ->
+module.exports = (params, config) ->
   # EXAMPLE START
   # params = params.parse argv
   params.output ?= 'export'
