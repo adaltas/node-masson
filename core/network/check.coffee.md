@@ -28,7 +28,7 @@ I assume the A record to always be printed on the last line.
 
       @system.execute
         header: 'DNS Forward Lookup'
-        cmd: "dig #{@config.host}. +short"
+        cmd: "dig #{options.hostname}. +short"
         code_skipped: 1
         shy: true
       , (err, executed, stdout, stderr) ->
@@ -44,12 +44,12 @@ Check reverse DNS lookup using the configured DNS configuration present inside
 
       @system.execute
         header: 'DNS Reverse Lookup'
-        cmd: "dig -x #{@config.ip} +short"
+        cmd: "dig -x #{options.ip} +short"
         code_skipped: 1
         shy: true
       , (err, executed, stdout) ->
         throw err if err
-        if "#{@config.host}." isnt stdout.trim()
+        if "#{options.hostname}." isnt stdout.trim()
           options.log "[WARN, masson `dig ip`] Invalid returned host #{stdout.trim()}"
           # next null, 'WARNING'
 
@@ -61,7 +61,7 @@ command uses "getent".
 
       @system.execute
         header: 'System Forward Lookup'
-        cmd: "getent hosts #{@config.host}"
+        cmd: "getent hosts #{options.hostname}"
         code_skipped: 2
         shy: true
       , (err, valid, stdout, stderr) ->
@@ -69,7 +69,7 @@ command uses "getent".
         options.log "[WARN, masson `getent host`] Invalid host #{stdout.trim()}" if not valid
         # return next null, 'WARNING' if not valid
         [ip, fqdn] = stdout.split(/\s+/).filter( (entry) -> entry)
-        options.log "[WARN, masson `getent host`] Invalid host #{@config.host}" if ip isnt @config.ip or fqdn isnt @config.host
+        options.log "[WARN, masson `getent host`] Invalid host #{options.hostname}" if ip isnt options.ip or fqdn isnt options.hostname
 
 ## Check System Reverse Lookup
 
@@ -79,7 +79,7 @@ command uses "getent".
 
       @system.execute
         header: 'System Reverse Lookup'
-        cmd: "getent hosts #{@config.ip}"
+        cmd: "getent hosts #{options.ip}"
         code_skipped: 2
         shy: true
       , (err, valid, stdout) ->
@@ -87,8 +87,8 @@ command uses "getent".
         options.log "[WARN, masson `getent host`] Invalid ip #{stdout.trim()}" if not valid
         # return next null, 'WARNING' if not valid
         [ip, fqdn] = stdout.split(/\s+/).filter( (entry) -> entry)
-        options.log "[WARN, masson `getent host`] Invalid ip #{@config.ip}" if ip isnt @config.ip or fqdn isnt @config.host
-        # next null, if ip is @config.ip and fqdn is @config.host then false else 'WARNING'
+        options.log "[WARN, masson `getent host`] Invalid ip #{options.ip}" if ip isnt options.ip or fqdn isnt options.hostname
+        # next null, if ip is options.ip and fqdn is options.hostname then false else 'WARNING'
 
 ## Check Hostname
 
@@ -101,8 +101,8 @@ the executed command is `hostname --fqdn`.
         shy: true
       , (err, _, stdout) ->
         throw err if err
-        options.log "[WARN, masson `getent host`] Invalid hostname" if stdout.trim() isnt @config.host
-        # next null, if stdout.trim() is @config.host then false else 'WARNING'
+        options.log "[WARN, masson `getent host`] Invalid hostname" if stdout.trim() isnt options.hostname
+        # next null, if stdout.trim() is options.hostname then false else 'WARNING'
 
 ## Utilities
 
