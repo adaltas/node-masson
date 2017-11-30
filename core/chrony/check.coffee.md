@@ -1,7 +1,7 @@
 
 ## Check
 
-    module.exports = header: '', handler: (options) ->
+    module.exports = header: 'chrony Check', handler: (options) ->
 
 ## Client Server
 
