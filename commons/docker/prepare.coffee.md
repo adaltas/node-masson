@@ -3,8 +3,8 @@
 Download different Docker packages
 
     module.exports =
-      if: -> @contexts('masson/commons/docker')[0]?.config.host is @config.host
       header: 'Docker'
+      if: (options) -> options.prepare
       ssh: null
       handler: (options) ->
         @file.cache

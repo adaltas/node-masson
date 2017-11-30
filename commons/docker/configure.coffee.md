@@ -150,6 +150,11 @@ To use it just specify the `options.block_device`.
       #   'dm.use_deferred_removal': true
       # options.env['DOCKER_STORAGE_OPTIONS'] ?= 
 
+## Command Specific
+
+      # Ensure "prepare" is executed locally only once
+      options.prepare = service.node.id is service.nodes[0].id
+
 ## Dependencies
 
     {merge} = require 'nikita/lib/misc'
