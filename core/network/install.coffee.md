@@ -39,12 +39,15 @@ this file.
 
 ## Hostname
 
-Declare the server hostname. On RH6 based system, the 
-relevant file is "/etc/sysconfig/network".
+Declare the server hostname. According to `hostnamectl` documentation:
+
+* "pretty": include all kinds of special characters (e.g. "Lennart's Laptop")
+* "static": initialize the kernel hostname at boot (e.g. "lennarts-laptop")
+* "transient": fallback value received from network configuration. 
 
       @call
         header: 'Hostname'
-        unless: -> options.hostname_disabled
+        unless: options.hostname_disabled
       , ->
         @call
           if_os: name: ['centos','redhat'], version: '6'
@@ -74,7 +77,7 @@ relevant file is "/etc/sysconfig/network".
             cmd: """
             hostname=`hostnamectl status | grep 'Transient hostname' | sed 's/^.* \\(.*\\)$/\\1/'`
             [[ $hostname == "#{options.hostname}" ]] && exit 3
-            hostnamectl set-hostname #{options.hostname}
+            hostnamectl set-hostname #{options.hostname} --transient
             """
             code_skipped: 3
 
