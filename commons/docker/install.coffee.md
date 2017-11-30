@@ -245,8 +245,14 @@ share images and deploy them to testing, staging and production environments.
     #     cmd: "docker run -p 5000:5000 registry:2.0"
 
 ## Docker Compose
+
 Compose is a tool for defining and running multi-container Docker applications.
 
+      @file.assert
+        ssh: null
+        target: "#{options.cache_dir}/docker-compose"
+      , (err) ->
+        throw Error 'Please run "prepare" before "install"' if err
       @file.download
         header: 'Docker Compose'
         source: "#{options.cache_dir}/docker-compose"
