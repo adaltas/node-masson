@@ -1,0 +1,70 @@
+
+normalize = require '../../lib/config/normalize'
+store = require '../../lib/config/store'
+nikita = require 'nikita'
+fs = require 'fs'
+
+describe 'normalize service nodes', ->
+
+  tmp = '/tmp/masson-test'
+  beforeEach ->
+    require('module')._cache = {}
+    nikita
+    .system.mkdir target: tmp
+    .promise()
+  afterEach ->
+    nikita
+    .system.remove tmp
+    .promise()
+  
+  it 'is normalized with default values', ->
+    fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
+    res = store normalize
+      clusters: 'cluster_a': services: 'service_a':
+        module: "#{tmp}/a"
+        affinity:
+          type: 'nodes'
+          values: 'a.fqdn'
+      nodes:
+        'a.fqdn': {}
+    .service 'cluster_a', 'service_a'
+    .nodes['a.fqdn'].should.eql
+      id: 'a.fqdn'
+      cluster: 'cluster_a'
+      service: 'service_a'
+      options: {}
+      node:
+        id: 'a.fqdn'
+        fqdn: 'a.fqdn'
+        hostname: 'a'
+        services: [
+          cluster: 'cluster_a'
+          module: '/tmp/masson-test/a'
+          service: 'service_a'
+        ]
+  
+  it 'overwrite options', ->
+    fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
+    res = store normalize
+      clusters: 'cluster_a': services: 'service_a':
+        module: "#{tmp}/a"
+        affinity:
+          type: 'nodes'
+          values: 'a.fqdn'
+        options:
+          'my_option_in_service_options': 'my value'
+          'my_option_in_service_nodes': 'should be overwritten'
+          'my_option_in_nodes': 'should be overwritten'
+        nodes:
+          'a.fqdn': options:
+            'my_option_in_service_nodes': 'my value'
+      nodes:
+        'a.fqdn': services:
+          'cluster_a:service_a':
+            'my_option_in_nodes': 'my value'
+            'my_option_in_service_nodes': 'should be overwritten'
+    .service 'cluster_a', 'service_a'
+    .nodes['a.fqdn'].options.should.eql
+      'my_option_in_service_options': 'my value'
+      'my_option_in_service_nodes': 'my value'
+      'my_option_in_nodes': 'my value'

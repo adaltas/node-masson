@@ -76,8 +76,9 @@ describe 'affinity generic', ->
           'b.fqdn': tags: 'env': 'prod', 'role': 'client'
           'c.fqdn': tags: 'env': 'dev', 'role': 'client'
           'd.fqdn': tags: 'env': 'dev', 'role': 'master'
-      .service('cluster_a', 'service_a').nodes
-      .should.eql ['a.fqdn']
+      .chain()
+      .service 'cluster_a', 'service_a', (service) ->
+        Object.keys(service.nodes).should.eql ['a.fqdn']
 
     it 'match any', ->
       fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
@@ -99,6 +100,7 @@ describe 'affinity generic', ->
           'b.fqdn': tags: 'env': 'prod', 'role': 'client'
           'c.fqdn': tags: 'env': 'dev', 'role': 'client'
           'd.fqdn': tags: 'env': 'dev', 'role': 'master'
-      .service('cluster_a', 'service_a').nodes
-      .should.eql ['a.fqdn', 'b.fqdn', 'd.fqdn']
+      .chain()
+      .service 'cluster_a', 'service_a', (service) ->
+        Object.keys(service.nodes).should.eql ['a.fqdn', 'b.fqdn', 'd.fqdn']
   

@@ -81,7 +81,10 @@ module.exports = (config) ->
         for mod in command
           throw Error "Invalid Command: accept array, string or function, got #{JSON.stringify mod} for command #{JSON.stringify cmdname}" unless typeof mod in ['string', 'function']
       # Default empty node list
-      service.nodes ?= []
+      service.nodes ?= {}
+      for snodeid, snode of service.nodes
+        throw Error "Invalid Node Id" if snode.id and snode.id isnt snodeid
+        snode.id = snodeid
   # Dependencies
   for cname, cluster of config.clusters
     for sname, service of cluster.services
@@ -114,10 +117,6 @@ module.exports = (config) ->
     if is_object node.services
       node.services = for sid, service of node.services
         [cname, sname] = sid.split ':'
-        # console.log
-        #   cluster: cname
-        #   service: sname
-        #   options: service
         cluster: cname
         service: sname
         options: service
@@ -150,26 +149,38 @@ module.exports = (config) ->
         else
           service.affinity[0]
       )
-      service.nodes = affinities.handlers[affinity.type].resolve config, affinity
+      nodeids = affinities.handlers[affinity.type].resolve config, affinity
+      for snodeid, snode of service.nodes
+        throw Error "No Affinity Found: #{snodeid}" if snodeid not in nodeids
+      for nodeId in nodeids
+        service.nodes[nodeId] ?= {} 
+        service.nodes[nodeId].id = nodeId
+        service.nodes[nodeId].cluster = service.cluster
+        service.nodes[nodeId].service = service.id
+        service.nodes[nodeId].node = merge {}, config.nodes[nodeId]
+        service.nodes[nodeId].options ?= {}
+      # console.log service.id, service.nodes
     # Enrich service list in nodes
-    for node in service.nodes
+    for _, snode of service.nodes
       found = null
-      for srv, i in config.nodes[node].services
+      for srv, i in config.nodes[snode.id].services
         if srv.cluster is cname and srv.service is sname
           found = i
           break
       if found?
-        config.nodes[node].services[i].module ?= service.module
+        config.nodes[snode.id].services[found].module ?= service.module
+        snode.node.services.push merge {}, config.nodes[snode.id].services[found]
       else
-        config.nodes[node].services.push cluster: cname, service: sname, module: service.module
+        config.nodes[snode.id].services.push cluster: cname, service: sname, module: service.module
+        snode.node.services.push cluster: cname, service: sname, module: service.module
     # Enrich affinity for dependencies marked as auto
     for dname, dep of service.deps
       continue unless dep.auto
       continue if dep.disabled
       sdep = config.clusters[dep.cluster].services[dep.service]
       values = {}
-      for node in service.nodes
-        values[node] = true
+      for _, node of service.nodes
+        values[node.id] = true
       sdep.affinity.push type: 'nodes', match: 'any', values: values
   # Re-order node services
   for nname, node of config.nodes
@@ -181,57 +192,53 @@ module.exports = (config) ->
       for dname, dep of service.deps
         continue unless dep.local and dep.required
         dservice = config.clusters[dep.cluster].services[dep.service]
-        for snode in service.nodes
-          continue if snode in dservice.nodes
-          throw Error "Required Local Dependency: service #{JSON.stringify sname} in cluster #{JSON.stringify cname} require service #{JSON.stringify dep.service} in cluster #{JSON.stringify dep.cluster} to be present on node #{snode}"
-
+        for _, snode of service.nodes
+          continue if snode.id in dservice.nodes
+          throw Error "Required Local Dependency: service #{JSON.stringify sname} in cluster #{JSON.stringify cname} require service #{JSON.stringify dep.service} in cluster #{JSON.stringify dep.cluster} to be present on node #{snode.id}"
   # Enrich configuration
   for service in services
     [cname, sname] = service.split ':'
     service = config.clusters[cname].services[sname]
     # Load configuration
-    service.service_by_nodes ?= {}
-    for node in service.nodes
-      node = config.nodes[node]
-      # Copy options
-      options = merge {}, service.options
-      # Overwrite options from node
+    for _, snode of service.nodes
+      node = config.nodes[snode.id]
+      # Get options from node
       node_services = node.services.filter (srv) -> srv.cluster is service.cluster and srv.service is service.id
-      if node_services.length is 1
-        options = merge {}, options, node_services[0].options
-      else if node_services.length > 1
-        throw Error 'Should never happen'
-      service.service_by_nodes[node.id] =
-        service: service.id
-        cluster: service.cluster
-        options: options
-        node: node
-        nodes: Object.values(config.nodes).filter (node) -> node.id in service.nodes
+      throw Error 'Should never happen' if node_services.length > 1
+      noptions = if node_services.length is 1 then node_services[0].options else {}
+      # Overwrite options from service.nodes
+      if service.nodes[node.id]
+        options = merge {}, options, service.nodes[node.id].options
+      service.nodes[snode.id].options = merge {}, service.options, noptions, snode.options
     # Load deps and run configure
-    for node in service.nodes
-      node = config.nodes[node]
+    for _, snode of service.nodes
+      node = config.nodes[snode.id]
       deps = {}
       for dname, dep of service.deps
         # Handle not satisfied dependency
         continue if dep.disabled
         # Get dependency service
-        deps[dname] = Object.values config.clusters[dep.cluster].services[dep.service].service_by_nodes
+        deps[dname] = Object.values config.clusters[dep.cluster].services[dep.service].nodes
+        # console.log '-->', deps[dname]
         if dep.single
           throw Error "Invalid Option: single only apply to 1 dependencies, found #{deps[dname].length}" if deps[dname].length isnt 1
           deps[dname] = deps[dname][0] or null
         if dep.local
           deps[dname] = [deps[dname]] if dep.single
           deps[dname] = deps[dname].filter (dep) ->
-            dep.node.id is node.id
+            dep.id is node.id
           deps[dname] = deps[dname][0] or null
-      # service.service_by_nodes[node.id].deps = deps
+      # service.service_by_nodes[node.id].deps = deps]
       inject =
-        service: service.service_by_nodes[node.id].id
-        cluster: service.service_by_nodes[node.id].cluster
-        options: service.service_by_nodes[node.id].options
-        node: service.service_by_nodes[node.id].node
-        nodes: service.service_by_nodes[node.id].nodes
+        cluster: snode.cluster
+        service: snode.service
+        options: snode.options
+        nodes: merge {}, service.nodes
+        node: merge {}, node
         deps: deps
+        # TODO: service_by_nodes
+        # node: node
+        # nodes: Object.values(config.nodes).filter (node) -> node.id in service.nodes
       if service.configure
         try
           service.configure = load service.configure if typeof service.configure is 'string'
@@ -241,11 +248,11 @@ module.exports = (config) ->
         throw Error "Invalid Configuration: not a function, got #{typeof service.configure}" unless typeof service.configure is 'function'
         service.configure.call null, inject
       newinject = {}
-      for k, v of service.service_by_nodes[node.id]
+      for k, v of service.nodes[snode.id]
         continue if k is 'deps'
         # continue if k is 'nodes'
         newinject[k] = v
-      service.service_by_nodes[node.id] = newinject
+      service.nodes[node.id] = newinject
       # delete service.service_by_nodes[node.id].deps
   config
 

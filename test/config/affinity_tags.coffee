@@ -51,6 +51,12 @@ describe 'affinity tags', ->
         affinity.handlers.tags.normalize
           type: 'tags', values: 'tag_a': values: 'value_a': true, 'value_b': true
       ).should.throw 'Required Property: "match", when more than one value'
+    
+    it 'ensure value is a tring', ->
+      ( ->
+        affinity.handlers.tags.normalize
+          type: 'tags', values: 'in': true
+      ).should.throw 'Invalid Property: "values", expect a string, got true'
       
     it 'multiple tags', ->
       affinity.handlers.tags.normalize
@@ -89,6 +95,7 @@ describe 'affinity tags', ->
             'role': ['master', 'worker']
           'b.fqdn': tags:
             'role': 'client'
+          'c.fqdn': {}
       affinity.handlers.tags.resolve s.config(),
         s.service('cluster_a', 'service_a').affinity[0]
       .should.eql ['a.fqdn']
@@ -109,6 +116,7 @@ describe 'affinity tags', ->
           'b.fqdn': tags: 'env': 'prod', 'role': 'client'
           'c.fqdn': tags: 'env': 'dev', 'role': 'client'
           'd.fqdn': tags: 'env': 'dev', 'role': 'master'
+          'e.fqdn': {}
       affinity.handlers.tags.resolve s.config(),
         s.service('cluster_a', 'service_a').affinity[0]
       .should.eql ['a.fqdn']
@@ -129,6 +137,7 @@ describe 'affinity tags', ->
           'b.fqdn': tags: 'env': 'prod', 'role': 'client'
           'c.fqdn': tags: 'env': 'dev', 'role': 'client'
           'd.fqdn': tags: 'env': 'dev', 'role': 'master'
+          'e.fqdn': {}
       affinity.handlers.tags.resolve s.config(),
         s.service('cluster_a', 'service_a').affinity[0]
       .should.eql ['a.fqdn', 'b.fqdn', 'd.fqdn']
@@ -149,6 +158,7 @@ describe 'affinity tags', ->
           'b.fqdn': tags: 'env': 'prod', 'role': 'client'
           'c.fqdn': tags: 'env': 'dev', 'role': 'client'
           'd.fqdn': tags: 'env': 'dev', 'role': 'master'
+          'e.fqdn': {}
       affinity.handlers.tags.resolve s.config(),
         s.service('cluster_a', 'service_a').affinity[0]
-      .should.eql ['c.fqdn']
+      .should.eql ['c.fqdn', 'e.fqdn']

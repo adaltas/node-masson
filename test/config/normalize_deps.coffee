@@ -54,8 +54,7 @@ describe 'normalize deps', ->
       affinity: []
       deps: {}
       commands: {}
-      nodes: []
-      service_by_nodes: {}
+      nodes: {}
   
   it 'load and merge module', ->
     fs.writeFileSync "#{tmp}/dep_a.json", JSON.stringify

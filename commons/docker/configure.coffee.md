@@ -153,7 +153,7 @@ To use it just specify the `options.block_device`.
 ## Command Specific
 
       # Ensure "prepare" is executed locally only once
-      options.prepare = service.node.id is service.nodes[0].id
+      options.prepare = service.node.id is Object.values(service.nodes)[0].id
 
 ## Dependencies
 

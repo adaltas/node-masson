@@ -62,7 +62,7 @@ describe 'normalize nodes services', ->
           cluster: 'cluster_a', service: 'service_a', options: overwritten_key: 'an overwritten value'
         ]
     .service 'cluster_a', 'service_a'
-    .service_by_nodes['b.fqdn']
+    .nodes['b.fqdn']
     .options.overwritten_key.should.eql 'an overwritten value'
 
   it 'contain cluster, service and module', ->

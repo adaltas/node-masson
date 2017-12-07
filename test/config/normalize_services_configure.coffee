@@ -33,20 +33,17 @@ describe 'normalize service configure', ->
         'c.fqdn': ip: '10.10.10.3'
     services
     .map (service) ->
-      service.nodes.length.should.eql 2
+      Object.values(service.nodes).length.should.eql 2
       # Test node
       node_id: service.node.id
       # Test nodes
-      nodes_0_id: service.nodes[0].id
-      nodes_1_id: service.nodes[1].id
+      nodes: Object.values(service.nodes).map (node) -> node.id
     .should.eql [
       node_id: 'a.fqdn'
-      nodes_0_id: 'a.fqdn'
-      nodes_1_id: 'c.fqdn'
+      nodes: ['a.fqdn', 'c.fqdn']
     ,
       node_id: 'c.fqdn'
-      nodes_0_id: 'a.fqdn'
-      nodes_1_id: 'c.fqdn'
+      nodes: ['a.fqdn', 'c.fqdn']
     ]
 
   it 'inject deps using module discovery', ->
@@ -73,26 +70,28 @@ describe 'normalize service configure', ->
         'c.fqdn': ip: '10.10.10.3'
     services.map (service) ->
       (service.deps.dep_undefined is undefined).should.be.true()
-      service.deps.dep_defined[0].nodes.length.should.eql 1
+      service.deps.dep_defined.length.should.eql 1
+      [dep_defined] = service.deps.dep_defined
+      # Object.values(dep_defined.nodes).length.should.eql 1
       # Test deps node
-      dep_a_cluster: service.deps.dep_defined[0].cluster
-      dep_a_service: service.deps.dep_defined[0].service
-      dep_a_node_id: service.deps.dep_defined[0].node.id
+      dep_a_cluster: dep_defined.cluster
+      dep_a_service: dep_defined.service
+      dep_a_node_id: dep_defined.node.id
       # Test deps nodes
-      dep_a_nodes_0_id: service.deps.dep_defined[0].nodes[0].id
+      # dep_a_nodes_0_id: Object.values(dep_defined.nodes)[0].id
       # Test deps options
-      dep_a_options_key: service.deps.dep_defined[0].options.key
+      dep_a_options_key: dep_defined.options.key
     .should.eql [
       dep_a_cluster: 'cluster_a'
       dep_a_service: 'dep_a'
       dep_a_node_id: 'b.fqdn'
-      dep_a_nodes_0_id: 'b.fqdn'
+      # dep_a_nodes_0_id: 'b.fqdn'
       dep_a_options_key: 'value'
     ,
       dep_a_cluster: 'cluster_a'
       dep_a_service: 'dep_a'
       dep_a_node_id: 'b.fqdn'
-      dep_a_nodes_0_id: 'b.fqdn'
+      # dep_a_nodes_0_id: 'b.fqdn'
       dep_a_options_key: 'value'
     ]
 
@@ -137,8 +136,8 @@ describe 'normalize service configure', ->
         'c.fqdn': ip: '10.10.10.3'
     .chain()
     .service 'cluster_a', 'service_a', (service) ->
-      Object.values(service.service_by_nodes).length.should.eql 2
-      Object.values(service.service_by_nodes)
+      Object.values(service.nodes).length.should.eql 2
+      Object.values(service.nodes)
       .map (srv) -> srv.options
       .should.eql [
         { test: 'a.fqdn' }
@@ -166,7 +165,7 @@ describe 'normalize service configure', ->
         'c.fqdn': ip: '10.10.10.3'
     .chain()
     .service 'cluster_a', 'service_a', (service) ->
-      Object.values(service.service_by_nodes)
+      Object.values(service.nodes)
       .map (srv) -> srv.options
       .should.eql [
         { test: ['a.fqdn', 'c.fqdn'] }

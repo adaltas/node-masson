@@ -59,18 +59,20 @@ The module accept the following properties:
 ```
 
     module.exports = (service) ->
-      options = service.options
+      {options} = service
       
       options.ip = service.node.ip
       options.fqdn = service.node.fqdn
       options.hostname = service.node.hostname
-      options.nodes = service.nodes
       options.hostname_disabled ?= false
       
 ## Hosts
 
       options.hosts_auto ?= false
       options.hosts ?= {}
+      if options.hosts_auto then for _, node of service.nodes
+        throw Error "Required Property: node must define an IP" unless node.node.ip
+        options.hosts[node.node.ip] = "#{node.node.fqdn} #{node.node.hostname}"
 
 ## DNS Resolver
 
