@@ -27,7 +27,7 @@ describe 'normalize service affinity', ->
         'b.fqdn': ip: '10.10.10.2'
     .chain()
     .service 'cluster_a', 'service_a', (service) ->
-      service.nodes.should.eql []
+      service.nodes.should.eql {}
     .node 'a.fqdn', (node) ->
       node.services.should.eql []
       
@@ -45,7 +45,7 @@ describe 'normalize service affinity', ->
         'b.fqdn': ip: '10.10.10.2'
     .chain()
     .service 'cluster_a', 'service_a', (service) ->
-      service.nodes.should.eql ['b.fqdn']
+      Object.keys(service.nodes).should.eql ['b.fqdn']
     .node 'b.fqdn', (node) ->
      node.services.should.eql [
        cluster: 'cluster_a', service: 'service_a', module: "#{tmp}/a"

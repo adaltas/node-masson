@@ -30,24 +30,24 @@ module.exports =
           module.exports.handlers[value.type].normalize value
         config
       resolve: (config, affinity) ->
-        nodeids = Object.values(config.nodes).map( (node) -> node.id)
+        nodeids = Object.values(config.nodes).map( (node) -> subject: node.id)
         matchednodes = []
         for value in affinity.values
           matchednodes.push module.exports.handlers[value.type].resolve config, value
         # matchednodes = flatten matchednodes
-        match[affinity.match or 'all'] matchednodes, nodeids, nodeids
+        match[affinity.match or 'all'] matchednodes, nodeids
     tags:
       normalize: (config) ->
         throw Error "Required Property: \"values\" not found" unless config.values
         throw Error "Invalid Property: \"values\", expect an object" unless is_object config.values
         for tag, tconfig of config.values
-          tconfig = config.values[tag] = values: [tconfig] if typeof tconfig is 'string'
+          tconfig = config.values[tag] = values: [tconfig] unless is_object(tconfig) or Array.isArray tconfig
           tconfig = config.values[tag] = values: tconfig if Array.isArray tconfig
           if Array.isArray tconfig.values
             values = tconfig.values
             tconfig.values = {}
             for value in values
-              throw Error "Invalid Property: \"values\", expect a string" unless typeof value is 'string'
+              throw Error "Invalid Property: \"values\", expect a string, got #{value}" unless typeof value is 'string'
               tconfig.values[value] = true
           # Validation
           throw Error "Required Property: \"match\", when more than one value" if Object.keys(tconfig.values).length > 1 and not tconfig.match
@@ -57,16 +57,16 @@ module.exports =
         throw Error "Required Property: \"match\", when more than one tag" if Object.keys(config.values).length > 1 and not config.match
         config
       resolve: (config, affinity) ->
-        nodeids = Object.values(config.nodes).map( (node) -> node.id)
         # fqdns = Object.values(config.nodes).map( (node) -> node.fqdn)
         matchednodes = []
         for name, tag of affinity.values
-          nodetags = 
           values = Object.keys(tag.values)
-          subjects = Object.values(config.nodes).map( (node) -> node.tags?[name])
-          # Get the matching nodes for this tag
-          matchednodes.push match[tag.match or 'all'] values, subjects, nodeids
-        match[affinity.match or 'all'] matchednodes, nodeids, nodeids
+          tests = Object.values(config.nodes)
+          .map (node, i) -> output: node.id, subject: config.nodes[node.id].tags?[name]
+          # .filter (node) -> node.subject
+          matchednodes.push match[tag.match or 'all'] values, tests
+        nodeids = Object.values(config.nodes).map( (node) -> subject: node.id)
+        match[affinity.match or 'all'] matchednodes, nodeids
     services:
       normalize: (config) ->
         throw Error "Required Property: \"values\" not found" unless config.values
@@ -93,14 +93,16 @@ module.exports =
         throw Error "Required Property: \"match\", when more than one values" if Object.keys(config.values).length > 1 and not config.match
         config
       resolve: (config, affinity) ->
-        fqdns = Object.values(config.nodes).map( (node) -> node.fqdn)
-        match[affinity.match or 'all'] Object.keys(affinity.values), fqdns, fqdns
+        fqdns = Object.values(config.nodes).map( (node) -> subject: node.fqdn)
+        match[affinity.match or 'all'] Object.keys(affinity.values), fqdns
 
 match =
   # Return any subject which match all the left values
-  all: (values, subjects, result) ->
-    result.filter (value, i) ->
-      subject = subjects[i]
+  all: (values, tests) ->
+    tests
+    .filter (test) ->
+      {subject} = test
+      return false unless subject
       subject = [subject] if typeof subject is 'string'
       ok = true
       for value in values
@@ -108,24 +110,33 @@ match =
         ok = false unless any value, subject
         # ok = false unless value in subject
       ok
+    .map (test) ->
+      test.output or test.subject
   # Return any subject which match at least one left values
-  any: (values, subjects, result) ->
-    result.filter (value, i) ->
-      subject = subjects[i]
+  any: (values, tests) ->
+    tests
+    .filter (test) ->
+      {subject} = test
+      return false unless subject
       subject = [subject] if typeof subject is 'string'
       for value in values
         value = [value] if typeof value is 'string'
         return true if any value, subject
       false
+    .map (test) ->
+      test.output or test.subject
   # Return any subject which match no left values
-  none: (values, subjects, result) ->
-    result.filter (value, i) ->
-      subject = subjects[i]
+  none: (values, tests) ->
+    tests
+    .filter (test) ->
+      {subject} = test
       subject = [subject] if typeof subject is 'string'
       for value in values
         value = [value] if typeof value is 'string'
         return false if any value, subject
       true
+    .map (test) ->
+      test.output or test.subject
 
 any = (a, b) ->
   for aa in a

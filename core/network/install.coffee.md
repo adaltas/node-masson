@@ -8,19 +8,15 @@
 Ovewrite the "/etc/hosts" file with the hostname resolution defined 
 by the property "network.hosts". This configuration may be automatically
 enriched with the cluster hostname if the property "network.hosts_auto" is
-set. Set the "network.hosts_disabled" to "true" if you dont wish to overwrite
-this file.
+set.
 
-      content = []
-      if options.hosts_auto then for node in options.nodes
-        content.push "#{node.ip} #{node.fqdn} #{node.hostname}"
-      for ip, hostnames of options.hosts
-        content.push "#{ip} #{hostnames}"
       @file
         header: 'Hosts'
-        if: content.length
+        if: Object.keys(options.hosts).length
         target: '/etc/hosts'
-        replace: content.join '\n'
+        replace: (
+          "#{ip} #{hostnames}" for ip, hostnames of options.hosts
+        ).join '\n'
         from: '# START RYBA'
         to: '# END RYBA'
         append: true

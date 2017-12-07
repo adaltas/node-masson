@@ -32,8 +32,7 @@ describe 'normalize services', ->
       affinity: []
       deps: {}
       commands: {}
-      nodes: []
-      service_by_nodes: {}
+      nodes: {}
         
   it 'module is string', ->
     fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
@@ -51,6 +50,5 @@ describe 'normalize services', ->
       affinity: []
       deps: {}
       commands: {}
-      nodes: []
-      service_by_nodes: {}
+      nodes: {}
   

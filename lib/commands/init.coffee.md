@@ -101,7 +101,7 @@ masson init \
           "version": "0.0.0",
           "description": "#{params.description}",
           "dependencies": {
-            "coffee-script": "1.10.0",
+            "coffeescript": "^2.0.2",
             "masson": "#{unless params.latest then '0.1.3' else 'https://github.com/adaltas/node-masson.git#HEAD'}",
             "ryba": "#{unless params.latest then '0.0.6' else 'https://github.com/ryba-io/ryba.git#HEAD'}",
             "ryba-repos": "#{unless params.latest then '0.0.2' else 'https://github.com/ryba-io/ryba-repos.git#HEAD'}"

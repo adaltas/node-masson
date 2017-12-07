@@ -9,6 +9,8 @@ merge = require '../utils/merge'
 
 module.exports = (params, config, callback) ->
   # params.end ?= true
+  # console.log merge {}, config.clusters.vagrant.services
+  # process.exit()
   s = store(config)
   engine = require('nikita/lib/core/kv/engines/memory')()
   each s.nodes()
@@ -28,7 +30,7 @@ module.exports = (params, config, callback) ->
       for service in node.services
         service = s.service(service.cluster, service.service)
         continue unless service.plugin
-        n.call service.plugin, merge {}, service.service_by_nodes[node.id].options
+        n.call service.plugin, merge {}, service.nodes[node.id].options
     n.call ->
       for service in node.services
         service = s.service(service.cluster, service.service)
@@ -37,11 +39,12 @@ module.exports = (params, config, callback) ->
         console.log "found empty command in #{service.module}" if service.commands['']
         if service.commands[params.command]
           for module in service.commands[params.command]
-            n.call module, merge {}, service.service_by_nodes[node.id].options
+            n.call module, merge {}, service.nodes[node.id].options
     n.then (err) ->
       n.ssh.close header: 'SSH Close' #unless params.command is 'prepare' # params.end and 
       n.then ->
         console.log err if err
+        return
         callback err
   .next (err) ->
     message = if err

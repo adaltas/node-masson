@@ -57,8 +57,7 @@ describe 'command configure', ->
           deps: {}
           id: "/tmp/masson-test/a"
           module: "/tmp/masson-test/a"
-          nodes: []
-          service_by_nodes: {}
+          nodes: {}
 
   it 'service', ->
     write = process.stdout.write

@@ -37,7 +37,7 @@ Here's how to use it inside a module:
 
 ```coffee
 module.export = header: 'My Module', modules: 'masson/core/info', handler: (ctx) ->
-  console.log ctx.diskinfo
+  console.info ctx.diskinfo
 ```
 
 It will output:
@@ -85,7 +85,7 @@ Here's how to use it inside a module:
 
 ```coffee
 module.export = header: 'My Module', modules: 'masson/core/info', handler: (ctx) ->
-  console.log ctx.cpuinfo
+  console.info ctx.cpuinfo
 ```
 
 It will output:
@@ -143,7 +143,7 @@ Here's how to use it inside a module:
 
 ```coffee
 module.export = header: 'My Module', modules: 'masson/core/info', handler: (ctx) ->
-  console.log JSON.stringify ctx.meminfo
+  console.info JSON.stringify ctx.meminfo
 ```
 
 It will output:

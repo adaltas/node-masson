@@ -56,11 +56,11 @@ describe 'chrony config', ->
           'client.fqdn': {}
       .chain()
       .service 'test', 'chrony', (service) ->
-        service.service_by_nodes['server.fqdn'].options.config.should.eql """
+        service.nodes['server.fqdn'].options.config.should.eql """
           allow 192.168/16
           local stratum 10
           manual
           """
-        service.service_by_nodes['client.fqdn'].options.config.should.eql """
+        service.nodes['client.fqdn'].options.config.should.eql """
           server 192.168.122.1 iburst
           """

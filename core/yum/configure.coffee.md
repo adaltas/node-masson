@@ -81,7 +81,7 @@ Note, ntp is installed to encure correct date on the server or HTTPS will fail.
 ## Configuration
 
       options.fqdn = service.node.fqdn
-      options.prepare = service.nodes[0].fqdn is options.fqdn
+      options.prepare = Object.values(service.nodes)[0].fqdn is options.fqdn
       options.merge ?= true
       options.config ?= {}
       options.config.main ?= {}
