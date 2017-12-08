@@ -25,6 +25,7 @@ help for a particular command.
     documented code.
 *   Code as the single source of thruth
 *   Work entirely offline
+*   Easy introspection: source code is easy to navigate and understand
 
 ## Documentation
 

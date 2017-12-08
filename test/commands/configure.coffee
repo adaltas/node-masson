@@ -57,6 +57,7 @@ describe 'command configure', ->
           deps: {}
           id: "/tmp/masson-test/a"
           module: "/tmp/masson-test/a"
+          instances: []
           nodes: {}
 
   it 'service', ->

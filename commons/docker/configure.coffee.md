@@ -20,7 +20,6 @@
       options.user_dockerroot.home ?= "/var/lib/#{options.user_dockerroot.name}"
       options.user_dockerroot.gid ?= options.group_dockerroot.name
 
-
 ## Environment
 
       options.nsenter ?= true
@@ -153,7 +152,7 @@ To use it just specify the `options.block_device`.
 ## Command Specific
 
       # Ensure "prepare" is executed locally only once
-      options.prepare = service.node.id is Object.values(service.nodes)[0].id
+      options.prepare = service.node.id is service.instances[0].node.id
 
 ## Dependencies
 

@@ -22,6 +22,22 @@ OS will reboot if SELINUX was modified.
         cmd: 'shutdown -r now'
         if: -> @status -1 and options.reboot
 
+# Kernel
+
+Configure kernel parameters at runtime. There are no properties set by default,
+here's a suggestion:
+
+*    vm.swappiness = 10
+*    vm.overcommit_memory = 1
+*    vm.overcommit_ratio = 100
+*    net.core.somaxconn = 4096 (default socket listen queue size 128)
+
+      @tools.sysctl
+        header: 'Kernel'
+        properties: options.sysctl
+        merge: true
+        comment: true
+
 ## Limits
 
 On CentOs 6.4, The default values are:

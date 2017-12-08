@@ -81,7 +81,6 @@ Note, ntp is installed to encure correct date on the server or HTTPS will fail.
 ## Configuration
 
       options.fqdn = service.node.fqdn
-      options.prepare = Object.values(service.nodes)[0].fqdn is options.fqdn
       options.merge ?= true
       options.config ?= {}
       options.config.main ?= {}
@@ -116,3 +115,8 @@ Note, ntp is installed to encure correct date on the server or HTTPS will fail.
       options.packages['yum-plugin-priorities'] ?= true
       options.packages['man'] ?= true
       options.packages['ksh'] ?= true
+
+## Command Specific
+
+      # Ensure "prepare" is executed locally only once
+      options.prepare = service.node.id is service.instances[0].node.id

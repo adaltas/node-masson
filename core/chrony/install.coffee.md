@@ -22,6 +22,7 @@ chronyc that the link to the internet is present.
         if: options.config
         target: options.conf_file
         content: options.config
+        eof: true
       @service.restart
         name: 'chronyd'
         if: -> @status -1

@@ -76,6 +76,10 @@ The module accept the following properties:
       options.selinux = 'disabled' if options.selinux is false
       throw Error "Invalid option \"options.selinux\": #{JSON.stringify options.selinux}" unless options.selinux in ['enforcing', 'permissive', 'disabled']
 
+## Sysctl
+
+      options.sysctl ?= {}
+
 ## Limits
 
       options.limits ?= {}

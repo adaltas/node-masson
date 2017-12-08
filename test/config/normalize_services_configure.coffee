@@ -17,7 +17,7 @@ describe 'normalize service configure', ->
     .system.remove tmp
     .promise()
   
-  it 'inject node and nodes', ->
+  it 'inject node and instances', ->
     fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
     services = []
     normalize
@@ -33,17 +33,17 @@ describe 'normalize service configure', ->
         'c.fqdn': ip: '10.10.10.3'
     services
     .map (service) ->
-      Object.values(service.nodes).length.should.eql 2
+      service.instances.length.should.eql 2
       # Test node
       node_id: service.node.id
       # Test nodes
-      nodes: Object.values(service.nodes).map (node) -> node.id
+      instance_node_ids: service.instances.map (instance) -> instance.node.id
     .should.eql [
       node_id: 'a.fqdn'
-      nodes: ['a.fqdn', 'c.fqdn']
+      instance_node_ids: ['a.fqdn', 'c.fqdn']
     ,
       node_id: 'c.fqdn'
-      nodes: ['a.fqdn', 'c.fqdn']
+      instance_node_ids: ['a.fqdn', 'c.fqdn']
     ]
 
   it 'inject deps using module discovery', ->
@@ -136,9 +136,9 @@ describe 'normalize service configure', ->
         'c.fqdn': ip: '10.10.10.3'
     .chain()
     .service 'cluster_a', 'service_a', (service) ->
-      Object.values(service.nodes).length.should.eql 2
-      Object.values(service.nodes)
-      .map (srv) -> srv.options
+      service.instances.length.should.eql 2
+      service.instances
+      .map (instance) -> instance.options
       .should.eql [
         { test: 'a.fqdn' }
         { test: 'c.fqdn' }
@@ -165,8 +165,8 @@ describe 'normalize service configure', ->
         'c.fqdn': ip: '10.10.10.3'
     .chain()
     .service 'cluster_a', 'service_a', (service) ->
-      Object.values(service.nodes)
-      .map (srv) -> srv.options
+      service.instances
+      .map (instance) -> instance.options
       .should.eql [
         { test: ['a.fqdn', 'c.fqdn'] }
         { test: ['a.fqdn', 'c.fqdn'] }

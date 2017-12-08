@@ -16,11 +16,11 @@ describe 'configure', ->
         'node_02.fqdn': ip: '10.10.10.12', tags: 'env': 'dev'
     .chain()
     .service 'test', 'masson/core/network', (service) ->
-      Object.values(service.nodes)
-      .map (node) ->
-        node.options.hosts.should.eql
+      service.instances
+      .map (instance) ->
+        instance.options.hosts.should.eql
           '10.10.10.10': 'repos.ryba ryba'
           '10.10.10.11': 'node_01.fqdn node_01'
           '10.10.10.12': 'node_02.fqdn node_02'
-        node.id
+        instance.id
       .should.eql ['node_01.fqdn', 'node_02.fqdn']

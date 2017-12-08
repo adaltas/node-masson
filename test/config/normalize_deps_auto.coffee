@@ -56,7 +56,7 @@ describe 'normalize deps auto', ->
         values: 'a.fqdn': true, 'c.fqdn': true
       ]
       # Affinity must be resolved
-      Object.values(service.nodes).map((node) -> node.id).should.eql ['a.fqdn', 'c.fqdn']
+      service.instances.map((instance) -> instance.node.id).should.eql ['a.fqdn', 'c.fqdn']
   
   it 'load the module', ->
     fs.writeFileSync "#{tmp}/dep_a.json", JSON.stringify

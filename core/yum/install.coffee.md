@@ -102,5 +102,4 @@ set the property "yum.epel.enabled" to "true".
 
 ## Dependencies
 
-    glob = require 'glob'
     pidfile_running = require 'nikita/lib/misc/pidfile_running'

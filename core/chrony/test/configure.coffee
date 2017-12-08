@@ -1,6 +1,7 @@
 
 normalize = require '../../../lib/config/normalize'
 store = require '../../../lib/config/store'
+array_get = require '../../../lib/utils/array_get'
 nikita = require 'nikita'
 
 describe 'chrony config', ->
@@ -56,11 +57,13 @@ describe 'chrony config', ->
           'client.fqdn': {}
       .chain()
       .service 'test', 'chrony', (service) ->
-        service.nodes['server.fqdn'].options.config.should.eql """
+        array_get(service.instances, (instance) -> instance.node.id is 'server.fqdn')
+        .options.config.should.eql """
           allow 192.168/16
           local stratum 10
           manual
           """
-        service.nodes['client.fqdn'].options.config.should.eql """
+        array_get service.instances, (instance) -> instance.node.id is 'client.fqdn'
+        .options.config.should.eql """
           server 192.168.122.1 iburst
           """
