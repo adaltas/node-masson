@@ -70,9 +70,9 @@ The module accept the following properties:
 
       options.hosts_auto ?= false
       options.hosts ?= {}
-      if options.hosts_auto then for _, node of service.nodes
-        throw Error "Required Property: node must define an IP" unless node.node.ip
-        options.hosts[node.node.ip] = "#{node.node.fqdn} #{node.node.hostname}"
+      if options.hosts_auto then for instance in service.instances
+        throw Error "Required Property: node must define an IP" unless instance.node.ip
+        options.hosts[instance.node.ip] = "#{instance.node.fqdn} #{instance.node.hostname}"
 
 ## DNS Resolver
 

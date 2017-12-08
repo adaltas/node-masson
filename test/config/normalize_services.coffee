@@ -32,6 +32,7 @@ describe 'normalize services', ->
       affinity: []
       deps: {}
       commands: {}
+      instances: []
       nodes: {}
         
   it 'module is string', ->
@@ -50,5 +51,6 @@ describe 'normalize services', ->
       affinity: []
       deps: {}
       commands: {}
+      instances: []
       nodes: {}
   

@@ -54,6 +54,7 @@ describe 'normalize deps', ->
       affinity: []
       deps: {}
       commands: {}
+      instances: []
       nodes: {}
   
   it 'load and merge module', ->

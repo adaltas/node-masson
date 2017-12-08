@@ -69,6 +69,22 @@ describe 'normalize deps required', ->
   it 'validate local', ->
     fs.writeFileSync "#{tmp}/dep_a.json", JSON.stringify {}
     fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
+    # Valid
+    store normalize
+      clusters: 'cluster_a': services:
+        'dep_a':
+          module: "#{tmp}/dep_a"
+          affinity: type: 'nodes', match: 'any', values: ['a.fqdn', 'b.fqdn', 'c.fqdn']
+        'service_a':
+          module: "#{tmp}/a"
+          affinity: type: 'nodes', match: 'any', values: 'b.fqdn'
+          deps: 'dep_a': module: "#{tmp}/dep_a", local: true, required: true
+      nodes:
+        'a.fqdn': {}
+        'b.fqdn': {}
+        'c.fqdn': {}
+    .service 'cluster_a', 'service_a'
+    # Invalid
     ( ->
       store normalize
         clusters: 'cluster_a': services:

@@ -3,7 +3,7 @@
 Download different Docker packages
 
     module.exports =
-      header: 'Docker'
+      header: 'Docker Prepare'
       if: (options) -> options.prepare
       ssh: null
       handler: (options) ->

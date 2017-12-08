@@ -186,7 +186,6 @@ have been copied or not (in case they already exist).
 
     each = require 'each'
     path = require 'path'
-    semver = require 'semver'
     string = require 'nikita/lib/misc/string'
 
 ## Notes

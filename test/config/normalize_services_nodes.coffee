@@ -28,20 +28,21 @@ describe 'normalize service nodes', ->
       nodes:
         'a.fqdn': {}
     .service 'cluster_a', 'service_a'
-    .nodes['a.fqdn'].should.eql
-      id: 'a.fqdn'
-      cluster: 'cluster_a'
-      service: 'service_a'
-      options: {}
-      node:
+    .instances.should.eql [
         id: 'a.fqdn'
-        fqdn: 'a.fqdn'
-        hostname: 'a'
-        services: [
-          cluster: 'cluster_a'
-          module: '/tmp/masson-test/a'
-          service: 'service_a'
-        ]
+        cluster: 'cluster_a'
+        service: 'service_a'
+        options: {}
+        node:
+          id: 'a.fqdn'
+          fqdn: 'a.fqdn'
+          hostname: 'a'
+          services: [
+            cluster: 'cluster_a'
+            module: '/tmp/masson-test/a'
+            service: 'service_a'
+          ]
+      ]
   
   it 'overwrite options', ->
     fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
@@ -56,7 +57,7 @@ describe 'normalize service nodes', ->
           'my_option_in_service_nodes': 'should be overwritten'
           'my_option_in_nodes': 'should be overwritten'
         nodes:
-          'a.fqdn': options:
+          'a.fqdn':
             'my_option_in_service_nodes': 'my value'
       nodes:
         'a.fqdn': services:
@@ -64,7 +65,8 @@ describe 'normalize service nodes', ->
             'my_option_in_nodes': 'my value'
             'my_option_in_service_nodes': 'should be overwritten'
     .service 'cluster_a', 'service_a'
-    .nodes['a.fqdn'].options.should.eql
+    .instances.filter( (instance) -> instance.node.id is 'a.fqdn')[0]
+    .options.should.eql
       'my_option_in_service_options': 'my value'
       'my_option_in_service_nodes': 'my value'
       'my_option_in_nodes': 'my value'

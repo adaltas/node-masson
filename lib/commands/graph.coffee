@@ -38,7 +38,7 @@ module.exports = (params, config) ->
         cluster: service.cluster
         id: service.id
         module: service.module
-        nodes: service.nodes
+        nodes: service.instances.map (instance) -> instance.node.id
       print output
     else
       for service, i in config.graph
@@ -49,8 +49,8 @@ module.exports = (params, config) ->
           " (#{service.module})" unless service.id is service.module
           '\n'
         ].join ''
-        for node in service.nodes
-          process.stdout.write "  * #{node}\n"
+        for instance in service.instances
+          process.stdout.write "  * #{instance.node.id}\n"
         process.stdout.write '\n'
   else
     print config.graph

@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* normalize: refactor nodes as instances
 * normalize: merge service_by_nodes with nodes
 * pki: new commands
 * params: merge from config

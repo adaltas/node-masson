@@ -44,6 +44,7 @@ Example:
 
     module.exports = (service) ->
       options = service.options
+      options.fqdn = service.node.fqdn
 
 ## Validation
 

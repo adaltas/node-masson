@@ -19,7 +19,7 @@ describe 'params', ->
     .system.remove tmp
     .promise()
 
-  it 'can be overwritten from configuration', ->
+  it 'can be overwritten from configuration', (next) ->
     write = process.stdout.write
     data = null
     process.stdout.write = (d)->
@@ -29,5 +29,6 @@ describe 'params', ->
     masson ['-c', "#{tmp}/config.json", 'help'], (err) ->
       # parameters(params).run(, config)
       process.stdout.write = write
-      data.split(/\r\n|[\n\r\u0085\u2028\u2029]/g)[5]
-      .should.eql '      help              Overwrite default description'
+      data.split(/\r\n|[\n\r\u0085\u2028\u2029]/g)[13]
+      .should.eql '    help                    Overwrite default description'
+      next()

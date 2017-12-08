@@ -161,34 +161,37 @@ The following files are updated:
 
       @call header: 'LDAP Stash password', ->
         for name, dbmodule of options.kdc_conf.dbmodules then do(name, dbmodule) =>
-          {ldap_service_password_file, ldap_kadmind_dn, ldap_kadmind_password} = dbmodule
           options.log "Stash key file is: #{dbmodule.ldap_service_password_file}"
           keyfileContent = null
           @call (_, callback) ->
             options.log 'Read current keyfile if it exists'
-            fs.readFile options.ssh, "#{ldap_service_password_file}", 'utf8', (err, content) ->
+            fs.readFile options.ssh, "#{dbmodule.ldap_service_password_file}", 'utf8', (err, content) ->
               return callback null, true if err and err.code is 'ENOENT'
               return callback err if err
               keyfileContent = content
               callback null, false
           @system.mkdir
-            target: path.dirname(ldap_service_password_file)
+            target: path.dirname(dbmodule.ldap_service_password_file)
             if: -> @status -1
           @call (_, callback) ->
             options.log 'Stash password into local file for kadmin dn'
             @options.ssh.shell (err, stream) =>
               return callback err if err
-              cmd = "kdb5_ldap_util -D \"#{options.root_dn}\" -w #{options.root_password} stashsrvpw -f #{ldap_service_password_file} #{ldap_kadmind_dn}"
+              cmd = "kdb5_ldap_util -D \"#{options.root_dn}\" -w #{options.root_password} stashsrvpw -f #{dbmodule.ldap_service_password_file} #{dbmodule.ldap_kadmind_dn}"
               options.log "Run `#{cmd}`"
               reentered = done = false
+              console.log '|', options.fqdn, 'before >>'
               stream.write "#{cmd}\n"
               stream.on 'data', (data, stderr) =>
+                console.log '|', options.fqdn, '<< after'
                 # options.log[if stderr then 'err' else 'out'].write data
                 data = data.toString()
                 if /Password for/.test data
-                  stream.write "#{ldap_kadmind_password}\n"
+                  options.log "Enter Password", level: 'INFO'
+                  stream.write "#{dbmodule.ldap_kadmind_password}\n"
                 else if /Re-enter password for/.test data
-                  stream.write "#{ldap_kadmind_password}\n\n"
+                  options.log "Re-enter Password", level: 'INFO'
+                  stream.write "#{dbmodule.ldap_kadmind_password}\n\n"
                   reentered = true
                 else if reentered and not done
                   done = true
@@ -197,7 +200,7 @@ The following files are updated:
                 callback()
           @call (_, callback) ->
             return callback null, true  unless keyfileContent
-            fs.readFile options.ssh, "#{ldap_service_password_file}", 'utf8', (err, content) ->
+            fs.readFile options.ssh, "#{dbmodule.ldap_service_password_file}", 'utf8', (err, content) ->
               return callback err if err
               modified = if keyfileContent is content then false else true
               callback null, keyfileContent isnt content
