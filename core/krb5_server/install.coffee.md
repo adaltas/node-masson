@@ -180,10 +180,8 @@ The following files are updated:
               cmd = "kdb5_ldap_util -D \"#{options.root_dn}\" -w #{options.root_password} stashsrvpw -f #{dbmodule.ldap_service_password_file} #{dbmodule.ldap_kadmind_dn}"
               options.log "Run `#{cmd}`"
               reentered = done = false
-              console.log '|', options.fqdn, 'before >>'
               stream.write "#{cmd}\n"
               stream.on 'data', (data, stderr) =>
-                console.log '|', options.fqdn, '<< after'
                 # options.log[if stderr then 'err' else 'out'].write data
                 data = data.toString()
                 if /Password for/.test data

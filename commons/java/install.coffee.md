@@ -47,7 +47,7 @@ have been copied or not (in case they already exist).
       , ->
         installed_versions = null
         @system.mkdir
-          target: java.jdk.root_dir
+          target: options.jdk.root_dir
         @system.execute
           header: "List Installed JDK"
           # Better than ls, it ignores links and empty dirs
