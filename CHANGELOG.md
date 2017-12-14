@@ -1,6 +1,10 @@
 
 # Changelog
 
+## Trunk
+
+* chrony: support new output to print tracking
+
 ## Version 0.1.6
 
 * normalize: refactor nodes as instances
