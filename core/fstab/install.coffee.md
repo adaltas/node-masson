@@ -30,7 +30,7 @@ Format disks and update the fstab.volumes variables with devices names
             user: disk.user
             group: disk.user
             mode: disk.mode
-          @then callback
+          @next callback
 
 ## Write fstab & Mount volume
 

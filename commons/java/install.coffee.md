@@ -112,7 +112,7 @@ have been copied or not (in case they already exist).
               source: "/tmp/#{path_name}/US_export_policy.jar"
               target: "#{options.jdk.root_dir}/jdk#{version}/jre/lib/security/US_export_policy.jar"
             @system.remove "/tmp/#{path_name}", shy: true
-          @then callback
+          @next callback
 
 ## Java Paths
 

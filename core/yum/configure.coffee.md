@@ -85,6 +85,8 @@ Note, ntp is installed to encure correct date on the server or HTTPS will fail.
       options.config ?= {}
       options.config.main ?= {}
       options.config.main.keepcache ?= '0'
+      # Update installed packages
+      options.update ?= false
 
 ## Proxy Configuration
 
@@ -96,9 +98,11 @@ Note, ntp is installed to encure correct date on the server or HTTPS will fail.
 
 ## System Repository
 
-      options.source ?= null
-      options.update ?= true
-      options.clean ?= 'CentOS*'
+      options.repo ?= {}
+      options.repo.source ?= null
+      options.repo.update ?= true
+      options.repo.clean ?= 'CentOS*'
+      options.repo.target ?= '/etc/yum.repos.d/centos.repo'
 
 ## Epel Repository
 

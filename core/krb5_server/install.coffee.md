@@ -212,7 +212,7 @@ The following files are updated:
             fs.readFile options.ssh, "/var/kerberos/krb5kdc/.k5.#{config.realm}", (err, buf) =>
               return next err if err
               @kv.set(key: "krb5_ha.#{config.realm}", value: buf)
-              @then next
+              @next next
           @call unless: config.master, ->
             @kv.get(key: "krb5_ha.#{config.realm}", (err, status, key, value) =>
               fs.writeFile options.ssh, "/var/kerberos/krb5kdc/.k5.#{config.realm}", value, (err) =>

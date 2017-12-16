@@ -325,7 +325,7 @@ The bug is fixed after version 5.7 of MariaDB.
                             cmd: "if [ -f \"#{options.my_cnf['mysqld']['pid-file']}\" ]; then exit 1; else exit 0 ; fi"
                           @service.start
                             name: options.srv_name
-                      @then callback
+                      @next callback
           @call
             header: 'Allow Root Remote Login'
             unless: options.disallow_remote_root_login

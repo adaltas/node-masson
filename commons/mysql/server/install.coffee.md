@@ -161,7 +161,7 @@ the following ways:
           stream.on 'exit', =>
             console.log 'exit'
             @service.restart 'mysqld' unless err
-            @then (err) -> callback err, true
+            @next (err) -> callback err, true
 
 ## Mysql >5.7 Secure Temp Password
 

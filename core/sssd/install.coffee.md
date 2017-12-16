@@ -59,7 +59,7 @@ the command `authconfig --update --ldaploadcacert={file}`.
               # target: "#{config.TLS_CACERTDIR}/#{filename}.0"
               unless_exists: true
               mode: 0o444
-          @then callback
+          @next callback
       @service
         name: 'sssd'
         action: 'restart'

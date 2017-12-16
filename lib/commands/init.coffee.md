@@ -259,7 +259,7 @@ masson init \
       .execute
         cmd: "npm install"
         cwd: "#{params.path}"
-      .then (err, status) ->
+      .next (err, status) ->
         if err
           rl.write "#{err.stack?.trim() or err.message}\n"
         else if status

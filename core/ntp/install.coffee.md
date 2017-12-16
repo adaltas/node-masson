@@ -85,7 +85,7 @@ and when only ONE ntp server is configured
             action: 'restart'
             code_stopped: [1, 3]
             if_not: modified
-          @then callback
+          @next callback
 
 ## Synchronization
 

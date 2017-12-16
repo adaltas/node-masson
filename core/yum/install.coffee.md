@@ -34,12 +34,12 @@ Upload the YUM repository file definition present in
 in "/etc/yum.repos.d"
 
       @tools.repo
-        if: options.source?
+        if: !!options.repo.source
         header: 'Repo'
-        source: options.source
-        update: options.update
-        target: '/etc/yum.repos.d/centos.repo'
-        clean: options.clean
+        source: options.repo.source
+        update: options.repo.update
+        target: options.repo.target
+        clean: options.repo.clean
 
 ## Custom Repositories
 
@@ -91,6 +91,14 @@ set the property "yum.epel.enabled" to "true".
           clean: 'epel*'
         @service
           name: 'epel-release'
+
+## Package Update
+
+      @execute
+        header: 'Update'
+        if: options.update
+        cmd: "yum -y update"
+        if_exec: '[[ `yum check-update | egrep "(.i386|.x86_64|.noarch|.src)" | wc -l` > 0 ]]'
 
 ## User Packages
 

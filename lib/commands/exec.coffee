@@ -24,7 +24,7 @@ module.exports = (params, config) ->
         write "\x1b[35m#{stderr.trim()}\x1b[39m\n" if stderr.length
         write "\n"
         callback()
-    n.then (err) ->
+    n.next (err) ->
       n.ssh.close()
       next err
   .next (err) ->

@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* nikita: rename then to next
 * chrony: support new output to print tracking
 
 ## Version 0.1.6

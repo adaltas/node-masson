@@ -41,9 +41,9 @@ module.exports = (params, config, callback) ->
         if service.commands[params.command]
           for module in service.commands[params.command]
             n.call module, merge {}, instance.options
-    n.then (err) ->
+    n.next (err) ->
       n.ssh.close header: 'SSH Close' #unless params.command is 'prepare' # params.end and 
-      n.then ->
+      n.next ->
         console.log err if err
         return
         callback err
