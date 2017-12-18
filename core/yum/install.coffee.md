@@ -94,7 +94,7 @@ set the property "yum.epel.enabled" to "true".
 
 ## Package Update
 
-      @execute
+      @system.execute
         header: 'Update'
         if: options.update
         cmd: "yum -y update"
