@@ -249,7 +249,8 @@ The bug is fixed after version 5.7 of MariaDB.
             @call
               header: 'Change Password'
               handler: (_, callback) ->
-                options.ssh.shell (err, stream) =>
+                ssh = @ssh options.ssh
+                ssh.shell (err, stream) =>
                   stream.write 'if /usr/bin/mysql_secure_installation ;then exit 0; else exit 1;fi\n'
                   data = ''
                   error = exit = null

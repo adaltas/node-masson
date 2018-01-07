@@ -14,7 +14,8 @@ transparent SSH2 transport thanks to the [ssh2-fs] package.
         'readlink', 'unlink', 'mkdir', 'readdir', 'readFile', 'writeFile',
         'exists', 'createReadStream', 'createWriteStream' ].forEach (fn) =>
         @fs[fn] = =>
-          fs[fn].call null, @options.ssh, arguments...
+          ssh = @ssh options.ssh
+          fs[fn].call null, ssh, arguments...
 
 # Dependencies
 

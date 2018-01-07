@@ -6,7 +6,7 @@ Download the PostgreSQL Container
     module.exports =
       header: 'PostgreSQL'
       if: -> @contexts('masson/commons/postgres/server')[0]?.config.host is @config.host
-      ssh: null
+      ssh: false
       handler: (options) ->
         @docker.pull
           tag: 'postgresql'

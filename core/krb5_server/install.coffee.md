@@ -160,12 +160,13 @@ The following files are updated:
             unless: -> @status -1
 
       @call header: 'LDAP Stash password', ->
+        ssh = @ssh options.ssh
         for name, dbmodule of options.kdc_conf.dbmodules then do(name, dbmodule) =>
           options.log "Stash key file is: #{dbmodule.ldap_service_password_file}"
           keyfileContent = null
           @call (_, callback) ->
             options.log 'Read current keyfile if it exists'
-            fs.readFile options.ssh, "#{dbmodule.ldap_service_password_file}", 'utf8', (err, content) ->
+            fs.readFile ssh, "#{dbmodule.ldap_service_password_file}", 'utf8', (err, content) ->
               return callback null, true if err and err.code is 'ENOENT'
               return callback err if err
               keyfileContent = content
@@ -175,7 +176,7 @@ The following files are updated:
             if: -> @status -1
           @call (_, callback) ->
             options.log 'Stash password into local file for kadmin dn'
-            @options.ssh.shell (err, stream) =>
+            ssh.shell (err, stream) =>
               return callback err if err
               cmd = "kdb5_ldap_util -D \"#{options.root_dn}\" -w #{options.root_password} stashsrvpw -f #{dbmodule.ldap_service_password_file} #{dbmodule.ldap_kadmind_dn}"
               options.log "Run `#{cmd}`"
@@ -198,24 +199,25 @@ The following files are updated:
                 callback()
           @call (_, callback) ->
             return callback null, true  unless keyfileContent
-            fs.readFile options.ssh, "#{dbmodule.ldap_service_password_file}", 'utf8', (err, content) ->
+            fs.readFile ssh, "#{dbmodule.ldap_service_password_file}", 'utf8', (err, content) ->
               return callback err if err
               modified = if keyfileContent is content then false else true
               callback null, keyfileContent isnt content
 
       @call header: 'HA', ->
+        ssh = @ssh options.ssh
         @each options.admin, (options, next) ->
           # realm = options.key
           config = options.value
           return next() unless config.ha
           @call if: config.master, ->
-            fs.readFile options.ssh, "/var/kerberos/krb5kdc/.k5.#{config.realm}", (err, buf) =>
+            fs.readFile ssh, "/var/kerberos/krb5kdc/.k5.#{config.realm}", (err, buf) =>
               return next err if err
               @kv.set(key: "krb5_ha.#{config.realm}", value: buf)
               @next next
           @call unless: config.master, ->
             @kv.get(key: "krb5_ha.#{config.realm}", (err, status, key, value) =>
-              fs.writeFile options.ssh, "/var/kerberos/krb5kdc/.k5.#{config.realm}", value, (err) =>
+              fs.writeFile ssh, "/var/kerberos/krb5kdc/.k5.#{config.realm}", value, (err) =>
                 next err
             )
 

@@ -106,7 +106,8 @@ a command argumet because it can not be run interractively.
         header: 'Root Password'
         if: -> password
       , (options, callback) ->
-        options.ssh.shell (err, stream) =>
+        ssh = @ssh options.ssh
+        ssh.shell (err, stream) =>
           return callback err if err
           cmd = db.cmd
             engine: 'mysql'

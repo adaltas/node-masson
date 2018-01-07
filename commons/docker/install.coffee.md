@@ -249,7 +249,7 @@ share images and deploy them to testing, staging and production environments.
 Compose is a tool for defining and running multi-container Docker applications.
 
       @file.assert
-        ssh: null
+        ssh: false
         target: "#{options.cache_dir}/docker-compose"
       , (err) ->
         throw Error 'Please run "prepare" before "install"' if err

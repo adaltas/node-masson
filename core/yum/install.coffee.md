@@ -8,7 +8,8 @@
 Make sure Yum isnt already running.
 
       @call header: 'Locked', shy: true, handler: (_, callback) ->
-        pidfile_running @options.ssh, '/var/run/yum.pid', (err, running) ->
+        ssh = @ssh options.ssh
+        pidfile_running ssh, '/var/run/yum.pid', (err, running) ->
           err = Error 'Yum is already running' if running
           callback err
 

@@ -6,7 +6,7 @@ Download the Oracle JDK.
     module.exports =
       header: 'Java Prepare'
       if: (options) -> options.prepare
-      ssh: null
+      ssh: false
       handler: (options) ->
         for version, info of options.jdk.versions
           console.log

@@ -120,7 +120,8 @@ the following ways:
         header: 'Secure'
         if_exec: 'echo "show databases" | mysql -uroot'
       , (_, callback) ->
-        options.ssh.shell (err, stream) =>
+        ssh = @ssh options.ssh
+        ssh.shell (err, stream) =>
           return callback err if err
           stream.write '/usr/bin/mysql_secure_installation\n'
           stream.on 'data', (data, extended) =>
