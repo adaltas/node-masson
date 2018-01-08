@@ -9,12 +9,6 @@ Download the Oracle JDK.
       ssh: false
       handler: (options) ->
         for version, info of options.jdk.versions
-          console.log
-            header: "Oracle JDK #{version}"
-            location: true
-            headers: ['Cookie: oraclelicense=accept-securebackup-cookie']
-            md5: info.jdk_md5
-            sha256: info.jdk_sha256
           @file.cache
             header: "Oracle JDK #{version}"
             location: true
