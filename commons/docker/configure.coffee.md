@@ -103,7 +103,7 @@ are added to the docker configuration, so it can be used by other docker actions
         throw Error "Required Option: ssl.key" if not options.ssl.key
         throw Error "Required Option: ssl.cacert" if not options.ssl.cacert
         options.env['DOCKER_CERT_PATH'] ?= "#{options.conf_dir}/certs.d"
-        # options.host ?= "tcp://#{service.node.fqdn}:#{options.default_port}"
+        options.host ?= "tcp://#{service.node.fqdn}:#{options.default_port}"
         # this ca MUST be at #{docker.conf_dir}/certs.d/ca.pem
         options.other_args['tlscacert'] ?= "#{options.env['DOCKER_CERT_PATH']}/ca.pem"
         options.other_args['tlscert'] ?= "#{options.env['DOCKER_CERT_PATH']}/cert.pem"
