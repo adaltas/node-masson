@@ -8,7 +8,7 @@
 
       options.conf_dir ?= '/etc/nginx'
       options.log_dir ?= '/var/log/nginx'
-      options.iptables ?= service.use.iptables and service.use.iptables.options.action is 'start'
+      options.iptables ?= service.deps.iptables and service.deps.iptables.options.action is 'start'
 
 ## Identities
 
@@ -27,6 +27,3 @@
       options.user.home ?= '/var/lib/nginx'
       options.user.shell ?= false
 
-## Dependencies
-    
-    migration = require '../../lib/migration'
