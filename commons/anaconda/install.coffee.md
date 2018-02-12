@@ -4,8 +4,8 @@
 Install anaconda.
 
     module.exports = header: 'Anaconda Install', handler: (options) ->
-      @each options.python_version, (options) ->
-        version = options.key
+      @each options.python_version, (opts) ->
+        version = opts.key
         @call unless_exec: "#{options.install_dir}/python#{version}/bin/python --version 2>&1 | grep #{options.version}", handler: ->
           script = "#{options.tmp_dir}/Anaconda#{version}-#{options.version}-Linux-x86_64.sh"
           @system.mkdir options.tmp_dir
