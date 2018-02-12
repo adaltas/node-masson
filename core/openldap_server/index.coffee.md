@@ -6,6 +6,7 @@
         iptables: module: 'masson/core/iptables', local: true
         saslauthd: module: 'masson/core/saslauthd', local: true
         ssl: module: 'masson/core/ssl', local: true
+        network: module: 'masson/core/network'
         openldap_server: module: 'masson/core/openldap_server'
       configure:
         'masson/core/openldap_server/configure'
