@@ -4,8 +4,7 @@
 Checks fstab and mounted points.
 
     module.exports = header: 'FSTAB Check', handler: (options) ->
-      {fstab} = @config
-      for mntpt, disk of fstab.volumes
+      for mntpt, disk of options.volumes
         @system.execute
           header: 'Mountpoints'
           cmd: "[ `df -kP \"#{mntpt}\" | tail -n +2 | awk '{print $NF}'` = \"#{mntpt}\" ]"
