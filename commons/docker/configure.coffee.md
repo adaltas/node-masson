@@ -111,6 +111,12 @@ are added to the docker configuration, so it can be used by other docker actions
         # configure tcp socket to  communicate with docker
         tlsverify_socket = "#{service.node.fqdn}:#{options.default_port}"
         options.sockets.tcp.push tlsverify_socket if options.sockets.tcp.indexOf tlsverify_socket < 0
+        options.daemon['tls'] ?= true
+        options.daemon['tlscert'] ?= options.other_args['tlscert']
+        options.daemon['tlskey'] ?= options.other_args['tlskey']
+        options.daemon['tlscacert'] ?= options.other_args['tlscacert']
+        options.daemon['hosts'] ?= []
+        options.daemon.hosts.push options.host unless options.host in options.daemon.hosts
         # indeed when executing a nikita.docker action, it will build the docker command
         # to communicate with local daemon engine
         # for example docker --host tcp://master2.ryba:3376 --tlscacert /etc/docker/certs.d/cacert.pem
@@ -124,6 +130,7 @@ are added to the docker configuration, so it can be used by other docker actions
 In the case adminsitrators want to install docker-ce, the yum name must be docker-ce instead of docker.
       
       options.yum_name ?= 'docker'
+      options.srv_name ?= 'docker'
 
 ## Devicemapper
 

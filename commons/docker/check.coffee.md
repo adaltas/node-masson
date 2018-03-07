@@ -11,6 +11,7 @@ Ensure the "ntpd" service is up and running.
 
       @service.assert
         header: 'Service'
-        name: 'docker'
+        name: options.yum_name
+        srv_name: options.srv_name
         installed: true
         started: true
