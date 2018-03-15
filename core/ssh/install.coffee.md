@@ -33,7 +33,7 @@ defined inside "users.[].authorized_keys".
               append: true
             uid: user.name
             gid: null
-            mode: 0o600
+            mode: 0o0600
             eof: true
 
 ## Configure

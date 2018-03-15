@@ -37,7 +37,7 @@
         keystore: options.truststore.target
         storepass: options.truststore.password
         caname: options.truststore.caname
-        cacert: "#{options.cacert.source}"
+        cacert: options.cacert.source
         local: options.cacert.local
         mode: 0o0644
         parent: mode: 0o0644
@@ -48,9 +48,9 @@
         keystore: options.keystore.target
         storepass: options.keystore.password
         caname: options.keystore.caname
-        cacert: "#{options.cacert.source}"
-        key: "#{options.key.source}"
-        cert: "#{options.cert.source}"
+        cacert: options.cacert.source
+        key: options.key.source
+        cert: options.cert.source
         keypass: options.keystore.keypass
         name: options.keystore.name
         local: options.cert.local

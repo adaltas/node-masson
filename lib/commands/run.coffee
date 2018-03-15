@@ -33,11 +33,11 @@ module.exports = (params, config, callback) ->
         n.call service.plugin, merge {}, instance.options
     n.call ->
       for service in node.services
-        service = s.service(service.cluster, service.service)
+        service = s.service service.cluster, service.service
         # masson 1 has `!service.required and ` in following condition
         continue if params.modules and multimatch(service.module, params.modules).length is 0
         console.log "found empty command in #{service.module}" if service.commands['']
-        instance = array_get(service.instances, (instance) -> instance.node.id is node.id)
+        instance = array_get service.instances, (instance) -> instance.node.id is node.id
         if service.commands[params.command]
           for module in service.commands[params.command]
             n.call module, merge {}, instance.options
