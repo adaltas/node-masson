@@ -19,7 +19,7 @@ OS will reboot if SELINUX was modified.
         backup: true
       @system.execute
         header: 'Reboot'
-        cmd: 'shutdown -r now'
+        cmd: 'shutdown -r now \'Rebooting after modifying SELinux\''
         if: -> @status -1 and options.reboot
 
 # Kernel
