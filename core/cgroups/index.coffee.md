@@ -11,5 +11,10 @@ cgroup cpu mount point.
       configure:
         'masson/core/cgroups/configure'
       commands:
-        'install':
-          'masson/core/cgroups/install'
+        'install': [
+          'masson/core/cgroups/install' 
+          'masson/core/cgroups/start'
+        ]
+        'start': [
+          'masson/core/cgroups/start'
+        ]
