@@ -48,7 +48,7 @@ Example 1 with format preparation
         disk.pass ?= '0'
         disk.dump = "#{disk.dump}" if typeof disk.dump isnt 'string'
         disk.pass = "#{disk.pass}" if typeof disk.pass isnt 'string'
-        disk.name = path.resolve '/dev/', disk.name
+        disk.name = path.resolve '/dev/', disk.name if disk.format
         throw Error "Please specify device property for mountpoint #{mntpt} or disable fstab" unless disk.device? or disk.name?
         throw Error "Invalid device format. Please provide a string (device path or UUID='<uuid>')" unless typeof disk.device is 'string' or disk.format
         throw Error "Please specify 'type' property for mountpoint #{mntpt} or disable fstab" unless disk.type?

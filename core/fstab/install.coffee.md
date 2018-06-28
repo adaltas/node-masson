@@ -3,35 +3,73 @@
 
     module.exports = header: 'FSTAB Install', handler: (options) ->
 
-## Prepare Disks
-
-Format disks and update the fstab.volumes variables with devices names
+## Prepare Logical Volumes
+Create Logical volume and format partition (before they are mounted by fstab)
 
       @call
-        header: 'Prepare Disk'
+        header: 'Logical Volumes'
+      , ->
+        @each options.logical_volumes, (opts, callback) ->
+          lvname = opts.key
+          lv = opts.value
+          console.log lv.format
+          @system.execute
+            header: 'Create'
+            cmd: """
+              lvcreate -L #{lv.size} #{lv.vg_path} -n #{lvname}
+            """
+            unless_exec: "lvdisplay #{lvname}"
+          @system.execute
+            header: 'Format'
+            if: lv.format
+            cmd: "echo 'y\n' | mkfs -t #{lv.type} #{lvname} \n"
+            code_skipped: 1
+          @system.mkdir
+            header: 'Create target'
+            target: lv.target
+            user: 'root'
+            group: 'root'
+            mode: 0o0644
+          @next callback
+
+## Format Volumes
+
+Format volumes and update the fstab.volumes variables with devices names.
+
+      @call
+        header: 'Format Volumes'
       , ->
         @each options.volumes, (opts, callback) ->
           mntpt = opts.key
           disk = opts.value
-          return callback null, false unless disk.format
-          @system.execute
-            header: 'Format Disk'
-            if_exec: "file -s #{disk.name} | egrep '^\/dev\/#{path.basename disk.name}:\\sdata$'"
-            cmd: "echo 'y\n' | mkfs -t #{disk.type} #{disk.name} \n"
-          @system.execute
-            cmd: "blkid | sed -n '/#{path.basename disk.name}/s/.*UUID=\\\"\\\([^\\\"]*\\)\\\".*/\\1/p'"
-            shy: true
-          , (err, _, stdout, __) ->
-            return callback err if err
-            uuid = stdout.trim()
-            disk.device ?= "UUID=#{uuid}"
+          @call
+            if: disk.format
+          , ->
+            @system.execute
+              header: 'Format Disk'
+              if_exec: "file -s #{disk.name} | egrep '^\/dev\/#{path.basename disk.name}:\\sdata$'"
+              cmd: "echo 'y\n' | mkfs -t #{disk.type} #{disk.name} \n"
+            @system.execute
+              cmd: "blkid | sed -n '/#{path.basename disk.name}/s/.*UUID=\\\"\\\([^\\\"]*\\)\\\".*/\\1/p'"
+              shy: true
+              unless: disk.device?
+            , (err, _, stdout, __) ->
+              return callback err if err
+              uuid = stdout.trim()
+              disk.device ?= "UUID=#{uuid}"
+          @system.mkdir
+            if: disk.options.indexOf('bind') isnt -1
+            target: disk.device
+            user: disk.user
+            group: disk.user
+            mode: disk.mode
           @system.mkdir
             target: mntpt
             user: disk.user
             group: disk.user
             mode: disk.mode
-          @next callback
-
+          @next callback        
+        
 ## Write fstab & Mount volume
 
 Write /etc/fstab
