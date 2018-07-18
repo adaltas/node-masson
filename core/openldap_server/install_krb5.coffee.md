@@ -14,10 +14,10 @@ is possible to check if the schema is installed by calling
 the command `ldapsearch  -D cn=admin,cn=config -w test -b "cn=config"`.
 
       @call header: 'Schema', handler: ->
-        options.log message: 'Install schema', level: 'DEBUG'
+        @log message: 'Install schema', level: 'DEBUG'
         @service
           name: 'krb5-server-ldap'
-        options.log message: 'Get schema location', level: 'DEBUG'
+        @log message: 'Get schema location', level: 'DEBUG'
         schema = null
         @system.execute
           cmd: 'rpm -ql krb5-server-ldap | grep kerberos.schema'

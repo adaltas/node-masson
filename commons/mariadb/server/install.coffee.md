@@ -248,7 +248,7 @@ The bug is fixed after version 5.7 of MariaDB.
                   target: '/var/lib/mysql/mysql.sock'
             @call
               header: 'Change Password'
-              handler: (_, callback) ->
+            , (_, callback) ->
                 ssh = @ssh options.ssh
                 ssh.shell (err, stream) =>
                   stream.write 'if /usr/bin/mysql_secure_installation ;then exit 0; else exit 1;fi\n'
@@ -257,54 +257,54 @@ The bug is fixed after version 5.7 of MariaDB.
                   exited = false
                   stream.on 'data', (data, extended) =>
                     # todo: not working anymore after implementing log object in nikita
-                    # options.log message = data, type: ''
-                    # options.log[if extended is 'stderr' then 'err' else 'out']?.write data
-                    # for now options.log to see nonetheless what is executed
+                    # @log message = data, type: ''
+                    # @log[if extended is 'stderr' then 'err' else 'out']?.write data
+                    # for now @log to see nonetheless what is executed
                     data = data.toString()
                     switch
                       when /Enter current password for root/.test data
-                        options.log data
+                        @log data
                         stream.write "#{if test_password then options.admin_password else options.current_password}\n"
                         data = ''
                       when /ERROR 1045/.test(data) and test_password
-                        options.log data
+                        @log data
                         test_password = false
                         modified = true
                         data = ''
                       when /Change the root password/.test data
-                        options.log data
+                        @log data
                         stream.write "y\n"
                         data = ''
                       when /Set root password/.test data
-                        options.log data
+                        @log data
                         stream.write "y\n"
                         data = ''
                       when /New password/.test(data) or /Re-enter new password/.test(data)
-                        options.log data
+                        @log data
                         stream.write "#{options.admin_password}\n"
                         data = ''
                       when /Remove anonymous users/.test data
-                        options.log data
+                        @log data
                         stream.write "#{if options.remove_anonymous then 'y' else 'n'}\n"
                         data = ''
                       when /Disallow root login remotely/.test data
-                        options.log data
+                        @log data
                         stream.write "#{if options.disallow_remote_root_login then 'y' else 'n'}\n"
                         data = ''
                       when /Remove test database and access to it/.test data
-                        options.log data
+                        @log data
                         stream.write "#{if options.remove_test_db then 'y' else 'n'}\n"
                         data = ''
                       when /Reload privilege tables now/.test data
-                        options.log data
+                        @log data
                         stream.write "#{if options.reload_privileges then 'y' else 'n'}\n"
                         data = ''
                       when /All done/.test data
-                        options.log data
+                        @log data
                         stream.end 'exit\n' unless exit
                         exit = true
                       when /ERROR/.test data
-                        options.log data
+                        @log data
                         return if data.toString().indexOf('ERROR 1008 (HY000) at line 1: Can\'t drop database \'test\'') isnt -1
                         error = new Error data.toString()
                         if data.toString().indexOf('ERROR 2002 (HY000)') isnt -1

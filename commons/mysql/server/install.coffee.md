@@ -129,32 +129,32 @@ the following ways:
             console.log 'read': data
             switch
               when /Enter current password for root/.test data
-                options.log data
+                @log data
                 console.log 'write: ', options.current_password
                 stream.write "#{options.current_password}\n"
               when /Change the root password/.test data
-                options.log data
+                @log data
                 stream.write "y\n"
               when /Set root password/.test data
-                options.log data
+                @log data
                 stream.write "y\n"
               when /New password/.test(data) or /Re-enter new password/.test(data)
-                options.log data
+                @log data
                 stream.write "#{options.admin_password}\n"
               when /Remove anonymous users/.test data
-                options.log data
+                @log data
                 stream.write "y\n"
               when /Disallow root login remotely/.test data
-                options.log data
+                @log data
                 stream.write "y\n"
               when /Remove test database and access to it/.test data
-                options.log data
+                @log data
                 stream.write "y\n"
               when /Reload privilege tables now/.test data
-                options.log data
+                @log data
                 stream.write "y\n"
               when /All done/.test data
-                options.log data
+                @log data
                 stream.end 'exit\n'
           stream.on 'error', (err) ->
             console.log 'exit'

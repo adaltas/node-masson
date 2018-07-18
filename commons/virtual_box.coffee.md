@@ -12,7 +12,7 @@
         cmd: 'VBoxManage -v'
       , (err, executed, stdout) ->
         return next err if err
-        options.log 'Get Guest Additions version on VM machine'
+        @log 'Get Guest Additions version on VM machine'
         version_target = /\d+\.\d+\.\d+/.exec(stdout)[0]
       @call ->
         @system.execute
@@ -22,7 +22,7 @@
           throw err if err
           version_current = stdout.trim()
       @call ->
-        options.log "Install latest Guest Additions #{version_target}"
+        @log "Install latest Guest Additions #{version_target}"
         @system.execute
           cmd: """
             yum install -y gcc kernel-* # might need to reboot

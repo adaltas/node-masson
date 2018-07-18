@@ -34,7 +34,7 @@ I assume the A record to always be printed on the last line.
       , (err, executed, stdout, stderr) ->
         throw err if err
         unless ipRegex.test stdout.split(/\s+/).shift()
-          options.log "[WARN, masson `dig host`] Invalid returned IP #{stdout.trim()}"
+          @log "[WARN, masson `dig host`] Invalid returned IP #{stdout.trim()}"
           # next null, 'WARNING'
 
 ## DNS Reverse Lookup
@@ -50,7 +50,7 @@ Check reverse DNS lookup using the configured DNS configuration present inside
       , (err, executed, stdout) ->
         throw err if err
         if "#{@config.host}." isnt stdout.trim()
-          options.log "[WARN, masson `dig ip`] Invalid returned host #{stdout.trim()}"
+          @log "[WARN, masson `dig ip`] Invalid returned host #{stdout.trim()}"
           # next null, 'WARNING'
 
 ## Check System Forward Lookup
@@ -66,10 +66,10 @@ command uses "getent".
         shy: true
       , (err, valid, stdout, stderr) ->
         throw err if err
-        options.log "[WARN, masson `getent host`] Invalid host #{stdout.trim()}" if not valid
+        @log "[WARN, masson `getent host`] Invalid host #{stdout.trim()}" if not valid
         # return next null, 'WARNING' if not valid
         [ip, fqdn] = stdout.split(/\s+/).filter( (entry) -> entry)
-        options.log "[WARN, masson `getent host`] Invalid host #{@config.host}" if ip isnt @config.ip or fqdn isnt @config.host
+        @log "[WARN, masson `getent host`] Invalid host #{@config.host}" if ip isnt @config.ip or fqdn isnt @config.host
 
 ## Check System Reverse Lookup
 
@@ -84,10 +84,10 @@ command uses "getent".
         shy: true
       , (err, valid, stdout) ->
         throw err if err
-        options.log "[WARN, masson `getent host`] Invalid ip #{stdout.trim()}" if not valid
+        @log "[WARN, masson `getent host`] Invalid ip #{stdout.trim()}" if not valid
         # return next null, 'WARNING' if not valid
         [ip, fqdn] = stdout.split(/\s+/).filter( (entry) -> entry)
-        options.log "[WARN, masson `getent host`] Invalid ip #{@config.ip}" if ip isnt @config.ip or fqdn isnt @config.host
+        @log "[WARN, masson `getent host`] Invalid ip #{@config.ip}" if ip isnt @config.ip or fqdn isnt @config.host
         # next null, if ip is @config.ip and fqdn is @config.host then false else 'WARNING'
 
 ## Check Hostname
@@ -101,7 +101,7 @@ the executed command is `hostname --fqdn`.
         shy: true
       , (err, _, stdout) ->
         throw err if err
-        options.log "[WARN, masson `getent host`] Invalid hostname" if stdout.trim() isnt @config.host
+        @log "[WARN, masson `getent host`] Invalid hostname" if stdout.trim() isnt @config.host
         # next null, if stdout.trim() is @config.host then false else 'WARNING'
 
 ## Utilities

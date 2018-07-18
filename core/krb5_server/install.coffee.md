@@ -162,10 +162,10 @@ The following files are updated:
       @call header: 'LDAP Stash password', ->
         ssh = @ssh options.ssh
         for name, dbmodule of options.kdc_conf.dbmodules then do(name, dbmodule) =>
-          options.log "Stash key file is: #{dbmodule.ldap_service_password_file}"
+          @log "Stash key file is: #{dbmodule.ldap_service_password_file}"
           keyfileContent = null
           @call (_, callback) ->
-            options.log 'Read current keyfile if it exists'
+            @log 'Read current keyfile if it exists'
             fs.readFile ssh, "#{dbmodule.ldap_service_password_file}", 'utf8', (err, content) ->
               return callback null, true if err and err.code is 'ENOENT'
               return callback err if err
@@ -175,21 +175,21 @@ The following files are updated:
             target: path.dirname(dbmodule.ldap_service_password_file)
             if: -> @status -1
           @call (_, callback) ->
-            options.log 'Stash password into local file for kadmin dn'
+            @log 'Stash password into local file for kadmin dn'
             ssh.shell (err, stream) =>
               return callback err if err
               cmd = "kdb5_ldap_util -D \"#{options.root_dn}\" -w #{options.root_password} stashsrvpw -f #{dbmodule.ldap_service_password_file} #{dbmodule.ldap_kadmind_dn}"
-              options.log "Run `#{cmd}`"
+              @log "Run `#{cmd}`"
               reentered = done = false
               stream.write "#{cmd}\n"
               stream.on 'data', (data, stderr) =>
-                # options.log[if stderr then 'err' else 'out'].write data
+                # @log[if stderr then 'err' else 'out'].write data
                 data = data.toString()
                 if /Password for/.test data
-                  options.log "Enter Password", level: 'INFO'
+                  @log "Enter Password", level: 'INFO'
                   stream.write "#{dbmodule.ldap_kadmind_password}\n"
                 else if /Re-enter password for/.test data
-                  options.log "Re-enter Password", level: 'INFO'
+                  @log "Re-enter Password", level: 'INFO'
                   stream.write "#{dbmodule.ldap_kadmind_password}\n\n"
                   reentered = true
                 else if reentered and not done
