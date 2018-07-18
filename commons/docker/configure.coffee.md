@@ -77,7 +77,7 @@ Example:
       options.other_opts ?= ''
       options.other_args ?= {}
       options.other_args.iptables ?= if service.deps.iptables and service.deps.iptables.options.action is 'start' then 'true' else 'false'
-      options.source ?= 'https://github.com/docker/compose/releases/download/1.12.0/docker-compose-Linux-x86_64'
+      options.source ?= 'https://github.com/docker/compose/releases/download/1.13.0/docker-compose-Linux-x86_64'
       options.daemon ?= {}
       # the /etc/docker/daemon.json file can also be used to specify starting options for docker daemon
 
