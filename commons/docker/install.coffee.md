@@ -119,6 +119,7 @@ Skip Pakage installation, if provided by external deploy tool.
           target: options.tlskey
           source: options.ssl.key.source
           local: options.ssl.key.local
+          mode: 0o0600
 
 ## Configure Devicemapper
 For Production use, Docker should have its own devicemapper storage.

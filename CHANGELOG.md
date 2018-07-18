@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* docker: secure cert key
 * docker: align docker-compose version
 * nikita: rename then to next
 * chrony: support new output to print tracking
