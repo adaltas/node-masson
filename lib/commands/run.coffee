@@ -40,7 +40,8 @@ module.exports = (params, config, callback) ->
         instance = array_get service.instances, (instance) -> instance.node.id is node.id
         if service.commands[params.command]
           for module in service.commands[params.command]
-            n.call module, merge {}, instance.options
+            isRoot = config.nikita.ssh.username is 'root' or not config.nikita.ssh.username
+            n.call module, merge {}, instance.options, sudo: not isRoot
     n.next (err) ->
       n.ssh.close header: 'SSH Close' #unless params.command is 'prepare' # params.end and 
       n.next ->

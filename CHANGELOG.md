@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* sudo: add support and auto detection
 * docker: fix conflicting options
 * docker: secure cert key
 * docker: align docker-compose version
