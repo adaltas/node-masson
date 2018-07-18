@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* docker: fix conflicting options
 * docker: secure cert key
 * docker: align docker-compose version
 * nikita: rename then to next

@@ -47,6 +47,11 @@ Skip Pakage installation, if provided by external deploy tool.
 
 ## Configuration
 
+Note, the options exposed inside the environment variable `OPTIONS` in 
+"/etc/sysconfig/docker" conflict with the one defined in
+"/etc/docker/daemon.json". They are not merge, thus preventing Docker to start
+starting in version 1.13.
+
       @call header: 'Configuration', ->
         opts = []
         opts.push "--#{k}=#{v}" for k,v of options.other_args
@@ -76,7 +81,9 @@ Skip Pakage installation, if provided by external deploy tool.
             header: 'Daemon'
             if_os: name: ['redhat','centos'], version: '7'
             target: '/etc/docker/daemon.json'
-            content: JSON.stringify options.daemon, null, 2
+            # TODO: activate daemon in favor of the deprecated sysconfig
+            content: '{}'
+            # content: JSON.stringify options.daemon, null, 2
           # @file
           #   if_os: name: ['redhat','centos'], version: '6'
           #   target: '/etc/sysconfig/docker'
