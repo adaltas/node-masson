@@ -969,9 +969,9 @@ needle@^2.2.1:
     iconv-lite "^0.4.4"
     sax "^1.2.4"
 
-nikita@~0.6.8:
-  version "0.6.8"
-  resolved "https://registry.yarnpkg.com/nikita/-/nikita-0.6.8.tgz#bd3beb86d15e8bb078c440137ea72da080468263"
+nikita@~0.6.11:
+  version "0.6.11"
+  resolved "https://registry.yarnpkg.com/nikita/-/nikita-0.6.11.tgz#8ccbf0b166e7cd11a0e64f02e721582e7c174adf"
   dependencies:
     backmeup "~0.0.2"
     colors "~1.2.2"
