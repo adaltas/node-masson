@@ -1,7 +1,7 @@
 
 # Changelog
 
-## Trunk
+## Version 0.1.7
 
 * sudo: add support and auto detection
 * docker: fix conflicting options
