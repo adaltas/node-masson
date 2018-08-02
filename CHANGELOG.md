@@ -1,6 +1,13 @@
 
 # Changelog
 
+* locale: nikita 2nd argument is not a callback
+* krb5_server: nikita kv  2nd argument is not a callback
+* openldap_server: nikita 2nd argument is not a callback
+* sssd: nikita 2nd argument is not a callback
+* info: nikita 2nd argument is not a callback
+* fstab: nikita 2nd argument is not a callback
+* java: nikita 2nd argument is not a callback
 * mariadb: nikita 2nd argument is not a callback
 
 ## Version 0.1.7
