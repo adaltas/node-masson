@@ -55,10 +55,10 @@ have been copied or not (in case they already exist).
           # cmd: "ls -d #{options.jdk.root_dir}/*"
           # code_skipped: 2
           shy: true
-        , (err, executed, stdout, stderr) ->
+        , (err, data) ->
           throw err if err
-          stdout = '' unless executed
-          installed_versions = (string.lines stdout.trim())
+          stdout = '' unless data.status
+          installed_versions = (string.lines data.stdout.trim())
             .filter (out) -> out if /jdk(.*)/.exec out
             .map (abs) -> "#{path.basename abs}"
         @system.mkdir options.jdk.root_dir
