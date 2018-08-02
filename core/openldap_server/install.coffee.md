@@ -52,14 +52,13 @@ ldap:x:55:
           name: 'openldap-clients'
         @service
           name: 'migrationtools'
-        @system.discover (err, status, os) ->
-          @system.tmpfs
-            if: -> (os.type in ['redhat','centos']) and (os.release[0] is '7')
-            mount: '/var/run/openldap'
-            name: 'openldap'
-            uid: options.user.name
-            gid: options.group.name
-            perm: '0750'
+        @system.tmpfs
+          if_os: name: ['redhat','centos'], version: '7'
+          mount: '/var/run/openldap'
+          name: 'openldap'
+          uid: options.user.name
+          gid: options.group.name
+          perm: '0750'
         @service.start 'slapd'
 
 ## Logging
@@ -138,9 +137,9 @@ Interesting posts also include:
           """
         @call (_, callback) -> @system.execute
           cmd: 'ldapsearch -Y EXTERNAL -H ldapi:/// -b "olcDatabase={0}config,cn=config"'
-        , (err, _, stdout) ->
+        , (err, data) ->
           return callback err if err
-          if match = /^olcRootPW: {SSHA}(.*)$/m.exec stdout
+          if match = /^olcRootPW: {SSHA}(.*)$/m.exec data.stdout
             callback null, not check_password options.config_password, match[1]
           else # First installation, password not yet defined
             callback null, true
@@ -178,9 +177,9 @@ discovered at runtime based on the OS release.
         if: options.backend is 'hdb'
       , ->
         bdb = null
-        @system.discover shy: true, (err, status, info) ->
-          throw Error "Unsupported OS: #{JSON.stringify info.type}" unless info.type in ['centos', 'redhat']
-          bdb = if /^6/.test info.release then 'bdb' else 'hdb'
+        @system.discover shy: true, (err, data) ->
+          throw Error "Unsupported OS: #{JSON.stringify data.type}" unless data.type in ['centos', 'redhat']
+          bdb = if /^6/.test data.release then 'bdb' else 'hdb'
         @call ->
           @system.execute
             header: 'Suffix'
@@ -214,9 +213,9 @@ discovered at runtime based on the OS release.
             """
           @call (_, callback) ->  @system.execute
             cmd: "ldapsearch -Y EXTERNAL -H ldapi:/// -b 'olcDatabase={2}#{bdb},cn=config'"
-          , (err, _, stdout) ->
+          , (err, data) ->
             return callback err if err
-            if match = /^olcRootPW: {SSHA}(.*)$/m.exec stdout
+            if match = /^olcRootPW: {SSHA}(.*)$/m.exec data.stdout
               callback null, not check_password options.root_password, match[1]
             else # First installation, password not yet defined
               callback null, true
@@ -241,8 +240,8 @@ Set up the database with the mdb backend.
         header: 'DB mdb'
         if: options.backend is 'mdb'
       , ->
-        @system.discover shy: true, (err, status, info) ->
-          throw Error "Unsupported OS: #{JSON.stringify info.type}" unless (info.type in ['centos', 'redhat']) and info.release[0] is '7'
+        @system.discover shy: true, (err, data) ->
+          throw Error "Unsupported OS: #{JSON.stringify data.type}" unless (data.type in ['centos', 'redhat']) and data.release[0] is '7'
         @system.mkdir
           target: options.db_dir
           uid: options.user.name
@@ -288,9 +287,9 @@ Set up the database with the mdb backend.
             """
           @call (_, callback) ->  @system.execute
             cmd: "ldapsearch -Y EXTERNAL -H ldapi:/// -b 'olcDatabase={3}mdb,cn=config'"
-          , (err, _, stdout) ->
+          , (err, data) ->
             return callback err if err
-            if match = /^olcRootPW: {SSHA}(.*)$/m.exec stdout
+            if match = /^olcRootPW: {SSHA}(.*)$/m.exec data.stdout
               callback null, not check_password options.root_password, match[1]
             else # First installation, password not yet defined
               callback null, true
@@ -389,8 +388,8 @@ ACLs can be retrieved with the command:
           """
           code_skipped: 2
           shy: true
-        , (err, exists, stdout) ->
-          schema = stdout.trim() if exists
+        , (err, data) ->
+          schema = data.stdout.trim() if data.status
         @file.download
           source: "#{__dirname}/resources/ldap.schema"
           target: '/tmp/ldap.schema'
@@ -432,9 +431,9 @@ ACLs can be retrieved with the command:
             cmd: "ldapadd -c -Y EXTERNAL -H ldapi:/// -f #{target}"
             code_skipped: 68
             shy: true
-          , (err, executed, stdout, stderr) ->
+          , (err, data) ->
             return if err
-            status = true if stdout.match(/Already exists/g)?.length isnt stdout.match(/adding new entry/g).length
+            status = true if data.stdout.match(/Already exists/g)?.length isnt data.stdout.match(/adding new entry/g).length
           @system.remove
             target: target
             shy: true

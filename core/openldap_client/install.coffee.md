@@ -56,8 +56,8 @@ the command `authconfig --update --ldaploadcacert={file}`.
             @system.execute
               cmd: "openssl x509 -noout -hash -in /tmp/#{hash}; rm -rf /tmp/#{hash}"
               shy: true
-            , (err, _, stdout) ->
-              filename = stdout.trim() unless err
+            , (err, data) ->
+              filename = data.stdout.trim() unless err
             # Clean up uploaded certificate
             # TODO: always execute this action, even on error
             @system.remove
@@ -72,8 +72,8 @@ the command `authconfig --update --ldaploadcacert={file}`.
             @system.execute
               cmd: "openssl x509 -noout -hash -in #{certificate.source}"
               shy: true
-            , (err, _, stdout) ->
-              filename = stdout.trim() unless err
+            , (err, data) ->
+              filename = data.stdout.trim() unless err
             @call ->
               @file
                 source: certificate.source

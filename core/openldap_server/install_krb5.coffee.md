@@ -21,9 +21,9 @@ the command `ldapsearch  -D cn=admin,cn=config -w test -b "cn=config"`.
         schema = null
         @system.execute
           cmd: 'rpm -ql krb5-server-ldap | grep kerberos.schema'
-        , (err, executed, stdout) ->
-          throw Error 'Kerberos schema not found' if not err and stdout is ''
-          schema = stdout
+        , (err, data) ->
+          throw Error 'Kerberos schema not found' if not err and data.stdout is ''
+          schema = data.stdout
         @call ->
           @ldap.schema
             name: 'kerberos'
