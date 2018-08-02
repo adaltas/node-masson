@@ -20,9 +20,9 @@ such as LC_ALL= . We set all variable to `en_US.UTF-8` by default.
       @system.execute
         cmd: 'locale | grep \'LC_*\''
         shy: true
-      , (err, executed, stdout, stderr) ->
+      , (err, data) ->
         throw err if err
-        for line in string.lines(stdout.trim())
+        for line in string.lines(data.stdout.trim())
           [_, key, value] = /(LC_.*)=(.*)/.exec line
           continue unless /^\s*$/.test value
           props[key] = if key is 'LC_ALL' then 'C' else "#{options.lang}"
