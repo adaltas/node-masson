@@ -129,7 +129,7 @@ Note: For Now Ryba does not support automatic discovery for more than 2 master.
       options.my_cnf['mysqld']['port'] ?= '3306'
       # Note bind address mut be an ip adress and not a hostname
       options.my_cnf['mysqld']['bind-address'] ?= '0.0.0.0'
-      options.my_cnf['mysqld']['pid-file'] ?= '/var/run/mysql/options.pid'
+      options.my_cnf['mysqld']['pid-file'] ?= '/var/run/mariadb/mysql.pid'
       options.my_cnf['mysqld']['socket'] ?= '/var/lib/mysql/mysql.sock'
       options.my_cnf['mysqld']['datadir'] ?= "#{options.user.home}/data"
       options.my_cnf['mysqld']['user'] ?= "#{options.user.name}"

@@ -1,6 +1,8 @@
 
 # Changelog
 
+* mariadb: nikita 2nd argument is not a callback
+
 ## Version 0.1.7
 
 * sudo: add support and auto detection

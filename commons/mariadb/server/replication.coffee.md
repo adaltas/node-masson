@@ -56,9 +56,9 @@ Gather the target master informations, then start the slave replication.
             @system.execute
               header: 'Master Infos'
               cmd: db.cmd remote_master, "show master status \\G"
-            , (err, status, stdout, stderr) ->
+            , (err, data) ->
               throw err if err
-              lines = string.lines stdout
+              lines = string.lines data.stdout
               for line in lines
                 parts = line.trim().split(':')
                 master_file = parts[1].trim() if parts[0] is 'File'

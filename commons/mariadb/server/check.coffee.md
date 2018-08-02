@@ -42,9 +42,9 @@ Ensure the port is listening.
         @system.execute
           retry: 3
           cmd: "#{db.cmd props,'show slave status \\G ;'} | grep Slave_IO_State"
-        , (err, status, stdout) ->
+        , (err, data) ->
           throw err if err
-          ok = /^Slave_IO_State:\sWaiting for master to send event/.test(stdout.trim() )or /^Slave_IO_State:\sConnecting to master/.test(stdout.trim())
+          ok = /^Slave_IO_State:\sWaiting for master to send event/.test(data.stdout.trim() )or /^Slave_IO_State:\sConnecting to master/.test(data.stdout.trim())
           throw Error 'Error in Replication state' unless ok
 
 ## Dependencies
