@@ -50,8 +50,8 @@ the command `authconfig --update --ldaploadcacert={file}`.
           @system.execute # openssh is executed remotely
             cmd: "openssl x509 -noout -hash -in /tmp/#{hash}; rm -rf /tmp/#{hash}"
             shy: true
-          , (err, _, stdout) ->
-            filename = stdout.trim() unless err
+          , (err, data) ->
+            filename = data.stdout.trim() unless err
           @call ->
             @file.download
               source: certificate
