@@ -53,9 +53,9 @@ Format volumes and update the fstab.volumes variables with devices names.
               cmd: "blkid | sed -n '/#{path.basename disk.name}/s/.*UUID=\\\"\\\([^\\\"]*\\)\\\".*/\\1/p'"
               shy: true
               unless: disk.device?
-            , (err, _, stdout, __) ->
+            , (err, obj) ->
               return callback err if err
-              uuid = stdout.trim()
+              uuid = obj.stdout.trim()
               disk.device ?= "UUID=#{uuid}"
           @system.mkdir
             if: disk.options.indexOf('bind') isnt -1
