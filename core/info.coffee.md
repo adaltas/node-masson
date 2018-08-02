@@ -16,10 +16,10 @@ properties "kernel\_name", "nodename", "kernel\_release", "kernel\_version",
         cmd: 'uname -snrvmo'
         stdout: null
         stderr: null
-      , (err, executed, stdout, stderr) ->
+      , (err, data) ->
         throw err if err
         # Linux hadoop1 2.6.32-279.el6.x86_64 #1 SMP Fri Jun 22 12:19:21 UTC 2012 x86_64 x86_64 x86_64 GNU/Linux
-        match = /(\w+) (\w+) ([^ ]+)/.exec stdout
+        match = /(\w+) (\w+) ([^ ]+)/.exec data.stdout
         @kernel_name = match[1]
         @nodename = match[2]
         @kernel_release = match[3]
@@ -61,10 +61,10 @@ It will output:
       @system.execute
         header: 'Disk'
         cmd: 'df'
-      , (err, executed, stdout) ->
+      , (err, data) ->
         throw err if err
         @diskinfo = []
-        for line, i in string.lines stdout
+        for line, i in string.lines data.stdout
           continue if i is 0
           continue if /^\s*$/.test line
           line = line.split /\s+/
@@ -120,11 +120,11 @@ CPU supports the AES instruction set by running the following command:
       @system.execute
         header: 'CPU'
         cmd: 'cat /proc/cpuinfo'
-      , (err, executed, stdout, stderr) ->
+      , (err, data) ->
         return next err if err
         @cpuinfo = []
         cpu = {}
-        for line in string.lines stdout
+        for line in string.lines data.stdout
           line = line.trim()
           if line is ''
             @cpuinfo.push cpu if Object.keys(cpu).length
@@ -169,10 +169,10 @@ It will output:
         cmd: 'cat /proc/meminfo'
         stdout: null
         stderr: null
-      , (err, executed, stdout, stderr) ->
+      , (err, data) ->
         return next err if err
         @meminfo = {}
-        for line in string.lines stdout
+        for line in string.lines data.stdout
           continue if line is ''
           [key, value] = line.split ':'
           [value, unit] = value.trim().split ' '
