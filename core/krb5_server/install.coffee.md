@@ -216,8 +216,8 @@ The following files are updated:
               @kv.set(key: "krb5_ha.#{config.realm}", value: buf)
               @next next
           @call unless: config.master, ->
-            @kv.get(key: "krb5_ha.#{config.realm}", (err, status, key, value) =>
-              fs.writeFile ssh, "/var/kerberos/krb5kdc/.k5.#{config.realm}", value, (err) =>
+            @kv.get(key: "krb5_ha.#{config.realm}", (err, data) =>
+              fs.writeFile ssh, "/var/kerberos/krb5kdc/.k5.#{config.realm}", data.value, (err) =>
                 next err
             )
 
