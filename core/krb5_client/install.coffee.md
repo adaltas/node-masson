@@ -106,7 +106,7 @@ configuration object. By default, we set the following properties to "yes": "Cha
             target: '/etc/ssh/sshd_config'
           @service
             srv_name: 'sshd'
-            action: 'restart'
+            state: 'restarted'
             if: -> @status -1
 
 ## Module Dependencies

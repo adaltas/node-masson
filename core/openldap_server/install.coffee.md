@@ -78,7 +78,7 @@ http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
         @log 'Restart rsyslog service'
         @service
           name: 'rsyslog'
-          action: 'restart'
+          state: 'restarted'
           if: -> @status -1
         @system.execute
           unless_exec: """

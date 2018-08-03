@@ -25,7 +25,7 @@ Configure the application. The configuration file is defined by the
         backup: true
       @service
         name: 'httpd'
-        action: 'restart'
+        state: 'restarted'
         if: -> @status -1
 
 ## HTTPD
@@ -65,5 +65,5 @@ the "http://{host}/ldapadmin" URL path.
         backup: true
       @service
         name: 'httpd'
-        action: 'restart'
+        state: 'restart'ed
         if: @status -1

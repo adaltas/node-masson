@@ -4,7 +4,7 @@
     module.exports = (service) ->
       options = service.options
       
-      options.action ?= 'start'
+      options.state ?= 'started'
       # Service supports chkconfig, but is not referenced in any runlevel
       options.startup ?= ''
       options.rules ?= []

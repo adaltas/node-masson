@@ -62,7 +62,7 @@ the command `authconfig --update --ldaploadcacert={file}`.
           @next callback
       @service
         name: 'sssd'
-        action: 'restart'
+        state: 'restarted'
         if: -> @status -1
 
 ## Configure
@@ -103,7 +103,7 @@ default overwritten unless the "sssd.merge" is `true`.
           if: -> @status -1
         @service
           name: 'sssd'
-          action: 'restart'
+          state: 'restarted'
           if: -> @status -2
 
 ## Dependencies

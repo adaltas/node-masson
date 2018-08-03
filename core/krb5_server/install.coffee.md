@@ -116,10 +116,10 @@ The following files are updated:
           @call 'masson/core/openldap_client/wait', options.wait_ldap_client
           @service
             srv_name: 'krb5kdc'
-            action: 'restart'
+            state: 'restarted'
           @service
             srv_name: 'kadmin'
-            action: 'restart'
+            state: 'restarted'
 ## Wait
 
       @call 'masson/core/openldap_client/wait'
@@ -245,7 +245,7 @@ The following files are updated:
           if: -> @status -2
         @service
           srv_name: 'rsyslog'
-          action: 'restart'
+          state: 'restarted'
           if: -> @status -3
 
       @call header: 'Admin principal', ->

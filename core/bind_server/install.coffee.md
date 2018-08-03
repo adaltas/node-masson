@@ -73,7 +73,7 @@ and setting "allow-query" to any. The "named" service is restarted if modified.
       @service
         header: 'Restart'
         srv_name: 'named'
-        action: 'restart'
+        state: 'restarted'
         if: -> @status -1
 
 ## Zones
@@ -118,7 +118,7 @@ Generates configuration files for rndc.
           gid: options.group.name
         @service
           srv_name: 'named'
-          action: 'restart'
+          state: 'restarted'
           if: -> @status()
 
 ## Module Dependencies

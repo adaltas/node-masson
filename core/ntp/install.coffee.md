@@ -83,7 +83,7 @@ and when only ONE ntp server is configured
             backup: true
           @service
             srv_name: 'ntpd'
-            action: 'restart'
+            state: 'restarted'
             code_stopped: [1, 3]
             if_not: modified
           @next callback

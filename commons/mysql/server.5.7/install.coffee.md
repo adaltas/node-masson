@@ -66,7 +66,7 @@ Install the MySQL database server. Secure the temporary directory.
           chk_name: 'mysqld'
           srv_name: 'mysqld'
           startup: true
-          action: 'start'
+          state: 'started'
 
 ## Configuration
 Write /etc/my.cnf configuration file.

@@ -42,4 +42,4 @@ saslauth:x:76:
         if: -> @status()
         srv_name: 'saslauthd'
         startup: true
-        action: ['start', 'restart']
+        state: ['started', 'restarted']

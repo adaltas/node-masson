@@ -19,4 +19,4 @@ the application level by binding the system of cgroup hierarchies with the syste
       @service.startup
         name: 'cgconfig'
         startup: true
-        action: 'start'
+        state: 'started'

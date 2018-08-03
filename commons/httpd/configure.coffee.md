@@ -11,7 +11,7 @@
 ## Service
 
       options.startup ?= true
-      options.action ?= 'start'
+      options.state ?= 'started'
 
 ## Identities
 

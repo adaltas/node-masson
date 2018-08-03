@@ -83,7 +83,7 @@ Package on Centos/Redhat 7 OS.
           startup: true
           chk_name: 'mysqld'
           srv_name: 'mysqld'
-          action: 'start'
+          state: 'started'
         @service
           header: 'Install'
           name: 'mysql-server'
@@ -91,7 +91,7 @@ Package on Centos/Redhat 7 OS.
           startup: true
           chk_name: 'mysqld'
           srv_name: 'mysqld'
-          action: 'start'
+          state: 'started'
 
 ## Configuration
 Write /etc/my.cnf configuration file.
