@@ -1,7 +1,7 @@
 
 # Changelog
 
-## Trunk
+## Version 0.1.8
 
 * locale: nikita 2nd argument is not a callback
 * krb5_server: nikita kv  2nd argument is not a callback
