@@ -1,6 +1,8 @@
 
 # Changelog
 
+## Trunk
+
 * locale: nikita 2nd argument is not a callback
 * krb5_server: nikita kv  2nd argument is not a callback
 * openldap_server: nikita 2nd argument is not a callback
