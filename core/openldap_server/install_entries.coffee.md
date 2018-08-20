@@ -1,7 +1,7 @@
 
 # OpenLDAP Install Entries
 
-    module.exports = header: 'OpenLDAP Server Entries', handler: (options) ->
+    module.exports = header: 'OpenLDAP Server Entries', handler: ({options}) ->
 
 ## Groups
 

@@ -5,7 +5,7 @@ Install the [OpenLDAP backend for the MIT Kerberos server](https://web.mit.edu/k
 
 ## Configuration
 
-    module.exports = header: 'OpenLDAP Server Krb5', handler: (options) ->
+    module.exports = header: 'OpenLDAP Server Krb5', handler: ({options}) ->
 
 ## Install schema
 

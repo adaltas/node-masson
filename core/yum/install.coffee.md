@@ -1,7 +1,7 @@
 
 # YUM Install
 
-    module.exports = header: 'YUM Install', handler: (options) ->
+    module.exports = header: 'YUM Install', handler: ({options}) ->
 
 ## Locked
 

@@ -1,7 +1,7 @@
 
 # SSH Install
 
-    module.exports = header: 'SSH Install', handler: (options) ->
+    module.exports = header: 'SSH Install', handler: ({options}) ->
 
 ## Package
 

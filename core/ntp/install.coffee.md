@@ -5,7 +5,7 @@ The installation follows the procedure published on [cyberciti][cyberciti]. The
 "ntp" server is installed as a startup service and `ntpdate` is run a first
 time when the `ntpd` daemon isnt yet started.
 
-    module.exports = header: 'NTP Install', handler: (options) ->
+    module.exports = header: 'NTP Install', handler: ({options}) ->
 
 ## Package
 

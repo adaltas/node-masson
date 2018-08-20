@@ -1,7 +1,7 @@
 
 # Proxy Install
 
-    module.exports = header: 'Proxy Install', handler: (options) ->
+    module.exports = header: 'Proxy Install', handler: ({options}) ->
 
 ## System
 

@@ -1,7 +1,7 @@
 
 # FSTAB Install
 
-    module.exports = header: 'FSTAB Install', handler: (options) ->
+    module.exports = header: 'FSTAB Install', handler: ({options}) ->
 
 ## Prepare Logical Volumes
 Create Logical volume and format partition (before they are mounted by fstab)
@@ -9,9 +9,9 @@ Create Logical volume and format partition (before they are mounted by fstab)
       @call
         header: 'Logical Volumes'
       , ->
-        @each options.logical_volumes, (opts, callback) ->
-          lvname = opts.key
-          lv = opts.value
+        @each options.logical_volumes, ({options}, callback) ->
+          lvname = options.key
+          lv = options.value
           console.log lv.format
           @system.execute
             header: 'Create'
@@ -39,9 +39,9 @@ Format volumes and update the fstab.volumes variables with devices names.
       @call
         header: 'Format Volumes'
       , ->
-        @each options.volumes, (opts, callback) ->
-          mntpt = opts.key
-          disk = opts.value
+        @each options.volumes, ({options}, callback) ->
+          mntpt = options.key
+          disk = options.value
           @call
             if: disk.format
           , ->

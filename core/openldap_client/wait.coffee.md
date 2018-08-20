@@ -1,7 +1,7 @@
 
 # OpenLDAP Client Wait
 
-    module.exports = header: 'OpenLDAP Client Wait', handler: (options) ->
+    module.exports = header: 'OpenLDAP Client Wait', handler: ({options}) ->
 
       @connection.wait
         header: 'TCP'

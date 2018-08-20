@@ -1,7 +1,7 @@
 
 # Cgroups Install
 
-    module.exports = header: 'Cgroups Install', handler: (options) ->
+    module.exports = header: 'Cgroups Install', handler: ->
 
 ## Packages
 

@@ -1,7 +1,7 @@
 
 # System Install
 
-    module.exports = header: 'System Install', handler: (options) ->
+    module.exports = header: 'System Install', handler: ({options}) ->
 
 ## SELinux
 

@@ -15,7 +15,7 @@ Dig isn't available by default on CentOS and is installed by the
 "masson/core/bind_client" dependency.
 
 
-    module.exports = header: 'Network Check', handler: (options) ->
+    module.exports = header: 'Network Check', handler: ->
 
 ## Check DNS Forward Lookup
 

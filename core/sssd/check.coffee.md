@@ -1,5 +1,5 @@
 
-    module.exports = header: 'SSSD Check', handler: (options) ->
+    module.exports = header: 'SSSD Check', handler: ({options}) ->
 
 ## Runing Sevrice
 

@@ -5,7 +5,7 @@ Make sure we can execute the command `ldapsearch` with the default URL found
 inside "/etc/openldap/ldap.conf". The success of the test rely on the command
 exit code.
 
-    module.exports = header: 'OpenLDAP Client Check', handler: (options) ->
+    module.exports = header: 'OpenLDAP Client Check', handler: ({options}) ->
 
 ## Wait
 

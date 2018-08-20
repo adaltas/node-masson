@@ -3,7 +3,7 @@
 
 Check the health of the SSH server.
 
-    module.exports = header: 'SSH Check', handler: (options) ->
+    module.exports = header: 'SSH Check', handler: ->
 
 ## Runing Sevrice
 

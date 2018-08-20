@@ -3,7 +3,7 @@
 
 Wait for all the Kerberos servers referenced by the client configuration.
 
-    module.exports = header: 'Krb5 Client Wait', handler: (options) ->
+    module.exports = header: 'Krb5 Client Wait', handler: ({options}) ->
 
 ## Wait Admin
 

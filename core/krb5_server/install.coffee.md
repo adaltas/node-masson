@@ -18,7 +18,7 @@ Resources:
 *   [On Load Balancers and Kerberos](https://ssimo.org/blog/id_019.html)
 *   [Kerberos With LDAP on centos 7](http://www.rjsystems.nl/en/2100-d6-kerberos-openldap-provider.php)
 
-    module.exports = header: 'Kerberos Server Install', handler: (options) ->
+    module.exports = header: 'Kerberos Server Install', handler: ({options}) ->
 
 ## IPTables
 
@@ -206,7 +206,7 @@ The following files are updated:
 
       @call header: 'HA', ->
         ssh = @ssh options.ssh
-        @each options.admin, (options, next) ->
+        @each options.admin, ({options}, next) ->
           # realm = options.key
           config = options.value
           return next() unless config.ha

@@ -1,7 +1,7 @@
 
 # Bind Server Install
 
-    module.exports = header: 'Bind Server Install', handler: (options) ->
+    module.exports = header: 'Bind Server Install', handler: ({options}) ->
 
 ## Users & Groups
 

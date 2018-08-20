@@ -3,7 +3,7 @@
 
 Check the health of the Bind server.
 
-    module.exports = header: 'Bind Server Check', handler: (options) ->
+    module.exports = header: 'Bind Server Check', handler: ->
 
 ## Runing Sevrice
 

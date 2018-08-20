@@ -1,7 +1,7 @@
 
 # chrony Install
 
-    module.exports = header: 'chrony Install', handler: (options) ->
+    module.exports = header: 'chrony Install', handler: ({options}) ->
 
 ## Package
 

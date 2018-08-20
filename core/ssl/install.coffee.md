@@ -1,7 +1,7 @@
 
 # SSL Install 
 
-    module.exports = header: 'SSL Install', handler: (options) ->
+    module.exports = header: 'SSL Install', handler: ({options}) ->
 
 ## Upload Certicate Authority
 

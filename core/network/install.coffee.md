@@ -1,7 +1,7 @@
 
 # Network Install
 
-    module.exports = header: 'Network Install', handler: (options) ->
+    module.exports = header: 'Network Install', handler: ({options}) ->
 
 ## Hosts
 
