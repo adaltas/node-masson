@@ -70,20 +70,18 @@ starting in version 1.13.
           match: RegExp "^#{quote k}=.*$", 'mg'
           replace: "#{k}=#{v}"
           append: true
-        @call ->
-          @file
-            header: 'Sysconfig'
-            if_os: name: ['redhat','centos'], version: '7'
-            target: '/etc/sysconfig/docker'
-            write: writes
-            backup: true
           @file
             header: 'Daemon'
             if_os: name: ['redhat','centos'], version: '7'
             target: '/etc/docker/daemon.json'
-            # TODO: activate daemon in favor of the deprecated sysconfig
-            content: '{}'
-            # content: JSON.stringify options.daemon, null, 2
+            content: JSON.stringify options.daemon, null, 2
+          # @file
+          #   header: 'Sysconfig'
+          #   unless: options.write_daemon
+          #   if_os: name: ['redhat','centos'], version: '7'
+          #   target: '/etc/sysconfig/docker'
+          #   write: writes
+          #   backup: true
           # @file
           #   if_os: name: ['redhat','centos'], version: '6'
           #   target: '/etc/sysconfig/docker'

@@ -1,6 +1,10 @@
 
 # Changelog
 
+## Trunk
+
+* docker: use only daemon.json file
+
 ## Version 0.1.8
 
 * locale: nikita 2nd argument is not a callback

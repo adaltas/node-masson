@@ -38,4 +38,4 @@ setup TLS, sockets etc. Configuration which are mandatory if you want to use doc
         'status':
           'masson/commons/docker/status'
         'stop':
-          'masson/commons/docker/status'
+          'masson/commons/docker/stop'
