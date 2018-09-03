@@ -3,7 +3,7 @@
 
 Check the health of the Docker daemon.
 
-    module.exports = header: 'Docker Check', handler: (options) ->
+    module.exports = header: 'Docker Check', handler: ({options}) ->
 
 ## Runing Sevrice
 

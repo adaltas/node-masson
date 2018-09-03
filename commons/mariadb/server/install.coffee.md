@@ -1,7 +1,7 @@
 
 # MariaDB Server Install
 
-    module.exports = header: 'MariaDB Server Install', handler: (options) ->
+    module.exports = header: 'MariaDB Server Install', handler: ({options}) ->
 
 ## IPTables
 

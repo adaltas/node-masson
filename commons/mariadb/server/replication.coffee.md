@@ -7,7 +7,7 @@ Follow [instructions](https://www.digitalocean.com/community/tutorials/how-to-se
 Note: Ryba does not do any action if replication has already be enabled once for
 consistency reasons.
 
-    module.exports = header: 'MariaDB Server Replication', handler: (options) ->
+    module.exports = header: 'MariaDB Server Replication', handler: ({options}) ->
       return unless options.ha_enabled
       
       remote_master =

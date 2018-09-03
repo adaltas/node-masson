@@ -1,7 +1,7 @@
 
 # MariaDB Server Check
 
-    module.exports = header: 'MariaDB Server Check', handler: (options) ->
+    module.exports = header: 'MariaDB Server Check', handler: ({options}) ->
 
 ## Runing Sevrice
 

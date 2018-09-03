@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* nikita: options as destructured object
 * docker: use only daemon.json file
 
 ## Version 0.1.8
