@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* rngd: initial release for rngd service
 * nikita: options as destructured object
 * docker: use only daemon.json file
 
