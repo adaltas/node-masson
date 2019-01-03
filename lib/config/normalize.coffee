@@ -72,7 +72,7 @@ module.exports = (config) ->
           throw Error "Unsupported Affinity Type: got #{affinity.type}, accepted values are #{JSON.stringify Object.keys affinities.handlers}" unless affinities.handlers[affinity.type]
           affinities.handlers[affinity.type].normalize affinity
         catch err
-          err.message += " in service #{JSON.stringify sname} of cluter #{JSON.stringify cname}"
+          err.message += " in service #{JSON.stringify sname} of cluster #{JSON.stringify cname}"
           throw err
       # Normalize commands
       service.commands ?= {}
@@ -246,7 +246,7 @@ module.exports = (config) ->
         try
           service.configure = load service.configure if typeof service.configure is 'string'
         catch err
-          err.message += " in service #{JSON.stringify service.id} of cluter #{JSON.stringify service.cluster}"
+          err.message += " in service #{JSON.stringify service.id} of cluster #{JSON.stringify service.cluster}"
           throw err
         throw Error "Invalid Configuration: not a function, got #{typeof service.configure}" unless typeof service.configure is 'function'
         service.configure.call null, inject
