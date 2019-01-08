@@ -43,11 +43,9 @@ module.exports = (params, config, callback) ->
             isRoot = config.nikita.ssh.username is 'root' or not config.nikita.ssh.username
             n.call module, merge {}, instance.options, sudo: not isRoot
     n.next (err) ->
-      n.ssh.close header: 'SSH Close' #unless params.command is 'prepare' # params.end and 
-      n.next ->
-        console.log err if err
-        return
-        callback err
+      n.ssh.close header: 'SSH Close' #unless params.command is 'prepare' # params.end and
+      process.stdout.write err.message + '\n' if err
+      callback err
   .next (err) ->
     message = if err
     then 'Finish with err: ' + err.message

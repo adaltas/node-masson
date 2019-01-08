@@ -6,6 +6,9 @@
 * rngd: initial release for rngd service
 * nikita: options as destructured object
 * docker: use only daemon.json file
+* run: print err message after close
+* exec: print err message after close
+* nikita: use destructuring assignments
 
 ## Version 0.1.8
 
