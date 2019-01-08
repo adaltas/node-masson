@@ -1,7 +1,7 @@
 
 # Changelog
 
-## Trunk
+## Version 0.1.9
 
 * rngd: initial release for rngd service
 * nikita: options as destructured object
