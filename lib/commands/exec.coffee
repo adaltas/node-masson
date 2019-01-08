@@ -26,8 +26,11 @@ module.exports = (params, config) ->
         write "\n"
         callback()
     n.next (err) ->
-      n.ssh.close()
-      next err
+      # n.ssh.close()
+      # next err
+      n.ssh.close header: 'SSH Close' #unless params.command is 'prepare' # params.end and
+      n.next ->
+        process.stdout.write err.message if err
   .next (err) ->
     process.stdout.write err.message if err
     # Done
