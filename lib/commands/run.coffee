@@ -47,9 +47,10 @@ module.exports = (params, config, callback) ->
       process.stdout.write err.message + '\n' if err
       callback err
   .next (err) ->
-    message = if err
-    then 'Finish with err: ' + err.message
-    else 'Finish with success'
-    process.stdout.write '\n' + message + '\n\n'
+    if err
+      process.stderr.write "\nFinish with err: err.message\n\n"
+    else
+      process.stdout.write 'Finish with success'
+    
     callback err
     
