@@ -1,6 +1,10 @@
 
 # Changelog
 
+## Trunk
+
+* java: rename headers to http_headers
+
 ## Version 0.1.9
 
 * rngd: initial release for rngd service

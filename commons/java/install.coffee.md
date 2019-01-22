@@ -81,7 +81,7 @@ have been copied or not (in case they already exist).
               source: jdk.jdk_location
               target: "/tmp/java.#{now}/#{path.basename jdk.jdk_location}"
               location: true
-              headers: ['Cookie: oraclelicense=accept-securebackup-cookie']
+              http_headers: ['Cookie: oraclelicense=accept-securebackup-cookie']
             @system.mkdir "#{root_dir}/jdk#{version}"
             @tools.extract
               source: "/tmp/java.#{now}/#{path.basename jdk.jdk_location}"
@@ -95,7 +95,7 @@ have been copied or not (in case they already exist).
               source: "#{jdk.jce_location}"
               target: "/var/tmp/#{path.basename jdk.jce_location}"
               location: true
-              headers: ['Cookie: oraclelicense=accept-securebackup-cookie']
+              http_headers: ['Cookie: oraclelicense=accept-securebackup-cookie']
               shy: true
             @system.mkdir "/tmp/#{path_name}.#{now}", shy: true
             @system.mkdir "/tmp/#{path_name}", shy: true
