@@ -69,7 +69,7 @@ Java home are:
       options.jdk.version ?= '1.8.0_152'
       options.jdk.versions ?=
         '1.8.0_152':
-          jdk_location: "http://download.oracle.com/otn-pub/java/jdk/8u152-b16/aa0333dd3019491ca4f6ddbe78cdb6d0/jdk-8u152-linux-x64.tar.gz"
+          jdk_location: "https://download.oracle.com/otn-pub/java/jdk/8u202-b08/1961070e4c9b4e26a04e7f5a083f551e/jdk-8u202-linux-x64.tar.gz"
           jdk_md5: "20dddd28ced3179685a5f58d3fcbecd8"
           jce_location: "http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip"
           jce_sha256: "f3020a3922efd6626c2fff45695d527f34a8020e938a49292561f18ad1320b59"
