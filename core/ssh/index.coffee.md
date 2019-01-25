@@ -10,6 +10,7 @@
       deps:
         system: module: 'masson/core/system', local: true
         yum: module: 'masson/core/yum', local: true
+        apt: module: 'masson/core/apt', local: true
       configure:
         'masson/core/ssh/configure'
       commands:

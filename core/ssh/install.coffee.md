@@ -9,7 +9,11 @@
         @service
           name: 'openssh-server'
         @service
+          if_os: name: ['redhat','centos']
           name: 'openssh-clients'
+        @service
+          if_os: name: ['ubuntu']
+          name: 'openssh-client'
 
 ## Authorized Keys
 
