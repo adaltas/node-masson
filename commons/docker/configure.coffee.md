@@ -179,7 +179,7 @@ To use it just specify the `options.block_device`.
 
 ## Dependencies
 
-    {merge} = require 'nikita/lib/misc'
+    {merge} = require '@nikita/core/lib/misc'
 
 [socket-opts]:(https://docs.docker.com/engine/reference/commandline/dockerd/#/daemon-socket-option)
 [daemon-opts-resources]:(https://github.com/moby/moby/issues/21701)

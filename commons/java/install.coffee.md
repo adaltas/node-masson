@@ -191,7 +191,7 @@ have been copied or not (in case they already exist).
 
     each = require 'each'
     path = require 'path'
-    string = require 'nikita/lib/misc/string'
+    string = require '@nikita/core/lib/misc/string'
 
 ## Notes
 

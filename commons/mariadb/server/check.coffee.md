@@ -49,4 +49,4 @@ Ensure the port is listening.
 
 ## Dependencies
 
-    db = require 'nikita/lib/misc/db'
+    db = require '@nikita/core/lib/misc/db'

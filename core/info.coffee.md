@@ -185,4 +185,4 @@ It will output:
 
 ## Dependencies
 
-    string = require 'nikita/lib/misc/string'
+    string = require '@nikita/core/lib/misc/string'

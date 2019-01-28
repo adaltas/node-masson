@@ -18,4 +18,4 @@ Wait for all the Kerberos servers deployed by Masson.
 
 ## Dependencies
 
-    array = require 'nikita/lib/misc/array'
+    array = require '@nikita/core/lib/misc/array'

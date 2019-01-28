@@ -62,4 +62,4 @@ two new properties "sshd\_config" and "banner".
 
 ## Dependencies
 
-    {merge} = require 'nikita/lib/misc'
+    {merge} = require '@nikita/core/lib/misc'

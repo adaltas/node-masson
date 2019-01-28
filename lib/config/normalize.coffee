@@ -1,6 +1,6 @@
 
 tsort = require 'tsort'
-{merge} = require 'nikita/lib/misc'
+{merge} = require '@nikita/core/lib/misc'
 load = require '../utils/load'
 affinities = require './affinities'
 

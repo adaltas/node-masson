@@ -28,4 +28,4 @@ Wait connect action is used as a check of the port availability.
 
 ## Dependencies
 
-    db = require 'nikita/lib/misc/db'
+    db = require '@nikita/core/lib/misc/db'

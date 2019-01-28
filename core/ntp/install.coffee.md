@@ -108,6 +108,6 @@ to wait for an available NTPD server.
 ## Module Dependencies
 
     fs = require 'ssh2-fs'
-    string = require 'nikita/lib/misc/string'
+    string = require '@nikita/core/lib/misc/string'
 
 [cyberciti]: http://www.cyberciti.biz/faq/howto-install-ntp-to-synchronize-server-clock/

@@ -1,6 +1,6 @@
 
 path = require 'path'
-nikita = require 'nikita'
+nikita = require '@nikita/core'
 each = require 'each'
 store = require '../config/store'
 flatten = require '../utils/flatten'
@@ -10,7 +10,7 @@ array_get = require '../utils/array_get'
 
 module.exports = (params, config, callback) ->
   s = store(config)
-  engine = require('nikita/lib/core/kv/engines/memory')()
+  engine = require('@nikita/core/lib/core/kv/engines/memory')()
   each s.nodes()
   .parallel(true)
   .call (node, callback) ->
@@ -48,7 +48,9 @@ module.exports = (params, config, callback) ->
       callback err
   .next (err) ->
     if err
-      process.stderr.write "\nFinish with err: err.message\n\n"
+      # process.stderr.write "\nFinish with err: #{err.message}\n\n"
+      process.stderr.write "\n#{err.stack}\n"
+      console.log(err)
     else
       process.stdout.write 'Finish with success'
     

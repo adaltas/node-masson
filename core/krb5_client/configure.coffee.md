@@ -105,6 +105,6 @@ Example:
 
 ## Dependencies
 
-    misc = require 'nikita/lib/misc'
-    array = require 'nikita/lib/misc/array'
-    {merge} = require 'nikita/lib/misc'
+    misc = require '@nikita/core/lib/misc'
+    array = require '@nikita/core/lib/misc/array'
+    {merge} = require '@nikita/core/lib/misc'

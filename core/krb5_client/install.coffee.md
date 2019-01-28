@@ -111,7 +111,7 @@ configuration object. By default, we set the following properties to "yes": "Cha
 
 ## Module Dependencies
 
-    misc = require 'nikita/lib/misc'
+    misc = require '@nikita/core/lib/misc'
 
 ## Useful Client Commands
 

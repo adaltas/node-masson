@@ -36,4 +36,4 @@ Deploy the git configuration.
 
 ## Dependencies
 
-    misc = require 'nikita/lib/misc'
+    misc = require '@nikita/core/lib/misc'

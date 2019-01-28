@@ -350,6 +350,6 @@ The bug is fixed after version 5.7 of MariaDB.
 
 ## Dependencies
 
-    misc = require 'nikita/lib/misc'
-    db = require 'nikita/lib/misc/db'
+    misc = require '@nikita/core/lib/misc'
+    db = require '@nikita/core/lib/misc/db'
     path = require 'path'
