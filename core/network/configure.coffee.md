@@ -69,10 +69,11 @@ The module accept the following properties:
 ## Hosts
 
       options.hosts_auto ?= false
+      options.own_host ?= false # For when fqdn of the current host is already in /etc/hosts, we will want to avoid duplication
       options.hosts ?= {}
       if options.hosts_auto then for instance in service.instances
         throw Error "Required Property: node must define an IP" unless instance.node.ip
-        options.hosts[instance.node.ip] = "#{instance.node.fqdn} #{instance.node.hostname}"
+        options.hosts[instance.node.ip] = "#{instance.node.fqdn} #{instance.node.hostname}" unless instance.node.ip is options.ip and options.own_host
 
 ## DNS Resolver
 
