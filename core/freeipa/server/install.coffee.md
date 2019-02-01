@@ -81,7 +81,6 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
         #dns options
         if options.dns_enabled
           cmd += '--setup-dns '
-          cmd += "#{options.dns_host} "
           cmd += "-n #{options.dns_domain_name} "
           cmd += "--auto-reverse " if options.dns_auto_reverse
           cmd += '--auto-forwarders ' if options.dns_autoforward

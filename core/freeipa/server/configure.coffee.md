@@ -139,7 +139,6 @@ Follows [production deployment configuration](https://www.freeipa.org/page/Deplo
       if options.dns_enabled
         throw Error 'Missing domain name "dns_domain_name"' unless options.dns_domain_name?
         throw Error 'Missing dns manager email "dns_email_manager"' unless options.dns_email_manager?
-        options.dns_host ?= service.node.fqdn
         # options.dns['domain'] ?= options.dns_domain_name
         # options.dns['zonemgr'] ?= options.dns_email_manager
         options.dns_auto_reverse ?= true
