@@ -33,4 +33,4 @@ and we couldnt dig the exact nature of this error.
 
 ## Module Dependencies
 
-    misc = require '@nikita/core/lib/misc'
+    misc = require '@nikitajs/core/lib/misc'

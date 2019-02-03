@@ -255,6 +255,6 @@ a command argumet because it can not be run interractively.
 
 ## Dependencies
 
-    misc = require '@nikita/core/lib/misc'
-    db = require '@nikita/core/lib/misc/db'
+    misc = require '@nikitajs/core/lib/misc'
+    db = require '@nikitajs/core/lib/misc/db'
     path = require 'path'

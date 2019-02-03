@@ -281,7 +281,7 @@ The following files are updated:
     fs = require 'ssh2-fs'
     path = require('path').posix
     each = require 'each'
-    misc = require '@nikita/core/lib/misc'
+    misc = require '@nikitajs/core/lib/misc'
 
 ## Notes
 

@@ -104,5 +104,5 @@ Write /etc/fstab
 
 ## Dependencies
 
-    {regexp} = require '@nikita/core/lib/misc'
+    {regexp} = require '@nikitajs/core/lib/misc'
     path = require 'path'

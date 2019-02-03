@@ -1,6 +1,6 @@
 
 path = require 'path'
-nikita = require '@nikita/core'
+nikita = require '@nikitajs/core'
 each = require 'each'
 store = require '../config/store'
 flatten = require '../utils/flatten'
@@ -10,7 +10,7 @@ array_get = require '../utils/array_get'
 
 module.exports = (params, config, callback) ->
   s = store(config)
-  engine = require('@nikita/core/lib/core/kv/engines/memory')()
+  engine = require('@nikitajs/core/lib/core/kv/engines/memory')()
   each s.nodes()
   .parallel(true)
   .call (node, callback) ->

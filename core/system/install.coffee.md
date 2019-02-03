@@ -86,7 +86,7 @@ Publish scripts inside the profile directory, located in "/etc/profile.d".
 
 ## Dependencies
 
-    {merge} = require '@nikita/core/lib/misc'
+    {merge} = require '@nikitajs/core/lib/misc'
 
 [nikita_group]: https://github.com/wdavidw/node-nikita/blob/master/src/group.coffee.md
 [nikita_user]: https://github.com/wdavidw/node-nikita/blob/master/src/user.coffee.md

@@ -1,4 +1,4 @@
 
-{merge} = require '@nikita/core/lib/misc'
+{merge} = require '@nikitajs/core/lib/misc'
 
 module.exports = merge

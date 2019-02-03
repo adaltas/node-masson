@@ -39,4 +39,4 @@ Make sure Yum isnt already running.
 
 ## Dependencies
 
-    pidfile_running = require '@nikita/core/lib/misc/pidfile_running'
+    pidfile_running = require '@nikitajs/core/lib/misc/pidfile_running'

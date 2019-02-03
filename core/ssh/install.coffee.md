@@ -113,4 +113,4 @@ service will be restarted if this action had any effect.
 
 ## Dependencies
 
-    misc = require '@nikita/core/lib/misc'
+    misc = require '@nikitajs/core/lib/misc'

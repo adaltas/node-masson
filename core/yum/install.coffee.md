@@ -111,4 +111,4 @@ set the property "yum.epel.enabled" to "true".
 
 ## Dependencies
 
-    pidfile_running = require '@nikita/core/lib/misc/pidfile_running'
+    pidfile_running = require '@nikitajs/core/lib/misc/pidfile_running'

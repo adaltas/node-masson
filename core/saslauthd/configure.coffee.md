@@ -91,4 +91,4 @@ Use a provided username and password to validate the connection, not required.
 
 ## Dependencies
 
-    {merge} = require '@nikita/core/lib/misc'
+    {merge} = require '@nikitajs/core/lib/misc'

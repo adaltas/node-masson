@@ -15,5 +15,5 @@
 
 ## Module Dependencies
 
-    misc = require '@nikita/core/lib/misc'
+    misc = require '@nikitajs/core/lib/misc'
     krb5_server = require '../krb5_server'

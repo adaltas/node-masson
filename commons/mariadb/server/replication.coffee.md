@@ -79,5 +79,5 @@ Gather the target master informations, then start the slave replication.
 
 ## Dependencies
 
-    db = require '@nikita/core/lib/misc/db'
-    string = require '@nikita/core/lib/misc/string'
+    db = require '@nikitajs/core/lib/misc/db'
+    string = require '@nikitajs/core/lib/misc/string'
