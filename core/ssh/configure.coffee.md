@@ -47,16 +47,15 @@ two new properties "sshd\_config" and "banner".
 }
 ```
 
-    module.exports = (service) ->
-      options = service.options
-      
+    module.exports = ({options, deps}) ->
       options.sshd_config ?= null
       options.users ?= {}
       for username, config of options.users
-        throw Error "User Not Defined: module system must define the user #{username}" unless username is 'root' or service.deps.system.options.users[username]
-        user = merge {}, service.deps.system.options.users[username] or {}, config
-        user.home ?= '/root' if username is 'root'
-        config.ssh_dir ?= "#{user.home}/.ssh"
+        if deps.system
+          throw Error "User Not Defined: module system must define the user #{username}" unless username is 'root' or deps.system.options.users[username]
+          config = merge {}, deps.system.options.users[username]
+        config.home ?= '/root' if username is 'root'
+        config.ssh_dir ?= "#{config.home}/.ssh"
         config.authorized_keys ?= []
         config.authorized_keys = [config.authorized_keys] if typeof config.authorized_keys is 'string'
 
