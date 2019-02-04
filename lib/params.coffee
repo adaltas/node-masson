@@ -54,6 +54,41 @@ module.exports =
           main:
             name: 'fqdn'
             description: 'The FQDN associated with the certificate'
+    'secrets':
+      description: 'Interact with the secure secret file store'
+      run: 'masson/lib/commands/secrets'
+      options: [
+        name: 'store', shortcut: 's', type: 'string'
+        default: '.secrets'
+        description: 'File storing the secrets'
+      ,
+        name: 'envpw', shortcut: 'e', type: 'string'
+        default: 'MASSON_SECRET_PW'
+        description: 'Environment variable storing the password'
+      ]
+      command: 'action'
+      commands:
+        'init':
+          description: 'Initialize the secret store'
+        'get':
+          description: 'Get a secret'
+          main:
+            name: 'property'
+            required: true
+            description: 'Property name'
+        'set':
+          description: 'Set a secret'
+          main:
+            name: 'property'
+            description: 'Property name'
+          options:
+            overwrite:
+              type: 'boolean'
+              shortcut: 'o'
+              default: false
+              description: 'Overwrite an existing property'
+        'show':
+          description: 'Display all the secrets'
     'exec':
       description: "Distribute a shell command"
       run: 'masson/lib/commands/exec'

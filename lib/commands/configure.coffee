@@ -11,7 +11,6 @@ store = require '../config/store'
 # ./bin/ryba configure -o output_file -p JSON
 module.exports = (params, config) ->
   # EXAMPLE START
-  # params = params.parse argv
   params.output ?= 'export'
   # params.format ?= 'coffee'
   params.output = path.resolve process.cwd(), params.output

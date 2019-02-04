@@ -7,17 +7,19 @@ store = require './config/store'
 merge = require './utils/merge'
 
 module.exports = (processOrArgv, callback) ->
-  if arguments.length is 1
-    callback = proc
-    processOrArgv = process
-  callback ?= (->)
   processOrArgv ?= process
 
   # Parse the first part of the arguments, without the user command
   orgparams = parameters(merge {}, params, main: name: 'main').parse(processOrArgv, help: false)
   # Read configuration
   load orgparams.config, (err, config) ->
-    return callback err if err
+    if err
+      if callback
+        return callback err
+      else
+        process.stderr.write "#{e.message}\n\n"
+        process.exit()
+    callback ?= (->)
     # Normalize coniguration
     config = normalize config
     # Enrich configuration with command discovery
@@ -41,7 +43,10 @@ module.exports = (processOrArgv, callback) ->
         ]
     # Merge default parameters with discovered parameters and user parameters
     merge params, commands: commands, config.params
-    # paramsvc = parameters params
-    # paramsnew = paramsvc.parse processOrArgv
-    # paramsvc.run paramsnew, config, callback
+    try
+      parameters(params).parse processOrArgv
+    catch err
+      process.stderr.write "#{err.message}\n\n"
+      process.exit()
     parameters(params).run processOrArgv, config, callback
+      

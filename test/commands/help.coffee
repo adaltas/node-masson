@@ -48,6 +48,7 @@ describe 'command help', ->
     COMMANDS
         help                    Display help information about masson
         pki                     Certificate Management for development usage
+        secrets                 Interact with the secure secret file store
         exec                    Distribute a shell command
         configure               Export servers' configuration in a file
         graph                   Print the execution plan
@@ -61,6 +62,10 @@ describe 'command help', ->
     COMMAND "pki"
         pki [pki options] <action>
         Where command is one of ca, cacert-view, check, cert, cert-view.
+
+    COMMAND "secrets"
+        secrets [secrets options] <action>
+        Where command is one of init, get, set, show.
 
     COMMAND "exec"
         exec                    Distribute a shell command
