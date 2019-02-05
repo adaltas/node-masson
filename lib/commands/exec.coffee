@@ -11,7 +11,7 @@ module.exports = (params, config) ->
   each config.nodes
   .parallel true
   .call (_, node, next) ->
-    return next() if params.hosts? and multimatch(node.fqdn, params.hosts).length is 0
+    return next() if params.nodes? and multimatch(node.fqdn, params.nodes).length is 0
     n = nikita merge {}, config.nikita
     n.ssh.open host: node.ip or node.fqdn
     n.call (options, callback) ->
@@ -26,8 +26,6 @@ module.exports = (params, config) ->
         write "\n"
         callback()
     n.next (err) ->
-      # n.ssh.close()
-      # next err
       n.ssh.close header: 'SSH Close' #unless params.command is 'prepare' # params.end and
       n.next ->
         process.stdout.write err.message if err
