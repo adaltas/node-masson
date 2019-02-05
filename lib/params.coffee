@@ -70,6 +70,12 @@ module.exports =
       commands:
         'init':
           description: 'Initialize the secret store'
+        'unset':
+          description: 'Delete a secret from the store'
+          main:
+            name: 'property'
+            required: true
+            description: 'Property name'
         'get':
           description: 'Get a secret'
           main:

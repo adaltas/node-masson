@@ -113,3 +113,24 @@ describe 'command configure', ->
                 a: 'a value'
                 b: 'b value'
             next()
+              
+  it 'unset key', (next) ->
+    store = new Store
+      store: tmp
+      password: 'mysecret'
+    store.init (err) ->
+      return next err if err
+      store.set
+        some: keys: 
+          a: 'a value'
+          b: 'b value'
+      , (err) ->
+        return next err if err
+        store.unset 'some.keys.a', (err) ->
+          return next err if err
+          store.get (err, secrets) ->
+            return next err if err
+            secrets.should.eql 
+              some: keys:
+                b: 'b value'
+            next()
