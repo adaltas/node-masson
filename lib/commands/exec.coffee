@@ -14,9 +14,11 @@ module.exports = (params, config) ->
     return next() if params.nodes? and multimatch(node.fqdn, params.nodes).length is 0
     n = nikita merge {}, config.nikita
     n.ssh.open host: node.ip or node.fqdn
-    n.call (options, callback) ->
-      ssh = @ssh options.ssh
-      exec ssh, params.subcommand, (err, stdout, stderr) ->
+    n.call ({options}, callback) ->
+      @system.execute
+        relax: true
+        cmd: params.subcommand
+      , (err, {stdout, stderr}) ->
         write if err
         then "\x1b[31m#{node.fqdn} (exit code #{err.code})\x1b[39m\n"
         else "\x1b[32m#{node.fqdn}\x1b[39m\n"
