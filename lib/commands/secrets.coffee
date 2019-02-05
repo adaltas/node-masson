@@ -3,21 +3,41 @@ fs = require 'fs'
 crypto = require 'crypto'
 yaml = require 'js-yaml'
 generator = require 'generate-password'
+get = require 'lodash.get'
+set = require 'lodash.set'
 
 class Store
   constructor: (options) ->
     @store = options.store
     @password = options.password or process.env[options.envpw]
     @algorithm = 'aes-256-ctr'
-  get: (callback) ->
+  get: (key, callback) ->
+    if arguments.length is 1
+      callback = key
+      key = null
     @_read (err) =>
       @decrypt @raw, (err, secrets) ->
         return callback err if err
-        secrets = JSON.parse secrets or '{}'
-        callback null, secrets
+        if key
+          callback null, get secrets, key
+        else
+          callback null, secrets
   set: (secrets, callback) ->
+    # (secrets, callback)
+    if arguments.length is 2
+      secrets = arguments[0]
+      callback = arguments[1]
+    # (key, value, callback)
+    else if arguments.length is 3
+      key = arguments[0]
+      value = arguments[1]
+      callback = arguments[2]
+      @get (err, secrets) =>
+        return callback err if err
+        set secrets, key, value
+        @set secrets, callback
+      return
     @_read (err) =>
-      secrets = JSON.stringify secrets
       @encrypt secrets, (err, secrets) =>
         return callback err if err
         @raw = Buffer.from(secrets)
@@ -45,7 +65,8 @@ class Store
     fs.stat @store, (err) ->
       callback null, !err
   # Encrypt some text
-  encrypt: (text, callback) ->
+  encrypt: (secrets, callback) ->
+    text = JSON.stringify secrets
     @_read (err) =>
       return callback err if err
       key = crypto.createHash('sha256').update(@password).digest().slice(0, 32)
@@ -62,7 +83,8 @@ class Store
       decipher = crypto.createDecipheriv @algorithm, key, @iv
       dec = decipher.update text, 'hex', 'utf8'
       dec += decipher.final 'utf8'
-      callback null, dec
+      secrets = JSON.parse dec or '{}'
+      callback null, secrets
 
 module.exports = (params, config, callback) ->
   module.exports[params.action] params, config, callback

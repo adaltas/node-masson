@@ -37,6 +37,8 @@
     "generate-password": "^1.4.1",
     "http-server": "~0.11.1",
     "js-yaml": "^3.12.1",
+    "lodash.get": "^4.4.2",
+    "lodash.set": "^4.3.2",
     "minimatch": "~3.0.4",
     "nikita": "~0.9.3-alpha.2",
     "pad": "~2.2.2",

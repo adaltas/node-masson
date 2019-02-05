@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* secrets: get/set by properties
 * java: rename headers to http_headers
 
 ## Version 0.1.9
