@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* secrets: isolate core functionalities
 * secrets: unset keys
 * secrets: get/set by properties
 * java: rename headers to http_headers

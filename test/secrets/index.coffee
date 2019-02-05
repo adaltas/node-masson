@@ -1,6 +1,6 @@
 
 nikita = require 'nikita'
-{Store} = require '../../lib/commands/secrets'
+secrets = require '../../lib/secrets'
 
 describe 'command configure', ->
   
@@ -11,7 +11,7 @@ describe 'command configure', ->
     .promise()
       
   it 'init', (next) ->
-    store = new Store
+    store = secrets
       store: tmp
       password: 'mysecret'
     store.init (err) ->
@@ -21,7 +21,7 @@ describe 'command configure', ->
         next()
           
   it 'setget all', (next) ->
-    store = new Store
+    store = secrets
       store: tmp
       password: 'mysecret'
     store.init (err) ->
@@ -34,7 +34,7 @@ describe 'command configure', ->
           next()
             
   it 'get key', (next) ->
-    store = new Store
+    store = secrets
       store: tmp
       password: 'mysecret'
     store.init (err) ->
@@ -53,7 +53,7 @@ describe 'command configure', ->
             next()
               
   it 'get keys', (next) ->
-    store = new Store
+    store = secrets
       store: tmp
       password: 'mysecret'
     store.init (err) ->
@@ -72,7 +72,7 @@ describe 'command configure', ->
           next()
             
   it 'set key', (next) ->
-    store = new Store
+    store = secrets
       store: tmp
       password: 'mysecret'
     store.init (err) ->
@@ -91,7 +91,7 @@ describe 'command configure', ->
             next()
               
   it 'set keys', (next) ->
-    store = new Store
+    store = secrets
       store: tmp
       password: 'mysecret'
     store.init (err) ->
@@ -115,7 +115,7 @@ describe 'command configure', ->
             next()
               
   it 'unset key', (next) ->
-    store = new Store
+    store = secrets
       store: tmp
       password: 'mysecret'
     store.init (err) ->
