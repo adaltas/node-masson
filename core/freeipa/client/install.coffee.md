@@ -32,7 +32,7 @@ Install the FreeIPA Server
     fs = require 'ssh2-fs'
     path = require('path').posix
     each = require 'each'
-    misc = require 'nikita/lib/misc'
+    misc = require '@nikitajs/core/lib/misc'
 
 ## Notes
 

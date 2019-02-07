@@ -32,4 +32,4 @@ Follows [production deployment configuration](https://www.freeipa.org/page/Deplo
 
 ## Dependencies
 
-    {merge} = require 'nikita/lib/misc'
+    {merge} = require '@nikitajs/core/lib/misc'
