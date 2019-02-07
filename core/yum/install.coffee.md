@@ -7,11 +7,12 @@
 
 Make sure Yum isnt already running.
 
-      @call header: 'Locked', shy: true, handler: (_, callback) ->
-        ssh = @ssh options.ssh
-        pidfile_running ssh, '/var/run/yum.pid', (err, running) ->
-          err = Error 'Yum is already running' if running
-          callback err
+      @system.running
+        header: 'Lock Check'
+        target: '/var/run/yum.pid'
+      , (err, {status}) ->
+        throw err if err
+        throw Error 'Yum is already running' if status
 
 ## Configuration
 
@@ -108,7 +109,3 @@ set the property "yum.epel.enabled" to "true".
         name: name
         if: active
       ) for name, active of options.packages
-
-## Dependencies
-
-    pidfile_running = require '@nikitajs/core/lib/misc/pidfile_running'

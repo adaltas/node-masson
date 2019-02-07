@@ -3,6 +3,8 @@
 
 ## Trunk
 
+* yum: use system.running
+* secrets: new command to manage passwords
 * secrets: isolate core functionalities
 * secrets: unset keys
 * secrets: get/set by properties
