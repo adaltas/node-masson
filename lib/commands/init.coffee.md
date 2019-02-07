@@ -21,7 +21,7 @@ masson init \
 
     params = require '../params'
     fs = require 'fs'
-    nikita = require 'nikita'
+    nikita = require '@nikitajs/core'
     readline = require 'readline'
 
     module.exports = ->

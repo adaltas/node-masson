@@ -1,5 +1,7 @@
 
-secrets = require '../lib/secrets'
+secrets = require '../secrets'
+get = require 'lodash.get'
+yaml = require 'js-yaml'
 
 module.exports = (params, config, callback) ->
   module.exports[params.action] params, config, callback
@@ -67,15 +69,27 @@ module.exports['set'] = (params, config, callback) ->
     if value and not params.overwrite
       process.stderr.write "Fail to save existing secret, use the \"overwrite\" option." + '\n'
       return callback()
-    unless password
-      password_generated = true
-      password = generator.generate
-        length: 10,
-        numbers: true
-    store.set property, password, (err) ->
-      if err
-        process.stderr.write "#{err.message}" + '\n'
+    store_password = (password) ->
+      store.set property, password, (err) ->
+        if err
+          process.stderr.write "#{err.message}" + '\n'
+        else
+          process.stderr.write "Secret store updated." + '\n'
+          process.stdout.write password + '\n' if password_generated
+        callback err
+    # Provided as argument
+    if password
+      store_password password
+    else
+      # Provided generated
+      if process.stdin.isTTY
+        password_generated = true
+        password = store.password()
+        store_password password
+      # Obtained from stdin
       else
-        process.stderr.write "Secret store updated." + '\n'
-        process.stdout.write password + '\n' if password_generated
-      callback err
+        password = ''
+        process.stdin.on 'data', (chunk) ->
+          password += chunk
+        process.stdin.on 'end', ->
+          store_password password

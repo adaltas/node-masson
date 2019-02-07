@@ -79,7 +79,7 @@ module.exports = (config) ->
       for cmdname, command of service.commands
         command = service.commands[cmdname] = [command] unless Array.isArray command
         for mod in command
-          throw Error "Invalid Command: accept array, string or function, got #{JSON.stringify mod} for command #{JSON.stringify cmdname}" unless typeof mod in ['string', 'function']
+          throw Error "Invalid Command: accept array, string or function, got #{JSON.stringify mod} for command #{JSON.stringify cmdname}" unless typeof mod in ['string', 'function'] or is_object mod
       # Default empty node list
       service.nodes ?= {}
       service.instances = []

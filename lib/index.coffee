@@ -11,6 +11,7 @@ module.exports = (processOrArgv, callback) ->
 
   # Parse the first part of the arguments, without the user command
   orgparams = parameters(merge {}, params, main: name: 'main').parse(processOrArgv, help: false)
+  
   # Read configuration
   load orgparams.config, (err, config) ->
     if err

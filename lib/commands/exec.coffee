@@ -3,7 +3,7 @@ each = require 'each'
 multimatch = require '../utils/multimatch'
 exec = require 'ssh2-exec'
 merge = require '../utils/merge'
-nikita = require 'nikita'
+nikita = require '@nikitajs/core'
 
 module.exports = (params, config) ->
   config.nikita.no_ssh = true
