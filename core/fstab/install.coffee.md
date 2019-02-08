@@ -12,7 +12,6 @@ Create Logical volume and format partition (before they are mounted by fstab)
         @each options.logical_volumes, ({options}, callback) ->
           lvname = options.key
           lv = options.value
-          console.log lv.format
           @system.execute
             header: 'Create'
             cmd: """

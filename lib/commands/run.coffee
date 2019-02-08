@@ -55,6 +55,5 @@ module.exports = (params, config, callback) ->
       process.stderr.write "\n#{err.stack}\n"
     else
       process.stdout.write 'Finish with success'
-    
     callback err
     

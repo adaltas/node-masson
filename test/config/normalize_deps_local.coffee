@@ -87,7 +87,6 @@ describe 'normalize deps local', ->
         'b.fqdn': ip: '10.10.10.2'
         'c.fqdn': ip: '10.10.10.3'
     services.map (service) ->
-      console.log service.deps.my_dep_a
       service.deps.my_dep_a.id.should.eql 'dep_a'
       service.deps.my_dep_a.node.id
     .should.eql ['a.fqdn', 'c.fqdn']

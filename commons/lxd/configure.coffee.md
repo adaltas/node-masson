@@ -8,7 +8,6 @@ TODO
 ## Normalization
 
     module.exports = ({options, node}) ->
-      console.log(node)
       # options.supported_os = ['ubuntu']
       
 ## Identities

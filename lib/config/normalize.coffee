@@ -166,7 +166,6 @@ module.exports = (config) ->
         # service.nodes[nodeId].service = service.id
         # service.nodes[nodeId].node = merge {}, config.nodes[nodeId]
         # service.nodes[nodeId].options ?= {}
-      # console.log service.id, service.nodes
     # Enrich service list in nodes
     for instance in service.instances
       found = null
@@ -226,7 +225,6 @@ module.exports = (config) ->
         continue if dep.disabled
         # Get dependency service
         deps[dname] = config.clusters[dep.cluster].services[dep.service].instances
-        # console.log '-->', deps[dname]
         if dep.single
           throw Error "Invalid Option: single only apply to 1 dependencies, found #{deps[dname].length}" if deps[dname].length isnt 1
           deps[dname] = deps[dname][0] or null

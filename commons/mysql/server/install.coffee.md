@@ -126,11 +126,9 @@ the following ways:
           stream.write '/usr/bin/mysql_secure_installation\n'
           stream.on 'data', (data, extended) =>
             data = data.toString()
-            console.log 'read': data
             switch
               when /Enter current password for root/.test data
                 @log data
-                console.log 'write: ', options.current_password
                 stream.write "#{options.current_password}\n"
               when /Change the root password/.test data
                 @log data
@@ -157,10 +155,8 @@ the following ways:
                 @log data
                 stream.end 'exit\n'
           stream.on 'error', (err) ->
-            console.log 'exit'
             callback err
           stream.on 'exit', =>
-            console.log 'exit'
             @service.restart 'mysqld' unless err
             @next (err) -> callback err, true
 

@@ -36,4 +36,3 @@ Each module belonging to FreeIPA (LDAP, MIT Kerberos, DNS) is separated in its o
           'masson/core/freeipa/server/status'
         'stop':
           'masson/core/freeipa/server/stop'
-
