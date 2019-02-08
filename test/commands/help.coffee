@@ -65,7 +65,7 @@ describe 'command help', ->
 
     COMMAND "secrets"
         secrets [secrets options] <action>
-        Where command is one of init, get, set, show.
+        Where command is one of init, unset, get, set, show.
 
     COMMAND "exec"
         exec                    Distribute a shell command
