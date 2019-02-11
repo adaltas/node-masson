@@ -4,7 +4,7 @@
 Install the FreeIPA Server
 
     module.exports = header: 'FreeIPA Server Install', handler: ({options}) ->
-
+    
 ## IPTables
 
 | Service    | Port | Proto | Parameter                            |
@@ -37,69 +37,157 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
 ## Identities
       
       for usr in ['hsqldb', 'apache', 'memcached', 'ods', 'tomcat', 'pkiuser', 'dirsrv']
-        @system.group options[usr].group
-        @system.user options[usr].user
+        @system.group
+          header: "Group #{usr}"
+          if: options.manage_users_groups
+        , options[usr].group
+        @system.user
+          header: "User #{usr}"
+          if: options.manage_users_groups
+        , options[usr].user
 
 ## Package
 
-      @service
-        name: 'freeipa-server'
-      @service
-        if: options.dns_enabled
-        name: 'ipa-server-dns'
-
-## Layout
-
-      @system.mkdir
-        target: options.conf_dir
+      @call header: 'Packages', ->
+        @service
+          name: 'freeipa-server'
+        @service
+          if: options.dns_enabled
+          name: 'ipa-server-dns'
 
 ## TLS
 
       (if options.tls_ca_cert_local then @file.download else @system.copy)
-        header: 'Deploy Cert'
+        header: 'Cert'
+        if: options.tls_cert_file
         source: options.tls_cert_file
         target: "#{options.conf_dir}/cacert.pem"
-        # uid: 'ldap'
-        # gid: 'ldap'
         mode: 0o0400
       (if options.tls_key_local then @file.download else @system.copy)
-        header: 'Deploy Key'
+        header: 'Key'
+        if: options.tls_key_file
         source: options.tls_key_file
         target: "#{options.conf_dir}/key.pem"
-        # uid: 'ldap'
-        # gid: 'ldap'
         mode: 0o0400
 
-
-## Setup
-
-      @call header: 'Setup', handler: ->
-        cmd = 'ipa-server-install -U '
-        cmd += "--hostname=#{options.fqdn} "
-        #krb5 mit realm
-        cmd += "-r #{options.realm_name} -a #{options.admin_password} -p #{options.manager_password} "
-        #dns options
-        if options.dns_enabled
-          cmd += '--setup-dns '
-          cmd += "-n #{options.dns_domain_name} "
-          cmd += "--auto-reverse " if options.dns_auto_reverse
-          cmd += '--auto-forwarders ' if options.dns_autoforward
-          cmd += if options.dns_forwarder? then "--forwarder=#{options.dns_forwarder}" else '--no-forwarders'
-        if !options.ntp_enabled
-          cmd += '--no-ntp '
-        if options.tls_enabled
-          cmd += " --ca-cert-file=#{options.conf_dir}/cacert.pem"
+      @system.execute
+        header: 'Setup'
+        unless_exists: '/etc/ipa/default.conf'
+        cmd: [
+          'ipa-server-install', '-U'
+          #  Basic options
+          "-a #{options.admin_password}"
+          "-p #{options.manager_password}"
+          "--hostname #{options.hostname}"
+          "--domain #{options.domain}" # Same as -n
+          "--ip-address #{options.ip_address}"
+          # Server options
+          "--idstart=#{options.idstart}" if options.idstart
+          "--idmax=#{options.idmax}" if options.idmax
+          # Kerberos REALM
+          "-r #{options.realm_name}"
+          # DNS
+          ...[
+            '--setup-dns'
+            '--auto-reverse' if options.dns_auto_reverse
+            '--auto-forwarders' if typeof options.dns_auto_forward is 'boolean'
+            ...( for forwarder in options.dns_forwarder
+              "--forwarder=#{forwarder}"
+            ) if Array.isArray options.dns_forwarder
+          ] if options.dns_enabled
+          '--no-ntp' unless options.ntp_enabled
+          ...[
+            if options.external_ca
+              '--external-ca'
+              "--ca-subject=\"#{options.ca_subject}\""
+            else
+              "--ca-cert-file=#{options.conf_dir}/cacert.pem"
+          ] if options.tls_enabled
+        ].join ' '
+      
+      @call
+        if_exists: '/root/ipa.csr'
+        unless_exists: '/root/ipa.cert'
+        header: '...waiting for /root/chain.cert.pem...'
+      , (err, callback) ->
+        @call ->
+          process.stdout.writte [
+            'The next step is to get /root/ipa.csr signed by your CA '
+            'and place the certificate chain, the root and the intermediate'
+            'certificates, in /root/ipa.cert in the PEM format'
+          ] if process.stdin.isTTY
+        @wait.exist
+          target: '/root/ipa.cert'
+        @call ->
+          process.stdout.writte [
+            'Be sure to back up the CA certificates stored in /root/cacert.p12'
+            'These files are required to create replicas. The password for these'
+            'files is the Directory Manager password'
+          ] if process.stdin.isTTY
+      @call
+        header: 'Certificate'
+        if: -> @status -1
+      , ->
         @system.execute
-          header: 'setup ipa server'
-          cmd: cmd
-          # unless_exec: "#{cmd} | grep 'IPA server is already configured on this system'"
+          unless_exists: '/var/lib/ipa-client/sysrestore/sysrestore.index'
+          cmd: [
+            'ipa-server-install'
+            '--external-cert-file=/root/ipa.cert'
+          ].join ' '
+        @system.execute
+          if_exists: '/var/lib/ipa-client/sysrestore/sysrestore.index'
+          cmd: [
+            'ipa-cacert-manage', 'renew'
+            '--external-cert-file=/root/ipa.cert'
+          ].join ' '
+        @fs.unlink
+          header: 'Cleanup'
+        , [
+          '/root/ipa.cert'
+          '/root/ipa.csr'
+        ]
         
-## Dependencies
+      @call
+        header: 'DNS'
+        if: options.dns_enabled
+        unless: -> @status -3
+      , ({}, callback) ->
+        @system.execute
+          cmd: """
+          echo #{options.admin_password} | kinit admin
+          ipa dnsserver-find
+          """
+        , (err, {stdout}) ->
+          return callback err if err
+          forwarders = parse_dnsserver_find_forwarders stdout, options.fqdn
+          @system.execute
+            cmd: [
+              'ipa-dns-install', '-U'
+              '--auto-reverse' if options.dns_auto_reverse
+              '--auto-forwarders' if options.dns_auto_forward
+              ...( for forwarder in options.dns_forwarder
+                "--forwarder=#{forwarder}"
+              )
+            ].join ' '
+          , (err, {status}) ->
+            callback err, status
 
-    fs = require 'ssh2-fs'
-    path = require('path').posix
-    each = require 'each'
-    misc = require '@nikitajs/core/lib/misc'
+## Utils
+
+    parse_dnsserver_find_forwarders = (data, fqdn) ->
+      servers = {}
+      server = null
+      for line in data.split '\n'
+        if match = /^\s+Server name:\s+(.*)$/.exec line
+          server = match[1]
+          servers[server] = []
+        if match = /^\s+Forwarders:\s+(.*)$/.exec line
+          forwarders = match[1].split(',').map (forwarder) -> forwarder.trim()
+          servers[server] = forwarders
+      if fqdn
+        servers[fqdn]
+      else
+        servers
 
 ## Notes
 

@@ -3,12 +3,61 @@
 
 Follows [production deployment configuration](https://www.freeipa.org/page/Deployment_Recommendations)
 
-    module.exports = (service) ->
-      options = service.options
-      options.fqdn = service.node.fqdn
+## Options
+
+* `admin_password` (string, required)   
+  The password for the IPA admin user.
+* `domain` (string, required)   
+  Primary DNS domain of the IPA deployment (not necessarily related to the 
+  current hostname); same as FreeIPA "-n" option.
+* `dns_auto_forward` (boolean, optional, false)   
+  Use DNS forwarders configured in /etc/resolv.conf ("--auto-forwarders"); can
+  be combined with `dns_forwarder`.
+* `dns_forwarder` (string|array|boolean, optional, [])   
+  Set one or multiple DNS; can be combined with `auto_forwarder`.
+  /etc/resolv.conf ("--auto-forwarders"); if string or array, add one or 
+  multiple DNS forwarder.
+* `idstart` (number, optional, undefined)
+  The starting value for the IDs range (FreeIPA default: random).
+* `idmax` (number, optional, undefined)
+  The max value for the IDs range (FreeIPA default: idstart+199999).
+* `manager_password` (string, required)   
+  The password to be used by the Directory Server for the Directory Manager user.
+
+## Exemple
+
+```coffee
+options:
+  # Kerberos
+  manager_password: 'DM\_PASSWORD'
+  admin_password: 'ADMIN\_PASSWORD'
+  realm_name: 'MASSON'
+  ntp_enabled: true
+  # DNS
+  dns_enabled: true
+  dns_domain_name: # Required
+  dns_email_manager: # Required
+  dns_auto_reverse: true
+  dns_auto_forward: false
+  dns_forwarder: ['1.1.1.1', '1.0.0.1']
+  # TLS
+  tls_enabled: true
+  tls_cert_file: # Required
+  tls_key_file: # Required
+```
+
+    module.exports = ({options, node, deps}) ->
+      options.hostname ?= node.fqdn
+      options.ip_address ?= node.ip
+
+## Deprecation
+
+      throw Error 'Option dns_autoforward is deprecated, use dns_auto_forward' if options.dns_autoforward?
 
 ## Indentites
 
+
+      options.manage_users_groups ?= true
       # Group
       options.hsqldb ?= {}
       options.hsqldb.group = name: options.hsqldb.group if typeof options.hsqldb.group is 'string'
@@ -123,13 +172,13 @@ Follows [production deployment configuration](https://www.freeipa.org/page/Deplo
 
 ## Configuration
 
-      options.iptables ?= service.deps.iptables and service.deps.iptables.options.action is 'start'
+      options.iptables ?= deps.iptables and deps.iptables.options.action is 'start'
       options.conf_dir ?= '/etc/freeipa/conf'
       # Prepare configuration for "kdc.conf"
       throw Error 'Required Manager Password "manager_password"' unless options.manager_password?
       throw Error '"manager_password" should be 8 characters long' unless options.manager_password.length > 7
       throw Error 'Required Admin Password "admin_password"' unless options.admin_password?
-      throw Error '"manager_password" should be 8 characters long' unless options.admin_password.length > 7
+      throw Error '"admin_password" should be 8 characters long' unless options.admin_password.length > 7
 
 ## Modules
 
@@ -137,32 +186,36 @@ Follows [production deployment configuration](https://www.freeipa.org/page/Deplo
       options.dns_enabled ?= true
       options.dns ?= {}
       if options.dns_enabled
-        throw Error 'Missing domain name "dns_domain_name"' unless options.dns_domain_name?
+        throw Error 'Missing domain name "domain"' unless options.domain?
         throw Error 'Missing dns manager email "dns_email_manager"' unless options.dns_email_manager?
-        # options.dns['domain'] ?= options.dns_domain_name
-        # options.dns['zonemgr'] ?= options.dns_email_manager
         options.dns_auto_reverse ?= true
-        options.dns_autoforward ?= false
-        options.dns_forwarder ?= null
+        options.dns_auto_forward ?= false
+        options.dns_forwarder ?= []
+        options.dns_forwarder = [options.dns_forwarder] unless Array.isArray options.dns_forwarder
       # NTP
       options.ntp_enabled ?= true
       # KERBEROS
-      options.krb5_realm_name ?= options.dns_domain_name.toUpperCase()
+      options.realm_name ?= options.dns_domain_name.toUpperCase()
       throw Error 'Missing realm name "realm_name"' unless options.realm_name?
 
 ## SSL
       
       options.tls_enabled ?= true
       if options.tls_enabled
-        throw Error 'TLS mode requires "tls_cert_file"' unless options.tls_cert_file
-        throw Error 'TLS mode requires "tls_key_file"' unless options.tls_key_file
+        if options.external_ca
+          options.ca_subject ?= "CN=Certificate Authority,O=#{option.realm_name}"
+        else
+          throw Error 'TLS mode requires "tls_cert_file"' unless options.tls_cert_file
+          throw Error 'TLS mode requires "tls_key_file"' unless options.tls_key_file
+          options.tls_key_local ?= true
+          options.tls_ca_cert_local ?= true
 
 ## Client Admin Operation
 
       options.admin ?= {}
-      options.admin[options.krb5_realm_name] ?=
-        realm: options.krb5_realm_name
-        kadmin_principal: "admin@#{options.krb5_realm_name}"
+      options.admin[options.realm_name] ?=
+        realm: options.realm_name
+        kadmin_principal: "admin@#{options.realm_name}"
         kadmin_password: options.admin_password
 
 
