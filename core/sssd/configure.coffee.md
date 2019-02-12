@@ -83,7 +83,7 @@ Example:
 ## Configuration
 
       options.merge ?= false
-      options.config = merge
+      options.config = mixme
         'sssd':
           'config_file_version' : '2'
           'reconnection_retries' : '3'
@@ -121,4 +121,4 @@ service sssd restart
 
 ## Dependencies
 
-    {merge} = require '@nikitajs/core/lib/misc'
+    mixme = require 'mixme'

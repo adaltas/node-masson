@@ -4,13 +4,13 @@ params = require './params'
 load = require './config/load'
 normalize = require './config/normalize'
 store = require './config/store'
-merge = require './utils/merge'
+mixme = require 'mixme'
 
 module.exports = (processOrArgv, callback) ->
   processOrArgv ?= process
 
   # Parse the first part of the arguments, without the user command
-  orgparams = parameters(merge {}, params, main: name: 'main').parse(processOrArgv, help: false)
+  orgparams = parameters(mixme {}, params, main: name: 'main').parse(processOrArgv, help: false)
   
   # Read configuration
   load orgparams.config, (err, config) ->
@@ -43,7 +43,7 @@ module.exports = (processOrArgv, callback) ->
           description: 'Resume from previous run'
         ]
     # Merge default parameters with discovered parameters and user parameters
-    merge params, commands: commands, config.params
+    mixme.mutate params, commands: commands, config.params
     try
       parameters(params).parse processOrArgv
     catch err

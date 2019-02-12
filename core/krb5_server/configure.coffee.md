@@ -70,7 +70,7 @@ on the appropriate node.
           master_count = service.deps.krb5_server.filter( (srv) -> srv.options.admin?[realm]?.master ).length
           throw Error 'Invalid configuration: more than one KDC server' if master_count > 1
           if master_count is 0
-            merge service.deps.krb5_server[0].options, admin: "#{realm}": master: true
+            mixme.mutate service.deps.krb5_server[0].options, admin: "#{realm}": master: true
 
 ## kdc.conf
 
@@ -82,7 +82,7 @@ configuration profile.
 
       # Default values
       options.kdc_conf ?= {}
-      options.kdc_conf = merge {},
+      options.kdc_conf = mixme
         'libdefaults': {}
         'kdcdefaults':
           'kdc_ports': '88'
@@ -101,7 +101,7 @@ configuration profile.
         admin = options.admin[realm]
         # DB module
         options.kdc_conf.dbmodules ?= {}
-        options.kdc_conf.dbmodules[admin.database_module] = merge {},
+        options.kdc_conf.dbmodules[admin.database_module] = mixme
           'db_library': 'kldap'
           'ldap_kerberos_container_dn': service.deps.openldap_server[0].options.krb5.kerberos_dn
           'ldap_kdc_dn': service.deps.openldap_server[0].options.krb5.kdc_user.dn
@@ -119,7 +119,7 @@ configuration profile.
           'kdc_master_key': admin.kdc_master_key
         , options.kdc_conf.dbmodules[admin.database_module]
         # Default realm configuration
-        config = options.kdc_conf.realms[realm] = merge
+        config = options.kdc_conf.realms[realm] = mixme
           'kadmind_port': 749
           # 'kpasswd_port': 464 # http://www.opensource.apple.com/source/Kerberos/Kerberos-47/KerberosFramework/Kerberos5/Documentation/kadmin/kpasswd.protocol
           'max_life': '10h 0m 0s'
@@ -169,4 +169,4 @@ configuration profile.
 
 ## Dependencies
 
-    {merge} = require '@nikitajs/core/lib/misc'
+    mixme = require 'mixme'

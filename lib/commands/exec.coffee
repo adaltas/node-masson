@@ -2,7 +2,7 @@
 each = require 'each'
 multimatch = require '../utils/multimatch'
 exec = require 'ssh2-exec'
-merge = require '../utils/merge'
+mixme = require 'mixme'
 nikita = require '@nikitajs/core'
 
 module.exports = (params, config) ->
@@ -10,10 +10,13 @@ module.exports = (params, config) ->
   write = (msg) -> process.stdout.write msg
   each config.nodes
   .parallel true
-  .call (_, node, next) ->
-    return next() if params.nodes? and multimatch(node.fqdn, params.nodes).length is 0
-    n = nikita merge {}, config.nikita
-    n.ssh.open host: node.ip or node.fqdn
+  .call (_, node, callback) ->
+    return callback() if params.nodes? and multimatch(node.fqdn, params.nodes).length is 0
+    for tag in params.tags or {}
+      [key, value] = tag.split '='
+      return callback() if multimatch(node.tags[key] or [], value.split(',')).length is 0
+    n = nikita mixme {}, config.nikita
+    n.ssh.open host: node.ip or node.fqdn, node.ssh
     n.call ({options}, callback) ->
       @system.execute
         relax: true

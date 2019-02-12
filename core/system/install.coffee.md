@@ -50,7 +50,7 @@ cat /etc/security/limits.d/90-nproc.conf
 root       soft    nproc     unlimited
 ```
 
-      @system.limits merge
+      @system.limits mixme
         header: "Global System Limits"
         target: '/etc/security/limits.conf'
         backup: true
@@ -86,7 +86,7 @@ Publish scripts inside the profile directory, located in "/etc/profile.d".
 
 ## Dependencies
 
-    {merge} = require '@nikitajs/core/lib/misc'
+    mixme = require 'mixme'
 
 [nikita_group]: https://github.com/wdavidw/node-nikita/blob/master/src/group.coffee.md
 [nikita_user]: https://github.com/wdavidw/node-nikita/blob/master/src/user.coffee.md

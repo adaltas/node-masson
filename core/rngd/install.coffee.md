@@ -19,10 +19,5 @@ Inspred from [rhel7-random-number-generator](https://www.certdepot.net/rhel7-get
         @service.restart
           name: 'rngd'
 
-
-## Dependencies
-
-    {merge} = require '@nikitajs/core/lib/misc'
-
 [nikita_group]: https://github.com/wdavidw/node-nikita/blob/master/src/group.coffee.md
 [nikita_user]: https://github.com/wdavidw/node-nikita/blob/master/src/user.coffee.md

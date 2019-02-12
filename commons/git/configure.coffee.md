@@ -66,14 +66,14 @@ configuration.
       options.users ?= {}
       for username, user of options.users
         throw Error "User Not Defined: module system must define the user #{username}" unless service.deps.system.options.users[username]
-        user = merge {}, service.deps.system.options.users[username], user
+        user = mixme service.deps.system.options.users[username], user
         user.target ?= "#{user.home}/.gitconfig"
         user.uid ?= user.uid or user.name
         user.gid ?= user.gid or user.group
-        user.content ?= merge {}, options.properties, user.gitconfig, user.properties
+        user.content ?= mixme options.properties, user.gitconfig, user.properties
         user.merge ?= options.merge
 
 ## Dependencies
 
-    {merge} = require '@nikitajs/core/lib/misc'
+    mixme = require 'mixme'
       

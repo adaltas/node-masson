@@ -104,6 +104,9 @@ module.exports =
       options: [
         name: 'nodes', shortcut: 'n', type: 'array'
         description: 'Limit to a list of server FQDNs'
+      ,
+        name: 'tags', shortcut: 't', type: 'array'
+        description: 'Limit to servers that honor a list of tags'
       ]
     'configure':
       description: 'Export servers\' configuration in a file'
