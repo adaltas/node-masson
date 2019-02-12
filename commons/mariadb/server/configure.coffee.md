@@ -11,7 +11,7 @@
 *   `my_cnf` (object)
     Object to be serialized into the "ini" format inside "/etc/my.cnf"
 
-Default configuration:
+## Default configuration:
 
 ```
 { "mysql": {
@@ -32,8 +32,18 @@ Default configuration:
 }
 ```
 
-    module.exports = (service) ->
-      options = service.options
+## Copying an existing certificate on the target node
+
+```json
+{ "tls": {
+    "enabled": true,
+    "cacert": { source: "/etc/ipa/ca.pem" },
+    "cert": { source: "/etc/ipa/cert.pem" },
+    "key": { source: "/etc/ipa/key.pem" }
+} }
+```
+
+    module.exports = ({options, node, deps}) ->
       
 ## Environment
 
@@ -49,8 +59,8 @@ Default configuration:
       options.disallow_remote_root_login ?= false
       options.remove_test_db ?= true
       options.reload_privileges ?= true
-      options.fqdn ?= service.node.fqdn
-      options.iptables ?= service.deps.iptables and service.deps.iptables.options.action is 'start'
+      options.fqdn ?= node.fqdn
+      options.iptables ?= deps.iptables and deps.iptables.options.action is 'start'
 
 ## Identities
 
@@ -85,20 +95,20 @@ If the DBA need more than two Masters, Ring like architecture should be used.
 
 Note: For Now Ryba does not support automatic discovery for more than 2 master.
 
-      options.ha_enabled ?= if service.deps.mariadb.length > 1 then true else false
+      options.ha_enabled ?= if deps.mariadb.length > 1 then true else false
       if options.ha_enabled
-        throw Error "Invalid HA Configuration: expect only 2 nodes" unless service.deps.mariadb.length is 2
+        throw Error "Invalid HA Configuration: expect only 2 nodes" unless deps.mariadb.length is 2
         options.replication_dir ?= "#{options.user.home}/replication"
-        mysql_fqdns = service.deps.mariadb.map( (srv) -> srv.node.fqdn ).sort()
+        mysql_fqdns = deps.mariadb.map( (srv) -> srv.node.fqdn ).sort()
         # Attribute an id to mysql server
         # This line is to be changed by admin to set replication architecture.
-        options.id ?= mysql_fqdns.indexOf(service.node.fqdn)+1
+        options.id ?= mysql_fqdns.indexOf(node.fqdn)+1
         options.my_cnf['mysqld']['server-id'] = options.id
         # automatic discovery
         # for ryba each mysql sever is a master, for enabling the replication,
         # a slave host hould be defined.
-        for mariadb_srv in service.deps.mariadb
-          continue if mariadb_srv.node.fqdn is service.node.fqdn
+        for mariadb_srv in deps.mariadb
+          continue if mariadb_srv.node.fqdn is node.fqdn
           options.repl_master ?= {}
           options.repl_master.fqdn ?= mariadb_srv.node.fqdn
           options.repl_master.admin_username ?= mariadb_srv.options.admin_username or 'root'
@@ -173,14 +183,17 @@ Note: For Now Ryba does not support automatic discovery for more than 2 master.
 
 ### SSL
 
-      options.ssl ?= service.deps.ssl?.options
-      if options.ssl
+      options.ssl ?= deps.ssl?.options
+      if options.ssl.enabled
         throw Error "Required Option: ssl.cacert" if not options.ssl.cacert
         throw Error "Required Option: ssl.key" if not options.ssl.key
         throw Error "Required Option: ssl.cert" if not options.ssl.cert
-        options.my_cnf['mysqld']['ssl-ca'] ?= "#{options.user.home}/data/ca.pem"
-        options.my_cnf['mysqld']['ssl-cert'] ?= "#{options.user.home}/data/server-cert.pem"
-        options.my_cnf['mysqld']['ssl-key'] ?= "#{options.user.home}/data/server-key.pem"
+        options.my_cnf['mysqld']['ssl-ca'] ?= options.ssl.cacert.target || "/var/lib/mysql/tls/ca.pem"
+        options.my_cnf['mysqld']['ssl-key'] ?= options.ssl.key.target || "/var/lib/mysql/tls/key.pem"
+        options.my_cnf['mysqld']['ssl-cert'] ?= options.ssl.cert.target || "/var/lib/mysql/tls/cert.pem"
+        options.ssl.cacert.local ?= false
+        options.ssl.key.local ?= false
+        options.ssl.cert.local ?= false
 
 ## MySQL Dump
 
@@ -227,7 +240,7 @@ Note: For Now Ryba does not support automatic discovery for more than 2 master.
 ## Wait
 
       options.wait_tcp = {}
-      options.wait_tcp.fqdn = service.node.fqdn
+      options.wait_tcp.fqdn = node.fqdn
       options.wait_tcp.port = options.my_cnf['mysqld']['port']
 
 ## Dependencies
