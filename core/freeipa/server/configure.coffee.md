@@ -33,9 +33,9 @@ options:
   admin_password: 'ADMIN\_PASSWORD'
   realm_name: 'MASSON'
   ntp_enabled: true
+  domain: # Required
   # DNS
   dns_enabled: true
-  dns_domain_name: # Required
   dns_email_manager: # Required
   dns_auto_reverse: true
   dns_auto_forward: false
@@ -195,7 +195,7 @@ options:
       # NTP
       options.ntp_enabled ?= true
       # KERBEROS
-      options.realm_name ?= options.dns_domain_name.toUpperCase()
+      options.realm_name ?= options.domain.toUpperCase()
       throw Error 'Missing realm name "realm_name"' unless options.realm_name?
 
 ## SSL
@@ -222,7 +222,3 @@ options:
 ## Wait
 
       options.wait = {}
-
-## Dependencies
-
-    {merge} = require '@nikitajs/core/lib/misc'

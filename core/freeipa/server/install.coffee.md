@@ -35,7 +35,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
         rules: rules
 
 ## Identities
-      
+
       for usr in ['hsqldb', 'apache', 'memcached', 'ods', 'tomcat', 'pkiuser', 'dirsrv']
         @system.group
           header: "Group #{usr}"
@@ -98,32 +98,33 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
           '--no-ntp' unless options.ntp_enabled
           ...[
             if options.external_ca
-              '--external-ca'
-              "--ca-subject=\"#{options.ca_subject}\""
+              "--external-ca --ca-subject=\"#{options.ca_subject}\""
             else
               "--ca-cert-file=#{options.conf_dir}/cacert.pem"
           ] if options.tls_enabled
         ].join ' '
+        bash: 'bash -l'
       
       @call
         if_exists: '/root/ipa.csr'
         unless_exists: '/root/ipa.cert'
-        header: '...waiting for /root/chain.cert.pem...'
+        header: 'External CA'
       , (err, callback) ->
         @call ->
-          process.stdout.writte [
-            'The next step is to get /root/ipa.csr signed by your CA '
+          process.stdout.write [
+            'The next step is to get /root/ipa.csr signed by your CA'
             'and place the certificate chain, the root and the intermediate'
-            'certificates, in /root/ipa.cert in the PEM format'
-          ] if process.stdin.isTTY
+            'certificates, in /root/ipa.cert in the PEM format', ''
+          ].join '\n' if process.stdin.isTTY
         @wait.exist
           target: '/root/ipa.cert'
         @call ->
-          process.stdout.writte [
+          process.stdout.write [
             'Be sure to back up the CA certificates stored in /root/cacert.p12'
             'These files are required to create replicas. The password for these'
-            'files is the Directory Manager password'
-          ] if process.stdin.isTTY
+            'files is the Directory Manager password', ''
+          ].join '\n' if process.stdin.isTTY
+        @next callback
       @call
         header: 'Certificate'
         if: -> @status -1
@@ -132,12 +133,14 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
           unless_exists: '/var/lib/ipa-client/sysrestore/sysrestore.index'
           cmd: [
             'ipa-server-install'
+            "-p #{options.manager_password}"
             '--external-cert-file=/root/ipa.cert'
           ].join ' '
         @system.execute
           if_exists: '/var/lib/ipa-client/sysrestore/sysrestore.index'
           cmd: [
             'ipa-cacert-manage', 'renew'
+            "-p #{options.manager_password}"
             '--external-cert-file=/root/ipa.cert'
           ].join ' '
         @fs.unlink
