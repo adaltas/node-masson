@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* ipa.client: client certificates generation
 * mariadb: new ssl.enabled option and secure improvements
 * yum: use system.running
 * secrets: new command to manage passwords

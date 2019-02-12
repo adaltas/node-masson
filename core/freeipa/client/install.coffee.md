@@ -5,34 +5,44 @@ Install the FreeIPA Server
 
     module.exports = header: 'FreeIPA Client Install', handler: ({options}) ->
 
-
 ## Package
 
       @service
+        header: 'Package'
         name: 'ipa-client'
 
 ## Setup
 
-      #wait
-      @call header: 'Register', handler: ->
-        cmd = 'ipa-client-install -U --force-join '
-        cmd += "--server #{options.ipa_host} "
-        if options.dns_enabled
-          cmd += "--enable-dns-updates "
-          cmd += "--domain #{options.dns_domain_name} "
-        cmd += "--realm=#{options.krb5_realm_name} -w #{options.admin_password} -p admin "
-        cmd += "--hostname=#{options.fqdn}"
-        @system.execute
-          header: 'setup client'
-          cmd: cmd
-          unless_exec: "echo #{options.admin_password} | kinit -p admin"
-
-## Dependencies
-
-    fs = require 'ssh2-fs'
-    path = require('path').posix
-    each = require 'each'
-    misc = require '@nikitajs/core/lib/misc'
+      @connection.wait
+        header: 'Wait'
+        host: options.ipa_fqdn
+        port: 443
+        
+      @system.execute
+        header: 'Setup'
+        unless_exists: '/etc/ipa/default.conf'
+        cmd: [
+          'ipa-client-install', '-U' # --force-join
+          "--server #{options.ipa_fqdn}" # Dont use IP or setup will crash
+          "--realm #{options.realm_name}", "-w #{options.admin_password}", "-p admin "
+          "--hostname=#{options.fqdn}"
+          "--domain #{options.domain}"
+          "--enable-dns-updates" if options.dns_enabled
+        ].join ' '
+      
+      @system.execute
+        header: 'TLS'
+        unless_exec: [
+          'ipa-getcert', 'list'
+          "-f #{options.tls.cert}"
+        ].join ' '
+        cmd: [
+          'ipa-getcert', 'request', '-r'
+          "-k #{options.tls.key}"
+          "-f #{options.tls.cert}"
+          "-D #{options.fqdn}"
+          "-K #{options.tls.principal}"
+        ].join ' '
 
 ## Notes
 

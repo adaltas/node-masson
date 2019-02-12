@@ -1,30 +1,73 @@
 
-## FreeIPA Client Configure
+# FreeIPA Client Configure
 
 Follows [production deployment configuration](https://www.freeipa.org/page/Deployment_Recommendations)
 
-    module.exports = (service) ->
-      options = service.options
-      options.fqdn = service.node.fqdn
+Options:
 
+* `tls.cert` (string, optional, "/etc/ipa/cert.pem")   
+  Path where to store the certificate.
+* `tls.enabled` (boolean, optional, false)   
+  Enable certificate generation and tracking.
+* `tls.key` (string, optional, "/etc/ipa/key.pem")   
+  Path where to store the private key.
+* `tls.subject` (string|object, optional, "CN=<fqdn>")   
+  Requested subject name.
+* `tls.subject.CN` (string, optional, "<fqdn>")   
+  Common name.
+* `tls.subject.O` (string, optional)   
+  Organisation name.
+* `tls.principal` (string, optional, "HTTP/<fqdn>")   
+  Requested principal name.
+
+## Example setting a custom organization name
+
+```json
+{ "tls":
+  "enabled": true
+  "subject": {
+    "O": "AU.ADALTAS.CLOUD"
+} }
+```
+
+## Source code
+
+    module.exports = ({options, node, deps}) ->
+      options.fqdn = node.fqdn
+      ipa_server = if deps.ipa_server?.length then deps.ipa_server[0] else null
 
 ## Modules
 
-      # DNS
-      if service.deps.ipa_server[0]?.length
-        options.dns_enabled ?= service.deps.ipa_server[0]?.options.dns_enabled
-        options.ipa_host ?= service.deps.ipa_server[0]?.node.fqdn
-        options.dns_enabled ?= service.deps.ipa_server[0]?.options.dns_enabled
-        options.ntp_enabled ?= service.deps.ipa_server[0]?.options.ntp_enabled
-        options.krb5_realm_name ?= service.deps.ipa_server[0]?.options.krb5_realm_name
-        options.admin_password ?= service.deps.ipa_server[0]?.options.admin_password
+      if ipa_server
+        options.dns_enabled ?= ipa_server.options.dns_enabled
+        options.ipa_fqdn ?= ipa_server.node.fqdn
+        options.dns_enabled ?= ipa_server.options.dns_enabled
+        options.ntp_enabled ?= ipa_server.options.ntp_enabled
+        options.realm_name ?= ipa_server.options.realm_name
+        options.admin_password ?= ipa_server.options.admin_password
         if options.dns_enabled
-          options.dns_domain_name ?= service.deps.ipa_server[0]?.options.dns_domain_name
-          throw Error 'Required IPA Server Domain name' unless options.dns_domain_name?
+          options.domain ?= ipa_server.options.domain
+          throw Error 'Required IPA Server Domain name' unless options.domain?
+
+## TLS
+
+      options.tls ?= {}
+      if options.tls.enabled
+        options.tls.cert ?= '/etc/ipa/cert.pem'
+        options.tls.key ?= '/etc/ipa/key.pem'
+        options.tls.principal ?= "HTTP/#{node.fqdn}"
+        unless typeof options.tls.subject is 'string'
+          options.tls.subject ?= {}
+          options.tls.subject.CN ?= "#{node.fqdn}"
+          options.tls.subject = [
+            "CN=#{options.tls.subject.CN}"
+            "O=#{options.tls.subject.O}" if options.tls.subject.O
+          ].join ','
 
 ## Client command
 
-      options.admin ?= merge {} , service.deps.ipa_server[0]?.options.ntp_enabled, options.admin
+      if ipa_server
+        options.admin ?= mixme ipa_server.options.ntp_enabled, options.admin
 
 ## Wait
 
@@ -32,4 +75,4 @@ Follows [production deployment configuration](https://www.freeipa.org/page/Deplo
 
 ## Dependencies
 
-    {merge} = require '@nikitajs/core/lib/misc'
+    mixme = require 'mixme'
