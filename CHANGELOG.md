@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* run: shwallow log disk creation error
 * krb5_client: use file.type.krb5_conf
 * ssl: moved to @rybajs/tools/ssl
 * java: moved to @rybajs/system/java
