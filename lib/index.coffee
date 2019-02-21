@@ -22,7 +22,11 @@ module.exports = (processOrArgv, callback) ->
         process.exit()
     callback ?= (->)
     # Normalize coniguration
-    config = normalize config
+    try
+      config = normalize config
+    catch err
+      process.stderr.write "#{err.stack}\n\n"
+      process.exit()
     # Enrich configuration with command discovery
     commands = {}
     for command in store(config).commands()

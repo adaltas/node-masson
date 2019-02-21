@@ -26,6 +26,7 @@ module.exports = (params, config, callback) ->
     n.kv.engine engine: engine
     n.log.cli host: node.fqdn, pad: host: 20, header: 60
     n.log.md basename: node.hostname, basedir: log.basedir, archive: false
+    n.next (->) #swallow Invalid Directory on log directory
     n.ssh.open
       header: 'SSH Open'
       host: node.ip or node.fqdn
