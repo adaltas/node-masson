@@ -44,6 +44,19 @@ Install the FreeIPA Server
           "-K #{options.ssl.principal}"
         ].join ' '
 
+## Configure
+
+Modify the Kerberos configuration file in "/etc/krb5.conf". Note, 
+this action wont be run if the server host a Kerberos server. 
+This is to avoid any conflict where both modules would try to write 
+their own configuration one. We give the priority to the server module 
+which create a Kerberos file with complementary information.
+
+      @file.types.krb5_conf
+        header: 'KRB5 Configuration'
+        if: options.krb5_conf.enabled
+      , options.krb5_conf
+
 ## Notes
 
 Renewable tickets is per default disallowed in the most linux distributions. This can be done per:

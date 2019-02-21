@@ -70,6 +70,14 @@ Options:
       if ipa_server
         options.admin ?= mixme ipa_server.options.ntp_enabled, options.admin
 
+## Kerberos
+
+      options.krb5_conf ?= {}
+      options.krb5_conf.enabled ?= false
+      options.krb5_conf.content ?= {}
+      options.krb5_conf.merge ?= false
+      options.krb5_conf.backup ?= true
+
 ## Wait
 
       options.wait = {}
