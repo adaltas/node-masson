@@ -30,11 +30,10 @@ This is to avoid any conflict where both modules would try to write
 their own configuration one. We give the priority to the server module 
 which create a Kerberos file with complementary information.
 
-      @file.ini
+      @file.types.krb5_conf
         header: 'Configuration'
+        if: options.krb5_conf.enabled
         content: options.etc_krb5_conf
-        target: '/etc/krb5.conf'
-        stringify: misc.ini.stringify_square_then_curly
         backup: true
 
 ## Wait
