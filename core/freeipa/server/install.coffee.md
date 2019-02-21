@@ -55,18 +55,18 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
           if: options.dns_enabled
           name: 'ipa-server-dns'
 
-## TLS
+## SSL/TLS
 
-      (if options.tls_ca_cert_local then @file.download else @system.copy)
+      (if options.ssl_ca_cert_local then @file.download else @system.copy)
         header: 'Cert'
-        if: options.tls_cert_file
-        source: options.tls_cert_file
+        if: options.ssl_cert_file
+        source: options.ssl_cert_file
         target: "#{options.conf_dir}/cacert.pem"
         mode: 0o0400
-      (if options.tls_key_local then @file.download else @system.copy)
+      (if options.ssl_key_local then @file.download else @system.copy)
         header: 'Key'
-        if: options.tls_key_file
-        source: options.tls_key_file
+        if: options.ssl_key_file
+        source: options.ssl_key_file
         target: "#{options.conf_dir}/key.pem"
         mode: 0o0400
 
@@ -101,7 +101,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
               "--external-ca --ca-subject=\"#{options.ca_subject}\""
             else
               "--ca-cert-file=#{options.conf_dir}/cacert.pem"
-          ] if options.tls_enabled
+          ] if options.ssl_enabled
         ].join ' '
         bash: 'bash -l'
       

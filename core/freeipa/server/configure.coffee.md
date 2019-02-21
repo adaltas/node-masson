@@ -40,10 +40,10 @@ options:
   dns_auto_reverse: true
   dns_auto_forward: false
   dns_forwarder: ['1.1.1.1', '1.0.0.1']
-  # TLS
-  tls_enabled: true
-  tls_cert_file: # Required
-  tls_key_file: # Required
+  # SSL/TLS
+  ssl_enabled: true
+  ssl_cert_file: # Required
+  ssl_key_file: # Required
 ```
 
     module.exports = ({options, node, deps}) ->
@@ -200,15 +200,15 @@ options:
 
 ## SSL
       
-      options.tls_enabled ?= true
-      if options.tls_enabled
+      options.ssl_enabled ?= true
+      if options.ssl_enabled
         if options.external_ca
           options.ca_subject ?= "CN=Certificate Authority,O=#{option.realm_name}"
         else
-          throw Error 'TLS mode requires "tls_cert_file"' unless options.tls_cert_file
-          throw Error 'TLS mode requires "tls_key_file"' unless options.tls_key_file
-          options.tls_key_local ?= true
-          options.tls_ca_cert_local ?= true
+          throw Error 'SSL/TLS mode requires "ssl_cert_file"' unless options.ssl_cert_file
+          throw Error 'SSL/TLS mode requires "ssl_key_file"' unless options.ssl_key_file
+          options.ssl_key_local ?= true
+          options.ssl_ca_cert_local ?= true
 
 ## Client Admin Operation
 

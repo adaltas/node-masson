@@ -31,17 +31,17 @@ Install the FreeIPA Server
         ].join ' '
       
       @system.execute
-        header: 'TLS'
+        header: 'SSL'
         unless_exec: [
           'ipa-getcert', 'list'
-          "-f #{options.tls.cert}"
+          "-f #{options.ssl.cert}"
         ].join ' '
         cmd: [
           'ipa-getcert', 'request', '-r'
-          "-k #{options.tls.key}"
-          "-f #{options.tls.cert}"
+          "-k #{options.ssl.key}"
+          "-f #{options.ssl.cert}"
           "-D #{options.fqdn}"
-          "-K #{options.tls.principal}"
+          "-K #{options.ssl.principal}"
         ].join ' '
 
 ## Notes

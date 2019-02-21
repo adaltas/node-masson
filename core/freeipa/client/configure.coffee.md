@@ -5,25 +5,25 @@ Follows [production deployment configuration](https://www.freeipa.org/page/Deplo
 
 Options:
 
-* `tls.cert` (string, optional, "/etc/ipa/cert.pem")   
+* `ssl.cert` (string, optional, "/etc/ipa/cert.pem")   
   Path where to store the certificate.
-* `tls.enabled` (boolean, optional, false)   
+* `ssl.enabled` (boolean, optional, false)   
   Enable certificate generation and tracking.
-* `tls.key` (string, optional, "/etc/ipa/key.pem")   
+* `ssl.key` (string, optional, "/etc/ipa/key.pem")   
   Path where to store the private key.
-* `tls.subject` (string|object, optional, "CN=<fqdn>")   
+* `ssl.subject` (string|object, optional, "CN=<fqdn>")   
   Requested subject name.
-* `tls.subject.CN` (string, optional, "<fqdn>")   
+* `ssl.subject.CN` (string, optional, "<fqdn>")   
   Common name.
-* `tls.subject.O` (string, optional)   
+* `ssl.subject.O` (string, optional)   
   Organisation name.
-* `tls.principal` (string, optional, "HTTP/<fqdn>")   
+* `ssl.principal` (string, optional, "HTTP/<fqdn>")   
   Requested principal name.
 
 ## Example setting a custom organization name
 
 ```json
-{ "tls":
+{ "ssl":
   "enabled": true
   "subject": {
     "O": "AU.ADALTAS.CLOUD"
@@ -49,19 +49,20 @@ Options:
           options.domain ?= ipa_server.options.domain
           throw Error 'Required IPA Server Domain name' unless options.domain?
 
-## TLS
+## SSL/TLS
 
-      options.tls ?= {}
-      if options.tls.enabled
-        options.tls.cert ?= '/etc/ipa/cert.pem'
-        options.tls.key ?= '/etc/ipa/key.pem'
-        options.tls.principal ?= "HTTP/#{node.fqdn}"
-        unless typeof options.tls.subject is 'string'
-          options.tls.subject ?= {}
-          options.tls.subject.CN ?= "#{node.fqdn}"
-          options.tls.subject = [
-            "CN=#{options.tls.subject.CN}"
-            "O=#{options.tls.subject.O}" if options.tls.subject.O
+      options.ssl ?= {}
+      if options.ssl.enabled
+        options.ssl.cacert ?= '/etc/ipa/ca.crt' # Exported to other services
+        options.ssl.cert ?= '/etc/ipa/cert.pem'
+        options.ssl.key ?= '/etc/ipa/key.pem'
+        options.ssl.principal ?= "HTTP/#{node.fqdn}"
+        unless typeof options.ssl.subject is 'string'
+          options.ssl.subject ?= {}
+          options.ssl.subject.CN ?= "#{node.fqdn}"
+          options.ssl.subject = [
+            "CN=#{options.ssl.subject.CN}"
+            "O=#{options.ssl.subject.O}" if options.ssl.subject.O
           ].join ','
 
 ## Client command
