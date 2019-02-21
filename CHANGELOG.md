@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* java: moved to @rybajs/system/java
 * ipa.client: client certificates generation
 * mariadb: new ssl.enabled option and secure improvements
 * yum: use system.running
