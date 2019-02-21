@@ -3,6 +3,8 @@
 
 ## Trunk
 
+* krb5_client: use file.type.krb5_conf
+* ssl: moved to @rybajs/tools/ssl
 * java: moved to @rybajs/system/java
 * ipa.client: client certificates generation
 * mariadb: new ssl.enabled option and secure improvements
