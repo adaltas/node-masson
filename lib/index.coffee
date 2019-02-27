@@ -18,7 +18,7 @@ module.exports = (processOrArgv, callback) ->
       if callback
         return callback err
       else
-        process.stderr.write "#{e.message}\n\n"
+        process.stderr.write "#{err.stack}\n\n"
         process.exit()
     callback ?= (->)
     # Normalize coniguration
@@ -51,7 +51,7 @@ module.exports = (processOrArgv, callback) ->
     try
       parameters(params).parse processOrArgv
     catch err
-      process.stderr.write "#{err.message}\n\n"
+      process.stderr.write "#{err.stack}\n\n"
       process.exit()
     parameters(params).run processOrArgv, config, callback
       
