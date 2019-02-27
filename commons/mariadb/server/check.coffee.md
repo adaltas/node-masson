@@ -28,17 +28,17 @@ Ensure the port is listening.
 
 ## Check Replication
 
-      props =
-        database: null
-        admin_username: options.admin_username
-        admin_password: options.admin_password
-        engine: 'mysql'
-        host: 'localhost'
-        silent: false
       @call
-        header: 'Check Replication'
+        header: 'Replication'
         if: options.ha_enabled
       , ->
+        props =
+          database: null
+          admin_username: options.admin_username
+          admin_password: options.admin_password
+          engine: 'mysql'
+          host: 'localhost'
+          silent: false
         @system.execute
           retry: 3
           cmd: "#{db.cmd props,'show slave status \\G ;'} | grep Slave_IO_State"
