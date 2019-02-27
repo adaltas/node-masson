@@ -18,8 +18,10 @@ module.exports = (params, config) ->
     n = nikita mixme {}, config.nikita
     n.ssh.open host: node.ip or node.fqdn, node.ssh
     n.call ({options}, callback) ->
+      isRoot = config.nikita.ssh.username is 'root' or not config.nikita.ssh.username
       @system.execute
         relax: true
+        sudo: not isRoot
         cmd: params.subcommand
       , (err, {stdout, stderr}) ->
         write if err

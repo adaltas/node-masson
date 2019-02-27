@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* exec: handle sudo
 * config: print stack trance on config error
 * run: shwallow log disk creation error
 * krb5_client: use file.type.krb5_conf
