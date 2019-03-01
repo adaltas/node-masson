@@ -114,6 +114,7 @@ describe 'command help', ->
 
     OPTIONS for exec
         -n --nodes              Limit to a list of server FQDNs
+        -t --tags               Limit to servers that honor a list of tags
         -h --help               Display help information
         subcommand              The subcommand to execute
 
