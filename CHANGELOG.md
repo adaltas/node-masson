@@ -1,6 +1,10 @@
 
 # Changelog
 
+## Trunk
+
+* project: corrupted npm, no core folder
+
 ## Version 0.1.10
 
 * exec: handle sudo
