@@ -1,7 +1,7 @@
 
 # Changelog
 
-## Trunk
+## Version 0.1.12
 
 * package: use files
 * project: mit license
