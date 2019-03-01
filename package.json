@@ -9,7 +9,7 @@
     "type": "git",
     "url": "git://github.com/adaltas/node-masson.git"
   },
-  "license": "BSD-3-Clause",
+  "license": "MIT",
   "keywords": [
     "deployment",
     "os"

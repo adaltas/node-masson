@@ -1,6 +1,10 @@
 
 # Changelog
 
+## Trunk
+
+* project: mit license
+
 ## Version 0.1.11
 
 * project: corrupted npm, no core folder
