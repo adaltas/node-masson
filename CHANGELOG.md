@@ -1,7 +1,7 @@
 
 # Changelog
 
-## Trunk
+## Version 0.1.10
 
 * exec: handle sudo
 * config: print stack trance on config error
