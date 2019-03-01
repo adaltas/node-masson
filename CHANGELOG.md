@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* package: use files
 * project: mit license
 
 ## Version 0.1.11

@@ -14,6 +14,12 @@
     "deployment",
     "os"
   ],
+  "files": [
+    "bin",
+    "commons",
+    "core",
+    "lib"
+  ],
   "contributors": [
     {
       "name": "David Worms",
