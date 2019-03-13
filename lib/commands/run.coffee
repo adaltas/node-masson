@@ -37,7 +37,7 @@ module.exports = (params, config, callback) ->
         continue unless service.plugin
         instance = array_get(service.instances, (instance) -> instance.node.id is node.id)
         n.call service.plugin, mixme {}, instance.options
-    n.call config.actions, ->
+    n.call -> # config.actions, 
       for service in node.services
         service = s.service service.cluster, service.service
         continue if params.modules and multimatch(service.module, params.modules).length is 0
