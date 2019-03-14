@@ -107,12 +107,17 @@ class Store
     crypted
   # Decrypt some text
   decrypt: (text, iv) ->
-    text = text.toString 'utf8' if Buffer.isBuffer text
-    key = crypto.createHash('sha256').update(@options.password).digest().slice(0, 32)
-    decipher = crypto.createDecipheriv @options.algorithm, key, iv
-    dec = decipher.update text, 'hex', 'utf8'
-    dec += decipher.final 'utf8'
-    secrets = JSON.parse dec or '{}'
+    try
+      text = text.toString 'utf8' if Buffer.isBuffer text
+      key = crypto.createHash('sha256').update(@options.password).digest().slice(0, 32)
+      decipher = crypto.createDecipheriv @options.algorithm, key, iv
+      dec = decipher.update text, 'hex', 'utf8'
+      dec += decipher.final 'utf8'
+      secrets = JSON.parse dec or '{}'
+    catch err
+      console.log "\x1b[31mError when decrypting password store. Is the password set and correct ?\x1b[0m"
+      throw err
+
     secrets
 
 module.exports = (options) ->
