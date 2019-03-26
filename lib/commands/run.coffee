@@ -16,6 +16,7 @@ module.exports = (params, config, callback) ->
   .call (node, callback) ->
     for tag in params.tags or {}
       [key, value] = tag.split '='
+      throw Error "Invalid usage, expected --tags key=value" if not value
       return callback() if multimatch(node.tags[key] or [], value.split(',')).length is 0
     return callback() if params.nodes and multimatch([node.ip, node.fqdn, node.hostname], params.nodes).length is 0
     log = {}
