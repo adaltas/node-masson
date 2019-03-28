@@ -7,9 +7,13 @@ Install the FreeIPA Server
 
 ## Package
 
-      @service
-        header: 'Package'
+      @service header: 'Package', [
+        if_os: name: ['redhat','centos']
         name: 'ipa-client'
+      ,
+        if_os: name: ['ubuntu']
+        name: 'freeipa-client'
+      ]
 
 ## Setup
 
