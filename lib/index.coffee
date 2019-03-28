@@ -7,26 +7,20 @@ store = require './config/store'
 mixme = require 'mixme'
 
 module.exports = (processOrArgv, callback) ->
-  processOrArgv ?= process
+  throw Error 'Required Argument: process or arguments is not provided' unless processOrArgv
+  throw Error 'Required Argument: callback is not provided' unless callback
 
   # Parse the first part of the arguments, without the user command
-  orgparams = parameters(mixme {}, params, main: name: 'main').parse(processOrArgv, help: false)
+  orgparams = parameters(mixme {}, params, main: name: 'main').parse(processOrArgv)
   
   # Read configuration
   load orgparams.config, (err, config) ->
-    if err
-      if callback
-        return callback err
-      else
-        process.stderr.write "#{err.stack}\n\n"
-        process.exit()
-    callback ?= (->)
-    # Normalize coniguration
+    return callback err if err
+    # Normalize configuration
     try
       config = normalize config
     catch err
-      process.stderr.write "#{err.stack}\n\n"
-      process.exit()
+      return callback err
     # Enrich configuration with command discovery
     commands = {}
     for command in store(config).commands()
@@ -49,9 +43,7 @@ module.exports = (processOrArgv, callback) ->
     # Merge default parameters with discovered parameters and user parameters
     mixme.mutate params, commands: commands, config.params
     try
-      parameters(params).parse processOrArgv
+      parameters(params).run processOrArgv, config, callback
     catch err
-      process.stderr.write "#{err.stack}\n\n"
-      process.exit()
-    parameters(params).run processOrArgv, config, callback
+      callback err
       

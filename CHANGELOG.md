@@ -1,6 +1,10 @@
 
 # Changelog
 
+## Trunk
+
+* masson: entrypoint callback requirement
+
 ## Version 0.1.12
 
 * package: use files

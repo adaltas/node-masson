@@ -1,4 +1,6 @@
 #!/usr/bin/env node
 
-require('coffeescript/register');
-require('../lib')();
+require('coffeescript/register')
+require('../lib')(process, (error) => {
+  error && process.stderr.write(error.stack+'\n\n')
+})
