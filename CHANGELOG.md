@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* package: latest dependencies
 * masson: entrypoint callback requirement
 
 ## Version 0.1.12
