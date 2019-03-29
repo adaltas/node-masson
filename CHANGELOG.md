@@ -3,6 +3,7 @@
 
 ## Trunk
 
+* network: new host_auto
 * package: latest dependencies
 * masson: entrypoint callback requirement
 

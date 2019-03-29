@@ -27,11 +27,13 @@ set.
         write.push
           match: RegExp "^#{quote ip}\\s.*$", 'm'
           replace: "#{ip} #{options.host_replace[ip]}"
+          append: true
       @file
         header: 'Host replace'
         if: options.host_replace?
         target: '/etc/hosts'
         write: write
+        eof: true
 
 ## Hostname
 

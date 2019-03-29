@@ -5,25 +5,28 @@
 
 The module accept the following properties:
 
-*   `hostname` (boolean)   
+*   `hostname` (boolean, optional)   
     The server hostname as return by the command "hostname" and defined by the 
     property "HOSTNAME" inside the "/etc/sysconfig/network" file, must not be 
-    configure globally, default to the "host" property.   
-*   `network.hostname_disabled` (boolean)   
+    configure globally, default to the "host" property.
+*   `hostname_disabled` (boolean, optional)   
     Do not update the hostname, disable the effect of the
     "hostname" property (which itself default to "host"), 
-    default to "false".   
-*   `network.hosts_auto` (boolean)   
-    Enrich the "/etc/hosts" file with the server hostname present on 
-    the cluster, default to "false"   
-*   `network.hosts` (object)   
+    default to "false".
+*   `host_auto` (boolean, optional)   
+    Enrich the "/etc/hosts" file with the server ip and hostname present on 
+    the cluster, enriching the `host_replace`, default to "false".
+*   `hosts_auto` (boolean, optional)   
+    Enrich the "/etc/hosts" file with all the hostnames present in 
+    the cluster, default to "false".
+*   `hosts` (object, optional)   
     Enrich the "/etc/hosts" file with custom adresses, the keys represent the 
-    IPs and the value the hostnames, optional.   
-*   `network.resolv` (string)   
-    Content of the '/etc/resolv.conf' file, optional.   
-*   `network.host_replace` (string)   
-    Custom hostname to replace in /etc/hosts, optional.   
-*   `ifcg` (object)   
+    IPs and the value the hostnames.
+*   `resolv` (string, optional)   
+    Content of the '/etc/resolv.conf' file.
+*   `host_replace` (string, optional)   
+    Custom hostname to replace in /etc/hosts.
+*   `ifcg` (object, optional)   
     Network interfaces configuration, keys are the interface name and filename 
     inside "/etc/sysconfig/network-scripts", value the configuration content.
 
@@ -58,12 +61,11 @@ The module accept the following properties:
 }
 ```
 
-    module.exports = (service) ->
-      {options} = service
+    module.exports = ({deps, options, node, instances}) ->
       
-      options.ip = service.node.ip
-      options.fqdn = service.node.fqdn
-      options.hostname = service.node.hostname
+      options.ip = node.ip
+      options.fqdn = node.fqdn
+      options.hostname = node.hostname
       options.hostname_disabled ?= false
       
 ## Hosts
@@ -71,14 +73,19 @@ The module accept the following properties:
       options.hosts_auto ?= false
       options.own_host ?= false # For when fqdn of the current host is already in /etc/hosts, we will want to avoid duplication
       options.hosts ?= {}
-      if options.hosts_auto then for instance in service.instances
+      options.host_replace ?= {}
+      if options.hosts_auto then for instance in instances
         throw Error "Required Property: node must define an IP" unless instance.node.ip
         options.hosts[instance.node.ip] = "#{instance.node.fqdn} #{instance.node.hostname}" unless instance.node.ip is options.ip and options.own_host
+      options.host_auto ?= false
+      if options.host_auto
+        throw Error "Required Property: node must define an IP" unless node.ip
+        options.host_replace[node.ip] = "#{node.fqdn} #{node.hostname}"
 
 ## DNS Resolver
 
-      if service.deps.bind_server
-        options.dns = for bind in service.deps.bind_server
-          continue if bind.node.host is service.node.host
+      if deps.bind_server
+        options.dns = for bind in deps.bind_server
+          continue if bind.node.host is node.host
           host: bind.node.host
           port: bind.options.port
