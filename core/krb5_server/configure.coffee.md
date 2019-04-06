@@ -63,14 +63,20 @@ High availability for the KDC is based on a master-slave architecture. If not
 declared in the configuration, the first KDC found is considered the master. To 
 declare the master server, set the property "config.{realm}.master" to "true" 
 on the appropriate node.
+The property `ha_deploy_master` describes which host is used to initialized the realm db.
+ryba will first execute operation on this host and enable the slave replication aftwerwards.
 
+
+      options.ha_deploy_master ?= {}
       for realm, config of options.admin
         config.ha = service.deps.krb5_server.length > 1
         if config.ha
           master_count = service.deps.krb5_server.filter( (srv) -> srv.options.admin?[realm]?.master ).length
+          options.ha_deploy_master[realm] ?= service.deps.krb5_server.filter( (srv) -> srv.options.admin?[realm]?.master )[0]?.node.fqdn if master_count is 1
           throw Error 'Invalid configuration: more than one KDC server' if master_count > 1
           if master_count is 0
             mixme.mutate service.deps.krb5_server[0].options, admin: "#{realm}": master: true
+            options.ha_deploy_master[realm] ?= service.deps.krb5_server[0].node.fqdn
 
 ## kdc.conf
 

@@ -98,7 +98,7 @@ The following files are updated:
         @file.ini
           content: options.kdc_conf
           target: '/var/kerberos/krb5kdc/kdc.conf'
-          stringify: misc.ini.stringify_square_then_curly
+          stringify: misc.ini.stringify_brackets_then_curly
           backup: true
         @file
           target: '/etc/sysconfig/kadmin'
@@ -162,24 +162,27 @@ The following files are updated:
       @call header: 'LDAP Stash password', ->
         ssh = @ssh options.ssh
         for name, dbmodule of options.kdc_conf.dbmodules then do(name, dbmodule) =>
-          @log "Stash key file is: #{dbmodule.ldap_service_password_file}"
+          @log message: "Stash key file is: #{dbmodule.ldap_service_password_file}"
           keyfileContent = null
           @call (_, callback) ->
-            @log 'Read current keyfile if it exists'
-            fs.readFile ssh, "#{dbmodule.ldap_service_password_file}", 'utf8', (err, content) ->
+            @log message: 'Read current keyfile if it exists'
+            @fs.readFile
+              target: "#{dbmodule.ldap_service_password_file}"
+              encoding: 'utf8'
+            , (err, {data}) ->
               return callback null, true if err and err.code is 'ENOENT'
               return callback err if err
-              keyfileContent = content
+              keyfileContent = data
               callback null, false
           @system.mkdir
             target: path.dirname(dbmodule.ldap_service_password_file)
             if: -> @status -1
           @call (_, callback) ->
-            @log 'Stash password into local file for kadmin dn'
+            @log message: 'Stash password into local file for kadmin dn'
             ssh.shell (err, stream) =>
               return callback err if err
-              cmd = "kdb5_ldap_util -D \"#{options.root_dn}\" -w #{options.root_password} stashsrvpw -f #{dbmodule.ldap_service_password_file} #{dbmodule.ldap_kadmind_dn}"
-              @log "Run `#{cmd}`"
+              cmd = "#{if options.sudo then 'sudo'} kdb5_ldap_util -D \"#{options.root_dn}\" -w #{options.root_password} stashsrvpw -f #{dbmodule.ldap_service_password_file} #{dbmodule.ldap_kadmind_dn}"
+              @log message: "Run `#{cmd}`"
               reentered = done = false
               stream.write "#{cmd}\n"
               stream.on 'data', (data, stderr) =>
@@ -199,33 +202,46 @@ The following files are updated:
                 callback()
           @call (_, callback) ->
             return callback null, true  unless keyfileContent
-            fs.readFile ssh, "#{dbmodule.ldap_service_password_file}", 'utf8', (err, content) ->
+            @fs.readFile
+              target: "#{dbmodule.ldap_service_password_file}"
+              encoding: 'utf8'
+            , (err, {data}) ->
               return callback err if err
-              modified = if keyfileContent is content then false else true
-              callback null, keyfileContent isnt content
-
-      @call header: 'HA', ->
-        ssh = @ssh options.ssh
+              modified = if keyfileContent is data then false else true
+              callback null, keyfileContent isnt data
+      
+      @call header: 'HA',  ->
+        {ha_deploy_master, root, ssh, sudo} = options
         @each options.admin, ({options}, next) ->
-          # realm = options.key
+          realm_data = ''
           config = options.value
-          return next() unless config.ha
-          @call if: config.master, ->
-            fs.readFile ssh, "/var/kerberos/krb5kdc/.k5.#{config.realm}", (err, buf) =>
-              return next err if err
-              @kv.set(key: "krb5_ha.#{config.realm}", value: buf)
-              @next next
-          @call unless: config.master, ->
-            @kv.get(key: "krb5_ha.#{config.realm}", (err, data) =>
-              fs.writeFile ssh, "/var/kerberos/krb5kdc/.k5.#{config.realm}", data.value, (err) =>
-                next err
-            )
+          return next() unless config.ha and not config.master
+          @call (_, next_cb) ->
+            node = nikita()
+            @log message: "Delegate to: #{ha_deploy_master[config.realm]}"
+            node.ssh.open
+              host: ha_deploy_master[config.realm], ssh
+            node.wait.exist
+              target: "/var/kerberos/krb5kdc/.k5.#{config.realm}"
+            node.call (_, cb) ->
+              node.fs.readFile "/var/kerberos/krb5kdc/.k5.#{config.realm}", sudo: sudo, (err, {data}) =>
+                realm_data = data
+                node.next cb
+            node.ssh.close()
+            node.next next_cb
+          @call ->
+            @fs.writeFile
+              target:  "/var/kerberos/krb5kdc/.k5.#{config.realm}"
+              content: realm_data
+          @next next
 
       @call header: 'Log', ->
         @file.touch
           target: '/var/log/krb5kdc.log'
+          uid: 'root'
         @file.touch
           target: '/var/log/kadmind.log'
+          uid: 'root'
         @file
           target: '/etc/rsyslog.conf'
           write: [
@@ -282,6 +298,9 @@ The following files are updated:
     path = require('path').posix
     each = require 'each'
     misc = require '@nikitajs/core/lib/misc'
+    nikita = require 'nikita'
+    mixme = require 'mixme'
+
 
 ## Notes
 
