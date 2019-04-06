@@ -34,7 +34,12 @@ Example:
 
     module.exports = (service) ->
       options = service.options
-      
+
+## Enable Client
+
+      options.krb5_conf ?= {}
+      options.krb5_conf.enabled ?= service.deps.krb5_server?.length > 0
+
       options.fqdn ?= service.node.fqdn
       options.sshd ?= {}
       options.kinit ?= '/usr/bin/kinit'
