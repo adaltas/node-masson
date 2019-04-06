@@ -391,7 +391,25 @@ Place the certificates into their final destinations.
 ## Registration
 
 Register the certificates inside the internal LDAP config database.
+lucasbak 1890404: Since 7.5 I have noticed a bug where slapd server does not accept
+olcTLSCertificateKeyFile and olcTLSCertificateFile modify separately but needs
+to modify both entries at the same time.
 
+
+      # @system.execute
+      #   header: 'Register CA Path'
+      #   unless_exec: """
+      #   ldapsearch -Y EXTERNAL -H ldapi:/// -b "cn=config" \
+      #   | grep -E "olcTLSCACertificatePath: /etc/openldap/certs"
+      #   """
+      #   cmd: """
+      #   ldapmodify -Y EXTERNAL -H ldapi:/// <<-EOF
+      #   dn: cn=config
+      #   changetype: modify
+      #   replace: olcTLSCACertificatePath
+      #   olcTLSCACertificatePath: /etc/openldap/certs
+      #   EOF
+      #   """
       @system.execute
         header: 'Register CA'
         unless_exec: """
@@ -407,7 +425,7 @@ Register the certificates inside the internal LDAP config database.
         EOF
         """
       @system.execute
-        header: 'Register Cert'
+        header: 'Register Cert & Key'
         unless_exec: """
         ldapsearch -Y EXTERNAL -H ldapi:/// -b "cn=config" \
         | grep -E "olcTLSCertificateFile: #{options.tls_cert_target}"
@@ -418,18 +436,7 @@ Register the certificates inside the internal LDAP config database.
         changetype: modify
         replace: olcTLSCertificateFile
         olcTLSCertificateFile: #{options.tls_cert_target}
-        EOF
-        """
-      @system.execute
-        header: 'Register Key'
-        unless_exec: """
-        ldapsearch -Y EXTERNAL -H ldapi:/// -b "cn=config" \
-        | grep -E "olcTLSCertificateKeyFile: #{options.tls_key_target}"
-        """
-        cmd: """
-        ldapmodify -Y EXTERNAL -H ldapi:/// <<-EOF
-        dn: cn=config
-        changetype: modify
+        -
         replace: olcTLSCertificateKeyFile
         olcTLSCertificateKeyFile: #{options.tls_key_target}
         EOF

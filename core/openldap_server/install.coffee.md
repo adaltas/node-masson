@@ -66,16 +66,16 @@ ldap:x:55:
 http://joshitech.blogspot.fr/2009/09/how-to-enabled-logging-in-openldap.html
 
       @call header: 'Logging', handler: ->
-        @log 'Check rsyslog dependency'
+        @log message: 'Check rsyslog dependency'
         @service
           name: 'rsyslog'
-        @log 'Declare local4 in rsyslog configuration'
+        @log message: 'Declare local4 in rsyslog configuration'
         @file
           target: '/etc/rsyslog.conf'
           match: /^local4.*/mg
           replace: 'local4.* /var/log/slapd.log'
           append: 'RULES'
-        @log 'Restart rsyslog service'
+        @log message: 'Restart rsyslog service'
         @service
           name: 'rsyslog'
           state: 'restarted'
