@@ -6,7 +6,7 @@ FreeIPA Client package, to use with FreeIPA Server.
     module.exports =
       deps:
         iptables: module: 'masson/core/iptables', local: true
-        ssl: module: 'masson/core/ssl', local: true
+        ssl: module: '@rybajs/tools/ssl', local: true
         network: module: 'masson/core/network', local: true
         ipa_server:  module: 'masson/core/freeipa/server'
       configure:

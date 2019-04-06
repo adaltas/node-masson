@@ -15,7 +15,7 @@ Each module belonging to FreeIPA (LDAP, MIT Kerberos, DNS) is separated in its o
       deps:
         iptables: module: 'masson/core/iptables', local: true
         system: module: 'masson/core/system', local: true #rngd entropy
-        ssl: module: 'masson/core/ssl', local: true
+        ssl: module: '@rybajs/tools/ssl', local: true
         network: module: 'masson/core/network', local: true
         rngd: module: 'masson/core/rngd', local: true, auto: true, implicit: true
       configure:
