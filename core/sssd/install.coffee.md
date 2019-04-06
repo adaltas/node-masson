@@ -78,6 +78,8 @@ default overwritten unless the "sssd.merge" is `true`.
           merge: options.merge
           mode: 0o0600
           backup: true
+          uid: 'root'
+          gid: 'root'
         opts =
           # Configures the password, shadow, group, and netgroups services maps to use the SSSD module
           # https://access.redhat.com/site/documentation/en-US/Red_Hat_Enterprise_Linux/6/html/Deployment_Guide/Configuration_Options-NSS_Configuration_Options.html
