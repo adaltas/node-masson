@@ -6,7 +6,7 @@ TODO: https://dev.mysql.com/doc/refman/5.7/en/mysql-cluster.html
     module.exports =
       deps:
         iptables: module: 'masson/core/iptables', local: true
-        ssl: module: 'masson/core/ssl', local: true
+        ssl: module: '@rybajs/tools/ssl', local: true
         mariadb: module: 'masson/commons/mariadb/server'
       configure:
         'masson/commons/mariadb/server/configure'
