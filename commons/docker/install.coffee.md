@@ -256,6 +256,7 @@ Compose is a tool for defining and running multi-container Docker applications.
 
       @file.assert
         ssh: false
+        sudo: false
         target: "#{options.cache_dir}/docker-compose"
       , (err) ->
         throw Error 'Please run "prepare" before "install"' if err
