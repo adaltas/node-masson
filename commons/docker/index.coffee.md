@@ -20,7 +20,7 @@ setup TLS, sockets etc. Configuration which are mandatory if you want to use doc
     module.exports =
       deps:
         iptables: module: 'masson/core/iptables', local: true
-        ssl: module: 'masson/core/ssl', local: true
+        ssl: module: '@rybajs/tools/ssl', local: true
       configure:
         'masson/commons/docker/configure'
       commands:

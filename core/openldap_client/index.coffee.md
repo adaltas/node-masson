@@ -50,7 +50,7 @@ Example:
     module.exports =
       deps:
         yum: module: 'masson/core/yum', local: true
-        ssl: module: 'masson/core/ssl', local: true
+        ssl: module: '@rybajs/tools/ssl', local: true
         openldap_server: module: 'masson/core/openldap_server'
       configure:
         'masson/core/openldap_client/configure'
