@@ -13,11 +13,9 @@ Inspred from [rhel7-random-number-generator](https://www.certdepot.net/rhel7-get
       , ->
         @service 'rng-tools'
         @service.init
-          target: '/etc/systemd/system/rngd.service'
-          source: "#{__dirname}/resources/rng.service"
+          target: '/usr/lib/systemd/system/rngd.service'
+          source: "#{__dirname}/resources/rngd.service.j2"
           local: true
         @service.restart
           name: 'rngd'
 
-[nikita_group]: https://github.com/wdavidw/node-nikita/blob/master/src/group.coffee.md
-[nikita_user]: https://github.com/wdavidw/node-nikita/blob/master/src/user.coffee.md
