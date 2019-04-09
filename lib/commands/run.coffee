@@ -42,6 +42,7 @@ module.exports = (params, config, callback) ->
       for service in node.services
         service = s.service service.cluster, service.service
         continue if params.modules and multimatch(service.module, params.modules).length is 0
+        continue if params.cluster and multimatch(service.cluster, params.cluster).length is 0
         instance = array_get service.instances, (instance) -> instance.node.id is node.id
         if service.commands[params.command]
           for module in service.commands[params.command]
