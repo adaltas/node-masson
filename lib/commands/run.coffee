@@ -5,10 +5,13 @@ each = require 'each'
 store = require '../config/store'
 flatten = require '../utils/flatten'
 multimatch = require '../utils/multimatch'
-mixme = require 'mixme'
+{merge} = require 'mixme'
 array_get = require '../utils/array_get'
 
 module.exports = (params, config, callback) ->
+  for tag in params.tags or {}
+    [key, value] = tag.split '='
+    return callback Error "Invalid usage, expected --tags key=value" if not value
   s = store(config)
   engine = require('@nikitajs/core/lib/core/kv/engines/memory')()
   each s.nodes()
@@ -16,14 +19,16 @@ module.exports = (params, config, callback) ->
   .call (node, callback) ->
     for tag in params.tags or {}
       [key, value] = tag.split '='
-      return callback Error "Invalid usage, expected --tags key=value" if not value
       return callback() if multimatch(node.tags[key] or [], value.split(',')).length is 0
     return callback() if params.nodes and multimatch([node.ip, node.fqdn, node.hostname], params.nodes).length is 0
+    return callback() unless node.services.filter (service) ->
+      not params.modules or multimatch(service.module, params.modules).length
+    .length
     log = {}
     log.basedir ?= './log'
     log.basedir = path.resolve process.cwd(), log.basedir
     config.nikita.no_ssh = true
-    n = nikita mixme {}, config.nikita
+    n = nikita merge config.nikita
     n.kv.engine engine: engine
     n.log.cli host: node.fqdn, pad: host: 20, header: 60
     n.log.md basename: node.hostname, basedir: log.basedir, archive: false
@@ -37,7 +42,7 @@ module.exports = (params, config, callback) ->
         service = s.service(service.cluster, service.service)
         continue unless service.plugin
         instance = array_get(service.instances, (instance) -> instance.node.id is node.id)
-        n.call service.plugin, mixme {}, instance.options
+        n.call service.plugin, merge instance.options
     n.call -> # config.actions, 
       for service in node.services
         service = s.service service.cluster, service.service
@@ -46,7 +51,7 @@ module.exports = (params, config, callback) ->
         if service.commands[params.command]
           for module in service.commands[params.command]
             isRoot = config.nikita.ssh.username is 'root' or not config.nikita.ssh.username
-            n.call module, mixme {}, instance.options, sudo: not isRoot
+            n.call module, merge instance.options, sudo: not isRoot
     n.next (err) ->
       n.ssh.close header: 'SSH Close' #unless params.command is 'prepare' # params.end and
       # process.stdout.write err.message + '\n' if err

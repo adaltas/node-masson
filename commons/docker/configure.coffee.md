@@ -94,7 +94,7 @@ Docker Engine supports TLS authentication between the CLI and engine.
 When TLS is enabled, `tlscacert`, `tlscert`, `tlskey` and `tlsverify` properties
 are added to the docker configuration, so it can be used by other docker actions.
 
-      options.ssl = mixme service.deps.ssl?.options, options.ssl
+      options.ssl = merge service.deps.ssl?.options, options.ssl
       options.ssl.enabled ?= !!service.deps.ssl
       unless options.ssl.enabled
         options.default_port ?= 2375
@@ -179,7 +179,7 @@ To use it just specify the `options.block_device`.
 
 ## Dependencies
 
-    mixme = require 'mixme'
+    {merge} = require 'mixme'
 
 [socket-opts]:(https://docs.docker.com/engine/reference/commandline/dockerd/#/daemon-socket-option)
 [daemon-opts-resources]:(https://github.com/moby/moby/issues/21701)

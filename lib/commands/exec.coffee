@@ -2,7 +2,7 @@
 each = require 'each'
 multimatch = require '../utils/multimatch'
 exec = require 'ssh2-exec'
-mixme = require 'mixme'
+{merge} = require 'mixme'
 nikita = require '@nikitajs/core'
 
 module.exports = (params, config) ->
@@ -15,7 +15,7 @@ module.exports = (params, config) ->
     for tag in params.tags or {}
       [key, value] = tag.split '='
       return callback() if multimatch(node.tags[key] or [], value.split(',')).length is 0
-    n = nikita mixme {}, config.nikita
+    n = nikita merge config.nikita
     n.ssh.open host: node.ip or node.fqdn, node.ssh
     n.call ({options}, callback) ->
       isRoot = config.nikita.ssh.username is 'root' or not config.nikita.ssh.username

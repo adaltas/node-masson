@@ -1,7 +1,7 @@
 
 path = require 'path'
 fs = require 'fs'
-mixme = require 'mixme'
+{merge} = require 'mixme'
 
 module.exports = (paths, callback) ->
   try
@@ -21,7 +21,7 @@ module.exports = (paths, callback) ->
           configs.push require file
       else
         configs.push require location
-    config = mixme {}, configs...
+    config = merge configs...
     for k, v of config.servers
       v.host ?= k
       v.shortname ?= k.split('.')[0]

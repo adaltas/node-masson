@@ -43,10 +43,10 @@ Example:
       options.fqdn ?= service.node.fqdn
       options.sshd ?= {}
       options.kinit ?= '/usr/bin/kinit'
-      options.admin = mixme service.deps.krb5_server[0].options.admin, options.admin if service.deps.krb5_server
-      options.etc_krb5_conf = mixme module.exports.etc_krb5_conf, options.etc_krb5_conf
+      options.admin = merge service.deps.krb5_server[0].options.admin, options.admin if service.deps.krb5_server
+      options.etc_krb5_conf = merge module.exports.etc_krb5_conf, options.etc_krb5_conf
       # Merge global with server-based configuration
-      # options.etc_krb5_conf.realms = mixme options.etc_krb5_conf.realms, options.etc_krb5_conf.realms
+      # options.etc_krb5_conf.realms = merge options.etc_krb5_conf.realms, options.etc_krb5_conf.realms
       if service.deps.krb5_server
         for srv in service.deps.krb5_server
           for realm, config of srv.options.admin
@@ -112,4 +112,4 @@ Example:
 
     misc = require '@nikitajs/core/lib/misc'
     array = require '@nikitajs/core/lib/misc/array'
-    mixme = require 'mixme'
+    {merge} = require 'mixme'

@@ -68,7 +68,7 @@ Options:
 ## Client command
 
       if ipa_server
-        options.admin ?= mixme ipa_server.options.ntp_enabled, options.admin
+        options.admin ?= merge ipa_server.options.ntp_enabled, options.admin
 
 ## Kerberos
 
@@ -84,4 +84,4 @@ Options:
 
 ## Dependencies
 
-    mixme = require 'mixme'
+    {merge} = require 'mixme'

@@ -75,7 +75,7 @@ ryba will first execute operation on this host and enable the slave replication 
           options.ha_deploy_master[realm] ?= service.deps.krb5_server.filter( (srv) -> srv.options.admin?[realm]?.master )[0]?.node.fqdn if master_count is 1
           throw Error 'Invalid configuration: more than one KDC server' if master_count > 1
           if master_count is 0
-            mixme.mutate service.deps.krb5_server[0].options, admin: "#{realm}": master: true
+            mutate service.deps.krb5_server[0].options, admin: "#{realm}": master: true
             options.ha_deploy_master[realm] ?= service.deps.krb5_server[0].node.fqdn
 
 ## kdc.conf
@@ -88,7 +88,7 @@ configuration profile.
 
       # Default values
       options.kdc_conf ?= {}
-      options.kdc_conf = mixme
+      options.kdc_conf = merge
         'libdefaults': {}
         'kdcdefaults':
           'kdc_ports': '88'
@@ -107,7 +107,7 @@ configuration profile.
         admin = options.admin[realm]
         # DB module
         options.kdc_conf.dbmodules ?= {}
-        options.kdc_conf.dbmodules[admin.database_module] = mixme
+        options.kdc_conf.dbmodules[admin.database_module] = merge
           'db_library': 'kldap'
           'ldap_kerberos_container_dn': service.deps.openldap_server[0].options.krb5.kerberos_dn
           'ldap_kdc_dn': service.deps.openldap_server[0].options.krb5.kdc_user.dn
@@ -125,7 +125,7 @@ configuration profile.
           'kdc_master_key': admin.kdc_master_key
         , options.kdc_conf.dbmodules[admin.database_module]
         # Default realm configuration
-        config = options.kdc_conf.realms[realm] = mixme
+        config = options.kdc_conf.realms[realm] = merge
           'kadmind_port': 749
           # 'kpasswd_port': 464 # http://www.opensource.apple.com/source/Kerberos/Kerberos-47/KerberosFramework/Kerberos5/Documentation/kadmin/kpasswd.protocol
           'max_life': '10h 0m 0s'
@@ -175,4 +175,4 @@ configuration profile.
 
 ## Dependencies
 
-    mixme = require 'mixme'
+    {merge, mutate} = require 'mixme'

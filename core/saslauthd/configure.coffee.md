@@ -64,7 +64,7 @@ The system configuration is written in "/run/saslauthd" and doesnt require any
 modification.
 
       options.sysconfig ?= {}
-      options.sysconfig = mixme options.sysconfig,
+      options.sysconfig = merge options.sysconfig,
         'SOCKETDIR': '/run/saslauthd'
         'MECH': 'ldap'
         'FLAGS': "-O #{options.conf_file}"
@@ -91,4 +91,4 @@ Use a provided username and password to validate the connection, not required.
 
 ## Dependencies
 
-    mixme = require 'mixme'
+    {merge} = require 'mixme'

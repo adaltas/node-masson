@@ -1,6 +1,6 @@
 
 tsort = require 'tsort'
-mixme = require 'mixme'
+{merge, mutate} = require 'mixme'
 load = require '../utils/load'
 affinities = require './affinities'
 
@@ -20,7 +20,7 @@ module.exports = (config) ->
     # Load service module
     externalModDef = load service.module
     throw Error "Invalid Service Definition: expect an object for module #{JSON.stringify service.module}, got #{JSON.stringify typeof externalModDef}" unless is_object externalModDef
-    mixme.mutate service, externalModDef
+    mergemutate service, externalModDef
     # Define auto loaded services
     service.deps ?= {}
     for dname, dservice of service.deps
@@ -158,13 +158,13 @@ module.exports = (config) ->
           id: nodeId
           cluster: service.cluster
           service: service.id
-          node: mixme {}, config.nodes[nodeId]
+          node: merge config.nodes[nodeId]
           options: service.nodes[nodeId] or {}
         # service.nodes[nodeId] ?= {} 
         # service.nodes[nodeId].id = nodeId
         # service.nodes[nodeId].cluster = service.cluster
         # service.nodes[nodeId].service = service.id
-        # service.nodes[nodeId].node = mixme {}, config.nodes[nodeId]
+        # service.nodes[nodeId].node = merge config.nodes[nodeId]
         # service.nodes[nodeId].options ?= {}
     # Enrich service list in nodes
     for instance in service.instances
@@ -175,7 +175,7 @@ module.exports = (config) ->
           break
       if found?
         config.nodes[instance.node.id].services[found].module ?= service.module
-        instance.node.services.push mixme {}, config.nodes[instance.node.id].services[found]
+        instance.node.services.push merge config.nodes[instance.node.id].services[found]
       else
         config.nodes[instance.node.id].services.push cluster: cname, service: sname, module: service.module
         instance.node.services.push cluster: cname, service: sname, module: service.module
@@ -214,8 +214,8 @@ module.exports = (config) ->
       noptions = if node_services.length is 1 then node_services[0].options else {}
       # Overwrite options from service.nodes
       # if service.nodes[node.id]
-      #   options = mixme {}, options, service.nodes[node.id].options
-      instance.options = mixme {}, service.options, noptions, service.nodes[instance.node.id]
+      #   options = merge options, service.nodes[node.id].options
+      instance.options = merge service.options, noptions, service.nodes[instance.node.id]
     # Load deps and run configure
     for instance in service.instances
       node = config.nodes[instance.node.id]
@@ -238,7 +238,7 @@ module.exports = (config) ->
         service: instance.service
         options: instance.options
         instances: service.instances
-        node: mixme {}, node
+        node: merge node
         deps: deps
       if service.configure
         try

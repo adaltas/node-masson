@@ -4,14 +4,14 @@ params = require './params'
 load = require './config/load'
 normalize = require './config/normalize'
 store = require './config/store'
-mixme = require 'mixme'
+{merge, mutate} = require 'mixme'
 
 module.exports = (processOrArgv, callback) ->
   throw Error 'Required Argument: process or arguments is not provided' unless processOrArgv
   throw Error 'Required Argument: callback is not provided' unless callback
 
   # Parse the first part of the arguments, without the user command
-  orgparams = parameters(mixme {}, params, main: name: 'main').parse(processOrArgv)
+  orgparams = parameters(merge params, main: name: 'main').parse(processOrArgv)
   
   # Read configuration
   load orgparams.config, (err, config) ->
@@ -41,7 +41,7 @@ module.exports = (processOrArgv, callback) ->
           description: 'Resume from previous run'
         ]
     # Merge default parameters with discovered parameters and user parameters
-    mixme.mutate params, commands: commands, config.params
+    mutate params, commands: commands, config.params
     try
       parameters(params).run processOrArgv, config, callback
     catch err

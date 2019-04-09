@@ -53,7 +53,7 @@ two new properties "sshd\_config" and "banner".
       for username, config of options.users
         if deps.system
           throw Error "User Not Defined: module system must define the user #{username}" unless username is 'root' or deps.system.options.users[username]
-        options.users[username] = mixme config, deps.system.options.users[username]
+        options.users[username] = merge config, deps.system.options.users[username]
         options.users[username].home ?= if username is 'root' then '/root' else "/home/#{username}"
         options.users[username].ssh_dir ?= "#{options.users[username].home}/.ssh"
         options.users[username].authorized_keys ?= []
@@ -61,4 +61,4 @@ two new properties "sshd\_config" and "banner".
 
 ## Dependencies
 
-    mixme = require 'mixme'
+    {merge} = require 'mixme'
