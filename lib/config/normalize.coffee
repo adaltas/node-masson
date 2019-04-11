@@ -20,7 +20,7 @@ module.exports = (config) ->
     # Load service module
     externalModDef = load service.module
     throw Error "Invalid Service Definition: expect an object for module #{JSON.stringify service.module}, got #{JSON.stringify typeof externalModDef}" unless is_object externalModDef
-    mergemutate service, externalModDef
+    mutate service, externalModDef
     # Define auto loaded services
     service.deps ?= {}
     for dname, dservice of service.deps

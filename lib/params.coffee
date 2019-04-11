@@ -8,19 +8,12 @@ module.exports =
     description: 'One or multiple configuration files'
     required: true
   ,
-    name: 'debug', shortcut: 'd', type: 'boolean'
+    name: 'stacktrace', shortcut: 's', type: 'boolean'
     description: 'Print readable stacktrace'
   ]
   commands:
-    'help':
-      run: 'masson/lib/commands/help'
     # 'help':
-    #   description: 'Print this help and exit'
     #   run: 'masson/lib/commands/help'
-    #   main:
-    #     name: 'name'
-    #     description: 'Print the help relative to the command'
-      # help: true
     'pki':
       description: 'Certificate Management for development usage'
       run: 'masson/lib/commands/pki'
@@ -29,7 +22,6 @@ module.exports =
         required: true
         description: 'Output directory'
       ]
-      command: 'action'
       commands:
         'ca':
           description: 'Generate the Certificate Authority'
@@ -66,7 +58,6 @@ module.exports =
         default: 'MASSON_SECRET_PW'
         description: 'Environment variable storing the password'
       ]
-      command: 'action'
       commands:
         'init':
           description: 'Initialize the secret store'
@@ -149,7 +140,6 @@ module.exports =
     'server':
       description: 'Print the execution plan'
       run: 'masson/lib/commands/server'
-      command: 'action'
       commands:
         'start':
           description: 'Start the server'

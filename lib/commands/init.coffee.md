@@ -33,15 +33,15 @@ masson init \
       rl.setPrompt ''
       rl.on 'SIGINT', process.exit
       nikita
-        debug: params.debug
+        debug: params.verbose
       .call (_, callback) ->
-        fs.stat "#{params.path}", (err, stat) =>
+        fs.stat "#{params.path}", (err, stat) ->
           if err?.code is 'ENOENT'
             callback null, true
           else if err
             callback err
           else if stat.isDirectory()
-            fs.stat "#{params.path}/.git", (err, stat) =>
+            fs.stat "#{params.path}/.git", (err, stat) ->
               if err or not stat?.isDirectory()
                 callback null, true
               else
@@ -75,7 +75,7 @@ masson init \
         content: """
         #!/bin/bash
         cd $( dirname "${BASH_SOURCE}" )/../conf
-        vagrant $@ 
+        vagrant $@
         """
         mode: 0o0755
         eof: true

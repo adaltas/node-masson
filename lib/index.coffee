@@ -11,7 +11,9 @@ module.exports = (processOrArgv, callback) ->
   throw Error 'Required Argument: callback is not provided' unless callback
 
   # Parse the first part of the arguments, without the user command
-  orgparams = parameters(merge params, main: name: 'main').parse(processOrArgv)
+  try
+    orgparams = parameters(merge params, main: name: 'main').parse(processOrArgv)
+  catch err then callback err
   
   # Read configuration
   load orgparams.config, (err, config) ->
@@ -24,7 +26,7 @@ module.exports = (processOrArgv, callback) ->
     # Enrich configuration with command discovery
     commands = {}
     for command in store(config).commands()
-      commands[command] = 
+      commands[command] =
         description: "Run the #{command} command"
         run: 'masson/lib/commands/run'
         options: [
