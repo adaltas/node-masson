@@ -34,6 +34,19 @@
       "email": "lucas@adaltas.com"
     }
   ],
+  "coffeelintConfig": {
+    "indentation" : {
+      "level" : "error",
+      "value" : 2
+    },
+    "line_endings" : {
+      "level" : "error",
+      "value" : "unix"
+    },
+    "max_line_length": {
+      "level": "ignore"
+    }
+  },
   "dependencies": {
     "coffeescript": "^2.4.1",
     "colors": "~1.3.3",
