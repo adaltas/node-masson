@@ -27,8 +27,8 @@ module.exports = (processOrArgv, callback) ->
     commands = {}
     for command in store(config).commands()
       commands[command] =
-        description: "Run the #{command} command"
-        run: 'masson/lib/commands/run'
+        description: "Run the #{command} command on the clusters"
+        route: 'masson/lib/commands/clusters'
         options: [
           name: 'nodes', shortcut: 'n', type: 'array'
           description: 'Limit to a list of server FQDNs'
@@ -43,9 +43,9 @@ module.exports = (processOrArgv, callback) ->
           description: 'Resume from previous run'
         ]
     # Merge default parameters with discovered parameters and user parameters
-    mutate params, commands: commands, config.params
+    mutate params, commands: 'clusters': commands: commands, config.params
     try
-      parameters(params).run processOrArgv, config, callback
+      parameters(params).route processOrArgv, config, callback
     catch err
       callback err
       

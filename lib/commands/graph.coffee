@@ -9,7 +9,7 @@ normalize = require '../config/normalize'
 store = require '../config/store'
 
 # ./bin/ryba graph -o output_file -p JSON
-module.exports = (params, config) ->
+module.exports = ({params}, config) ->
   params.output ?= 'export'
   params.output = path.resolve process.cwd(), params.output
   params.hosts = [params.hosts] if typeof params.hosts is 'string'

@@ -8,7 +8,8 @@ multimatch = require '../utils/multimatch'
 {merge} = require 'mixme'
 array_get = require '../utils/array_get'
 
-module.exports = (params, config, callback) ->
+module.exports = ({params}, config, callback) ->
+  command = params.command.slice(-1)[0]
   for tag in params.tags or {}
     [key, value] = tag.split '='
     return callback Error "Invalid usage, expected --tags key=value" if not value
@@ -21,9 +22,15 @@ module.exports = (params, config, callback) ->
       [key, value] = tag.split '='
       return callback() if multimatch(node.tags[key] or [], value.split(',')).length is 0
     return callback() if params.nodes and multimatch([node.ip, node.fqdn, node.hostname], params.nodes).length is 0
-    return callback() unless node.services.filter (service) ->
+    services = node.services
+    # Filtering based on module name
+    .filter (service) ->
       not params.modules or multimatch(service.module, params.modules).length
-    .length
+    # Keep only service with a matching command
+    .filter (service) ->
+      s.service service.cluster, service.service
+      .commands[command]
+    return callback() unless services.length
     log = {}
     log.basedir ?= './log'
     log.basedir = path.resolve process.cwd(), log.basedir
@@ -32,7 +39,8 @@ module.exports = (params, config, callback) ->
     n.kv.engine engine: engine
     n.log.cli host: node.fqdn, pad: host: 20, header: 60
     n.log.md basename: node.hostname, basedir: log.basedir, archive: false
-    n.next (->) #swallow Invalid Directory on log directory
+    # Swallow "Invalid Directory" error on log directory
+    n.next ((err) ->)
     n.ssh.open
       header: 'SSH Open'
       host: node.ip or node.fqdn
@@ -43,18 +51,17 @@ module.exports = (params, config, callback) ->
         continue unless service.plugin
         instance = array_get(service.instances, (instance) -> instance.node.id is node.id)
         n.call service.plugin, merge instance.options
-    n.call -> # config.actions, 
-      for service in node.services
+    n.call ->
+      for service in services
         service = s.service service.cluster, service.service
-        continue if params.modules and multimatch(service.module, params.modules).length is 0
+        # Retrieve the service instance associated with this node
         instance = array_get service.instances, (instance) -> instance.node.id is node.id
-        if service.commands[params.command]
-          for module in service.commands[params.command]
-            isRoot = config.nikita.ssh.username is 'root' or not config.nikita.ssh.username
-            n.call module, merge instance.options, sudo: not isRoot
+        # Call each registered module
+        for module in service.commands[command]
+          isRoot = config.nikita.ssh.username is 'root' or not config.nikita.ssh.username
+          n.call module, merge instance.options, sudo: not isRoot
     n.next (err) ->
-      n.ssh.close header: 'SSH Close' #unless params.command is 'prepare' # params.end and
-      # process.stdout.write err.message + '\n' if err
+      n.ssh.close header: 'SSH Close'
       n.next -> callback err
   .next (err) ->
     if err
@@ -62,7 +69,5 @@ module.exports = (params, config, callback) ->
         process.stderr.write "\n#{err.stack}\n"
       else for err in err.errors
         process.stderr.write "\n#{err.stack}\n"
-    else
-      process.stdout.write 'Finish with success'
     callback err
     

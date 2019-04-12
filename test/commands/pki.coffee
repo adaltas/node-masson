@@ -26,7 +26,7 @@ describe 'command pki', ->
       true
     fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
     config = normalize {}
-    parameters(params).run ['pki', '--dir', "#{tmp}", 'ca'], config, (err) ->
+    parameters(params).route ['pki', '--dir', "#{tmp}", 'ca'], config, (err) ->
       process.stdout.write = write
       data.should.eql """
       

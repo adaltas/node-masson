@@ -160,7 +160,7 @@ module.exports = (config) ->
           service: service.id
           node: merge config.nodes[nodeId]
           options: service.nodes[nodeId] or {}
-        # service.nodes[nodeId] ?= {} 
+        # service.nodes[nodeId] ?= {}
         # service.nodes[nodeId].id = nodeId
         # service.nodes[nodeId].cluster = service.cluster
         # service.nodes[nodeId].service = service.id

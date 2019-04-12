@@ -29,7 +29,7 @@ describe 'command configure', ->
         'cluster_a':
           services:
             "#{tmp}/a": true
-    parameters(params).run(['configure', '--format', 'json'], config)
+    parameters(params).route(['configure', '--format', 'json'], config)
     process.stdout.write = write
     JSON.parse(data).should.eql config
 
@@ -45,7 +45,7 @@ describe 'command configure', ->
           services:
             "#{tmp}/a": true
         'cluster_b': {}
-    parameters(params).run(['configure', '--cluster', 'cluster_a', '-f', 'json'], config)
+    parameters(params).route(['configure', '--cluster', 'cluster_a', '-f', 'json'], config)
     process.stdout.write = write
     JSON.parse(data).should.eql
       id: "cluster_a"
@@ -74,7 +74,7 @@ describe 'command configure', ->
         'service_a':
           module: "#{tmp}/a"
           deps: 'my_dep_a': module: "#{tmp}/dep_a", local: true
-    parameters(params).run(['configure', '--cluster', 'cluster_a', '--service', 'service_a', '-f', 'json'], config)
+    parameters(params).route(['configure', '--cluster', 'cluster_a', '--service', 'service_a', '-f', 'json'], config)
     process.stdout.write = write
     JSON.parse(data).id.should.eql 'service_a'
 
@@ -94,7 +94,7 @@ describe 'command configure', ->
         'a.fqdn': ip: '10.10.10.1'
         'b.fqdn': ip: '10.10.10.2'
         'c.fqdn': ip: '10.10.10.3'
-    parameters(params).run(['configure', '--nodes', '-f', 'json'], config)
+    parameters(params).route(['configure', '--nodes', '-f', 'json'], config)
     process.stdout.write = write
     JSON.parse(data)
     .map (node) -> node.id
@@ -116,7 +116,7 @@ describe 'command configure', ->
         'a.fqdn': ip: '10.10.10.1'
         'b.fqdn': ip: '10.10.10.2'
         'c.fqdn': ip: '10.10.10.3'
-    parameters(params).run(['configure', '--node', 'c.fqdn', '-f', 'json'], config)
+    parameters(params).route(['configure', '--node', 'c.fqdn', '-f', 'json'], config)
     process.stdout.write = write
     JSON.parse(data).should.eql
       ip: "10.10.10.3",

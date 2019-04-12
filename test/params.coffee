@@ -27,7 +27,7 @@ describe 'params', ->
     fs.writeFileSync "#{tmp}/config.json", JSON.stringify
       params: commands: 'help': description: 'Overwrite default description'
     masson ['-c', "#{tmp}/config.json", 'help'], (err) ->
-      # parameters(params).run(, config)
+      # parameters(params).route(, config)
       process.stdout.write = write
       data.split(/\r\n|[\n\r\u0085\u2028\u2029]/g)[13]
       .should.eql '    help                    Overwrite default description'

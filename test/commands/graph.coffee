@@ -32,7 +32,7 @@ describe 'command graph', ->
         'service_a':
           module: "#{tmp}/a"
           deps: 'my_dep_a': module: "#{tmp}/dep_a", local: true
-    parameters(params).run(['graph', '-f', 'json'], config)
+    parameters(params).route(['graph', '-f', 'json'], config)
     process.stdout.write = write
     JSON.parse(data).should.eql [
       'cluster_a:dep_a'
@@ -58,7 +58,7 @@ describe 'command graph', ->
       nodes:
         'a.fqdn': true
         'b.fqdn': true
-    parameters(params).run(['graph', '--nodes', '-f', 'json'], config)
+    parameters(params).route(['graph', '--nodes', '-f', 'json'], config)
     process.stdout.write = write
     JSON.parse(data).should.eql [
       cluster: 'cluster_a'
@@ -91,7 +91,7 @@ describe 'command graph', ->
       nodes:
         'a.fqdn': true
         'b.fqdn': true
-    parameters(params).run(['graph', '--nodes'], config)
+    parameters(params).route(['graph', '--nodes'], config)
     process.stdout.write = write
     data.substr(-2, 2).should.eql '\n\n'
     data.trim().should.eql """

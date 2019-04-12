@@ -24,16 +24,14 @@ masson init \
     nikita = require '@nikitajs/core'
     readline = require 'readline'
 
-    module.exports = ->
-      params = params.parse()
+    module.exports = ({params}, config) ->
       params.path ?= process.cwd()
-      params.name ?= 'my_project'
-      params.description ?= 'Description of my project.'
+      params.description ?= "Description of #{params.name} application."
       rl = readline.createInterface process.stdin, process.stdout
       rl.setPrompt ''
       rl.on 'SIGINT', process.exit
       nikita
-        debug: params.verbose
+        debug: params.debug
       .call (_, callback) ->
         fs.stat "#{params.path}", (err, stat) ->
           if err?.code is 'ENOENT'
@@ -265,3 +263,4 @@ masson init \
         else if status
           rl.write 'Project initialized\n'
         rl.close()
+        callback err

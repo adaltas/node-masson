@@ -19,9 +19,9 @@ describe 'command help', ->
     .promise()
       
   it 'print full help', ->
-    write = process.stdout.write
+    write = process.stderr.write
     data = null
-    process.stdout.write = (d)->
+    process.stderr.write = (d)->
       data = d
       true
     fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
@@ -30,8 +30,8 @@ describe 'command help', ->
         'cluster_a':
           services:
             "#{tmp}/a": true
-    parameters(params).run(['help'], config)
-    process.stdout.write = write
+    parameters(params).route(['help'], config)
+    process.stderr.write = write
     data.should.eql """
     
     NAME
@@ -41,12 +41,11 @@ describe 'command help', ->
         masson [masson options] <command>
 
     OPTIONS
-        -c --config             One or multiple configuration files Required.
-        -d --debug              Print readable stacktrace
+        -c --config             One or multiple configuration files
+        -s --stacktrace         Print readable stacktrace
         -h --help               Display help information
 
     COMMANDS
-        help                    Display help information about masson
         pki                     Certificate Management for development usage
         secrets                 Interact with the secure secret file store
         exec                    Distribute a shell command
@@ -54,35 +53,7 @@ describe 'command help', ->
         graph                   Print the execution plan
         server                  Print the execution plan
         init                    Create a project with a default layout and configuration
-
-    COMMAND "help"
         help                    Display help information about masson
-        help {name}             Help about a specific command
-
-    COMMAND "pki"
-        pki [pki options] <action>
-        Where command is one of ca, cacert-view, check, cert, cert-view.
-
-    COMMAND "secrets"
-        secrets [secrets options] <action>
-        Where command is one of init, unset, get, set, show.
-
-    COMMAND "exec"
-        exec                    Distribute a shell command
-        exec {subcommand}       The subcommand to execute
-
-    COMMAND "configure"
-        configure               Export servers' configuration in a file
-
-    COMMAND "graph"
-        graph                   Print the execution plan
-
-    COMMAND "server"
-        server [server options] <action>
-        Where command is one of start, stop, status.
-
-    COMMAND "init"
-        init                    Create a project with a default layout and configuration
 
     EXAMPLES
         masson --help           Show this message
@@ -91,9 +62,9 @@ describe 'command help', ->
     """
       
   it 'print help for command exec', ->
-    write = process.stdout.write
+    write = process.stderr.write
     data = null
-    process.stdout.write = (d)->
+    process.stderr.write = (d)->
       data = d
       true
     fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
@@ -102,8 +73,8 @@ describe 'command help', ->
         'cluster_a':
           services:
             "#{tmp}/a": true
-    parameters(params).run(['help', 'exec'], config)
-    process.stdout.write = write
+    parameters(params).route(['help', 'exec'], config)
+    process.stderr.write = write
     data.should.eql """
 
     NAME
@@ -119,8 +90,8 @@ describe 'command help', ->
         subcommand              The subcommand to execute
 
     OPTIONS for masson
-        -c --config             One or multiple configuration files Required.
-        -d --debug              Print readable stacktrace
+        -c --config             One or multiple configuration files
+        -s --stacktrace         Print readable stacktrace
         -h --help               Display help information
 
     EXAMPLES

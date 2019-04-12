@@ -6,6 +6,7 @@
 * network: new host_auto
 * package: latest dependencies
 * masson: entrypoint callback requirement
+* commands: use latest parameters
 
 ## Version 0.1.12
 
