@@ -1,6 +1,6 @@
 {
   "name": "masson",
-  "version": "0.1.12",
+  "version": "0.2.0",
   "description": "Module execution engine for cluster deployments.",
   "homepage": "https://github.com/adaltas/node-masson",
   "bugs": "https://github.com/adaltas/node-masson/issues",
@@ -35,13 +35,13 @@
     }
   ],
   "coffeelintConfig": {
-    "indentation" : {
-      "level" : "error",
-      "value" : 2
+    "indentation": {
+      "level": "error",
+      "value": 2
     },
-    "line_endings" : {
-      "level" : "error",
-      "value" : "unix"
+    "line_endings": {
+      "level": "error",
+      "value": "unix"
     },
     "max_line_length": {
       "level": "ignore"

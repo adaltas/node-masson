@@ -1,7 +1,7 @@
 
 # Changelog
 
-## Trunk
+## Version 0.2.0
 
 * network: new host_auto
 * package: latest dependencies
