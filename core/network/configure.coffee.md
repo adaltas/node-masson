@@ -24,6 +24,11 @@ The module accept the following properties:
     IPs and the value the hostnames.
 *   `resolv` (string, optional)   
     Content of the '/etc/resolv.conf' file.
+    'systemd-resolved' will be deactivated if set
+*   `systemd_resolv` (string, optional)
+    Content of '/etc/systemd/resolved.conf'.
+    'systemd-resolved' will be activated  if this is set.
+    Both `resolv` and `systemd_resolv` can't be set at the same time.
 *   `host_replace` (string, optional)   
     Custom hostname to replace in /etc/hosts.
 *   `ifcg` (object, optional)   
@@ -62,18 +67,19 @@ The module accept the following properties:
 ```
 
     module.exports = ({deps, options, node, instances}) ->
-      
+
       options.ip = node.ip
       options.fqdn = node.fqdn
       options.hostname = node.hostname
-      options.hostname_disabled ?= false
-      
+      throw Error 'Both resolv and systemd_resolv cannot be set at the same time' if options.resolv and options.systemd_resolv
+
 ## Hosts
 
       options.hosts_auto ?= false
       options.own_host ?= false # For when fqdn of the current host is already in /etc/hosts, we will want to avoid duplication
       options.hosts ?= {}
       options.host_replace ?= {}
+      options.hostname_disabled ?= true
       if options.hosts_auto then for instance in instances
         throw Error "Required Property: node must define an IP" unless instance.node.ip
         options.hosts[instance.node.ip] = "#{instance.node.fqdn} #{instance.node.hostname}" unless instance.node.ip is options.ip and options.own_host

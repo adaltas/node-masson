@@ -81,7 +81,7 @@ Declare the server hostname. According to `hostnamectl` documentation:
 
 ## DNS resolv
 
-Write the DNS configuration. On RH like system, this is configured 
+Write the DNS configuration. On RH like system, this is configured
 by the "/etc/resolv" file.
 
 The [resolver](http://man7.org/linux/man-pages/man5/resolver.5.html) 
@@ -90,16 +90,77 @@ access to the Internet Domain Name System (DNS). The
 configuration file is considered a trusted source of DNS information.
 
       @call
-        header: 'DNS Resolver'
+        header: 'Manual DNS Resolver'
         if: -> options.resolv
       , ->
         @file
+          if: options.resolv
           content:  options.resolv
           target: '/etc/resolv.conf'
           backup: true
           eof: true
+        @service.stop
+          header: "Deactivate systemd-resolved"
+          name: "systemd-resolved"
+        @service.startup
+          header: "Disable systemd-resolved"
+          name: "systemd-resolved"
+          startup: false
         @connection.wait
           servers: options.dns
+
+
+## Systemd DNS resolv
+
+If systemd_resolv is set, the [systemd resolver](http://man7.org/linux/man-pages/man8/systemd-resolved.service.8.html) is activated
+The resolver file (/etc/resolv.conf) is linked to `/run/systemd/resolve/stub-resolv.conf`
+or to the backup `/run/systemd/resolve/resolv.conf` if the first does not exist.
+
+In systemd version prior to 228, the `/run/systemd/resolve/stub-resolv.conf` file does
+not exist and systemd-resolved does not accept Domain search, Stub DNS and a lot of other options.
+
+It is recommended to symlink `/etc/resolv.conf` to a systemd-resolved managed file cited above.
+
+      @call
+        header: 'Systemd DNS resolver'
+        if: -> options.systemd_resolv
+      , ->
+        @service
+          header: "Install systemd-resolved"
+          unless_os: name: ["ubuntu"]
+          name: 'systemd-resolved'
+          startup: true
+          state: "started"
+        @file
+          header: "systemd-resolved config"
+          if: options.systemd_resolv
+          content: options.systemd_resolv
+          target: '/etc/systemd/resolved.conf'
+          backup: true
+          eof: true
+        @service.restart
+          header: "Restart systemd-resolved"
+          name: 'systemd-resolved'
+        @system.execute
+          cmd: """
+          ls /run/systemd/resolve/stub-resolv.conf || exit 42
+          """
+          code_skipped: 42
+        , (err, {code}) ->
+          resolv_link = if code is 42 then "/run/systemd/resolve/resolv.conf" else "/run/systemd/resolve/stub-resolv.conf"
+          @system.execute
+            header: "Link resolv.conf"
+            cmd: """
+            link="#{resolv_link}"
+            ls -l /etc/resolv.conf | grep $link && exit 42
+            rm -f /etc/resolv.conf
+            ln -s $link /etc/resolv.conf
+            """
+            code_skipped: 42
+        @connection.wait
+          servers: options.dns
+
+
 
 ## Interfaces
 
