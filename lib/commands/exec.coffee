@@ -22,7 +22,7 @@ module.exports = ({params}, config) ->
       @system.execute
         relax: true
         sudo: not isRoot
-        cmd: params.subcommand
+        cmd: params.subcommand.map((c) -> "\"#{c}\"").join ' '
       , (err, {stdout, stderr}) ->
         write if err
         then "\x1b[31m#{node.fqdn} (exit code #{err.code})\x1b[39m\n"
