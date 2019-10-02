@@ -7,7 +7,7 @@ module.exports = ({params}, config, callback) ->
   store.get (err, data) ->
     return callback err if err
     # Secret already set, need the overwrite option
-    [property, password] = params.property.split ' '
+    [property, password] = params.property
     password_generated = false
     value = get data, property
     if value and not params.overwrite
