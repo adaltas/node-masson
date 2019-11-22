@@ -25,7 +25,8 @@ module.exports = ({params}, config, callback) ->
     services = node.services
     # Filtering based on module name
     .filter (service) ->
-      not params.modules or multimatch(service.module, params.modules).length
+      (not params.modules or multimatch(service.module, params.modules).length) and
+      (not params.cluster or multimatch(service.cluster, params.cluster).length)
     # Keep only service with a matching command
     .filter (service) ->
       s.service service.cluster, service.service

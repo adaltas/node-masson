@@ -41,6 +41,9 @@ module.exports = (processOrArgv, callback) ->
         ,
           name: 'resume', shortcut: 'r', type: 'boolean'
           description: 'Resume from previous run'
+        ,
+          name: 'cluster', shortcut: 'c', type: 'array'
+          description: 'Limit to a list of clusters'
         ]
     # Merge default parameters with discovered parameters and user parameters
     mutate params, commands: 'clusters': commands: commands, config.params
