@@ -4,8 +4,22 @@ multimatch = require '../utils/multimatch'
 exec = require 'ssh2-exec'
 {merge} = require 'mixme'
 nikita = require '@nikitajs/core'
+exec_sync = require('child_process').execSync
+env = require('process').env
+fs = require('fs')
 
 module.exports = ({params}, config) ->
+  if not params.subcommand? or params.subcommand.length == 0
+    if not 'EDITOR' in env or env['EDITOR'] == ""
+      console.log("Please set your EDITOR env variable to the text editor of your choice\ne.g: export EDITOR=vi")
+      return
+    fs.writeFileSync('/tmp/masson_exec', '#!/bin/sh\n# Edit your Masson script to execute')
+    exec_sync(env['EDITOR']+' /tmp/masson_exec', {stdio: 'inherit', detached: true})
+    cmd = fs.readFileSync('/tmp/masson_exec', 'utf8');
+    fs.unlinkSync('/tmp/masson_exec')
+  else
+    cmd = params.subcommand.map((c) -> "\"#{c}\"").join ' '
+
   config.nikita.no_ssh = true
   write = (msg) -> process.stdout.write msg
   each config.nodes
@@ -22,7 +36,7 @@ module.exports = ({params}, config) ->
       @system.execute
         relax: true
         sudo: not isRoot
-        cmd: params.subcommand.map((c) -> "\"#{c}\"").join ' '
+        cmd: cmd
       , (err, {stdout, stderr}) ->
         write if err
         then "\x1b[31m#{node.fqdn} (exit code #{err.code})\x1b[39m\n"
