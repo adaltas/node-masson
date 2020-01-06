@@ -7,7 +7,7 @@ packaged as a Docker container.
     module.exports =
       deps:
         git: module: 'masson/commons/git', local: true
-        nodejs: module: 'masson/commons/nodejs', local: true
+        nodejs: module: '@rybajs/system/nodejs', local: true
       configure:
         'masson/commons/cloud9/configure'
       commands:

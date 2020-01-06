@@ -23,14 +23,14 @@ set.
         backup: true
         eof: true
       write = []
-      if options.host_replace then for ip in Object.keys options.host_replace
+      for ip in Object.keys options.host_replace
         write.push
           match: RegExp "^#{quote ip}\\s.*$", 'm'
           replace: "#{ip} #{options.host_replace[ip]}"
           append: true
       @file
         header: 'Host replace'
-        if: options.host_replace?
+        if: write.length
         target: '/etc/hosts'
         write: write
         eof: true
