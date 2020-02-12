@@ -82,7 +82,7 @@ set the property "yum.epel.enabled" to "true".
             target: epel_rpm_tmp
             shy: true
           @system.execute
-            cmd: "rpm -Uvh #{epel_rpm_tmp}" 
+            cmd: "rpm -Uvh #{epel_rpm_tmp}"
           @system.remove
             target: epel_rpm_tmp
             shy: true

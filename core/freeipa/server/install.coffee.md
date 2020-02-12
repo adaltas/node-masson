@@ -73,6 +73,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
       @system.execute
         header: 'Setup'
         unless_exists: '/etc/ipa/default.conf'
+        unless_exec: 'echo > /dev/tcp/localhost/443'
         cmd: [
           'ipa-server-install', '-U'
           #  Basic options
