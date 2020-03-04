@@ -11,6 +11,19 @@ module.exports =
       shortcut: 's', type: 'boolean'
       description: 'Print readable stacktrace'
   commands:
+    'grpc':
+      description: 'Remote access through grpc'
+      commands:
+        'start':
+          description: 'Start the GRPC server'
+          route: 'masson/lib/commands/grpc/start'
+        'status':
+          description: 'Print the server status'
+          route: 'masson/lib/commands/grpc/status'
+        'stop':
+          description: 'Stop the GRPC server'
+          route: 'masson/lib/commands/grpc/stop'
+      
     'pki':
       description: 'Certificate Management for development usage'
       options:
