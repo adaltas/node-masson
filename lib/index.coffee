@@ -29,22 +29,22 @@ module.exports = (processOrArgv, callback) ->
       commands[command] =
         description: "Run the #{command} command on the clusters"
         route: 'masson/lib/commands/clusters'
-        options: [
-          name: 'nodes', shortcut: 'n', type: 'array'
-          description: 'Limit to a list of server FQDNs'
-        ,
-          name: 'tags', shortcut: 't', type: 'array'
-          description: 'Limit to servers that honor a list of tags'
-        ,
-          name: 'modules', shortcut: 'm', type: 'array'
-          description: 'Limit to a list of modules'
-        ,
-          name: 'resume', shortcut: 'r', type: 'boolean'
-          description: 'Resume from previous run'
-        ,
-          name: 'cluster', shortcut: 'c', type: 'array'
-          description: 'Limit to a list of clusters'
-        ]
+        options:
+          cluster:
+            shortcut: 'c', type: 'array'
+            description: 'Limit to a list of clusters'
+          nodes:
+            shortcut: 'n', type: 'array'
+            description: 'Limit to a list of server FQDNs'
+          tags:
+            shortcut: 't', type: 'array'
+            description: 'Limit to servers that honor a list of tags'
+          modules:
+            shortcut: 'm', type: 'array'
+            description: 'Limit to a list of modules'
+          resume:
+            shortcut: 'r', type: 'boolean'
+            description: 'Resume from previous run'
     # Merge default parameters with discovered parameters and user parameters
     mutate params, commands: 'clusters': commands: commands, config.params
     try

@@ -50,14 +50,15 @@ two new properties "sshd\_config" and "banner".
     module.exports = ({options, deps}) ->
       options.sshd_config ?= null
       options.users ?= {}
-      for username, config of options.users
+      for username, user of options.users
         if deps.system
           throw Error "User Not Defined: module system must define the user #{username}" unless username is 'root' or deps.system.options.users[username]
-        options.users[username] = merge config, deps.system.options.users[username]
-        options.users[username].home ?= if username is 'root' then '/root' else "/home/#{username}"
-        options.users[username].ssh_dir ?= "#{options.users[username].home}/.ssh"
+          if deps.system.options.users[username]?.home
+            options.users[username].ssh_dir ?= "#{deps.system.options.users[username].home}/.ssh"
+        home = if username is 'root' then '/root' else "/home/#{username}"
+        options.users[username].ssh_dir ?= "#{home}/.ssh"
         options.users[username].authorized_keys ?= []
-        options.users[username].authorized_keys = [config.authorized_keys] if typeof config.authorized_keys is 'string'
+        options.users[username].authorized_keys = [user.authorized_keys] if typeof user.authorized_keys is 'string'
 
 ## Dependencies
 

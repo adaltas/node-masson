@@ -23,9 +23,32 @@ help for a particular command.
     for any client to run on the servers.
 *   Documentation: CoffeeScript Literate provides easy to read and self
     documented code.
-*   Code as the single source of thruth
+*   Code as the single source of truth
 *   Work entirely offline
 *   Easy introspection: source code is easy to navigate and understand
+
+## Developers
+
+```
+yarn link nikita
+yarn link @nikitajs/core
+yarn link @nikitajs/db
+yarn link @nikitajs/docker
+yarn link @nikitajs/filetypes
+yarn link @nikitajs/ipa
+yarn link @nikitajs/java
+yarn link @nikitajs/krb5
+yarn link @nikitajs/ldap
+yarn link @nikitajs/lxd
+yarn link @nikitajs/service
+yarn link @nikitajs/tools
+yarn link @rybajs/ambari
+yarn link @rybajs/storage
+yarn link @rybajs/system
+yarn link @rybajs/tools
+```
+
+
 
 ## Documentation
 
@@ -119,30 +142,38 @@ Using it as a module in configuration declaration (config.coffee) makes no sens
 ```
 
 ### auto dependencies
+
 Suggest-1:
+
 * Use `auto: true` for installing a module locally (on the same node). as a consequence
 `load: true` is implicitly set and the module configuration can be reached.
+
 ```cson
   `ryba/oozie/server/index.coffee.md`
   module.exports:
     deps:
       mapred_client: module: 'ryba/hadoop/mapred_client', install: true
 ```
+
 ```coffee
   `ryba/oozie/server/configure.coffee.md`
   module.exports = (service) ->
     service.deps.mapred_client.options #undefined if no other instanced of mapred_client exist on other nodes
 ```
+
 Suggest-2:
+
 * Use `auto: true`  or an other name `install: true` for installing a module locally (on the same node). `BUT`
 to access local configuration for installed dependency `local: true` should be set or all instances will be returned.
 like this the same behaviour is applied for local options
+
 ```cson
   `ryba/oozie/server/index.coffee.md`
   module.exports:
     deps:
       mapred_client: module: 'ryba/hadoop/mapred_client', install: true, local: true
 ```
+
 ```coffee
   `ryba/oozie/server/configure.coffee.md`
   module.exports = (service) ->
@@ -150,7 +181,9 @@ like this the same behaviour is applied for local options
 ```
 
 ### single dependencies
+
 * User `single: true` for loading the configuration of only one instance of the module.
+
 ```cson
   `ryba-env-metal/conf/config.coffee`
   module.exports:
@@ -159,12 +192,14 @@ like this the same behaviour is applied for local options
         module: 'ryba/hadoop/hdfs_nn'
         affinity: type: 'nodes', match: 'any', values: ['master01.metal.ryba', 'master02.metal.ryba']
 ```
+
 ```cson
   `ryba/hadoop/hdfs_client/index.coffee.md`
   module.exports:
     deps:
       hdfs_namenode: module: 'ryba/hadoop/hdfs_nn', single: true
 ```
+
 ```coffee
   `ryba/hadoop/hdfs_client/configure.coffee.md`
   module.exports = (service) ->
@@ -172,6 +207,7 @@ like this the same behaviour is applied for local options
 ```
 
 ### what about required
+
 * `required: true` is a good option as it explicty declares the necessary deps.
 definition of required:true is: a service A required a service B. But it can be on a different node.
 On both cases an error is raised at configuration time if the layout of services is not good.
@@ -181,6 +217,7 @@ Note: `required:true` and `local: true` is DIFFERENT from `auto/install: true` a
 must be declared in the configuration and in the second case the local config is not loaded by default.
 
 ### options co-habitation
+
 Options `auto: true` does not imply `local: true`. To get configuration for auto dependency, local must be set to true.
 An error must be raised if `local: true` and `single: strue` are set.
 `load:true` and `local:true` should be incompatible

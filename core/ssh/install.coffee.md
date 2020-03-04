@@ -23,7 +23,7 @@ defined inside "users.[].authorized_keys".
       @call
         header: 'Authorized Keys'
       , ->
-        for _, user of options.users
+        for username, user of options.users
           @system.mkdir
             target: "#{user.ssh_dir}"
             uid: user.name
@@ -35,7 +35,7 @@ defined inside "users.[].authorized_keys".
               match: new RegExp ".*#{misc.regexp.escape key}.*", 'mg'
               replace: key
               append: true
-            uid: user.name
+            uid: username
             gid: null
             mode: 0o0600
             eof: true
@@ -69,21 +69,21 @@ the "users.[].rsa\_pub" propery and is written in "~/.ssh/id\_rsa.pub".
         header: 'Public and Private Key'
       , ->
         users = for _, user of options.users then user
-        for _, user of users
+        for username, user of users
           throw Error "Property rsa_pub required if rsa defined" if user.rsa and not user.rsa_pub
           throw Error "Property rsa required if rsa_pub defined" if user.rsa_pub and not user.rsa
           @file
             if: user.rsa
             target: "#{user.ssh_dir}/id_rsa"
             content: user.rsa
-            uid: user.name
+            uid: username
             gid: null
             mode: 0o600
           @file
             if: user.rsa
             target: "#{user.ssh_dir}/id_rsa.pub"
             content: user.rsa_pub
-            uid: user.name
+            uid: username
             gid: null
             mode: 0o600
 

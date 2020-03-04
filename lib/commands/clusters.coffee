@@ -14,7 +14,7 @@ module.exports = ({params}, config, callback) ->
     [key, value] = tag.split '='
     return callback Error "Invalid usage, expected --tags key=value" if not value
   s = store(config)
-  engine = require('@nikitajs/core/lib/core/kv/engines/memory')()
+  kvengine = require('@nikitajs/core/lib/core/kv/engines/memory')()
   each s.nodes()
   .parallel(true)
   .call (node, callback) ->
@@ -22,6 +22,7 @@ module.exports = ({params}, config, callback) ->
       [key, value] = tag.split '='
       return callback() if multimatch(node.tags[key] or [], value.split(',')).length is 0
     return callback() if params.nodes and multimatch([node.ip, node.fqdn, node.hostname], params.nodes).length is 0
+    # Get filtered services
     services = node.services
     # Filtering based on module name
     .filter (service) ->
@@ -37,7 +38,7 @@ module.exports = ({params}, config, callback) ->
     log.basedir = path.resolve process.cwd(), log.basedir
     config.nikita.no_ssh = true
     n = nikita merge config.nikita
-    n.kv.engine engine: engine
+    n.kv.engine engine: kvengine
     n.log.cli host: node.fqdn, pad: host: 20, header: 60
     n.log.md basename: node.hostname, basedir: log.basedir, archive: false
     # Swallow "Invalid Directory" error on log directory
@@ -46,12 +47,14 @@ module.exports = ({params}, config, callback) ->
       header: 'SSH Open'
       host: node.ip or node.fqdn
     , node.ssh
+    # Call the plugin of every service, discard filtering
     n.call ->
       for service in node.services
         service = s.service(service.cluster, service.service)
         continue unless service.plugin
         instance = array_get(service.instances, (instance) -> instance.node.id is node.id)
         n.call service.plugin, merge instance.options
+    # Call the command of the filtered services
     n.call ->
       for service in services
         service = s.service service.cluster, service.service

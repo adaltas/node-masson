@@ -308,7 +308,7 @@ The bug is fixed after version 5.7 of MariaDB.
                       error = new Error 'MariaDB Server Not started'
                     stream.end 'exit\n' unless exit
                     exit = true
-              stream.on 'close', =>
+              stream.on 'close', ->
                 callback error
           @call
             if: -> safe_start
