@@ -27,7 +27,7 @@ defined inside "users.[].authorized_keys".
           @system.mkdir
             target: "#{user.ssh_dir}"
             uid: user.name
-            gid: null
+            gid: undefined
             mode: 0o0700 # was "permissions: 16832"
           @file
             target: "#{user.ssh_dir}/authorized_keys"
@@ -36,7 +36,7 @@ defined inside "users.[].authorized_keys".
               replace: key
               append: true
             uid: username
-            gid: null
+            gid: undefined
             mode: 0o0600
             eof: true
 
@@ -77,14 +77,14 @@ the "users.[].rsa\_pub" propery and is written in "~/.ssh/id\_rsa.pub".
             target: "#{user.ssh_dir}/id_rsa"
             content: user.rsa
             uid: username
-            gid: null
+            gid: undefined
             mode: 0o600
           @file
             if: user.rsa
             target: "#{user.ssh_dir}/id_rsa.pub"
             content: user.rsa_pub
             uid: username
-            gid: null
+            gid: undefined
             mode: 0o600
 
 ## Banner
