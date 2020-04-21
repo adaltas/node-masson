@@ -29,7 +29,7 @@ cat /etc/passwd | grep mysql
 mysql:x:27:27:MariaDB Server:/var/lib/mysql:/sbin/nologin
 ```
 Actions present to be able to change uid/gid:
-Note: Be careful if using different name thans 'mysql:mysql'
+Note: Be careful if using different name than 'mysql:mysql'
 User/group are hard coded in some of mariadb/mysql package scripts.
 
       @call header: 'Users & Groups', handler: ->
