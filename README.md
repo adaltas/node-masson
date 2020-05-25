@@ -2,7 +2,7 @@
 # Masson
 
 Masson is a configuration management, orchestration and do-anything-you-want
-tools. It is here to simplify your life installing complex setup and maintaining
+tool. It is here to simplify your life installing complex setup and maintaining
 dozens, hundreds, or even thousands of servers.
 
 At [Adaltas], we use it to deploy full featured Hadoop Clusters.
