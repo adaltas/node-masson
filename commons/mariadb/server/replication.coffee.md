@@ -30,7 +30,7 @@ Wait for master remote login.
 
       @wait.execute
         header: 'Wait Root remote login'
-        cmd: db.cmd remote_master, "show databases"
+        cmd: "#{cmd admin_username:remote_master.admin_username, admin_password:remote_master.admin_password, engine:remote_master.engine, host:remote_master.host, cmd:'show databases'}"
 
 ## Grant Privileges
 Grant privileges on the remote master server to the user used for replication.
@@ -40,22 +40,22 @@ Grant privileges on the remote master server to the user used for replication.
         master_file = null
         @system.execute
           header: 'Slave Privileges'
-          cmd: db.cmd remote_master, """
+          cmd: "#{cmd admin_username:remote_master.admin_username, admin_password:remote_master.admin_password, engine:remote_master.engine, host:remote_master.host, cmd:"""
             GRANT REPLICATION SLAVE ON *.* TO '#{options.repl_master.username}'@'%' IDENTIFIED BY '#{options.repl_master.password}';
             FLUSH PRIVILEGES;
-          """
-          unless_exec: "#{db.cmd remote_master, 'select User from mysql.user ;'} | grep '#{options.repl_master.username}'"
+          """}"
+          unless_exec: "#{cmd admin_username:remote_master.admin_username, admin_password:remote_master.admin_password, engine:remote_master.engine, host:remote_master.host, cmd:'select User from mysql.user ;'} | grep '#{options.repl_master.username}'"
 
 ## Setup Replication
 Gather the target master informations, then start the slave replication.
 
         @call
           header: 'Slave Setup'
-          unless_exec: "#{db.cmd props, 'show slave status \\G'} | grep 'Master_Host' | grep '#{options.repl_master.fqdn}'"
+          unless_exec: "#{cmd admin_username:props.admin_username, admin_password:props.admin_password, engine:props.engine, host:props.host, cmd:'show slave status \\G'} | grep 'Master_Host' | grep '#{options.repl_master.fqdn}'"
           handler: ->
             @system.execute
               header: 'Master Infos'
-              cmd: db.cmd remote_master, "show master status \\G"
+              cmd: "#{cmd admin_username:remote_master.admin_username, admin_password:remote_master.admin_password, engine:remote_master.engine, host:remote_master.host, cmd:'show master status \\G'}"
             , (err, data) ->
               throw err if err
               lines = string.lines data.stdout
@@ -65,7 +65,7 @@ Gather the target master informations, then start the slave replication.
                 master_pos = parts[1].trim() if parts[0] is 'Position'
             @call ->
               @system.execute
-                cmd: db.cmd props, """
+                cmd: "#{cmd admin_username:props.admin_username, admin_password:props.admin_password, engine:props.engine, host:props.host, cmd:"""
                   STOP SLAVE ;
                   RESET SLAVE ;
                   CHANGE MASTER TO \
@@ -75,9 +75,9 @@ Gather the target master informations, then start the slave replication.
                   MASTER_LOG_FILE='#{master_file}', \
                   MASTER_LOG_POS=#{master_pos} ;
                   START SLAVE ;
-                """
+                """}"
 
 ## Dependencies
 
-    db = require '@nikitajs/core/lib/misc/db'
+    {cmd} = require '@nikitajs/db/lib/query'
     string = require '@nikitajs/core/lib/misc/string'

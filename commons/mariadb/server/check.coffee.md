@@ -41,7 +41,7 @@ Ensure the port is listening.
           silent: false
         @system.execute
           retry: 3
-          cmd: "#{db.cmd props,'show slave status \\G ;'} | grep Slave_IO_State"
+          cmd: "#{cmd admin_username:props.admin_username, admin_password:props.admin_password, engine:props.engine, host:props.host, cmd:'show slave status \\G ;'} | grep Slave_IO_State"
         , (err, data) ->
           throw err if err
           ok = /^Slave_IO_State:\sWaiting for master to send event/.test(data.stdout.trim() )or /^Slave_IO_State:\sConnecting to master/.test(data.stdout.trim())
@@ -49,4 +49,4 @@ Ensure the port is listening.
 
 ## Dependencies
 
-    db = require '@nikitajs/core/lib/misc/db'
+    {cmd} = require '@nikitajs/db/lib/query'

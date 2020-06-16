@@ -230,7 +230,7 @@ The bug is fixed after version 5.7 of MariaDB.
         #   # But I dont even know what the old code was trying to achieve
         #   safe_start = false
         @call
-          unless_exec: "#{db.cmd database, 'show databases'}"
+          unless_exec: "#{cmd admin_username:database.admin_username, admin_password:database.admin_password, engine:database.engine, host:database.host, cmd:'show databases'}"
         , ->
           @call
             header: 'Configure Socket'
@@ -346,5 +346,5 @@ The bug is fixed after version 5.7 of MariaDB.
 ## Dependencies
 
     misc = require '@nikitajs/core/lib/misc'
-    db = require '@nikitajs/core/lib/misc/db'
+    {cmd} = require '@nikitajs/db/lib/query'
     path = require 'path'
