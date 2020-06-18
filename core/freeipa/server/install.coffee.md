@@ -3,6 +3,177 @@
 
 Install the FreeIPA Server
 
+    schema =
+      type: 'object'
+      properties:
+        'admin_password':
+          type: 'string'
+          description: """
+          """
+        'apache':
+          type: 'object'
+          description: """
+          Information relative to the apache user.
+          """
+          properties:
+            group: '$ref': 'registry://system/group'
+            user: '$ref': 'registry://system/user'
+        'ca_subject':
+          type: ''
+          description: """
+          The certificate authority (CA) subject, it corresponds to the
+          "--ca-subject" IPA argument and it is only used if 'external_ca' is
+          `true`. An exemple is `"CN=Certificate Authority,O=AU.ADALTAS.CLOUD"`.
+          """
+        'conf_dir':
+          type: ''
+          description: """
+          """
+        'dirsrv':
+          type: 'object'
+          description: """
+          Information relative to the dirsrv user.
+          """
+          properties:
+            group: '$ref': 'registry://system/group'
+            user: '$ref': 'registry://system/user'
+        'dns_auto_forward':
+          type: ''
+          description: """
+          """
+        'dns_auto_reverse':
+          type: ''
+          description: """
+          """
+        'dns_enabled':
+          type: 'boolean'
+          description: """
+          """
+        'dns_forwarder':
+          type: 'array'
+          description: """
+          The DNS forwarder used to forward external DNS requests. It
+          corresponds to the "--forwarder" IPA argument. An example is
+          `[['1.1.1.1', '1.0.0.1']]`.
+          """
+          items:
+            type: 'string'
+            format: 'ipv4'
+        'domain':
+          type: ''
+          description: """
+          """
+        'external_ca':
+          type: 'boolean'
+          description: """
+          Indicate the usage of an external certificate authority (CA).
+          """
+        'fqdn':
+          type: ''
+          description: """
+          The server FQDN. It corresponds to the "--hostname" IPA argument.
+          """
+        'hsqldb':
+          type: 'object'
+          description: """
+          Information relative to the hsqldb user.
+          """
+          properties:
+            group: '$ref': 'registry://system/group'
+            user: '$ref': 'registry://system/user'
+        'idmax':
+          type: ''
+          description: """
+          """
+        'idstart':
+          type: ''
+          description: """
+          """
+        'ip_address':
+          type: ''
+          description: """
+          """
+        'iptables':
+          type: ''
+          description: """
+          """
+        'manage_users_groups':
+          type: ''
+          description: """
+          """
+        'manager_password':
+          type: ''
+          description: """
+          """
+        'memcached':
+          type: 'object'
+          description: """
+          Information relative to the memcached user.
+          """
+          properties:
+            group: '$ref': 'registry://system/group'
+            user: '$ref': 'registry://system/user'
+        'no_krb5_offline_passwords':
+          type: ''
+          description: """
+          """
+        'ntp':
+          type: 'boolean'
+          description: """
+          """
+        'ntp_enabled':
+          type: ''
+          description: """
+          """
+        'ods':
+          type: 'object'
+          description: """
+          Information relative to the ods user.
+          """
+          properties:
+            group: '$ref': 'registry://system/group'
+            user: '$ref': 'registry://system/user'
+        'pkiuser':
+          type: 'object'
+          description: """
+          Information relative to the pkiuser user.
+          """
+          properties:
+            group: '$ref': 'registry://system/group'
+            user: '$ref': 'registry://system/user'
+        'realm_name':
+          type: ''
+          description: """
+          """
+        'ssl_ca_cert_local':
+          type: ''
+          description: """
+          """
+        'ssl_cert_file':
+          type: ''
+          description: """
+          """
+        'ssl_enabled':
+          type: ''
+          description: """
+          """
+        'ssl_key_local':
+          type: ''
+          description: """
+          """
+        'ssl_key_file':
+          type: ''
+          description: """
+          """
+        'tomcat':
+          type: 'object'
+          description: """
+          Information relative to the tomcat user.
+          """
+          properties:
+            group: '$ref': 'registry://system/group'
+            user: '$ref': 'registry://system/user'
+
     module.exports = header: 'FreeIPA Server Install', handler: ({options}) ->
     
 ## IPTables
@@ -69,7 +240,6 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
         source: options.ssl_key_file
         target: "#{options.conf_dir}/key.pem"
         mode: 0o0400
-
       @system.execute
         header: 'Setup'
         unless_exists: '/etc/ipa/default.conf'
@@ -79,7 +249,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
           #  Basic options
           "-a #{options.admin_password}"
           "-p #{options.manager_password}"
-          "--hostname #{options.hostname}"
+          "--hostname #{options.fqdn}"
           "--domain #{options.domain}" # Same as -n
           "--ip-address #{options.ip_address}"
           # Server options
@@ -87,6 +257,7 @@ IPTables rules are only inserted if the parameter "iptables.action" is set to
           "--idmax=#{options.idmax}" if options.idmax
           # Kerberos REALM
           "-r #{options.realm_name}"
+          "--no-krb5-offline-passwords" if options.no_krb5_offline_passwords
           # DNS
           ...[
             '--setup-dns'

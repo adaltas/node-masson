@@ -5,14 +5,14 @@
 
 Lifecycle
 
-```
+```bash
 ipactl --help
 Usage: ipactl start|stop|restart|status
 ```
 
 Debugging
 
-```
+```bash
 ipactl status
 journalctl -u dirsrv@{domain}.service -f
 ```
@@ -21,7 +21,7 @@ journalctl -u dirsrv@{domain}.service -f
 
 Kerberos logs "krb5kdc" can grow large. [Configuring logrotate](http://www.rjsystems.nl/en/2100-kerberos-master.php) seems like an appropriate option. Also, checkout the tomcat-pki logs.
 
-```
+```bash
 rm -rf /var/log/krb5kdc.log*
 rm -rf /var/log/pki/pki-tomcat/*.log
 rm -rf /var/log/pki/pki-tomcat/*.txt

@@ -47,7 +47,7 @@ options:
 ```
 
     module.exports = ({options, node, deps}) ->
-      options.hostname ?= node.fqdn
+      options.fqdn ?= node.fqdn
       options.ip_address ?= node.ip
 
 ## Deprecation
