@@ -1,31 +1,31 @@
 
 module.exports =
   name: 'masson'
-  description: 'Cluster deployment and management'
+  description: 'Cluster deployment and management.'
   load: require './utils/load'
   options:
     'config':
       shortcut: 'c', type: 'array'
-      description: 'One or multiple configuration files'
+      description: 'One or multiple configuration files.'
     'stacktrace':
       shortcut: 's', type: 'boolean'
-      description: 'Print readable stacktrace'
+      description: 'Print readable stacktrace.'
   commands:
     'grpc':
-      description: 'Remote access through grpc'
+      description: 'Remote access through grpc.'
       commands:
         'start':
-          description: 'Start the GRPC server'
+          description: 'Start the GRPC server.'
           route: 'masson/lib/commands/grpc/start'
         'status':
-          description: 'Print the server status'
+          description: 'Print the server status.'
           route: 'masson/lib/commands/grpc/status'
         'stop':
           description: 'Stop the GRPC server'
           route: 'masson/lib/commands/grpc/stop'
       
     'pki':
-      description: 'Certificate Management for development usage'
+      description: 'Certificate Management for development usage.'
       options:
         'dir':
           shortcut: 'd', type: 'string'
@@ -33,33 +33,33 @@ module.exports =
           required: true
       commands:
         'ca':
-          description: 'Generate the Certificate Authority'
+          description: 'Generate the Certificate Authority.'
           route: 'masson/lib/commands/pki/ca'
         'cacert-view':
-          description: 'Display detailed information of a certificate'
+          description: 'Display detailed information of a certificate.'
           route: 'masson/lib/commands/pki/cacert-view'
         'check':
-          description: 'Validate the certificate against the authority'
+          description: 'Validate the certificate against the authority.'
           main:
             name: 'fqdn'
             required: true
-            description: 'The FQDN associated with the certificate'
+            description: 'The FQDN associated with the certificate.'
           route: 'masson/lib/commands/pki/check'
         'cert':
-          description: "Generate the private and public key pair for a given FQDN"
+          description: "Generate the private and public key pair for a given FQDN."
           main:
             name: 'fqdn'
             required: true
             description: 'The FQDN associated with the certificate'
           route: 'masson/lib/commands/pki/cert'
         'cert-view':
-          description: 'Display detailed information of a certificate'
+          description: 'Display detailed information of a certificate.'
           main:
             name: 'fqdn'
-            description: 'The FQDN associated with the certificate'
+            description: 'The FQDN associated with the certificate.'
           route: 'masson/lib/commands/pki/cert-view'
     'secrets':
-      description: 'Interact with the secure secret file store'
+      description: 'Interact with the secure secret file store.'
       options:
         'store':
           shortcut: 's', type: 'string'
@@ -68,24 +68,24 @@ module.exports =
         'envpw':
           shortcut: 'e', type: 'string'
           default: 'MASSON_SECRET_PW'
-          description: 'Environment variable storing the password'
+          description: 'Environment variable storing the password.'
       commands:
         'init':
           description: 'Initialize the secret store'
           route: 'masson/lib/commands/secrets/init'
         'unset':
-          description: 'Delete a secret from the store'
+          description: 'Delete a secret from the store.'
           main:
-            name: 'property'
+            name: 'properties'
             required: true
-            description: 'Property name'
+            description: 'One or multiple property name.'
           route: 'masson/lib/commands/secrets/unset'
         'get':
           description: 'Get a secret'
           main:
             name: 'properties'
             required: true
-            description: 'One or multiple property name'
+            description: 'One or multiple property name.'
           route: 'masson/lib/commands/secrets/get'
         'set':
           description: 'Set a secret'
@@ -97,7 +97,7 @@ module.exports =
               type: 'boolean'
               shortcut: 'o'
               default: false
-              description: 'Overwrite an existing property'
+              description: 'Overwrite an existing property.'
           route: 'masson/lib/commands/secrets/set'
         'show':
           description: 'Display all the secrets'
@@ -107,37 +107,37 @@ module.exports =
       route: 'masson/lib/commands/exec'
       main:
         name: 'subcommand'
-        description: 'The subcommand to execute'
+        description: 'The subcommand to execute.'
       options:
         'nodes':
           shortcut: 'n', type: 'array'
-          description: 'Limit to a list of server FQDNs'
+          description: 'Limit to a list of server FQDNs.'
         'tags':
           shortcut: 't', type: 'array'
-          description: 'Limit to servers that honor a list of tags'
+          description: 'Limit to servers that honor a list of tags.'
     'configure':
-      description: 'Export servers\' configuration in a file'
+      description: 'Export servers\' configuration in a file.'
       route: 'masson/lib/commands/configure'
       options:
         'output':
           shortcut: 'o', type: 'string'
-          description: 'output directory'
+          description: 'output directory.'
         'format':
           shortcut: 'f', type: 'string'
-          description: 'Format of the output files: [json, cson, js, coffee]'
+          description: 'Format of the output files: [json, cson, js, coffee].'
           one_of: ['json', 'cson', 'js', 'coffee']
         'nodes':
           shortcut: 'n', type: 'boolean'
-          description: 'Print configuration of nodes'
+          description: 'Print configuration of nodes.'
         'cluster':
           shortcut: 'c', type: 'string'
-          description: 'Print configuration of clusters'
+          description: 'Print configuration of clusters.'
         'clusters':
           type: 'boolean'
-          description: 'Print list of cluster names'
+          description: 'Print list of cluster names.'
         'service':
           shortcut: 's', type: 'string'
-          description: 'Print configuration of a services (format cluster:service)'
+          description: 'Print configuration of a services (format cluster:service).'
         'service_names':
           type: 'boolean'
           description: 'Print list of service names'

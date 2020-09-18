@@ -1,5 +1,6 @@
 
-fs = require 'fs'
+fs = require('fs').promises
+fsOrg = require 'fs'
 crypto = require 'crypto'
 yaml = require 'js-yaml'
 generator = require 'generate-password'
@@ -13,91 +14,90 @@ class Store
     @options.envpw ?= 'MASSON_SECRET_PW'
     @options.password ?= process.env[@options.envpw]
     @options.algorithm ?= 'aes-256-ctr'
-  unset: (key, callback) ->
-    @get (err, secrets) =>
-      unset secrets, key
-      @set secrets, callback
+  unset: (key) ->
+    secrets = await @get()
+    unset secrets, key
+    await @set secrets
   get: ->
-    # (callback)
     if arguments.length is 1
-      callback = arguments[0]
-    # (key, callback)
-    else if arguments.length is 2
       key = arguments[0]
-      callback = arguments[1]
-    @_read (err) =>
-      secrets = @decrypt @raw, @iv
-      if key
-        callback null, get secrets, key
-      else
-        callback null, secrets
+    else if arguments.length isnt 0
+      throw Error "Invalid get arguments: got #{JSON.stringify arguments}"
+    await @_read()
+    secrets = @decrypt @raw, @iv
+    if key
+      get secrets, key
+    else
+      secrets
   getSync: ->
-    # (callback)
+    # ()
     if arguments.length is 1
       key = arguments[0]
+    else if arguments.length isnt 0
+      throw Error "Invalid getSync arguments: got #{JSON.stringify arguments}"
     @_readSync()
     secrets = @decrypt @raw, @iv
     if key
       get secrets, key
     else
       secrets
-  set: (sync, secrets, callback) ->
-    # (secrets, callback)
-    if arguments.length is 2
+  set: ->
+    # (secrets)
+    if arguments.length is 1
       secrets = arguments[0]
-      callback = arguments[1]
-      @_read (err) =>
-        secrets = @encrypt secrets, @iv
-        @raw = Buffer.from(secrets)
-        data = Buffer.concat [@iv, @raw]
-        fs.writeFile @options.store, data, (err, data) ->
-          callback err
-    # (key, value, callback)
-    else if arguments.length is 3
+      await @_read()
+      secrets = @encrypt secrets, @iv
+      @raw = Buffer.from secrets
+      data = Buffer.concat [@iv, @raw]
+      await fs.writeFile @options.store, data
+    # (key, value)
+    else if arguments.length is 2
       key = arguments[0]
       value = arguments[1]
-      callback = arguments[2]
-      @get (err, secrets) =>
-        return callback err if err
-        set secrets, key, value
-        @set secrets, callback
+      secrets = await @get()
+      set secrets, key, value
+      await @set secrets
       return
     else throw Error "Invalid set arguments: got #{JSON.stringify arguments}"
-  init: (callback) ->
-    @exists (err, exists) =>
-      return callback err if err
-      return callback Error 'Store already created' if exists
-      iv = crypto.randomBytes 16
-      fs.writeFile @options.store, iv, (err) ->
-        callback err
+  init: ->
+    {exists} = await @exists (err, exists) =>
+    throw Error 'Store already created' if exists
+    iv = crypto.randomBytes 16
+    await fs.writeFile @options.store, iv
   password: (options={}) ->
     generator.generate Object.assign
       length: 10,
       numbers: true
     , options
-  _readSync: (callback) ->
+  _read: ->
+    return if: @iv, raw: @raw if @iv and @raw
+    try
+      await fs.stat @options.store
+      data = await fs.readFile @options.store
+      @iv = data.slice 0, 16
+      @raw = data.slice 16
+      if: @iv, raw: @raw
+    catch err
+      throw err unless err.code is 'ENOENT'
+      throw Error 'Secret store not initialized'
+  _readSync: ->
     return [@iv, @raw] if @iv and @raw
     try
-      fs.statSync @options.store
+      fsOrg.statSync @options.store
     catch err
       throw Error 'Secret store not initialized'
-    data = fs.readFileSync @options.store
+    data = fsOrg.readFileSync @options.store
     @iv = data.slice 0, 16
     @raw = data.slice 16
     [@iv, @raw]
-  _read: (callback) ->
-    return callback null, @iv, @raw if @iv and @raw
-    fs.stat @options.store, (err) =>
-      return callback Error 'Secret store not initialized' if err
-      fs.readFile @options.store, (err, data) =>
-        return callback err if err
-        @iv = data.slice 0, 16
-        @raw = data.slice 16
-        callback null, @iv, @raw
   # Check if the store is created
-  exists: (callback) ->
-    fs.stat @options.store, (err) ->
-      callback null, !err
+  exists: ->
+    try
+      await fs.stat @options.store
+      true
+    catch err
+      throw err unless err.code is 'ENOENT'
+      false
   # Encrypt some text
   encrypt: (secrets, iv) ->
     text = JSON.stringify secrets

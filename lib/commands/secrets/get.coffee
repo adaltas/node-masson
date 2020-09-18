@@ -3,14 +3,17 @@ secrets = require '../../secrets'
 get = require 'lodash.get'
 yaml = require 'js-yaml'
 
-module.exports = ({params}, config, callback) ->
+module.exports = ({params}, config) ->
   store = secrets params
-  store.get (err, secrets) ->
-    for property in params.properties
+  return process.stderr.write [
+    'Store does not exists, '
+    'run the `init` command to initialize it.\n'
+  ].join '' unless await store.exists()
+  secrets = await store.get()
+  for property in params.properties
+    try
       secrets = get secrets, property
-      if err
-        process.stderr.write "#{err.message}" + '\n'
-      else unless secrets
+      unless secrets
         process.stderr.write "Property does not exists" + '\n'
       else
         if typeof secrets is 'string'
@@ -18,4 +21,5 @@ module.exports = ({params}, config, callback) ->
         else
           data = yaml.safeDump secrets
           process.stdout.write "#{data}" + '\n'
-      callback err
+    catch err
+      process.stderr.write "#{err.message}" + '\n'
