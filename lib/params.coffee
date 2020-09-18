@@ -83,9 +83,9 @@ module.exports =
         'get':
           description: 'Get a secret'
           main:
-            name: 'property'
+            name: 'properties'
             required: true
-            description: 'Property name'
+            description: 'One or multiple property name'
           route: 'masson/lib/commands/secrets/get'
         'set':
           description: 'Set a secret'

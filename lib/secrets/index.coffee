@@ -46,6 +46,12 @@ class Store
     if arguments.length is 2
       secrets = arguments[0]
       callback = arguments[1]
+      @_read (err) =>
+        secrets = @encrypt secrets, @iv
+        @raw = Buffer.from(secrets)
+        data = Buffer.concat [@iv, @raw]
+        fs.writeFile @options.store, data, (err, data) ->
+          callback err
     # (key, value, callback)
     else if arguments.length is 3
       key = arguments[0]
@@ -56,12 +62,7 @@ class Store
         set secrets, key, value
         @set secrets, callback
       return
-    @_read (err) =>
-      secrets = @encrypt secrets, @iv
-      @raw = Buffer.from(secrets)
-      data = Buffer.concat [@iv, @raw]
-      fs.writeFile @options.store, data, (err, data) ->
-        callback err
+    else throw Error "Invalid set arguments: got #{JSON.stringify arguments}"
   init: (callback) ->
     @exists (err, exists) =>
       return callback err if err
