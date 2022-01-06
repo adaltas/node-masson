@@ -60,8 +60,7 @@ class Store
       return
     else throw Error "Invalid set arguments: got #{JSON.stringify arguments}"
   init: ->
-    {exists} = await @exists (err, exists) =>
-    throw Error 'Store already created' if exists
+    throw Error 'Store already created' if await @exists()
     iv = crypto.randomBytes 16
     await fs.writeFile @options.store, iv
   password: (options={}) ->

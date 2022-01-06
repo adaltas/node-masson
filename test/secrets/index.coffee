@@ -4,134 +4,98 @@ secrets = require '../../lib/secrets'
 
 describe 'command configure', ->
 
-  tmp = '/tmp/masson-test'
+  tmp = '/tmp/masson-test/'
   beforeEach ->
     require('module')._cache = {}
     nikita.fs.mkdir tmp
   afterEach ->
     nikita.fs.remove tmp, recursive: true
       
-  it 'init', (next) ->
+  it 'init', ->
     store = secrets
-      store: tmp
+      store: "#{tmp}/a_store"
       password: 'mysecret'
-    store.init (err) ->
-      return next err if err
-      store.init (err) ->
-        err.message.should.eql 'Store already created'
-        next()
+    await store.init()
+    store.init()
+    .should.be.rejectedWith 'Store already created'
           
-  it 'setget all', (next) ->
+  it 'setget all', ->
     store = secrets
-      store: tmp
+      store: "#{tmp}/a_store"
       password: 'mysecret'
-    store.init (err) ->
-      return next err if err
-      store.set a_key: 'a value', (err) ->
-        return next err if err
-        store.get (err, secrets) ->
-          return next err if err
-          secrets.a_key.should.eql 'a value'
-          next()
+    await store.init()
+    await store.set a_key: 'a value'
+    values = await store.get()
+    values.a_key.should.eql 'a value'
             
-  it 'get key', (next) ->
+  it 'get key', ->
     store = secrets
-      store: tmp
+      store: "#{tmp}/a_store"
       password: 'mysecret'
-    store.init (err) ->
-      return next err if err
-      store.set
-        a_key: 'a value'
-        b: key: 'b value'
-      , (err) ->
-        return next err if err
-        store.get 'a_key', (err, value) ->
-          return next err if err
-          value.should.eql 'a value'
-          store.get 'b.key', (err, value) ->
-            return next err if err
-            value.should.eql 'b value'
-            next()
+    await store.init()
+    await store.set
+      a_key: 'a value'
+      b: key: 'b value'
+    value = await store.get 'a_key'
+    value.should.eql 'a value'
+    value = await store.get 'b.key'
+    value.should.eql 'b value'
               
-  it 'get keys', (next) ->
+  it 'get keys', ->
     store = secrets
-      store: tmp
+      store: "#{tmp}/a_store"
       password: 'mysecret'
-    store.init (err) ->
-      return next err if err
-      store.set
-        some: keys: 
-          a: 'a value'
-          b: 'b value'
-      , (err) ->
-        return next err if err
-        store.get 'some.keys', (err, secrets) ->
-          return next err if err
-          secrets.should.eql
-            a: 'a value'
-            b: 'b value'
-          next()
+    await store.init()
+    await store.set
+      some: keys: 
+        a: 'a value'
+        b: 'b value'
+    values = await store.get 'some.keys'
+    values.should.eql
+      a: 'a value'
+      b: 'b value'
             
-  it 'set key', (next) ->
+  it 'set key', ->
     store = secrets
-      store: tmp
+      store: "#{tmp}/a_store"
       password: 'mysecret'
-    store.init (err) ->
-      return next err if err
-      store.set
-        a_key: 'a value'
-      , (err) ->
-        return next err if err
-        store.set 'b.key', 'b value', (err) ->
-          return next err if err
-          store.get (err, secrets) ->
-            return next err if err
-            secrets.should.eql 
-              a_key: 'a value'
-              b: key: 'b value'
-            next()
+    await store.init()
+    await store.set
+      a_key: 'a value'
+    await store.set 'b.key', 'b value'
+    values = await store.get()
+    values.should.eql 
+      a_key: 'a value'
+      b: key: 'b value'
               
-  it 'set keys', (next) ->
+  it 'set keys', ->
     store = secrets
-      store: tmp
+      store: "#{tmp}/a_store"
       password: 'mysecret'
-    store.init (err) ->
-      return next err if err
-      store.set
-        a_key: 'a value'
-      , (err) ->
-        return next err if err
-        store.set 'keys', 
-          a: 'a value'
-          b: 'b value'
-        , (err) ->
-          return next err if err
-          store.get (err, secrets) ->
-            return next err if err
-            secrets.should.eql 
-              a_key: 'a value'
-              keys:
-                a: 'a value'
-                b: 'b value'
-            next()
+    await store.init()
+    await store.set
+      a_key: 'a value'
+    await store.set 'keys', 
+      a: 'a value'
+      b: 'b value'
+    values = await store.get()
+    values.should.eql 
+      a_key: 'a value'
+      keys:
+        a: 'a value'
+        b: 'b value'
               
-  it 'unset key', (next) ->
+  it 'unset key', ->
     store = secrets
-      store: tmp
+      store: "#{tmp}/a_store"
       password: 'mysecret'
-    store.init (err) ->
-      return next err if err
-      store.set
-        some: keys: 
-          a: 'a value'
-          b: 'b value'
-      , (err) ->
-        return next err if err
-        store.unset 'some.keys.a', (err) ->
-          return next err if err
-          store.get (err, secrets) ->
-            return next err if err
-            secrets.should.eql 
-              some: keys:
-                b: 'b value'
-            next()
+    await store.init()
+    await store.set
+      some: keys: 
+        a: 'a value'
+        b: 'b value'
+    await store.unset 'some.keys.a'
+    values = await store.get()
+    values.should.eql 
+      some: keys:
+        b: 'b value'

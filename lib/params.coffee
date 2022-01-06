@@ -62,26 +62,27 @@ module.exports =
       description: 'Interact with the secure secret file store.'
       options:
         'store':
-          shortcut: 's', type: 'string'
           default: '.secrets'
           description: 'File storing the secrets'
+          shortcut: 's', type: 'string'
         'envpw':
-          shortcut: 'e', type: 'string'
           default: 'MASSON_SECRET_PW'
           description: 'Environment variable storing the password.'
+          shortcut: 'e', type: 'string'
       commands:
         'init':
           description: 'Initialize the secret store'
           handler: 'masson/lib/commands/secrets/init'
         'unset':
           description: 'Delete a secret from the store.'
+          handler: 'masson/lib/commands/secrets/unset'
           main:
             name: 'properties'
             required: true
             description: 'One or multiple property name.'
-          handler: 'masson/lib/commands/secrets/unset'
         'get':
           description: 'Get a secret'
+          handler: 'masson/lib/commands/secrets/get'
           main:
             name: 'properties'
             required: true
@@ -90,12 +91,12 @@ module.exports =
             format:
               description: 'Output format, only apply if propery is not a leaf.'
               default: 'yaml'
-              one_of: ['json', 'yaml']
+              enum: ['json', 'prettyjson', 'yaml']
               shortcut: 'f'
               type: 'string'
-          handler: 'masson/lib/commands/secrets/get'
         'set':
           description: 'Set a secret'
+          handler: 'masson/lib/commands/secrets/set'
           main:
             name: 'property'
             description: 'Property name'
@@ -105,10 +106,16 @@ module.exports =
               shortcut: 'o'
               default: false
               description: 'Overwrite an existing property.'
-          handler: 'masson/lib/commands/secrets/set'
         'show':
           description: 'Display all the secrets'
           handler: 'masson/lib/commands/secrets/show'
+          options:
+            format:
+              description: 'Output format, only apply if propery is not a leaf.'
+              default: 'yaml'
+              enum: ['json', 'prettyjson', 'yaml']
+              shortcut: 'f'
+              type: 'string'
     'exec':
       description: "Distribute a shell command"
       handler: 'masson/lib/commands/exec'
