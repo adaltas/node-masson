@@ -38,13 +38,11 @@ module.exports = ({params}, config, callback) ->
     log.basedir = path.resolve process.cwd(), log.basedir
     config.nikita.no_ssh = true
     n = nikita merge config.nikita
-    n.kv.engine engine: kvengine
-    n.log.cli host: node.fqdn, pad: host: 20, header: 60
-    n.log.md basename: node.hostname, basedir: log.basedir, archive: false
-    # Swallow "Invalid Directory" error on log directory
-    n.next ((err) ->)
-    n.ssh.open
-      header: 'SSH Open'
+    await n.kv.engine engine: kvengine
+    await n.log.cli host: node.fqdn, pad: host: 20, header: 60
+    await n.log.md basename: node.hostname, basedir: log.basedir, archive: false
+    await n.ssh.open
+      $header: 'SSH Open'
       host: node.ip or node.fqdn
     , node.ssh
     # Call the plugin of every service, discard filtering

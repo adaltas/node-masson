@@ -1,6 +1,12 @@
 #!/usr/bin/env node
 
-require('coffeescript/register')
-require('../lib')(process, (error) => {
-  error && process.stderr.write(error.stack+'\n\n')
-})
+require('coffeescript/register');
+const masson = require('../lib');
+
+(async () => {
+  try {
+    await masson(process.argv.slice(2))
+  } catch (err) {
+    process.stderr.write(err.stack+'\n\n')
+  }
+})()

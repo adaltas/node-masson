@@ -16,13 +16,13 @@ module.exports =
       commands:
         'start':
           description: 'Start the GRPC server.'
-          route: 'masson/lib/commands/grpc/start'
+          handler: 'masson/lib/commands/grpc/start'
         'status':
           description: 'Print the server status.'
-          route: 'masson/lib/commands/grpc/status'
+          handler: 'masson/lib/commands/grpc/status'
         'stop':
           description: 'Stop the GRPC server'
-          route: 'masson/lib/commands/grpc/stop'
+          handler: 'masson/lib/commands/grpc/stop'
       
     'pki':
       description: 'Certificate Management for development usage.'
@@ -34,30 +34,30 @@ module.exports =
       commands:
         'ca':
           description: 'Generate the Certificate Authority.'
-          route: 'masson/lib/commands/pki/ca'
+          handler: 'masson/lib/commands/pki/ca'
         'cacert-view':
           description: 'Display detailed information of a certificate.'
-          route: 'masson/lib/commands/pki/cacert-view'
+          handler: 'masson/lib/commands/pki/cacert-view'
         'check':
           description: 'Validate the certificate against the authority.'
           main:
             name: 'fqdn'
             required: true
             description: 'The FQDN associated with the certificate.'
-          route: 'masson/lib/commands/pki/check'
+          handler: 'masson/lib/commands/pki/check'
         'cert':
           description: "Generate the private and public key pair for a given FQDN."
           main:
             name: 'fqdn'
             required: true
             description: 'The FQDN associated with the certificate'
-          route: 'masson/lib/commands/pki/cert'
+          handler: 'masson/lib/commands/pki/cert'
         'cert-view':
           description: 'Display detailed information of a certificate.'
           main:
             name: 'fqdn'
             description: 'The FQDN associated with the certificate.'
-          route: 'masson/lib/commands/pki/cert-view'
+          handler: 'masson/lib/commands/pki/cert-view'
     'secrets':
       description: 'Interact with the secure secret file store.'
       options:
@@ -72,21 +72,21 @@ module.exports =
       commands:
         'init':
           description: 'Initialize the secret store'
-          route: 'masson/lib/commands/secrets/init'
+          handler: 'masson/lib/commands/secrets/init'
         'unset':
           description: 'Delete a secret from the store.'
           main:
             name: 'properties'
             required: true
             description: 'One or multiple property name.'
-          route: 'masson/lib/commands/secrets/unset'
+          handler: 'masson/lib/commands/secrets/unset'
         'get':
           description: 'Get a secret'
           main:
             name: 'properties'
             required: true
             description: 'One or multiple property name.'
-          route: 'masson/lib/commands/secrets/get'
+          handler: 'masson/lib/commands/secrets/get'
         'set':
           description: 'Set a secret'
           main:
@@ -98,13 +98,13 @@ module.exports =
               shortcut: 'o'
               default: false
               description: 'Overwrite an existing property.'
-          route: 'masson/lib/commands/secrets/set'
+          handler: 'masson/lib/commands/secrets/set'
         'show':
           description: 'Display all the secrets'
-          route: 'masson/lib/commands/secrets/show'
+          handler: 'masson/lib/commands/secrets/show'
     'exec':
       description: "Distribute a shell command"
-      route: 'masson/lib/commands/exec'
+      handler: 'masson/lib/commands/exec'
       main:
         name: 'subcommand'
         description: 'The subcommand to execute.'
@@ -117,7 +117,7 @@ module.exports =
           description: 'Limit to servers that honor a list of tags.'
     'configure':
       description: 'Export servers\' configuration in a file.'
-      route: 'masson/lib/commands/configure'
+      handler: 'masson/lib/commands/configure'
       options:
         'output':
           shortcut: 'o', type: 'string'
@@ -143,7 +143,7 @@ module.exports =
           description: 'Print list of service names'
     'graph':
       description: 'Print the execution plan'
-      route: 'masson/lib/commands/graph'
+      handler: 'masson/lib/commands/graph'
       options:
         'output':
           shortcut: 'o', type: 'string'
@@ -173,7 +173,7 @@ module.exports =
               default: 5680
               shortcut: 'p'
               type: 'integer'
-          route: 'masson/lib/commands/server/start'
+          handler: 'masson/lib/commands/server/start'
         'stop':
           description: 'Stop the server'
           options:
@@ -189,17 +189,17 @@ module.exports =
             'pidfile':
               description: 'File storing the process ID'
               default: './conf/server.pid'
-          route: 'masson/lib/commands/server/stop'
+          handler: 'masson/lib/commands/server/stop'
         'status':
           description: 'Is the server routening?'
           options:
             'pidfile':
               description: 'File storing the process ID'
               default: './conf/server.pid'
-          route: 'masson/lib/commands/server/status'
+          handler: 'masson/lib/commands/server/status'
     'init':
       description: 'Create a project with a default layout and configuration'
-      route: 'masson/lib/commands/init'
+      handler: 'masson/lib/commands/init'
       options:
         'debug':
           shortcut: 'd', type: 'boolean'

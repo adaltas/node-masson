@@ -48,33 +48,44 @@
     }
   },
   "dependencies": {
-    "coffeescript": "^2.5.0",
+    "coffeescript": "^2.5.1",
     "colors": "~1.4.0",
-    "cson": "~6.9.0",
+    "cson": "~7.20.0",
     "each": "~1.2.2",
-    "generate-password": "^1.4.2",
-    "http-server": "~0.12.0",
-    "js-yaml": "^3.13.1",
+    "generate-password": "^1.6.0",
+    "http-server": "~0.12.3",
+    "js-yaml": "^4.0.0",
     "lodash.get": "^4.4.2",
     "lodash.set": "^4.3.2",
     "lodash.unset": "^4.5.2",
     "minimatch": "~3.0.4",
-    "mixme": "^0.3.5",
-    "nikita": "^0.9.5",
+    "mixme": "^0.5.0",
+    "nikita": "^1.0.0-alpha.1",
     "pad": "~3.2.0",
-    "parameters": "~0.7.2",
     "regexp-quote": "~0.0.0",
-    "ssh2-connect": "~2.0.5",
-    "ssh2-exec": "~0.5.3",
-    "ssh2-fs": "~0.3.8",
+    "shell": "^0.8.4",
+    "ssh2-connect": "~3.1.0",
+    "ssh2-exec": "~0.6.0",
+    "ssh2-fs": "~1.0.6",
     "ssha": "~1.0.1",
     "tsort": "~0.0.1"
   },
   "devDependencies": {
-    "mocha": "~6.2.2",
+    "mocha": "~8.3.2",
     "should": "~13.2.3"
   },
   "main": "./lib",
+  "mocha": {
+    "throw-deprecation": true,
+    "require": [
+      "should",
+      "coffeescript/register"
+    ],
+    "inline-diffs": true,
+    "timeout": 40000,
+    "reporter": "spec",
+    "recursive": true
+  },
   "bin": {
     "masson": "./bin/masson"
   },

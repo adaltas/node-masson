@@ -19,7 +19,7 @@ module.exports = ({params}, config) ->
         if typeof secrets is 'string'
           process.stdout.write "#{secrets}" + '\n'
         else
-          data = yaml.safeDump secrets
+          data = yaml.dump secrets
           process.stdout.write "#{data}" + '\n'
     catch err
       process.stderr.write "#{err.message}" + '\n'

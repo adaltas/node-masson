@@ -9,13 +9,9 @@ describe 'normalize deps local', ->
   tmp = '/tmp/masson-test'
   beforeEach ->
     require('module')._cache = {}
-    nikita
-    .system.mkdir target: tmp
-    .promise()
+    nikita.fs.mkdir tmp
   afterEach ->
-    nikita
-    .system.remove tmp
-    .promise()
+    nikita.fs.remove tmp, recursive: true
   
   it 'local with no match', ->
     fs.writeFileSync "#{tmp}/dep_a.json", JSON.stringify {}

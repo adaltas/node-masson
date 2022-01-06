@@ -18,7 +18,7 @@ module.exports = ({params}, config) ->
   try
     data = await store.get()
     reduceSize(data) if process.stdin.isTTY and not params.full?
-    data = yaml.safeDump data
+    data = yaml.dump data
     process.stdout.write "#{data}" + '\n'
   catch err
     process.stderr.write "#{err.message}" + '\n'

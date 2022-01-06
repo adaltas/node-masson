@@ -1,31 +1,27 @@
 
 path = require 'path'
-fs = require 'fs'
+fs = require('fs').promises
 {merge} = require 'mixme'
 
-module.exports = (paths, callback) ->
-  try
-    # Load configuration
-    configs = []
-    for config in paths
-      location = "#{path.resolve process.cwd(), config}"
-      exists = fs.existsSync location
-      stat = fs.statSync location if exists
-      if exists and stat.isDirectory()
-        files = fs.readdirSync location
-        for file in files
-          continue if file.indexOf('.') is 0
-          file = "#{path.resolve location, file}"
-          stat = fs.statSync file
-          continue if stat.isDirectory()
-          configs.push require file
-      else
-        configs.push require location
-    config = merge configs...
-    for k, v of config.servers
-      v.host ?= k
-      v.shortname ?= k.split('.')[0]
-      v
-    callback null, config
-  catch err
-    callback err
+module.exports = (paths) ->
+  # Load configuration
+  configs = []
+  for config in paths
+    location = "#{path.resolve process.cwd(), config}"
+    stat = await fs.stat location
+    if stat.isDirectory()
+      files = await fs.readdir location
+      for file in files
+        continue if file.indexOf('.') is 0
+        file = "#{path.resolve location, file}"
+        stat = await fs.stat file
+        continue if stat.isDirectory()
+        configs.push require file
+    else
+      configs.push require location
+  config = merge configs...
+  for k, v of config.servers
+    v.host ?= k
+    v.shortname ?= k.split('.')[0]
+    v
+  return config

@@ -1,6 +1,6 @@
 
 path = require 'path'
-{exec} = require 'child_process'
+nikita = require 'nikita'
 
 # `./bin/ryba pki --dir ./conf/certs cert {fqdn}`
 module.exports = ({params}, config, callback) ->
@@ -12,7 +12,7 @@ module.exports = ({params}, config, callback) ->
   key_path = path.resolve params.dir, "#{shortname}.key.pem"
   cert_path = path.resolve params.dir, "#{shortname}.cert.pem"
   subject = "/C=FR/O=Adaltas/L=Paris/CN=#{params.fqdn}"
-  exec """
+  {code, stdout, stderr} = await nikita.execute relax: true, """
   fqdn='#{params.fqdn}'
   shortname='#{shortname}'
   if [ ! -f #{cacert_path} ]; then echo 'Run `./generate.sh cacert` first.'; exit 1; fi
@@ -24,7 +24,6 @@ module.exports = ({params}, config, callback) ->
   # Clean up
   rm -rf '#{csr_path}'
   """
-  , (err, stdout, stderr) ->
-    if err
-      process.stderr.write '\n' + stderr + '\n\n'
-      process.exit 1
+  if code isnt 0
+    process.stderr.write '\n' + stderr + '\n\n'
+    process.exit code

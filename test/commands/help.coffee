@@ -1,22 +1,18 @@
 
 normalize = require '../../lib/config/normalize'
 params = require '../../lib/params'
-fs = require 'fs'
+fs = require('fs').promises
 nikita = require 'nikita'
-parameters = require 'parameters'
+shell = require 'shell'
 
 describe 'command help', ->
   
   tmp = '/tmp/masson-test'
   beforeEach ->
     require('module')._cache = {}
-    nikita
-    .system.mkdir target: tmp
-    .promise()
+    nikita.fs.mkdir tmp
   afterEach ->
-    nikita
-    .system.remove tmp
-    .promise()
+    nikita.fs.remove tmp, recursive: true
       
   it 'print full help', ->
     write = process.stderr.write
@@ -24,40 +20,41 @@ describe 'command help', ->
     process.stderr.write = (d)->
       data = d
       true
-    fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
+    await fs.writeFile "#{tmp}/a.json", JSON.stringify {}
     config = normalize
       clusters:
         'cluster_a':
           services:
             "#{tmp}/a": true
-    parameters(params).route(['help'], config)
+    shell(params).route(['help'], config)
     process.stderr.write = write
     data.should.eql """
     
     NAME
-        masson - Cluster deployment and management
+      masson - Cluster deployment and management.
 
     SYNOPSIS
-        masson [masson options] <command>
+      masson [masson options] <command>
 
     OPTIONS
-        -c --config             One or multiple configuration files
-        -s --stacktrace         Print readable stacktrace
-        -h --help               Display help information
+      -c --config               One or multiple configuration files.
+      -h --help                 Display help information
+      -s --stacktrace           Print readable stacktrace.
 
     COMMANDS
-        pki                     Certificate Management for development usage
-        secrets                 Interact with the secure secret file store
-        exec                    Distribute a shell command
-        configure               Export servers' configuration in a file
-        graph                   Print the execution plan
-        server                  Print the execution plan
-        init                    Create a project with a default layout and configuration
-        help                    Display help information about masson
+      grpc                      Remote access through grpc.
+      pki                       Certificate Management for development usage.
+      secrets                   Interact with the secure secret file store.
+      exec                      Distribute a shell command
+      configure                 Export servers' configuration in a file.
+      graph                     Print the execution plan
+      server                    Print the execution plan
+      init                      Create a project with a default layout and configuration
+      help                      Display help information
 
     EXAMPLES
-        masson --help           Show this message
-        masson help             Show this message
+      masson --help             Show this message
+      masson help               Show this message
     
     """
       
@@ -67,34 +64,34 @@ describe 'command help', ->
     process.stderr.write = (d)->
       data = d
       true
-    fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
+    await fs.writeFile "#{tmp}/a.json", JSON.stringify {}
     config = normalize
       clusters:
         'cluster_a':
           services:
             "#{tmp}/a": true
-    parameters(params).route(['help', 'exec'], config)
+    shell(params).route(['help', 'exec'], config)
     process.stderr.write = write
     data.should.eql """
 
     NAME
-        masson exec - Distribute a shell command
+      masson exec - Distribute a shell command
 
     SYNOPSIS
-        masson [masson options] exec [exec options] {subcommand}
+      masson [masson options] exec [exec options] {subcommand}
 
     OPTIONS for exec
-        -n --nodes              Limit to a list of server FQDNs
-        -t --tags               Limit to servers that honor a list of tags
-        -h --help               Display help information
-        subcommand              The subcommand to execute
+         subcommand             The subcommand to execute.
+      -h --help                 Display help information
+      -n --nodes                Limit to a list of server FQDNs.
+      -t --tags                 Limit to servers that honor a list of tags.
 
     OPTIONS for masson
-        -c --config             One or multiple configuration files
-        -s --stacktrace         Print readable stacktrace
-        -h --help               Display help information
+      -c --config               One or multiple configuration files.
+      -h --help                 Display help information
+      -s --stacktrace           Print readable stacktrace.
 
     EXAMPLES
-        masson exec --help      Show this message
+      masson exec --help        Show this message
     
     """

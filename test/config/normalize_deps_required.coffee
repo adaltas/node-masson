@@ -9,13 +9,9 @@ describe 'normalize deps required', ->
   tmp = '/tmp/masson-test'
   beforeEach ->
     require('module')._cache = {}
-    nikita
-    .system.mkdir target: tmp
-    .promise()
+    nikita.fs.mkdir tmp
   afterEach ->
-    nikita
-    .system.remove tmp
-    .promise()
+    nikita.fs.remove tmp, recursive: true
 
   it 'validate cluster reference when false', ->
     fs.writeFileSync "#{tmp}/a.json", JSON.stringify

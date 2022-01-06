@@ -3,12 +3,13 @@ nikita = require 'nikita'
 secrets = require '../../lib/secrets'
 
 describe 'command configure', ->
-  
-  tmp = '/tmp/masson_store'
+
+  tmp = '/tmp/masson-test'
   beforeEach ->
-    nikita
-    .system.remove tmp
-    .promise()
+    require('module')._cache = {}
+    nikita.fs.mkdir tmp
+  afterEach ->
+    nikita.fs.remove tmp, recursive: true
       
   it 'init', (next) ->
     store = secrets

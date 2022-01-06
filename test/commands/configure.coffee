@@ -1,35 +1,31 @@
 
 normalize = require '../../lib/config/normalize'
 params = require '../../lib/params'
-fs = require 'fs'
+fs = require('fs').promises
 nikita = require 'nikita'
-parameters = require 'parameters'
+shell = require 'shell'
 
 describe 'command configure', ->
   
   tmp = '/tmp/masson-test'
   beforeEach ->
     require('module')._cache = {}
-    nikita
-    .system.mkdir target: tmp
-    .promise()
+    nikita.fs.mkdir tmp
   afterEach ->
-    nikita
-    .system.remove tmp
-    .promise()
-      
+    nikita.fs.remove tmp, recursive: true
+  
   it 'format json', ->
     write = process.stdout.write
     data = null
     process.stdout.write = (d)->
       data = d
-    fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
+    await fs.writeFile "#{tmp}/a.json", JSON.stringify {}
     config = normalize
       clusters:
         'cluster_a':
           services:
             "#{tmp}/a": true
-    parameters(params).route(['configure', '--format', 'json'], config)
+    shell(params).route(['configure', '--format', 'json'], config)
     process.stdout.write = write
     JSON.parse(data).should.eql config
 
@@ -38,14 +34,14 @@ describe 'command configure', ->
     data = null
     process.stdout.write = (d)->
       data = d
-    fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
+    await fs.writeFile "#{tmp}/a.json", JSON.stringify {}
     config = normalize
       clusters:
         'cluster_a':
           services:
             "#{tmp}/a": true
         'cluster_b': {}
-    parameters(params).route(['configure', '--cluster', 'cluster_a', '-f', 'json'], config)
+    shell(params).route(['configure', '--cluster', 'cluster_a', '-f', 'json'], config)
     process.stdout.write = write
     JSON.parse(data).should.eql
       id: "cluster_a"
@@ -65,7 +61,7 @@ describe 'command configure', ->
     data = null
     process.stdout.write = (d)->
       data = d
-    fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
+    await fs.writeFile "#{tmp}/a.json", JSON.stringify {}
     config = normalize
       clusters: 'cluster_a': services:
         'dep_a':
@@ -74,7 +70,7 @@ describe 'command configure', ->
         'service_a':
           module: "#{tmp}/a"
           deps: 'my_dep_a': module: "#{tmp}/dep_a", local: true
-    parameters(params).route(['configure', '--cluster', 'cluster_a', '--service', 'service_a', '-f', 'json'], config)
+    shell(params).route(['configure', '--cluster', 'cluster_a', '--service', 'service_a', '-f', 'json'], config)
     process.stdout.write = write
     JSON.parse(data).id.should.eql 'service_a'
 
@@ -83,8 +79,8 @@ describe 'command configure', ->
     data = null
     process.stdout.write = (d)->
       data = d
-    fs.writeFileSync "#{tmp}/dep_a.json", JSON.stringify {}
-    fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
+    await fs.writeFile "#{tmp}/dep_a.json", JSON.stringify {}
+    await fs.writeFile "#{tmp}/a.json", JSON.stringify {}
     config = normalize
       clusters: 'cluster_a': services:
         'service_a':
@@ -94,7 +90,7 @@ describe 'command configure', ->
         'a.fqdn': ip: '10.10.10.1'
         'b.fqdn': ip: '10.10.10.2'
         'c.fqdn': ip: '10.10.10.3'
-    parameters(params).route(['configure', '--nodes', '-f', 'json'], config)
+    shell(params).route(['configure', '--nodes', '-f', 'json'], config)
     process.stdout.write = write
     JSON.parse(data)
     .map (node) -> node.id
@@ -105,8 +101,8 @@ describe 'command configure', ->
     data = null
     process.stdout.write = (d)->
       data = d
-    fs.writeFileSync "#{tmp}/dep_a.json", JSON.stringify {}
-    fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
+    await fs.writeFile "#{tmp}/dep_a.json", JSON.stringify {}
+    await fs.writeFile "#{tmp}/a.json", JSON.stringify {}
     config = normalize
       clusters: 'cluster_a': services:
         'service_a':
@@ -116,7 +112,7 @@ describe 'command configure', ->
         'a.fqdn': ip: '10.10.10.1'
         'b.fqdn': ip: '10.10.10.2'
         'c.fqdn': ip: '10.10.10.3'
-    parameters(params).route(['configure', '--node', 'c.fqdn', '-f', 'json'], config)
+    shell(params).route(['configure', '--node', 'c.fqdn', '-f', 'json'], config)
     process.stdout.write = write
     JSON.parse(data).should.eql
       ip: "10.10.10.3",

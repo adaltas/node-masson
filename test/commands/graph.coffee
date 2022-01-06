@@ -1,29 +1,25 @@
 
 normalize = require '../../lib/config/normalize'
 params = require '../../lib/params'
-fs = require 'fs'
+fs = require('fs').promises
 nikita = require 'nikita'
-parameters = require 'parameters'
+shell = require 'shell'
 
 describe 'command graph', ->
 
   tmp = '/tmp/masson-test'
   beforeEach ->
     require('module')._cache = {}
-    nikita
-    .system.mkdir target: tmp
-    .promise()
+    nikita.fs.mkdir tmp
   afterEach ->
-    nikita
-    .system.remove tmp
-    .promise()
+    nikita.fs.remove tmp, recursive: true
 
   it 'no arguments', ->
     write = process.stdout.write
     data = null
     process.stdout.write = (d)->
       data = d
-    fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
+    await fs.writeFile "#{tmp}/a.json", JSON.stringify {}
     config = normalize
       clusters: 'cluster_a': services:
         'dep_a':
@@ -32,7 +28,7 @@ describe 'command graph', ->
         'service_a':
           module: "#{tmp}/a"
           deps: 'my_dep_a': module: "#{tmp}/dep_a", local: true
-    parameters(params).route(['graph', '-f', 'json'], config)
+    shell(params).route(['graph', '-f', 'json'], config)
     process.stdout.write = write
     JSON.parse(data).should.eql [
       'cluster_a:dep_a'
@@ -44,7 +40,7 @@ describe 'command graph', ->
     data = null
     process.stdout.write = (d)->
       data = d
-    fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
+    await fs.writeFile "#{tmp}/a.json", JSON.stringify {}
     config = normalize
       clusters: 'cluster_a': services:
         'dep_a':
@@ -58,7 +54,7 @@ describe 'command graph', ->
       nodes:
         'a.fqdn': true
         'b.fqdn': true
-    parameters(params).route(['graph', '--nodes', '-f', 'json'], config)
+    shell(params).route(['graph', '--nodes', '-f', 'json'], config)
     process.stdout.write = write
     JSON.parse(data).should.eql [
       cluster: 'cluster_a'
@@ -77,8 +73,8 @@ describe 'command graph', ->
     data = ''
     process.stdout.write = (d)->
       data += d
-    fs.writeFileSync "#{tmp}/dep_a.json", JSON.stringify {}
-    fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
+    await fs.writeFile "#{tmp}/dep_a.json", JSON.stringify {}
+    await fs.writeFile "#{tmp}/a.json", JSON.stringify {}
     config = normalize
       clusters: 'cluster_a': services:
         "#{tmp}/dep_a":
@@ -91,7 +87,7 @@ describe 'command graph', ->
       nodes:
         'a.fqdn': true
         'b.fqdn': true
-    parameters(params).route(['graph', '--nodes'], config)
+    shell(params).route(['graph', '--nodes'], config)
     process.stdout.write = write
     data.substr(-2, 2).should.eql '\n\n'
     data.trim().should.eql """

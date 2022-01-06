@@ -6,7 +6,7 @@ yarn link nikita
 yarn link @nikitajs/core
 yarn link @nikitajs/db
 yarn link @nikitajs/docker
-yarn link @nikitajs/filetypes
+yarn link @nikitajs/file
 yarn link @nikitajs/ipa
 yarn link @nikitajs/java
 yarn link @nikitajs/krb5
