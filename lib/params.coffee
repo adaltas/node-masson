@@ -86,6 +86,13 @@ module.exports =
             name: 'properties'
             required: true
             description: 'One or multiple property name.'
+          options:
+            format:
+              description: 'Output format, only apply if propery is not a leaf.'
+              default: 'yaml'
+              one_of: ['json', 'yaml']
+              shortcut: 'f'
+              type: 'string'
           handler: 'masson/lib/commands/secrets/get'
         'set':
           description: 'Set a secret'

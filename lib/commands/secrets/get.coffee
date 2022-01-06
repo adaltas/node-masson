@@ -2,6 +2,7 @@
 secrets = require '../../secrets'
 get = require 'lodash.get'
 yaml = require 'js-yaml'
+util = require 'util'
 
 module.exports = ({params}, config) ->
   store = secrets params
@@ -19,7 +20,12 @@ module.exports = ({params}, config) ->
         if typeof secrets is 'string'
           process.stdout.write "#{secrets}" + '\n'
         else
-          data = yaml.dump secrets
-          process.stdout.write "#{data}" + '\n'
+          output = switch params.format
+            when 'json' then JSON.stringify secrets
+            when 'prettyjson' then util.inspect secrets,
+              colors: process.stdout.isTTY
+              depth: Infinity
+            when 'yaml' then yaml.dump secrets
+          process.stdout.write "#{output}" + '\n'
     catch err
       process.stderr.write "#{err.message}" + '\n'
