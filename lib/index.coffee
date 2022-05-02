@@ -1,5 +1,5 @@
 
-shell = require 'shell'
+{shell} = require 'shell'
 params = require './params'
 load = require './config/load'
 normalize = require './config/normalize'
