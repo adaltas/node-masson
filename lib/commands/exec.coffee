@@ -31,7 +31,6 @@ module.exports = ({params}, config) ->
       $ssh: merge host: node.ip or node.fqdn, node.ssh
     , ->
       {error, stdout, stderr} = await @execute
-        $debug: true
         $relax: true
         $sudo: true
         command: command
