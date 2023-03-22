@@ -20,16 +20,17 @@ module.exports = ({params}, config) ->
   else
     command = params.subcommand.map((c) -> "\"#{c}\"").join ' '
   write = (msg) -> process.stdout.write msg
-  each config.nodes
-  .parallel true
-  .call (_, node, callback) ->
-    return callback() if params.nodes? and multimatch(node.fqdn, params.nodes).length is 0
+  nodes = Object.values(config.nodes)
+  await each nodes, true, (node) ->
+    return if params.nodes? and multimatch(node.fqdn, params.nodes).length is 0
     for tag in params.tags or {}
       [key, value] = tag.split '='
-      return callback() if multimatch(node.tags[key] or [], value.split(',')).length is 0
-    nikita
-      $ssh: merge host: node.ip or node.fqdn, node.ssh
-    , ->
+      return if multimatch(node.tags[key] or [], value.split(',')).length is 0
+    await nikita
+      $ssh: merge
+        host: node.ip or node.fqdn
+        node.ssh
+    , ({ssh}) ->
       {error, stdout, stderr} = await @execute
         $relax: true
         $sudo: true
@@ -37,12 +38,9 @@ module.exports = ({params}, config) ->
       write if error
       then "\x1b[31m#{node.fqdn} (exit code #{error.exit_code})\x1b[39m\n"
       else "\x1b[32m#{node.fqdn}\x1b[39m\n"
-      write "\n" if stdout.length or stderr.length
-      write "\x1b[36m#{stdout.trim()}\x1b[39m\n" if stdout.length
-      write "\x1b[35m#{stderr.trim()}\x1b[39m\n" if stderr.length
+      write "\n" if (stdout || error.stdout).length or (stderr || error.stderr).length
+      write "\x1b[36m#{(stdout || error.stdout).trim()}\x1b[39m\n" if (stdout || error.stdout).length
+      write "\x1b[35m#{(stderr || error.stderr).trim()}\x1b[39m\n" if (stderr || error.stderr).length
       write "\n"
-    .then callback
-    .catch callback
-  .next (err) ->
-    process.stdout.write err.message if err
-    # Done
+  .catch (err) ->
+    process.stderr.write "#{err.message}\n"

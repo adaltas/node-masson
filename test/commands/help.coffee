@@ -3,7 +3,7 @@ normalize = require '../../lib/config/normalize'
 params = require '../../lib/params'
 fs = require('fs').promises
 nikita = require 'nikita'
-shell = require 'shell'
+{shell} = require 'shell'
 
 describe 'command help', ->
   
@@ -26,7 +26,7 @@ describe 'command help', ->
         'cluster_a':
           services:
             "#{tmp}/a": true
-    shell(params).route(['help'], config)
+    await shell(params).route(['help'], config)
     process.stderr.write = write
     data.should.eql """
     
@@ -70,7 +70,7 @@ describe 'command help', ->
         'cluster_a':
           services:
             "#{tmp}/a": true
-    shell(params).route(['help', 'exec'], config)
+    await shell(params).route(['help', 'exec'], config)
     process.stderr.write = write
     data.should.eql """
 

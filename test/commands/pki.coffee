@@ -3,7 +3,7 @@ normalize = require '../../lib/config/normalize'
 params = require '../../lib/params'
 fs = require('fs').promises
 nikita = require 'nikita'
-shell = require 'shell'
+{shell} = require 'shell'
 
 describe 'command pki', ->
   

@@ -8,20 +8,18 @@ multimatch = require '../utils/multimatch'
 {merge} = require 'mixme'
 array_get = require '../utils/array_get'
 
-module.exports = ({params}, config, callback) ->
+module.exports = ({params}, config) ->
   command = params.command.slice(-1)[0]
   for tag in params.tags or {}
     [key, value] = tag.split '='
-    return callback Error "Invalid usage, expected --tags key=value" if not value
+    throw Error "Invalid usage, expected --tags key=value" if not value
   s = store(config)
   kvengine = require('@nikitajs/core/lib/core/kv/engines/memory')()
-  each s.nodes()
-  .parallel(true)
-  .call (node, callback) ->
+  each s.nodes(), true, (node) ->
     for tag in params.tags or {}
       [key, value] = tag.split '='
-      return callback() if multimatch(node.tags[key] or [], value.split(',')).length is 0
-    return callback() if params.nodes and multimatch([node.ip, node.fqdn, node.hostname], params.nodes).length is 0
+      return if multimatch(node.tags[key] or [], value.split(',')).length is 0
+    return if params.nodes and multimatch([node.ip, node.fqdn, node.hostname], params.nodes).length is 0
     # Get filtered services
     services = node.services
     # Filtering based on module name
@@ -32,7 +30,7 @@ module.exports = ({params}, config, callback) ->
     .filter (service) ->
       s.service service.cluster, service.service
       .commands[command]
-    return callback() unless services.length
+    return unless services.length
     log = {}
     log.basedir ?= './log'
     log.basedir = path.resolve process.cwd(), log.basedir
@@ -62,14 +60,10 @@ module.exports = ({params}, config, callback) ->
         for module in service.commands[command]
           isRoot = config.nikita.ssh.username is 'root' or not config.nikita.ssh.username
           n.call module, merge instance.options, sudo: not isRoot
-    n.next (err) ->
-      n.ssh.close header: 'SSH Close'
-      n.next -> callback err
-  .next (err) ->
-    if err
-      unless err.errors
-        process.stderr.write "\n#{err.stack}\n"
-      else for err in err.errors
-        process.stderr.write "\n#{err.stack}\n"
-    callback err
+  .catch (err) ->
+    unless err.errors
+      process.stderr.write "\n#{err.stack}\n"
+    else for err in err.errors
+      process.stderr.write "\n#{err.stack}\n"
+    # throw err
     

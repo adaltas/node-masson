@@ -3,7 +3,7 @@ normalize = require '../../lib/config/normalize'
 params = require '../../lib/params'
 fs = require('fs').promises
 nikita = require 'nikita'
-shell = require 'shell'
+{shell} = require 'shell'
 
 describe 'command graph', ->
 
@@ -28,7 +28,7 @@ describe 'command graph', ->
         'service_a':
           module: "#{tmp}/a"
           deps: 'my_dep_a': module: "#{tmp}/dep_a", local: true
-    shell(params).route(['graph', '-f', 'json'], config)
+    await shell(params).route(['graph', '-f', 'json'], config)
     process.stdout.write = write
     JSON.parse(data).should.eql [
       'cluster_a:dep_a'
@@ -54,7 +54,7 @@ describe 'command graph', ->
       nodes:
         'a.fqdn': true
         'b.fqdn': true
-    shell(params).route(['graph', '--nodes', '-f', 'json'], config)
+    await shell(params).route(['graph', '--nodes', '-f', 'json'], config)
     process.stdout.write = write
     JSON.parse(data).should.eql [
       cluster: 'cluster_a'
@@ -87,7 +87,7 @@ describe 'command graph', ->
       nodes:
         'a.fqdn': true
         'b.fqdn': true
-    shell(params).route(['graph', '--nodes'], config)
+    await shell(params).route(['graph', '--nodes'], config)
     process.stdout.write = write
     data.substr(-2, 2).should.eql '\n\n'
     data.trim().should.eql """
