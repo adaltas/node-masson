@@ -1,14 +1,13 @@
 
-normalize = require '../../lib/config/normalize'
-store = require '../../lib/config/store'
-nikita = require 'nikita'
-fs = require 'fs'
+import normalize from 'masson/config/normalize'
+import store from 'masson/config/store'
+import nikita from 'nikita'
+import fs from 'fs'
 
 describe 'normalize clusters', ->
 
   tmp = '/tmp/masson-test'
   beforeEach ->
-    require('module')._cache = {}
     nikita.fs.mkdir tmp
   afterEach ->
     nikita.fs.remove tmp, recursive: true

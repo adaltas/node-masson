@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 require('coffeescript/register');
-const masson = require('../lib');
+import masson from 'masson';
 
 (async () => {
   try {

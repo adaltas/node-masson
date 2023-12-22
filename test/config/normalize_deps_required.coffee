@@ -1,14 +1,13 @@
 
-normalize = require '../../lib/config/normalize'
-store = require '../../lib/config/store'
-nikita = require 'nikita'
-fs = require 'fs'
+import normalize from 'masson/config/normalize'
+import store from 'masson/config/store'
+import nikita from 'nikita'
+import fs from 'fs'
 
 describe 'normalize deps required', ->
 
   tmp = '/tmp/masson-test'
   beforeEach ->
-    require('module')._cache = {}
     nikita.fs.mkdir tmp
   afterEach ->
     nikita.fs.remove tmp, recursive: true
@@ -16,8 +15,8 @@ describe 'normalize deps required', ->
   it 'validate cluster reference when false', ->
     fs.writeFileSync "#{tmp}/a.json", JSON.stringify
       deps: 'dep_a': cluster: 'anywhere', service: 'anything', module: "#{tmp}/dep_a", required: false
-    store normalize
-      clusters: 'cluster_a': services: 'service_a': module: "#{tmp}/a"
+    store await normalize
+      clusters: 'cluster_a': services: 'service_a': module: "#{tmp}/a.json"
     .service 'cluster_a', 'service_a'
     .deps
     .should.eql
@@ -27,16 +26,16 @@ describe 'normalize deps required', ->
     fs.writeFileSync "#{tmp}/a.json", JSON.stringify
       deps: 'dep_a': cluster: 'cluster_b', service: 'anything', module: "#{tmp}/dep_a", required: true
     ( ->
-      store normalize
-        clusters: 'cluster_a': services: 'service_a': module: "#{tmp}/a"
+      store await normalize
+        clusters: 'cluster_a': services: 'service_a': module: "#{tmp}/a.json"
       .service 'cluster_a', 'service_a'
     ).should.throw 'Invalid Cluster Reference: cluster "cluster_b" is not defined'
   
   it 'validate service reference, when false', ->
     fs.writeFileSync "#{tmp}/a.json", JSON.stringify
       deps: 'dep_a': service: 'anything', module: "#{tmp}/dep_a", required: false
-    store normalize
-      clusters: 'cluster_a': services: 'service_a': module: "#{tmp}/a"
+    store await normalize
+      clusters: 'cluster_a': services: 'service_a': module: "#{tmp}/a.json"
     .service 'cluster_a', 'service_a'
     .deps
     .should.eql
@@ -44,37 +43,54 @@ describe 'normalize deps required', ->
   
   it 'validate service reference based on service id, when true', ->
     fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
-    ( ->
-      store normalize
-        clusters: 'cluster_a': services: 'service_a':
-          module: "#{tmp}/a"
-          deps: 'dep_a': service: 'dep_a', module: "#{tmp}/dep_a", required: true
-      .service 'cluster_a', 'service_a'
-    ).should.throw "Required Dependency: unsatisfied dependency \"dep_a\" in service \"cluster_a:service_a\", service \"dep_a\" in cluster \"cluster_a\" is not defined"
+    store await normalize
+      clusters: 'cluster_a': services: 'service_a':
+        module: "#{tmp}/a.json"
+        deps: 'dep_a': service: 'dep_a', module: "#{tmp}/dep_a.json", required: true
+    .service 'cluster_a', 'service_a'
+    .should.be.rejectedWith "Required Dependency: unsatisfied dependency \"dep_a\" in service \"cluster_a:service_a\", service \"dep_a\" in cluster \"cluster_a\" is not defined"
+    # await normalize
+    #   clusters: 'cluster_a': services: 'service_a':
+    #     module: "#{tmp}/a.json"
+    #     deps: 'dep_a': service: 'dep_a', module: "#{tmp}/dep_a.json", required: true
+    # .should.be.rejectedWith "Required Dependency: unsatisfied dependency \"dep_a\" in service \"cluster_a:service_a\", service \"dep_a\" in cluster \"cluster_a\" is not defined"
+    # await Promise.reject(Error 'hum')
+    # try
+    #   await normalize
+    #     clusters: 'cluster_a': services: 'service_a':
+    #       module: "#{tmp}/a.json"
+    #       deps: 'dep_a': service: 'dep_a', module: "#{tmp}/dep_a.json", required: true
+    # catch err
+    #   console.log('!!!!!err', typeof err, err)
+    # ( ->
+    #   store await normalize
+    #     clusters: 'cluster_a': services: 'service_a':
+    #       module: "#{tmp}/a.json"
+    #       deps: 'dep_a': service: 'dep_a', module: "#{tmp}/dep_a.json", required: true
+    #   .service 'cluster_a', 'service_a'
+    # ).should.throw "Required Dependency: unsatisfied dependency \"dep_a\" in service \"cluster_a:service_a\", service \"dep_a\" in cluster \"cluster_a\" is not defined"
 
   it 'validate service reference based on module, when true', ->
     fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
-    ( ->
-      store normalize
-        clusters: 'cluster_a': services: 'service_a':
-          module: "#{tmp}/a"
-          deps: 'dep_a': module: "#{tmp}/dep_a", required: true
-      .service 'cluster_a', 'service_a'
-    ).should.throw "Required Dependency: unsatisfied dependency \"dep_a\" in service \"cluster_a:service_a\", module \"#{tmp}/dep_a\" in cluster \"cluster_a\" is not defined"
+    await normalize
+      clusters: 'cluster_a': services: 'service_a':
+        module: "#{tmp}/a.json"
+        deps: 'dep_a': module: "#{tmp}/dep_a.json", required: true
+    .should.be.rejectedWith "Required Dependency: unsatisfied dependency \"dep_a\" in service \"cluster_a:service_a\", module \"#{tmp}/dep_a.json\" in cluster \"cluster_a\" is not defined"
 
   it 'validate local', ->
     fs.writeFileSync "#{tmp}/dep_a.json", JSON.stringify {}
     fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
     # Valid
-    store normalize
+    store await normalize
       clusters: 'cluster_a': services:
         'dep_a':
-          module: "#{tmp}/dep_a"
+          module: "#{tmp}/dep_a.json"
           affinity: type: 'nodes', match: 'any', values: ['a.fqdn', 'b.fqdn', 'c.fqdn']
         'service_a':
-          module: "#{tmp}/a"
+          module: "#{tmp}/a.json"
           affinity: type: 'nodes', match: 'any', values: 'b.fqdn'
-          deps: 'dep_a': module: "#{tmp}/dep_a", local: true, required: true
+          deps: 'dep_a': module: "#{tmp}/dep_a.json", local: true, required: true
       nodes:
         'a.fqdn': {}
         'b.fqdn': {}
@@ -82,7 +98,7 @@ describe 'normalize deps required', ->
     .service 'cluster_a', 'service_a'
     # Invalid
     ( ->
-      store normalize
+      store await normalize
         clusters: 'cluster_a': services:
           'dep_a':
             module: "#{tmp}/dep_a"
@@ -90,7 +106,7 @@ describe 'normalize deps required', ->
           'service_a':
             module: "#{tmp}/a"
             affinity: type: 'nodes', match: 'any', values: 'b.fqdn'
-            deps: 'dep_a': module: "#{tmp}/dep_a", local: true, required: true
+            deps: 'dep_a': module: "#{tmp}/dep_a.json", local: true, required: true
         nodes:
           'a.fqdn': {}
           'b.fqdn': {}

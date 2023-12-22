@@ -1,12 +1,11 @@
 
-nikita = require 'nikita'
-secrets = require '../../lib/secrets'
+import nikita from 'nikita'
+import secrets from 'masson/secrets/index'
 
 describe 'command configure', ->
 
   tmp = '/tmp/masson-test/'
   beforeEach ->
-    require('module')._cache = {}
     nikita.fs.mkdir tmp
   afterEach ->
     nikita.fs.remove tmp, recursive: true

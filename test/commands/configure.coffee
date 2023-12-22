@@ -1,15 +1,14 @@
 
-normalize = require '../../lib/config/normalize'
-params = require '../../lib/params'
-fs = require('fs').promises
-nikita = require 'nikita'
-{shell} = require 'shell'
+import fs from 'node:fs/promises'
+import normalize from 'masson/config/normalize'
+import params from 'masson/params'
+import nikita from 'nikita'
+import {shell} from 'shell'
 
 describe 'command configure', ->
   
   tmp = '/tmp/masson-test'
   beforeEach ->
-    require('module')._cache = {}
     nikita.fs.mkdir tmp
   afterEach ->
     nikita.fs.remove tmp, recursive: true

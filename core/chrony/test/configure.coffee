@@ -1,7 +1,7 @@
 
-normalize = require '../../../lib/config/normalize'
-store = require '../../../lib/config/store'
-array_get = require '../../../lib/utils/array_get'
+normalize = require 'masson/config/normalize'
+store = require 'masson/config/store'
+array_get = require 'masson/utils/array_get'
 nikita = require 'nikita'
 
 describe 'chrony config', ->

@@ -1,15 +1,14 @@
 
-normalize = require '../../lib/config/normalize'
-affinity = require '../../lib/config/affinities'
-store = require '../../lib/config/store'
-fs = require 'fs'
-nikita = require 'nikita'
+import normalize from 'masson/config/normalize'
+import affinity from 'masson/config/affinities'
+import store from 'masson/config/store'
+import fs from 'fs'
+import nikita from 'nikita'
 
 describe 'affinity', ->
 
   tmp = '/tmp/masson-test'
   beforeEach ->
-    require('module')._cache = {}
     nikita.fs.mkdir tmp
   afterEach ->
     nikita.fs.remove tmp, recursive: true

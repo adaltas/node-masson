@@ -1,6 +1,6 @@
 
-normalize = require '../../../lib/config/normalize'
-store = require '../../../lib/config/store'
+normalize = require 'masson/config/normalize'
+store = require 'masson/config/store'
 
 describe 'configure', ->
   

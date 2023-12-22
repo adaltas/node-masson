@@ -1,9 +1,9 @@
 
-# normalize = require '../../lib/config/normalize'
-# params = require '../../lib/params'
-fs = require 'fs'
-nikita = require 'nikita'
-masson = require '../lib'
+# normalize = require 'masson/config/normalize'
+# params = require 'masson/params'
+import fs from 'fs'
+import nikita from 'nikita'
+import masson from 'masson'
 
 describe 'params', ->
 
