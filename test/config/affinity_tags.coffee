@@ -1,17 +1,11 @@
 
+import fs from 'node:fs/promises'
+import nikita from 'nikita'
 import normalize from 'masson/config/normalize'
 import affinity from 'masson/config/affinities'
 import store from 'masson/config/store'
-import fs from 'fs'
-import nikita from 'nikita'
 
 describe 'affinity tags', ->
-
-  tmp = '/tmp/masson-test'
-  beforeEach ->
-    nikita.fs.mkdir tmp
-  afterEach ->
-    nikita.fs.remove tmp, recursive: true
 
   describe 'normalize', ->
     
@@ -78,82 +72,94 @@ describe 'affinity tags', ->
   describe 'resolve', ->
     
     it 'match single tag', ->
-      fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
-      s = store normalize
-        clusters: 'cluster_a': services: 'service_a':
-          module: "#{tmp}/a"
-          affinity:
-            type: 'tags'
-            values: 'role': values: 'master': true
-        nodes:
-          'a.fqdn': tags:
-            'role': ['master', 'worker']
-          'b.fqdn': tags:
-            'role': 'client'
-          'c.fqdn': {}
-      affinity.handlers.tags.resolve s.config(),
-        s.service('cluster_a', 'service_a').affinity[0]
-      .should.eql ['a.fqdn']
+      nikita
+        $tmpdir: true
+      , ({metadata: {tmpdir}}) ->
+        await fs.writeFile "#{tmpdir}/a.json", JSON.stringify {}
+        s = store await normalize
+          clusters: 'cluster_a': services: 'service_a':
+            module: "#{tmpdir}/a.json"
+            affinity:
+              type: 'tags'
+              values: 'role': values: 'master': true
+          nodes:
+            'a.fqdn': tags:
+              'role': ['master', 'worker']
+            'b.fqdn': tags:
+              'role': 'client'
+            'c.fqdn': {}
+        affinity.handlers.tags.resolve s.config(),
+          s.service('cluster_a', 'service_a').affinity[0]
+        .should.eql ['a.fqdn']
         
     it 'match all tag', ->
-      fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
-      s = store normalize
-        clusters: 'cluster_a': services: 'service_a':
-          module: "#{tmp}/a"
-          affinity:
-            type: 'tags'
-            match: 'all'
-            values:
-              'role': 'master'
-              'env': 'prod'
-        nodes:
-          'a.fqdn': tags: 'env': 'prod', 'role': ['master', 'worker']
-          'b.fqdn': tags: 'env': 'prod', 'role': 'client'
-          'c.fqdn': tags: 'env': 'dev', 'role': 'client'
-          'd.fqdn': tags: 'env': 'dev', 'role': 'master'
-          'e.fqdn': {}
-      affinity.handlers.tags.resolve s.config(),
-        s.service('cluster_a', 'service_a').affinity[0]
-      .should.eql ['a.fqdn']
+      nikita
+        $tmpdir: true
+      , ({metadata: {tmpdir}}) ->
+        await fs.writeFile "#{tmpdir}/a.json", JSON.stringify {}
+        s = store await normalize
+          clusters: 'cluster_a': services: 'service_a':
+            module: "#{tmpdir}/a.json"
+            affinity:
+              type: 'tags'
+              match: 'all'
+              values:
+                'role': 'master'
+                'env': 'prod'
+          nodes:
+            'a.fqdn': tags: 'env': 'prod', 'role': ['master', 'worker']
+            'b.fqdn': tags: 'env': 'prod', 'role': 'client'
+            'c.fqdn': tags: 'env': 'dev', 'role': 'client'
+            'd.fqdn': tags: 'env': 'dev', 'role': 'master'
+            'e.fqdn': {}
+        affinity.handlers.tags.resolve s.config(),
+          s.service('cluster_a', 'service_a').affinity[0]
+        .should.eql ['a.fqdn']
         
     it 'match any tag', ->
-      fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
-      s = store normalize
-        clusters: 'cluster_a': services: 'service_a':
-          module: "#{tmp}/a"
-          affinity:
-            type: 'tags'
-            match: 'any'
-            values:
-              'role': 'master'
-              'env': 'prod'
-        nodes:
-          'a.fqdn': tags: 'env': 'prod', 'role': ['master', 'worker']
-          'b.fqdn': tags: 'env': 'prod', 'role': 'client'
-          'c.fqdn': tags: 'env': 'dev', 'role': 'client'
-          'd.fqdn': tags: 'env': 'dev', 'role': 'master'
-          'e.fqdn': {}
-      affinity.handlers.tags.resolve s.config(),
-        s.service('cluster_a', 'service_a').affinity[0]
-      .should.eql ['a.fqdn', 'b.fqdn', 'd.fqdn']
+      nikita
+        $tmpdir: true
+      , ({metadata: {tmpdir}}) ->
+        await fs.writeFile "#{tmpdir}/a.json", JSON.stringify {}
+        s = store await normalize
+          clusters: 'cluster_a': services: 'service_a':
+            module: "#{tmpdir}/a.json"
+            affinity:
+              type: 'tags'
+              match: 'any'
+              values:
+                'role': 'master'
+                'env': 'prod'
+          nodes:
+            'a.fqdn': tags: 'env': 'prod', 'role': ['master', 'worker']
+            'b.fqdn': tags: 'env': 'prod', 'role': 'client'
+            'c.fqdn': tags: 'env': 'dev', 'role': 'client'
+            'd.fqdn': tags: 'env': 'dev', 'role': 'master'
+            'e.fqdn': {}
+        affinity.handlers.tags.resolve s.config(),
+          s.service('cluster_a', 'service_a').affinity[0]
+        .should.eql ['a.fqdn', 'b.fqdn', 'd.fqdn']
         
     it 'match none tag', ->
-      fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
-      s = store normalize
-        clusters: 'cluster_a': services: 'service_a':
-          module: "#{tmp}/a"
-          affinity:
-            type: 'tags'
-            match: 'none'
-            values:
-              'role': 'master'
-              'env': 'prod'
-        nodes:
-          'a.fqdn': tags: 'env': 'prod', 'role': ['master', 'worker']
-          'b.fqdn': tags: 'env': 'prod', 'role': 'client'
-          'c.fqdn': tags: 'env': 'dev', 'role': 'client'
-          'd.fqdn': tags: 'env': 'dev', 'role': 'master'
-          'e.fqdn': {}
-      affinity.handlers.tags.resolve s.config(),
-        s.service('cluster_a', 'service_a').affinity[0]
-      .should.eql ['c.fqdn', 'e.fqdn']
+      nikita
+        $tmpdir: true
+      , ({metadata: {tmpdir}}) ->
+        await fs.writeFile "#{tmpdir}/a.json", JSON.stringify {}
+        s = store await normalize
+          clusters: 'cluster_a': services: 'service_a':
+            module: "#{tmpdir}/a.json"
+            affinity:
+              type: 'tags'
+              match: 'none'
+              values:
+                'role': 'master'
+                'env': 'prod'
+          nodes:
+            'a.fqdn': tags: 'env': 'prod', 'role': ['master', 'worker']
+            'b.fqdn': tags: 'env': 'prod', 'role': 'client'
+            'c.fqdn': tags: 'env': 'dev', 'role': 'client'
+            'd.fqdn': tags: 'env': 'dev', 'role': 'master'
+            'e.fqdn': {}
+        affinity.handlers.tags.resolve s.config(),
+          s.service('cluster_a', 'service_a').affinity[0]
+        .should.eql ['c.fqdn', 'e.fqdn']

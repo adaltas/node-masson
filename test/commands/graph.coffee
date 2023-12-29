@@ -1,98 +1,96 @@
 
-import normalize from 'masson/config/normalize'
-import params from 'masson/params'
-import fs from 'fs/promises'
+import fs from 'node:fs/promises'
+import { Writable } from 'node:stream'
 import nikita from 'nikita'
 import {shell} from 'shell'
+import normalize from 'masson/config/normalize'
+import params from 'masson/params'
 
 describe 'command graph', ->
 
-  tmp = '/tmp/masson-test'
-  beforeEach ->
-    nikita.fs.mkdir tmp
-  afterEach ->
-    nikita.fs.remove tmp, recursive: true
-
   it 'no arguments', ->
-    write = process.stdout.write
-    data = null
-    process.stdout.write = (d)->
-      data = d
-    await fs.writeFile "#{tmp}/a.json", JSON.stringify {}
-    config = normalize
-      clusters: 'cluster_a': services:
-        'dep_a':
-          module: "#{tmp}/a"
-          options: 'key': 'value'
-        'service_a':
-          module: "#{tmp}/a"
-          deps: 'my_dep_a': module: "#{tmp}/dep_a", local: true
-    await shell(params).route(['graph', '-f', 'json'], config)
-    process.stdout.write = write
-    JSON.parse(data).should.eql [
-      'cluster_a:dep_a'
-      'cluster_a:service_a'
-    ]
+    nikita
+      $tmpdir: true
+    , ({metadata: {tmpdir}}) ->
+      data = null
+      stdout = new Writable
+        write: (d) -> data = d.toString()
+      await fs.writeFile "#{tmpdir}/a.json", JSON.stringify {}
+      config = await normalize
+        clusters: 'cluster_a': services:
+          'dep_a':
+            module: "#{tmpdir}/a.json"
+            options: 'key': 'value'
+          'service_a':
+            module: "#{tmpdir}/a.json"
+            deps: 'my_dep_a': module: "#{tmpdir}/dep_a.json", local: true
+      await shell({...params, router: stdout: stdout}).route(['graph', '-f', 'json'], config)
+      JSON.parse(data).should.eql [
+        'cluster_a:dep_a'
+        'cluster_a:service_a'
+      ]
 
   it 'with nodes, JSON format', ->
-    write = process.stdout.write
-    data = null
-    process.stdout.write = (d)->
-      data = d
-    await fs.writeFile "#{tmp}/a.json", JSON.stringify {}
-    config = normalize
-      clusters: 'cluster_a': services:
-        'dep_a':
-          module: "#{tmp}/a"
-          affinity: type: 'nodes', values: 'b.fqdn'
-          options: 'key': 'value'
-        'service_a':
-          module: "#{tmp}/a"
-          affinity: type: 'nodes', values: 'a.fqdn'
-          deps: 'my_dep_a': module: "#{tmp}/dep_a", local: true
-      nodes:
-        'a.fqdn': true
-        'b.fqdn': true
-    await shell(params).route(['graph', '--nodes', '-f', 'json'], config)
-    process.stdout.write = write
-    JSON.parse(data).should.eql [
-      cluster: 'cluster_a'
-      id: 'dep_a'
-      module: "#{tmp}/a"
-      nodes: ['b.fqdn']
-    ,
-      cluster: 'cluster_a'
-      id: 'service_a'
-      module: "#{tmp}/a"
-      nodes: ['a.fqdn']
-    ]
+    nikita
+      $tmpdir: true
+    , ({metadata: {tmpdir}}) ->
+      data = null
+      stdout = new Writable
+        write: (d) -> data = d.toString()
+      await fs.writeFile "#{tmpdir}/a.json", JSON.stringify {}
+      config = await normalize
+        clusters: 'cluster_a': services:
+          'dep_a':
+            module: "#{tmpdir}/a.json"
+            affinity: type: 'nodes', values: 'b.fqdn'
+            options: 'key': 'value'
+          'service_a':
+            module: "#{tmpdir}/a.json"
+            affinity: type: 'nodes', values: 'a.fqdn'
+            deps: 'my_dep_a': module: "#{tmpdir}/dep_a.json", local: true
+        nodes:
+          'a.fqdn': true
+          'b.fqdn': true
+      await shell({...params, router: stdout: stdout}).route(['graph', '--nodes', '-f', 'json'], config)
+      JSON.parse(data).should.eql [
+        cluster: 'cluster_a'
+        id: 'dep_a'
+        module: "#{tmpdir}/a.json"
+        nodes: ['b.fqdn']
+      ,
+        cluster: 'cluster_a'
+        id: 'service_a'
+        module: "#{tmpdir}/a.json"
+        nodes: ['a.fqdn']
+      ]
 
   it 'with nodes, human format', ->
-    write = process.stdout.write
-    data = ''
-    process.stdout.write = (d)->
-      data += d
-    await fs.writeFile "#{tmp}/dep_a.json", JSON.stringify {}
-    await fs.writeFile "#{tmp}/a.json", JSON.stringify {}
-    config = normalize
-      clusters: 'cluster_a': services:
-        "#{tmp}/dep_a":
-          affinity: type: 'nodes', values: 'b.fqdn'
-          options: 'key': 'value'
-        'service_a':
-          module: "#{tmp}/a"
-          affinity: type: 'nodes', values: 'a.fqdn'
-          deps: 'my_dep_a': module: "#{tmp}/dep_a", local: true
-      nodes:
-        'a.fqdn': true
-        'b.fqdn': true
-    await shell(params).route(['graph', '--nodes'], config)
-    process.stdout.write = write
-    data.substr(-2, 2).should.eql '\n\n'
-    data.trim().should.eql """
-    * cluster_a:#{tmp}/dep_a
-      * b.fqdn
-    
-    * cluster_a:service_a (#{tmp}/a)
-      * a.fqdn
-    """
+    nikita
+      $tmpdir: true
+    , ({metadata: {tmpdir}}) ->
+      data = null
+      stdout = new Writable
+        write: (d) -> data = d.toString()
+      await fs.writeFile "#{tmpdir}/dep_a.json", JSON.stringify {}
+      await fs.writeFile "#{tmpdir}/a.json", JSON.stringify {}
+      config = await normalize
+        clusters: 'cluster_a': services:
+          "#{tmpdir}/dep_a.json":
+            affinity: type: 'nodes', values: 'b.fqdn'
+            options: 'key': 'value'
+          'service_a':
+            module: "#{tmpdir}/a.json"
+            affinity: type: 'nodes', values: 'a.fqdn'
+            deps: 'my_dep_a': module: "#{tmpdir}/dep_a.json", local: true
+        nodes:
+          'a.fqdn': true
+          'b.fqdn': true
+      await shell({...params, router: stdout: stdout}).route(['graph', '--nodes'], config)
+      data.substr(-2, 2).should.eql '\n\n'
+      data.trim().should.eql """
+      * cluster_a:#{tmpdir}/dep_a.json
+        * b.fqdn
+      
+      * cluster_a:service_a (#{tmpdir}/a.json)
+        * a.fqdn
+      """

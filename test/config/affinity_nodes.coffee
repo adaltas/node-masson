@@ -1,17 +1,11 @@
 
+import fs from 'node:fs/promises'
+import nikita from 'nikita'
 import normalize from 'masson/config/normalize'
 import affinity from 'masson/config/affinities'
 import store from 'masson/config/store'
-import fs from 'fs'
-import nikita from 'nikita'
 
 describe 'affinity nodes', ->
-
-  tmp = '/tmp/masson-test'
-  beforeEach ->
-    nikita.fs.mkdir tmp
-  afterEach ->
-    nikita.fs.remove tmp, recursive: true
   
   describe 'normalize', ->
   
@@ -42,42 +36,51 @@ describe 'affinity nodes', ->
   describe 'resolve', ->
     
     it 'match single', ->
-      fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
-      s = store normalize
-        clusters: 'cluster_a': services: 'service_a':
-          module: "#{tmp}/a"
-          affinity: type: 'nodes', values: 'a.fqdn': true
-        nodes:
-          'a.fqdn': {}
-          'b.fqdn': {}
-      affinity.handlers.nodes.resolve s.config(),
-        s.service('cluster_a', 'service_a').affinity[0]
-      .should.eql ['a.fqdn']
+      nikita
+        $tmpdir: true
+      , ({metadata: {tmpdir}}) ->
+        await fs.writeFile "#{tmpdir}/a.json", JSON.stringify {}
+        s = store await normalize
+          clusters: 'cluster_a': services: 'service_a':
+            module: "#{tmpdir}/a.json"
+            affinity: type: 'nodes', values: 'a.fqdn': true
+          nodes:
+            'a.fqdn': {}
+            'b.fqdn': {}
+        affinity.handlers.nodes.resolve s.config(),
+          s.service('cluster_a', 'service_a').affinity[0]
+        .should.eql ['a.fqdn']
         
     it 'match any', ->
-      fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
-      s = store normalize
-        clusters: 'cluster_a': services: 'service_a':
-          module: "#{tmp}/a"
-          affinity: type: 'nodes', match: 'any', values: 'a.fqdn': true, 'b.fqdn': true
-        nodes:
-          'a.fqdn': {}
-          'b.fqdn': {}
-      affinity.handlers.nodes.resolve s.config(),
-        s.service('cluster_a', 'service_a').affinity[0]
-      .should.eql ['a.fqdn', 'b.fqdn']
-        
+      nikita
+        $tmpdir: true
+      , ({metadata: {tmpdir}}) ->
+        await fs.writeFile "#{tmpdir}/a.json", JSON.stringify {}
+        s = store await normalize
+          clusters: 'cluster_a': services: 'service_a':
+            module: "#{tmpdir}/a.json"
+            affinity: type: 'nodes', match: 'any', values: 'a.fqdn': true, 'b.fqdn': true
+          nodes:
+            'a.fqdn': {}
+            'b.fqdn': {}
+        affinity.handlers.nodes.resolve s.config(),
+          s.service('cluster_a', 'service_a').affinity[0]
+        .should.eql ['a.fqdn', 'b.fqdn']
+    
     it 'match none', ->
-      fs.writeFileSync "#{tmp}/a.json", JSON.stringify {}
-      s = store normalize
-        clusters: 'cluster_a': services: 'service_a':
-          module: "#{tmp}/a"
-          affinity: type: 'nodes', match: 'none', values: 'a.fqdn': true, 'c.fqdn': true
-        nodes:
-          'a.fqdn': {}
-          'b.fqdn': {}
-      affinity.handlers.nodes.resolve s.config(),
-        s.service('cluster_a', 'service_a').affinity[0]
-      .should.eql ['b.fqdn']
+      nikita
+        $tmpdir: true
+      , ({metadata: {tmpdir}}) ->
+        await fs.writeFile "#{tmpdir}/a.json", JSON.stringify {}
+        s = store await normalize
+          clusters: 'cluster_a': services: 'service_a':
+            module: "#{tmpdir}/a.json"
+            affinity: type: 'nodes', match: 'none', values: 'a.fqdn': true, 'c.fqdn': true
+          nodes:
+            'a.fqdn': {}
+            'b.fqdn': {}
+        affinity.handlers.nodes.resolve s.config(),
+          s.service('cluster_a', 'service_a').affinity[0]
+        .should.eql ['b.fqdn']
       
     

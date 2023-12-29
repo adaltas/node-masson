@@ -1,17 +1,11 @@
 
+import fs from 'node:fs'
+import nikita from 'nikita'
 import normalize from 'masson/config/normalize'
 import affinity from 'masson/config/affinities'
 import store from 'masson/config/store'
-import fs from 'fs'
-import nikita from 'nikita'
 
 describe 'affinity', ->
-
-  tmp = '/tmp/masson-test'
-  beforeEach ->
-    nikita.fs.mkdir tmp
-  afterEach ->
-    nikita.fs.remove tmp, recursive: true
   
   describe 'complete', ->
   
@@ -23,7 +17,7 @@ describe 'affinity', ->
             'module/a': true
         nodes:
           'fqdn_a': true
-      config = normalize config
+      config = await normalize config
       nodes = affinity.nodes config, 'service_a'
       nodes.should.eql []
       services = affinity.services config, 'fqdn_a'
@@ -39,7 +33,7 @@ describe 'affinity', ->
                 match: 'all'
         nodes:
           'fqdn_a': true
-      config = normalize config
+      config = await normalize config
       nodes = affinity.nodes config, 'service_a'
       nodes.should.eql []
       services = affinity.services config, 'fqdn_a'

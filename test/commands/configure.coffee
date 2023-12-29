@@ -19,11 +19,11 @@ describe 'command configure', ->
     process.stdout.write = (d)->
       data = d
     await fs.writeFile "#{tmp}/a.json", JSON.stringify {}
-    config = normalize
+    config = await normalize
       clusters:
         'cluster_a':
           services:
-            "#{tmp}/a": true
+            "#{tmp}/a.json": true
     await shell(params).route(['configure', '--format', 'json'], config)
     process.stdout.write = write
     JSON.parse(data).should.eql config
@@ -34,24 +34,24 @@ describe 'command configure', ->
     process.stdout.write = (d)->
       data = d
     await fs.writeFile "#{tmp}/a.json", JSON.stringify {}
-    config = normalize
+    config = await normalize
       clusters:
         'cluster_a':
           services:
-            "#{tmp}/a": true
+            "#{tmp}/a.json": true
         'cluster_b': {}
     await shell(params).route(['configure', '--cluster', 'cluster_a', '-f', 'json'], config)
     process.stdout.write = write
     JSON.parse(data).should.eql
       id: "cluster_a"
       services:
-        "/tmp/masson-test/a":
+        "#{tmp}/a.json":
           affinity: []
           cluster: "cluster_a"
           commands: {}
           deps: {}
-          id: "/tmp/masson-test/a"
-          module: "/tmp/masson-test/a"
+          id: "#{tmp}/a.json"
+          module: "#{tmp}/a.json"
           instances: []
           nodes: {}
 
@@ -61,13 +61,13 @@ describe 'command configure', ->
     process.stdout.write = (d)->
       data = d
     await fs.writeFile "#{tmp}/a.json", JSON.stringify {}
-    config = normalize
+    config = await normalize
       clusters: 'cluster_a': services:
         'dep_a':
-          module: "#{tmp}/a"
+          module: "#{tmp}/a.json"
           options: 'key': 'value'
         'service_a':
-          module: "#{tmp}/a"
+          module: "#{tmp}/a.json"
           deps: 'my_dep_a': module: "#{tmp}/dep_a", local: true
     await shell(params).route(['configure', '--cluster', 'cluster_a', '--service', 'service_a', '-f', 'json'], config)
     process.stdout.write = write
@@ -80,10 +80,10 @@ describe 'command configure', ->
       data = d
     await fs.writeFile "#{tmp}/dep_a.json", JSON.stringify {}
     await fs.writeFile "#{tmp}/a.json", JSON.stringify {}
-    config = normalize
+    config = await normalize
       clusters: 'cluster_a': services:
         'service_a':
-          module: "#{tmp}/a"
+          module: "#{tmp}/a.json"
           affinity: type: 'nodes', match: 'any', values: ['a.fqdn', 'c.fqdn']
       nodes:
         'a.fqdn': ip: '10.10.10.1'
@@ -102,10 +102,10 @@ describe 'command configure', ->
       data = d
     await fs.writeFile "#{tmp}/dep_a.json", JSON.stringify {}
     await fs.writeFile "#{tmp}/a.json", JSON.stringify {}
-    config = normalize
+    config = await normalize
       clusters: 'cluster_a': services:
         'service_a':
-          module: "#{tmp}/a"
+          module: "#{tmp}/a.json"
           affinity: type: 'nodes', match: 'any', values: ['a.fqdn', 'c.fqdn']
       nodes:
         'a.fqdn': ip: '10.10.10.1'
@@ -119,5 +119,5 @@ describe 'command configure', ->
       fqdn: "c.fqdn",
       hostname: "c",
       services: [
-        cluster: "cluster_a", service: "service_a", module: "#{tmp}/a"
+        cluster: "cluster_a", service: "service_a", module: "#{tmp}/a.json"
       ]

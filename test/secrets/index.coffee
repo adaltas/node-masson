@@ -1,6 +1,6 @@
 
 import nikita from 'nikita'
-import secrets from 'masson/secrets/index'
+import secrets from 'masson/secrets'
 
 describe 'command configure', ->
 

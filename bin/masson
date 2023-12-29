@@ -1,12 +1,5 @@
-#!/usr/bin/env node
+#!/usr/bin/env bash
 
-require('coffeescript/register');
-import masson from 'masson';
+cwd=$(dirname "${BASH_SOURCE}")
 
-(async () => {
-  try {
-    await masson(process.argv.slice(2))
-  } catch (err) {
-    process.stderr.write(err.stack+'\n\n')
-  }
-})()
+node --loader $cwd/../test/loaders/coffee.js $cwd/masson.js $@

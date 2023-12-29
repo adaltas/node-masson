@@ -50,22 +50,23 @@
   "dependencies": {
     "coffeescript": "^2.7.0",
     "colors": "~1.4.0",
-    "cson": "~7.20.0",
-    "each": "~2.4.0",
-    "generate-password": "^1.7.0",
+    "cson": "~8.2.0",
+    "dedent": "^1.5.1",
+    "each": "~2.6.0",
+    "generate-password": "^1.7.1",
     "http-server": "~14.1.1",
     "js-yaml": "^4.1.0",
     "lodash.get": "^4.4.2",
     "lodash.set": "^4.3.2",
     "lodash.unset": "^4.5.2",
-    "minimatch": "~7.4.2",
-    "mixme": "^0.5.9",
-    "nikita": "^1.0.0-alpha.3",
+    "minimatch": "~9.0.3",
+    "mixme": "^1.1.0",
+    "nikita": "^1.0.0-alpha.4",
     "pad": "~3.2.0",
     "regexp-quote": "~0.0.0",
     "shell": "^0.9.4",
-    "ssh2-connect": "~3.4.1",
-    "ssh2-exec": "~0.7.3",
+    "ssh2-connect": "~3.4.2",
+    "ssh2-exec": "~0.7.6",
     "ssh2-fs": "~1.1.2",
     "ssha": "~1.0.1",
     "tsort": "~0.0.1"
@@ -74,17 +75,23 @@
     "mocha": "~10.2.0",
     "should": "~13.2.3"
   },
+  "exports": {
+    ".": "./lib/index.js",
+    "./*": "./lib/*.js",
+    "./commons/*": "./commons/*.coffee",
+    "./core/*": "./core/*.coffee"
+  },
   "main": "./lib",
   "mocha": {
-    "throw-deprecation": true,
-    "require": [
-      "should",
-      "coffeescript/register"
-    ],
     "inline-diffs": true,
-    "timeout": 40000,
+    "loader": "./test/loaders/coffee.js",
+    "recursive": true,
     "reporter": "spec",
-    "recursive": true
+    "require": [
+      "should"
+    ],
+    "throw-deprecation": true,
+    "timeout": 40000
   },
   "bin": {
     "masson": "./bin/masson"
@@ -97,5 +104,6 @@
     "minor": "npm version minor -m 'Bump to version %s'",
     "major": "npm version major -m 'Bump to version %s'",
     "test": "mocha test/**/*.coffee"
-  }
+  },
+  "type": "module"
 }
