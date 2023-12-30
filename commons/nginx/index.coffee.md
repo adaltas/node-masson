@@ -6,7 +6,7 @@ well as an IMAP/POP3 proxy server. NGINX is known for its high performance,
 stability, rich feature set, simple configuration, and low resource consumption.
 
 
-    module.exports =
+    export default
       deps:
         iptables: module: 'masson/core/iptables', local: true
       configure:

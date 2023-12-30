@@ -1,7 +1,7 @@
 
 # Krb5 Client
 
-    module.exports =
+    export default
       deps:
         krb5_server: module: 'masson/core/krb5_server'
         ntp: module: 'masson/core/ntp'

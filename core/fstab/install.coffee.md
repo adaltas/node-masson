@@ -1,7 +1,7 @@
 
 # FSTAB Install
 
-    module.exports = header: 'FSTAB Install', handler: ({options}) ->
+    export default header: 'FSTAB Install', handler: ({options}) ->
 
 ## Prepare Logical Volumes
 Create Logical volume and format partition (before they are mounted by fstab)

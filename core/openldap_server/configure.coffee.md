@@ -27,7 +27,7 @@ and should correspond to "openldap_server.config_password".
 } } }
 ```
 
-    module.exports = (service) ->
+    export default (service) ->
       options = service.options
 
 ## Validation

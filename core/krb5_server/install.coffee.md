@@ -18,7 +18,7 @@ Resources:
 *   [On Load Balancers and Kerberos](https://ssimo.org/blog/id_019.html)
 *   [Kerberos With LDAP on centos 7](http://www.rjsystems.nl/en/2100-d6-kerberos-openldap-provider.php)
 
-    module.exports = header: 'Kerberos Server Install', handler: ({options}) ->
+    export default header: 'Kerberos Server Install', handler: ({options}) ->
 
 ## IPTables
 

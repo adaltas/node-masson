@@ -8,7 +8,7 @@ In LDAP authentication, the saslauthd process handles authentication requests
 on behalf of Couchbase Server while the LDAP protocol is used to connect to the 
 LDAP server. 
 
-    module.exports =
+    export default
       deps: {}
       configure:
         'masson/core/saslauthd/configure'

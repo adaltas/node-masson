@@ -3,7 +3,7 @@
 
 ## Source Code
 
-    module.exports = ({options}) ->
+    export default ({options}) ->
 
 ## Configuration
 

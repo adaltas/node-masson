@@ -6,7 +6,7 @@ Then it extends a given volume group with this disk and its targeted logical vol
 
 ## Configuration
 
-    module.exports =
+    export default
       configure:
         'masson/core/lvm/configure'
       commands:

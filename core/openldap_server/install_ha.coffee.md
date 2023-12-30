@@ -1,7 +1,7 @@
 
 # OpenLDAP ACL
 
-    module.exports = header: 'OpenLDAP Server HA', handler: ({options}) ->
+    export default header: 'OpenLDAP Server HA', handler: ({options}) ->
     
       db = switch options.backend
         when 'mdb' then 'olcDatabase={3}mdb'

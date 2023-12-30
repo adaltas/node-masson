@@ -7,7 +7,7 @@ usage by default compared to more specialized APT tools like
 [apt-get(8)](http://manpages.ubuntu.com/manpages/xenial/man8/apt-get.8.html) and 
 [apt-cache(8)](http://manpages.ubuntu.com/manpages/xenial/man8/apt-cache.8.html).
 
-    module.exports =
+    export default
       configure:
         'masson/core/apt/configure'
       commands:

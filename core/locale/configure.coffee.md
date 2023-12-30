@@ -1,7 +1,7 @@
 
 # Users Locale Configure
 
-    module.exports = (service) ->
+    export default (service) ->
       options = service.options
 
       options.users = service.deps.system.options.users

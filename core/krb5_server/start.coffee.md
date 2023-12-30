@@ -3,7 +3,7 @@
 
 Start the kadmin and krb5kdc daemons.
 
-    module.exports = header: 'Kerberos Server Start', handler: ->
+    export default header: 'Kerberos Server Start', handler: ->
       @service.start
         header: 'kadmin'
         name: 'kadmin'

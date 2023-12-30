@@ -6,7 +6,7 @@ it differs from prior versions (5.6 and less) in the way there is no longer
 the "mysql_secure_installation" script and the password is stashed into the
 logs.
 
-    module.exports = header: 'MySQL Server Install', handler: (options) ->
+    export default header: 'MySQL Server Install', handler: (options) ->
 
 ## IPTables
 
@@ -37,7 +37,7 @@ Actions present to be able to change uid/gid:
 Note: Be careful if using different name thans 'mysql:mysql'
 User/group are hard coded in some of mariadb/mysql package scripts.
 
-      @system.group 'Group' options.group
+      @system.group 'Group', options.group
       @system.user 'User', options.user
 
 ## Repository

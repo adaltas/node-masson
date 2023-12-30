@@ -1,7 +1,7 @@
 
 # HTTPD Web Server Install
 
-    module.exports = header: 'HTTPD Install', handler: ({options}) ->
+    export default header: 'HTTPD Install', handler: ({options}) ->
 
 ## IPTables
 

@@ -1,7 +1,7 @@
 
 # NGINX Web Server Configure
 
-    module.exports = (service) ->
+    export default (service) ->
       options = service.options
 
 ## Environment
@@ -26,4 +26,3 @@
       options.user.comment ?= 'NGINX Web Server User'
       options.user.home ?= '/var/lib/nginx'
       options.user.shell ?= false
-

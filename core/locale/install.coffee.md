@@ -1,7 +1,7 @@
 
 # Users Locale Install
 
-    module.exports = header: 'Locale Install', handler: ({options}) ->
+    export default header: 'Locale Install', handler: ({options}) ->
 
 ## LC_* Properties
 

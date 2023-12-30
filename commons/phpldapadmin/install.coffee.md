@@ -1,7 +1,7 @@
 
 # phpLDAPadmin Install
 
-    module.exports = header: 'phpLDAPadmin Install', handler: (options) ->
+    export default header: 'phpLDAPadmin Install', handler: (options) ->
 
 ## Package
 
@@ -65,5 +65,5 @@ the "http://{host}/ldapadmin" URL path.
         backup: true
       @service
         name: 'httpd'
-        state: 'restart'ed
+        state: 'restarted'
         if: @status -1

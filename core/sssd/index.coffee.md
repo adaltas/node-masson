@@ -1,7 +1,7 @@
 
 # SSSD Intall
 
-    module.exports =
+    export default
       use:
         yum: module: 'masson/core/yum'
         openldap_client: module: 'masson/core/openldap_client'

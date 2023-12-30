@@ -66,7 +66,7 @@ The module accept the following properties:
 }
 ```
 
-    module.exports = (service) ->
+    export default (service) ->
       options = service.options
       
 ## SELinux

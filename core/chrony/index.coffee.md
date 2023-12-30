@@ -27,7 +27,7 @@ More advantages and feature comparaisons on the
 
 ## Definition
 
-    module.exports =
+    export default
       configure:
         'masson/core/chrony/configure'
       commands:

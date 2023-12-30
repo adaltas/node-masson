@@ -11,7 +11,7 @@
 
 See the the "resources section" for additional information.
 
-    module.exports = (service) ->
+    export default (service) ->
       options = service.options
 
 ## Indentities

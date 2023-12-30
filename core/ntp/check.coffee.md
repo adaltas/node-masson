@@ -1,7 +1,7 @@
 
 # NTP Check
 
-    module.exports = header: 'NTP Check', handler: ->
+    export default header: 'NTP Check', handler: ->
 
 ## Runing Sevrice
 

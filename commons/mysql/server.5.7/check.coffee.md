@@ -1,7 +1,7 @@
 
 # Mysql Server Check
 
-    module.exports = header: 'Mysql Server Check', handler: (options) ->
+    export default header: 'Mysql Server Check', handler: (options) ->
 
 ## Runing Sevrice
 

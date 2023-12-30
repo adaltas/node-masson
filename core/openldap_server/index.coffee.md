@@ -1,7 +1,7 @@
 
 # OpenLDAP Server
 
-    module.exports =
+    export default
       deps:
         iptables: module: 'masson/core/iptables', local: true
         saslauthd: module: 'masson/core/saslauthd', local: true

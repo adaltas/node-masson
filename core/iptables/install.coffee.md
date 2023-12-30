@@ -1,7 +1,7 @@
 
 # Iptables Install
 
-    module.exports = header: 'Iptables Install', handler: ({options}) ->
+    export default header: 'Iptables Install', handler: ({options}) ->
 
 ## Package
 

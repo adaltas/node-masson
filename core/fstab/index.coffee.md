@@ -3,7 +3,7 @@
 
 This module handles fstab and mountpoints.
 
-    module.exports =
+    export default
       configure:
         'masson/core/fstab/configure'
       commands:

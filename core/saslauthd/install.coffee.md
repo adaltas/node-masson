@@ -1,7 +1,7 @@
 
 # SASLAuthd Install
 
-    module.exports = header: 'SASLAuthd Install', handler: ({options}) ->
+    export default header: 'SASLAuthd Install', handler: ({options}) ->
 
 ## Identities
 

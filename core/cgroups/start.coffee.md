@@ -3,6 +3,6 @@
 
 Start the cgconfig service.
 
-    module.exports = header: 'Cgroups Start', handler: ->
+    export default header: 'Cgroups Start', handler: ->
       @service.start
         name: 'cgconfig'

@@ -1,7 +1,7 @@
 
 # NGINX Web Server Install
 
-    module.exports = header: 'NGINX Install', handler: (options) ->
+    export default header: 'NGINX Install', handler: (options) ->
 
 ## Users & Groups
 

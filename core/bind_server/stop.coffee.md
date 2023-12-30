@@ -3,5 +3,5 @@
 
 Stop the "named" service.
 
-    module.exports = header: 'Bind Server Stop', handler: ->
+    export default header: 'Bind Server Stop', handler: ->
       @service.stop name: 'named'

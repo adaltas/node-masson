@@ -1,7 +1,7 @@
 
 # MySQL client installation
 
-    module.exports = header: 'MySQL Client Install', handler: (options) ->
+    export default header: 'MySQL Client Install', handler: (options) ->
 
 ## Yum Repositories
 

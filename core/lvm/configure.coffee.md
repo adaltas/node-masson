@@ -16,7 +16,7 @@ The module accept the following properties:
     A size suffix of M for megabytes, G for gigabytes, T for terabytes, P for petabytes or E for exabytes is optional.
     With the + sign the value is added to the actual size of the logical volume. 
 
-    module.exports = (service) ->
+    export default (service) ->
       options = service.options
       
       throw Error "Invalid device format. Please provide a string (device path or UUID='<uuid>')" unless typeof options.disk is 'string'

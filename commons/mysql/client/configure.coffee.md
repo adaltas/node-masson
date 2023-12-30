@@ -1,7 +1,7 @@
 
 # Mysql client configuration
 
-    module.exports = (service) ->
+    export default (service) ->
       options = service.options
 
 ## Repository

@@ -28,7 +28,7 @@ provision their databases and user access.
 } } }
 ```
 
-    module.exports = (service) ->
+    export default (service) ->
       options = service.options
 
 ## Validation

@@ -3,7 +3,7 @@
 
 Install MySQL Server 5.7 community.
 
-    module.exports =
+    export default
       deps:
         iptables: module: 'masson/core/iptables', local: true
       configure:

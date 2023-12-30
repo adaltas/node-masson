@@ -9,7 +9,7 @@ Massachusetts Institute of Technology.
 The article [SSH Kerberos Authentication Using GSSAPI and SSPI][gss_sspi]
 provides a good description on how Kerberos is negotiated by GSSAPI and SSPI.
 
-    module.exports =
+    export default
       deps:
         iptables: module: 'masson/core/iptables', local: true
         openldap_client: module: 'masson/core/openldap_client', local: true, auto: true

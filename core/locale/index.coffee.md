@@ -1,7 +1,7 @@
 
 # Users Locale
 
-    module.exports =
+    export default
       deps:
         system: module: 'masson/core/system', local: true, required: true
       configure:

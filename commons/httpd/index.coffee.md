@@ -3,7 +3,7 @@
 
 Configure the HTTPD server.
 
-    module.exports =
+    export default
       deps:
         iptables: module: 'masson/core/iptables', local: true
       configure:

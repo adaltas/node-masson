@@ -1,7 +1,7 @@
 
 # LVM Install
 
-    module.exports = header: 'LVM Install', handler: ({options}) ->
+    export default header: 'LVM Install', handler: ({options}) ->
 
 ## Initialize physical volume
 

@@ -10,7 +10,7 @@ Note:
   possible values: PLAIN, GSSAPI, ANONYMOUS, CRAM-MD5, DIGEST-MD5, PLAIN, OTP, EXTERNAL
 * the "slapd.conf" file is for now hardcoded
 
-    module.exports = header: 'OpenLDAP Server SASL', handler: ({options}) ->
+    export default header: 'OpenLDAP Server SASL', handler: ({options}) ->
     
       return unless options.saslauthd
       @file

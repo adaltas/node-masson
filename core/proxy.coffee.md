@@ -37,7 +37,7 @@ configuration will be enriched with the `http_proxy`, the
 `https_proxy`, the `http_proxy_no_auth` and the 
 `https_proxy_no_auth` urls properties.
 
-    module.exports = ->
+    export default ->
       @config.proxy ?= {}
       @config.proxy.system ?= false
       @config.proxy.system_file ?= "phyla_proxy.sh"

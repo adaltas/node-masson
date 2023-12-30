@@ -1,7 +1,7 @@
 
 # MySQL Server Install
 
-    module.exports = ->
+    export default ->
       @system.execute
         header: 'External Root Access'
         if: mysql.server.root_host

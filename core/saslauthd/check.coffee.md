@@ -1,7 +1,7 @@
 
 # SASLAuthd Check
 
-    module.exports = header: 'SASLAuthd Check', handler: ({options}) ->
+    export default header: 'SASLAuthd Check', handler: ({options}) ->
 
 First check that the DN and password that saslauthd will use when it connects to AD are valid:
 

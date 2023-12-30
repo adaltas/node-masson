@@ -6,7 +6,7 @@ file "/etc/openldap/ldap.conf" is configured by the "openldap_client.config"
 object property. The property "openldap\_client.ca\_cert" may reference a 
 certificate to upload.
 
-    module.exports = header: 'OpenLDAP Client Install', handler: ({options}) ->
+    export default header: 'OpenLDAP Client Install', handler: ({options}) ->
 
 ## Package
 

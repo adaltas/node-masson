@@ -3,7 +3,7 @@
 
 TODO: https://dev.mysql.com/doc/refman/5.7/en/mysql-cluster.html
 
-    module.exports =
+    export default
       deps:
         iptables: module: 'masson/core/iptables', local: true
       configure:

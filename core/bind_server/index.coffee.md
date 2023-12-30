@@ -5,7 +5,7 @@ Install and configure [named](http://linux.die.net/man/8/named), a
 Domain Name System (DNS) server, part of the BIND 9 distribution f
 rom ISC.
 
-    module.exports =
+    export default
       deps:
         iptables: module: 'masson/core/iptables', local: true
         yum: module: 'masson/core/yum'

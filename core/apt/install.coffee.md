@@ -1,7 +1,7 @@
 
 # APT Install
 
-    module.exports = header: 'APT Install', handler: ({options}) ->
+    export default header: 'APT Install', handler: ({options}) ->
 
 ## Locked
 

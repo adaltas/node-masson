@@ -8,7 +8,7 @@ Note, in a VirtualBox environnemnet (including with Vagrant), you might enforce
 the clock of the virtual box with the command 
 `VBoxManage modifyvm ${vmname} --biossystemtimeoffset -0`.
 
-    module.exports =
+    export default
       deps:
         network: 'masson/core/network'
       configure:

@@ -3,7 +3,7 @@
 
 Gather various information relative to the targeted system.
 
-    module.exports = header: 'Info', required: true, handler: ->
+    export default header: 'Info', required: true, handler: ->
 
 ## Server Info
 

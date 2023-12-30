@@ -24,7 +24,7 @@ contains the following properties:
     `password` property but used for secure https proxy. it
     default to the default http settings.
 
-    module.exports = (service) ->
+    export default (service) ->
       options = service.options
       
       options.system ?= "proxy.sh"

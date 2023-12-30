@@ -1,7 +1,7 @@
 
 # MySQL Server Install
 
-    module.exports = header: 'MySQL Server Install', handler: (options) ->
+    export default header: 'MySQL Server Install', handler: (options) ->
 
 ## IPTables
 

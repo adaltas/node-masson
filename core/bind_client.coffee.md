@@ -9,6 +9,6 @@ nslookup, dig and host.
 
 The package "bind-utils" is installed.
 
-    module.exports = header: 'Bind Client Install', handler: ->
+    export default header: 'Bind Client Install', handler: ->
       @service
         name: 'bind-utils'

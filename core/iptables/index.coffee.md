@@ -35,7 +35,7 @@ Example:
 }
 ```
 
-    module.exports =
+    export default
       deps:
         yum: module: 'masson/core/yum', local: true
       configure:

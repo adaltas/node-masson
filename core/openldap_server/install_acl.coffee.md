@@ -1,7 +1,7 @@
 
 # OpenLDAP ACL
 
-    module.exports = header: 'OpenLDAP Server ACL', handler: ({options}) ->
+    export default header: 'OpenLDAP Server ACL', handler: ({options}) ->
 
 After this call, the follwing command should execute with success:
 

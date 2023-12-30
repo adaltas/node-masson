@@ -3,7 +3,7 @@
 
 Check the health of the Bind server.
 
-    module.exports = header: 'Kerberos Server Check', handler: ({options}) ->
+    export default header: 'Kerberos Server Check', handler: ({options}) ->
 
 ## Runing Sevrice
 

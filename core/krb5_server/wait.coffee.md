@@ -11,7 +11,7 @@ Wait for all the Kerberos servers deployed by Masson.
 
 ## Source Code
 
-    module.exports = header: 'Kerberos Server Wait', handler: ({options}) ->
+    export default header: 'Kerberos Server Wait', handler: ({options}) ->
       @connection.wait
         header: 'Kadmin'
         servers: options.kadmin

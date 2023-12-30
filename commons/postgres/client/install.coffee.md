@@ -3,7 +3,7 @@
 
 Install the PostgreSQL command-line tool.
 
-    module.exports = header: 'PostgreSQL Client Install', handler: ->
+    export default header: 'PostgreSQL Client Install', handler: ->
 
 ## Package
 

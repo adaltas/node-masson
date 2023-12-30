@@ -5,7 +5,7 @@ The default ports used by OpenLdap server are 389 and 636.
 
 todo: add migrationtools
 
-    module.exports = header: 'OpenLDAP Server Install', handler: ({options}) ->
+    export default header: 'OpenLDAP Server Install', handler: ({options}) ->
 
 ## IPTables
 

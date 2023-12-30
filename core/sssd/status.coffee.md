@@ -1,5 +1,5 @@
 
 # SSSD Status
 
-    module.exports = header: 'SSSD Status', handler: ->
+    export default header: 'SSSD Status', handler: ->
       @service.status name: 'sssd'

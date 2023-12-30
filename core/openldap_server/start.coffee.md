@@ -3,6 +3,6 @@
 
 Start the slapd daemon.
 
-    module.exports = header: 'OpenLDAP Server Start', handler: ->
+    export default header: 'OpenLDAP Server Start', handler: ->
       @service.start
         name: 'slapd'

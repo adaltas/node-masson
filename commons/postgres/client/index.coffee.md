@@ -3,6 +3,6 @@
 
 Install the PostgreSQL command-line tool.
 
-    module.exports =
+    export default
       'install':
         'masson/commons/postgres/client/install'

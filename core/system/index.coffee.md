@@ -6,7 +6,7 @@
 * Install Unix groups and users
 * Add system profile scripts
 
-    module.exports =
+    export default
       deps: {}
       configure:
         'masson/core/system/configure'

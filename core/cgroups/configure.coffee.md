@@ -5,7 +5,7 @@ The module accept the following properties:
 
 ## Source code
 
-    module.exports = (service) ->
+    export default (service) ->
       options = service.options
 
       options.groups ?= {}

@@ -1,7 +1,7 @@
 
 # phpLDAPadmin Configure
 
-    module.exports = (service) ->
+    export default (service) ->
       options = service.options
       
       options.config_path ?= '/etc/phpldapadmin/config.php'

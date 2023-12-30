@@ -7,7 +7,7 @@ Install the services defined by the "sssd.services" property. By default, the
 following service: "sssd", "sssd-client", "pam\_krb5", "pam\_ldap" and
 "sssd-tools". It also ensures SSSD is marked as a startup service.
 
-    module.exports = header: 'SSSD Install', handler: ({options}) ->
+    export default header: 'SSSD Install', handler: ({options}) ->
 
 ## Identities
 
