@@ -1,87 +1,41 @@
 {
   "name": "masson",
-  "version": "0.2.1",
-  "description": "Module execution engine for cluster deployments.",
+  "version": "0.2.0",
+  "description": "Actions scheduling and orchestration for deployment a lot more.",
   "homepage": "https://github.com/adaltas/node-masson",
   "bugs": "https://github.com/adaltas/node-masson/issues",
   "author": "David Worms <david@adaltas.com>",
+  "contributors": [
+    "David Worms <david@adaltas.com> (https://www.adaltas.com)",
+    "Pierre Sauvage <pierre@adaltas.com> (https://www.adaltas.com)"
+  ],
+  "bin": {
+    "masson": "./bin/masson"
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/adaltas/node-masson.git"
   },
   "license": "MIT",
-  "keywords": [
-    "deployment",
-    "os"
-  ],
-  "files": [
-    "bin",
-    "commons",
-    "core",
-    "lib"
-  ],
-  "contributors": [
-    {
-      "name": "David Worms",
-      "email": "david@adaltas.com"
-    },
-    {
-      "name": "Pierre Sauvage",
-      "email": "pierre@adaltas.com"
-    },
-    {
-      "name": "Lucas Bakalian",
-      "email": "lucas@adaltas.com"
-    }
-  ],
-  "coffeelintConfig": {
-    "indentation": {
-      "level": "error",
-      "value": 2
-    },
-    "line_endings": {
-      "level": "error",
-      "value": "unix"
-    },
-    "max_line_length": {
-      "level": "ignore"
-    }
-  },
   "dependencies": {
-    "coffeescript": "^2.7.0",
-    "colors": "~1.4.0",
-    "cson": "~8.2.0",
-    "dedent": "^1.5.1",
-    "each": "~2.6.0",
-    "generate-password": "^1.7.1",
-    "http-server": "~14.1.1",
-    "js-yaml": "^4.1.0",
-    "lodash.get": "^4.4.2",
-    "lodash.set": "^4.3.2",
-    "lodash.unset": "^4.5.2",
-    "minimatch": "~9.0.3",
+    "each": "^2.7.0",
+    "glob": "^10.4.1",
     "mixme": "^1.1.0",
-    "nikita": "^1.0.0-alpha.4",
-    "pad": "~3.2.0",
-    "regexp-quote": "~0.0.0",
-    "shell": "^0.9.4",
-    "ssh2-connect": "~3.4.2",
-    "ssh2-exec": "~0.7.6",
-    "ssh2-fs": "~1.1.2",
-    "ssha": "~1.0.1",
-    "tsort": "~0.0.1"
+    "multimatch": "^7.0.0",
+    "nikita": "^1.0.0-alpha.7",
+    "shell": "^0.9.6",
+    "yaml": "^2.4.5"
   },
   "devDependencies": {
-    "mocha": "~10.2.0",
-    "should": "~13.2.3"
+    "coffeescript": "^2.7.0",
+    "mocha": "^10.4.0",
+    "should": "^13.2.3"
   },
   "exports": {
     ".": "./lib/index.js",
-    "./*": "./lib/*.js",
-    "./commons/*": "./commons/*.coffee",
-    "./core/*": "./core/*.coffee"
+    "./*": "./actions/*.js"
   },
-  "main": "./lib",
+  "main": "lib/index.js",
   "mocha": {
     "inline-diffs": true,
     "loader": "./test/loaders/coffee.js",
@@ -92,18 +46,6 @@
     ],
     "throw-deprecation": true,
     "timeout": 40000
-  },
-  "bin": {
-    "masson": "./bin/masson"
-  },
-  "scripts": {
-    "preversion": "grep '## Trunk' CHANGELOG.md",
-    "version": "version=`grep '^  \"version\": ' package.json | sed 's/.*\"\\([0-9\\.]*\\)\".*/\\1/'` && sed -i \"s/## Trunk/## Version $version/\" CHANGELOG.md && git add CHANGELOG.md",
-    "postversion": "git push && git push --tags && npm publish",
-    "patch": "npm version patch -m 'Bump to version %s'",
-    "minor": "npm version minor -m 'Bump to version %s'",
-    "major": "npm version major -m 'Bump to version %s'",
-    "test": "mocha test/**/*.coffee"
   },
   "type": "module"
 }

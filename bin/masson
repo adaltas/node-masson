@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-cwd=$(dirname "${BASH_SOURCE}")
-
-node --loader $cwd/../test/loaders/coffee.js $cwd/masson.js $@
+node --no-warnings lib/index.js -c ./conf "$@"
