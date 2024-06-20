@@ -26,24 +26,8 @@ Run check with module and node filtering.
 
 ## Configuration
 
-Search directories are defined with additionnal `-c --config` parameters. Multiple search directories may be provided from the CLI.
-
-Configuration files are defined in YAML. 
-
-All files discovered from the search directories are merged to build the final configuration. Parent directories and filenames, split by dots (`.`), are leveraged to build the path of an action.
-
-A search directory `./conf` with a configuration file stored in `./conf/actions/my_services.yml` and a child action named `my_component` is merged in the configuration as `actions.my_services.actions.my_components`
-
-Simlarly, a search directory `./conf` with a configuration file stored in `./conf/actions.my_services.yml` and a child action named `my_component` is merged in the configuration as `actions.my_services.actions.my_components`.
-
-Configuration is splitted among the following properties.
-
-- `actions`   
-  List of actions and group actions with their definition.
-- `nodes`   
-  Node where to target action execution.
-- `secrets`
-  List of secrets exposed to your actions.
+- [Configuration discovery](./config-discovery.md)
+- [Configuration structure](./config-structure.md)
 
 ## Action definitions
 
