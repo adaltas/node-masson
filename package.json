@@ -50,5 +50,8 @@
     "throw-deprecation": true,
     "timeout": 40000
   },
+  "scripts": {
+    "test": "mocha test/**/*.coffee"
+  },
   "type": "module"
 }
