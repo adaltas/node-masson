@@ -28,8 +28,8 @@ describe 'config.normalize', ->
           action_2: {}
       .should.eql
         actions: [
-          { namespace: ['action_1'], metadata: {header: []}, name: 'action_1' }
-          { namespace: ['action_2'], metadata: {header: []}, name: 'action_2' }
+          { masson: { name: 'action_1', namespace: ['action_1'] }, metadata: { header: [] } }
+          { masson: { name: 'action_2', namespace: ['action_2'] }, metadata: { header: [] } }
         ]
         nodes: []
 
@@ -46,10 +46,10 @@ describe 'config.normalize', ->
               action_2_1: {}
       .should.eql
         actions: [
-          { namespace: ['action_1'], metadata: {header: []}, name: 'action_1' }
-          { namespace: ['action_1', 'action_1_1'], metadata: {header: []}, name: 'action_1_1' }
-          { namespace: ['action_1', 'action_1_1', 'action_1_1_1'], metadata: {header: []}, name: 'action_1_1_1' }
-          { namespace: ['action_2'], metadata: {header: []}, name: 'action_2' }
-          { namespace: ['action_2', 'action_2_1'], metadata: {header: []}, name: 'action_2_1' }
+          { masson: { name: 'action_1', namespace: ['action_1'] }, metadata: { header: [] } }
+          { masson: { name: 'action_1_1', namespace: ['action_1', 'action_1_1'] }, metadata: { header: [] } }
+          { masson: { name: 'action_1_1_1', namespace: ['action_1', 'action_1_1', 'action_1_1_1'] }, metadata: { header: [] } }
+          { masson: { name: 'action_2', namespace: ['action_2'] }, metadata: {header: []} }
+          { masson: { name: 'action_2_1', namespace: ['action_2', 'action_2_1'] }, metadata: { header: [] } }
         ]
         nodes: []
