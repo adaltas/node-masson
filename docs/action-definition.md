@@ -10,7 +10,14 @@ Common Nikita action properties include:
 - `module` Module path of the action to execute.
 
 Masson add additionnal properties.
+
+- `dependencies` Actions for which the current action depends on.
 - `masson` Properties used by Masson
   - `namespace` Array path of the action.
   - `slug` String representation of the path
 
+Dependencies are defined as an object whose keys identify the dependency and whose value defined the dependency properties.
+
+- `required`
+- `unique`
+- `config`
