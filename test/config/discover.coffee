@@ -17,7 +17,7 @@ describe 'config.discover', ->
         await @file.yaml
           target: "#{tmpdir}/conf/actions.service.actions.component_2.yaml"
           content: config: test: 'test 2'
-        discover searchs: "#{tmpdir}/conf"
+        discover search: "#{tmpdir}/conf"
           .should.finally.eql
             actions: service: actions:
               component_1: config: test: 'test 1'
@@ -33,7 +33,7 @@ describe 'config.discover', ->
         await @file.yaml
           target: "#{tmpdir}/conf/actions.service.actions/component_2.yaml"
           content: config: test: 'test 2'
-        await discover searchs: "#{tmpdir}/conf"
+        await discover search: "#{tmpdir}/conf"
           .should.finally.eql
             actions: service: actions:
               component_1: config: test: 'test 1'
@@ -48,7 +48,7 @@ describe 'config.discover', ->
         await @file.yaml
           target: "#{tmpdir}/conf/actions.yml"
           content: component_1: config: test: 'test 1'
-        await discover searchs: "#{tmpdir}/conf"
+        await discover search: "#{tmpdir}/conf"
           .should.finally.eql
             actions:
               component_1: config: test: 'test 1'
@@ -66,7 +66,7 @@ describe 'config.discover', ->
           content: '''
           export default { component_1: { config: { test: 'test 1' } } }
           '''
-        await discover searchs: "#{tmpdir}/conf"
+        await discover search: "#{tmpdir}/conf"
           .should.finally.eql
             actions:
               component_1: config: test: 'test 1'
@@ -81,7 +81,7 @@ describe 'config.discover', ->
           content: '''
           module.exports = { component_1: { config: { test: 'test 1' } } }
           '''
-        await discover searchs: "#{tmpdir}/conf"
+        await discover search: "#{tmpdir}/conf"
           .should.finally.eql
             actions:
               component_1: config: test: 'test 1'
@@ -94,7 +94,7 @@ describe 'config.discover', ->
         await @file.json
           target: "#{tmpdir}/conf/actions.json"
           content: component_1: config: test: 'test 1'
-        await discover searchs: "#{tmpdir}/conf"
+        await discover search: "#{tmpdir}/conf"
           .should.finally.eql
             actions:
               component_1: config: test: 'test 1'
