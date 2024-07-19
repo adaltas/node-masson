@@ -4,8 +4,8 @@
 Configuration is splitted among the following properties.
 
 - `actions`   
-  List of actions and group actions with their definition.
+  [Actions](./definition-actions.md) scheduled for execution.
 - `nodes`   
-  Node where to target action execution.
+  Nodes where to target action execution.
 - `secrets`
-  List of secrets exposed to your actions.
+  Secrets exposed to your actions.

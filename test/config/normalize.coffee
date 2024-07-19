@@ -53,3 +53,27 @@ describe 'config.normalize', ->
           { masson: { name: 'action_2_1', namespace: ['action_2', 'action_2_1'], slug: '/action_2/action_2_1' }, metadata: { header: [] } }
         ]
         nodes: []
+
+  describe 'actions.nodes', ->
+
+    it 'string match all', ->
+      normalize(
+        nodes:
+          node_1: config: hostname: 'node_1'
+          node_2 : {}
+        actions:
+          action_1:
+            nodes: '*'
+      ).actions.shift().nodes.should.eql ['node_1', 'node_2']
+
+    it 'array match nodes.<node>.name and nodes.<node>.config.[hostname,fqdn]', ->
+      normalize(
+        nodes:
+          node_1: config: hostname: 'node_1'
+          node_2: config: fqdn: 'node_2.domain.com'
+          node_3: {}
+          invalid_node: {}
+        actions:
+          action_1:
+            nodes: ['node_*']
+      ).actions.shift().nodes.should.eql ['node_1', 'node_2', 'node_3']
