@@ -51,10 +51,15 @@ describe 'config.normalize', ->
         actions:
           action_1: {}
           action_2: {}
-      .then ({actions}) -> actions
+      .then ({actions}) -> actions.map ({actions, masson, metadata}) -> ({actions, masson, metadata})
       .should.finally.eql [
-        { masson: { name: 'action_1', namespace: ['action_1'], "slug": '/action_1' }, metadata: { header: [] } }
-        { masson: { name: 'action_2', namespace: ['action_2'], "slug": '/action_2' }, metadata: { header: [] } }
+        actions: []
+        masson: { name: 'action_1', namespace: ['action_1'], "slug": '/action_1' }
+        metadata: { header: [] }
+      ,
+        actions: []
+        masson: { name: 'action_2', namespace: ['action_2'], "slug": '/action_2' }
+        metadata: { header: [] }
       ]
 
     it 'deep actions', ->
@@ -68,14 +73,28 @@ describe 'config.normalize', ->
           action_2:
             actions:
               action_2_1: {}
-      .then ({actions}) -> actions
+      .then ({actions}) -> actions.map ({actions, masson, metadata}) -> ({actions, masson, metadata})
       .should.finally.eql [
-          { masson: { name: 'action_1', namespace: ['action_1'], slug: '/action_1' }, metadata: { header: [] } }
-          { masson: { name: 'action_1_1', namespace: ['action_1', 'action_1_1'], slug: '/action_1/action_1_1' }, metadata: { header: [] } }
-          { masson: { name: 'action_1_1_1', namespace: ['action_1', 'action_1_1', 'action_1_1_1'], slug: '/action_1/action_1_1/action_1_1_1' }, metadata: { header: [] } }
-          { masson: { name: 'action_2', namespace: ['action_2'], slug: '/action_2' }, metadata: {header: []} }
-          { masson: { name: 'action_2_1', namespace: ['action_2', 'action_2_1'], slug: '/action_2/action_2_1' }, metadata: { header: [] } }
-        ]
+        actions: [ [ 'action_1', 'action_1_1' ] ]
+        masson: { name: 'action_1', namespace: ['action_1'], slug: '/action_1' }
+        metadata: { header: [] }
+      ,
+        actions: [ [ 'action_1', 'action_1_1', 'action_1_1_1' ] ]
+        masson: { name: 'action_1_1', namespace: ['action_1', 'action_1_1'], slug: '/action_1/action_1_1' }
+        metadata: { header: [] }
+      ,
+        actions: []
+        masson: { name: 'action_1_1_1', namespace: ['action_1', 'action_1_1', 'action_1_1_1'], slug: '/action_1/action_1_1/action_1_1_1' }
+        metadata: { header: [] }
+      ,
+        actions: [ [ 'action_2', 'action_2_1' ] ]
+        masson: { name: 'action_2', namespace: ['action_2'], slug: '/action_2' }
+        metadata: { header: [] }
+      ,
+        actions: []
+        masson: { name: 'action_2_1', namespace: ['action_2', 'action_2_1'], slug: '/action_2/action_2_1' }
+        metadata: { header: [] }
+      ]
 
   describe 'actions.nodes', ->
 
