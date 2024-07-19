@@ -1,7 +1,9 @@
 
 import nikita from '@nikitajs/core'
+import registry from '@nikitajs/core/registry'
 import '@nikitajs/file/register'
 import normalize from '../../lib/config/normalize.js'
+import mklayout from '../../lib/utils/mklayout.js'
 
 describe 'config.normalize', ->
 
@@ -12,12 +14,35 @@ describe 'config.normalize', ->
         nodes:
           node_1: {}
           node_2: {}
-      .should.eql 
-        nodes: [
+      .then ({nodes}) -> nodes
+      .should.finally.eql [
           { name: "node_1", config: { hostname: undefined } },
           { name: "node_2", config: { hostname: undefined } }
-        ],
-        actions: []
+        ]
+
+  describe 'masson.register', ->
+
+    it 'load module when defined as string', ->
+      mklayout([
+        ['./package.json', { type: 'module'}],
+        ['./register.js', '''
+        // Dependencies
+        import registry from "@nikitajs/core/registry";
+
+        // Action registration
+        await registry.register({
+          masson_test: "{{tmpdir}}/test.js",
+        });
+
+        '''],
+        ['./test.js', 'export default () => "ok"'],
+      ], (tmpdir) ->
+        await normalize
+          masson:
+            register: ["#{tmpdir}/register.js"]
+        actions = await registry.get()
+        actions.masson_test[''].metadata.module.should.eql "#{tmpdir}/test.js"
+      )
 
   describe 'actions', ->
 
@@ -26,12 +51,11 @@ describe 'config.normalize', ->
         actions:
           action_1: {}
           action_2: {}
-      .should.eql
-        actions: [
-          { masson: { name: 'action_1', namespace: ['action_1'], "slug": '/action_1' }, metadata: { header: [] } }
-          { masson: { name: 'action_2', namespace: ['action_2'], "slug": '/action_2' }, metadata: { header: [] } }
-        ]
-        nodes: []
+      .then ({actions}) -> actions
+      .should.finally.eql [
+        { masson: { name: 'action_1', namespace: ['action_1'], "slug": '/action_1' }, metadata: { header: [] } }
+        { masson: { name: 'action_2', namespace: ['action_2'], "slug": '/action_2' }, metadata: { header: [] } }
+      ]
 
     it 'deep actions', ->
       normalize
@@ -44,30 +68,33 @@ describe 'config.normalize', ->
           action_2:
             actions:
               action_2_1: {}
-      .should.eql
-        actions: [
+      .then ({actions}) -> actions
+      .should.finally.eql [
           { masson: { name: 'action_1', namespace: ['action_1'], slug: '/action_1' }, metadata: { header: [] } }
           { masson: { name: 'action_1_1', namespace: ['action_1', 'action_1_1'], slug: '/action_1/action_1_1' }, metadata: { header: [] } }
           { masson: { name: 'action_1_1_1', namespace: ['action_1', 'action_1_1', 'action_1_1_1'], slug: '/action_1/action_1_1/action_1_1_1' }, metadata: { header: [] } }
           { masson: { name: 'action_2', namespace: ['action_2'], slug: '/action_2' }, metadata: {header: []} }
           { masson: { name: 'action_2_1', namespace: ['action_2', 'action_2_1'], slug: '/action_2/action_2_1' }, metadata: { header: [] } }
         ]
-        nodes: []
 
   describe 'actions.nodes', ->
 
     it 'string match all', ->
-      normalize(
+      normalize
         nodes:
           node_1: config: hostname: 'node_1'
           node_2 : {}
         actions:
           action_1:
             nodes: '*'
-      ).actions.shift().nodes.should.eql ['node_1', 'node_2']
+      .then ({actions}) -> actions.shift()
+      .then (action) -> action.nodes.should.eql ['node_1', 'node_2']
+      
+      
+      # .actions.shift().nodes.should.eql ['node_1', 'node_2']
 
     it 'array match nodes.<node>.name and nodes.<node>.config.[hostname,fqdn]', ->
-      normalize(
+      normalize
         nodes:
           node_1: config: hostname: 'node_1'
           node_2: config: fqdn: 'node_2.domain.com'
@@ -76,4 +103,5 @@ describe 'config.normalize', ->
         actions:
           action_1:
             nodes: ['node_*']
-      ).actions.shift().nodes.should.eql ['node_1', 'node_2', 'node_3']
+      .then ({actions}) -> actions.shift()
+      .then (action) -> action.nodes.should.eql ['node_1', 'node_2', 'node_3']
