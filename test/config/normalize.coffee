@@ -98,6 +98,17 @@ describe 'config.normalize', ->
 
   describe 'actions.nodes', ->
 
+    it 'not defined', ->
+      normalize
+        nodes:
+          node_1: config: hostname: 'node_1'
+          node_2 : {}
+        actions:
+          action_1: {} 
+      .then ({actions}) -> actions.shift()
+      .then ({nodes}) -> nodes
+      .should.finally.eql []
+    
     it 'string match all', ->
       normalize
         nodes:
@@ -108,10 +119,7 @@ describe 'config.normalize', ->
             nodes: '*'
       .then ({actions}) -> actions.shift()
       .then (action) -> action.nodes.should.eql ['node_1', 'node_2']
-      
-      
-      # .actions.shift().nodes.should.eql ['node_1', 'node_2']
-
+    
     it 'array match nodes.<node>.name and nodes.<node>.config.[hostname,fqdn]', ->
       normalize
         nodes:
