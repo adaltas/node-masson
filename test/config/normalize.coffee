@@ -51,6 +51,15 @@ describe 'config.normalize', ->
         actions.masson_test[''].metadata.module.should.eql "#{tmpdir}/test.js"
       )
 
+    it 'merge with the nikita default action when an object', ->
+      normalize
+        masson:
+          register: [{
+            "an": "action": (->)
+          }]
+      .then((config) => config.masson.nikita.metadata.register)
+      .should.finally.eql "an": "action": (->)
+
   describe 'actions', ->
 
     it 'root actions no children', ->
