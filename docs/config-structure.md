@@ -3,9 +3,11 @@
 
 Configuration is splitted among the following properties.
 
-- `actions`   
+- `actions`  
   [Actions](./definition-actions.md) scheduled for execution.
-- `nodes`   
+- `masson`  
+  [Masson]('./definition-masson.md) configuration.
+- `nodes`  
   Nodes where to target action execution.
-- `secrets`
+- `secrets`  
   Secrets exposed to your actions.
