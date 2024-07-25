@@ -20,6 +20,13 @@ describe 'config.normalize', ->
           { name: "node_2", config: { hostname: undefined } }
         ]
 
+  describe 'masson.nikita', ->
+
+    it 'default normalization', ->
+      normalize() 
+      .then((config) => config.masson.nikita)
+      .should.finally.eql { $: false }
+
   describe 'masson.register', ->
 
     it 'load module when defined as string', ->
