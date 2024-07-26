@@ -6,24 +6,40 @@ describe("config.run", () => {
     const config = await configure();
     await run(config).should.finally.eql({});
   });
-  it("one action with local node", async () => {
-    const config = await configure({
-      nodes: {
-        local: {},
-      },
-      actions: {
-        action_1: {
-          nodes: "*",
-          handler: () => 1,
+  describe("node", function () {
+    it("one action without node", async () => {
+      const config = await configure({
+        actions: {
+          action_1: {
+            handler: () => 1,
+          },
         },
-      },
+      });
+      await run(config).then((action) => {
+        action["local://action_1"].should.match({
+          output: 1,
+        });
+      });
     });
-    await run(config).then((action) => {
-      action["local://action_1"].should.match({
-        node: {
-          name: "local",
+    it("one action with local node", async () => {
+      const config = await configure({
+        nodes: {
+          local: {},
         },
-        output: 1,
+        actions: {
+          action_1: {
+            nodes: "*",
+            handler: () => 1,
+          },
+        },
+      });
+      await run(config).then((action) => {
+        action["local://action_1"].should.match({
+          node: {
+            name: "local",
+          },
+          output: 1,
+        });
       });
     });
   });
