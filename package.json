@@ -54,7 +54,7 @@
     "timeout": 40000
   },
   "scripts": {
-    "dev:link": "yarn link nikita && yarn link @nikitajs/core && yarn link @nikitajs/file && yarn link @nikitajs/utils",
+    "dev:links": "npm link nikita && npm link @nikitajs/core && npm link @nikitajs/logs && npm link @nikitajs/file && npm link @nikitajs/utils",
     "test": "mocha test/**/*.coffee"
   },
   "type": "module"
