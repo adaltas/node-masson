@@ -8,7 +8,11 @@ describe("config.normalize", function () {
   it("default without arguments", async function () {
     await normalize().should.finally.eql({
       nodes: [],
-      masson: { log: { cli: false, md: false }, nikita: { $: false }, register: [] },
+      masson: {
+        log: { cli: false, md: false },
+        nikita: { $: false },
+        register: [],
+      },
       actions: [],
     });
   });
@@ -196,6 +200,44 @@ describe("config.normalize", function () {
             metadata: { header: [] },
           },
         ]);
+    });
+  });
+
+  describe("actions.commands", function () {
+    it("default", async function () {
+      await normalize({
+        actions: {
+          my_action: {},
+        },
+      }).then(({ actions }) => {
+        actions.should.match([
+          {
+            masson: {
+              name: "my_action",
+            },
+            commands: [],
+          },
+        ]);
+      });
+    });
+
+    it("normalize command to an array", async function () {
+      await normalize({
+        actions: {
+          my_action: {
+            commands: "test",
+          },
+        },
+      }).then(({ actions }) => {
+        actions.should.match([
+          {
+            masson: {
+              name: "my_action",
+            },
+            commands: ["test"],
+          },
+        ]);
+      });
     });
   });
 
