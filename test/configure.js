@@ -5,7 +5,12 @@ describe("config.discover", () => {
   it("default without arguments", async () => {
     await configure().should.finally.eql({
       nodes: [],
-      masson: { nikita: { $: false }, register: [] },
+      masson: {
+        nikita: { $: false },
+        patterns: ["**/*.yml", "**/*.yaml", "**/*.js", "**/*.json"],
+        register: [],
+        search: [],
+      },
       actions: [],
     });
   });

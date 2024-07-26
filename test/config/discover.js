@@ -3,7 +3,15 @@ import "@nikitajs/file/register";
 import discover from "../../lib/config/discover.js";
 
 describe("config.discover", function () {
-  describe("structure", function () {
+  it("default without arguments", async function () {
+    await discover().should.finally.eql({
+      masson: {
+        search: [],
+        patterns: ["**/*.yml", "**/*.yaml", "**/*.js", "**/*.json"],
+      },
+    });
+  });
+  describe("filesystem layout", function () {
     it("load composite filenames", async function () {
       await nikita(
         {
@@ -19,11 +27,12 @@ describe("config.discover", function () {
             content: { config: { test: "test 2" } },
           });
           // prettier-ignore
-          return discover({ search: `${tmpdir}/conf` })
+          return discover({ masson: { search: `${tmpdir}/conf` } })
+            .then( config => ({ actions: config.actions }))
             .should.finally.eql({
               actions: { service: { actions: {
                 component_1: { config: { test: "test 1" } },
-                component_2: { config: { test: "test 2" } }}}}});
+                component_2: { config: { test: "test 2" } } } } } });
         }
       );
     });
@@ -43,11 +52,12 @@ describe("config.discover", function () {
             content: { config: { test: "test 2" } },
           });
           // prettier-ignore
-          await discover({search: `${tmpdir}/conf`})
+          await discover({masson: { search: `${tmpdir}/conf` } })
+            .then( config => ({ actions: config.actions }))
             .should.finally.eql({
               actions: { service: { actions:{
-                component_1: { config: { test: 'test 1' }},
-                component_2: { config: { test: 'test 2' }}}}}})
+                component_1: { config: { test: 'test 1' } },
+                component_2: { config: { test: 'test 2' } } } } } })
         }
       );
     });
@@ -65,10 +75,11 @@ describe("config.discover", function () {
             content: { component_1: { config: { test: "test 1" } } },
           });
           // prettier-ignore
-          await discover({ search: `${tmpdir}/conf`})
-          .should.finally.eql({
-            actions: {
-              component_1: { config: { test: 'test 1' }}}})
+          await discover({ masson: { search: `${tmpdir}/conf` } })
+            .then( config => ({ actions: config.actions }))
+            .should.finally.eql({
+              actions: {
+                component_1: { config: { test: 'test 1' } } } })
         }
       );
     });
@@ -89,10 +100,11 @@ describe("config.discover", function () {
               "export default { component_1: { config: { test: 'test 1' } } }",
           });
           // prettier-ignore
-          await discover ({search: `${tmpdir}/conf`})
-          .should.finally.eql({
-            actions: {
-              component_1: { config: { test: 'test 1' }}}})
+          await discover ({ masson: { search: `${tmpdir}/conf` } })
+            .then( config => ({ actions: config.actions }))
+            .should.finally.eql({
+              actions: {
+                component_1: { config: { test: 'test 1' } } } })
         }
       );
     });
@@ -110,10 +122,11 @@ describe("config.discover", function () {
               "module.exports = { component_1: { config: { test: 'test 1' } } }",
           });
           // prettier-ignore
-          await discover({search: `${tmpdir}/conf`})
-          .should.finally.eql({
-            actions: {
-              component_1: { config: { test: 'test 1' }}}})
+          await discover({ masson: { search: `${tmpdir}/conf` } })
+            .then( config => ({ actions: config.actions }))
+            .should.finally.eql({
+              actions: {
+                component_1: { config: { test: 'test 1' } } } })
         }
       );
     });
@@ -130,10 +143,11 @@ describe("config.discover", function () {
             content: { component_1: { config: { test: "test 1" } } },
           });
           // prettier-ignore
-          await discover ({search: `${tmpdir}/conf`})
-          .should.finally.eql({
-            actions:{
-              component_1: { config: { test: 'test 1' }}}})
+          await discover ({ masson: { search: `${tmpdir}/conf` } })
+            .then( config => ({ actions: config.actions } ))
+            .should.finally.eql({
+              actions:{
+                component_1: { config: { test: 'test 1' } } } });
         }
       );
     });

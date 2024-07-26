@@ -5,6 +5,13 @@ import normalize from "../../lib/config/normalize.js";
 import mklayout from "../../lib/utils/mklayout.js";
 
 describe("config.normalize", function () {
+  it("default without arguments", async function () {
+    await normalize().should.finally.eql({
+      nodes: [],
+      masson: { nikita: { $: false }, register: [] },
+      actions: [],
+    });
+  });
   describe("nodes", function () {
     it("name default to key", async function () {
       await normalize({
