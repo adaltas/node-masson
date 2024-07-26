@@ -8,7 +8,7 @@ describe("config.normalize", function () {
   it("default without arguments", async function () {
     await normalize().should.finally.eql({
       nodes: [],
-      masson: { nikita: { $: false }, register: [] },
+      masson: { log: { cli: false, md: false }, nikita: { $: false }, register: [] },
       actions: [],
     });
   });
@@ -25,6 +25,14 @@ describe("config.normalize", function () {
           { name: "node_1", config: { hostname: undefined } },
           { name: "node_2", config: { hostname: undefined } },
         ]);
+    });
+  });
+
+  describe("masson.log", function () {
+    it("default normalization", async function () {
+      await normalize()
+        .then((config) => config.masson.log)
+        .should.finally.eql({ cli: false, md: false });
     });
   });
 
