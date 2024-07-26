@@ -1,5 +1,6 @@
 import globals from "globals";
 import pluginJs from "@eslint/js";
+import pluginMocha from "eslint-plugin-mocha";
 import eslintConfigPrettier from "eslint-config-prettier";
 
 export default [
@@ -22,5 +23,6 @@ export default [
     },
   },
   pluginJs.configs.recommended,
+  pluginMocha.configs.flat.recommended,
   eslintConfigPrettier,
 ];

@@ -32,6 +32,7 @@
     "dedent": "^1.5.3",
     "eslint": "9.x",
     "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-mocha": "^10.4.3",
     "globals": "^15.6.0",
     "mocha": "^10.4.0",
     "should": "^13.2.3"
@@ -53,6 +54,7 @@
     "timeout": 40000
   },
   "scripts": {
+    "dev:link": "yarn link nikita && yarn link @nikitajs/core && yarn link @nikitajs/file && yarn link @nikitajs/utils",
     "test": "mocha test/**/*.coffee"
   },
   "type": "module"
