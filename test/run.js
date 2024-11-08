@@ -1,13 +1,14 @@
 import configure from "../lib/configure.js";
 import run from "../lib/run.js";
 
-describe("config.run", () => {
-  it("default without arguments", async () => {
+describe("config.run", function () {
+  it("default without arguments", async function () {
     const config = await configure();
     await run(config).should.finally.eql({});
   });
+
   describe("node", function () {
-    it("one action without node", async () => {
+    it("one action without node", async function () {
       const config = await configure({
         actions: {
           action_1: {
@@ -21,7 +22,8 @@ describe("config.run", () => {
         });
       });
     });
-    it("one action with local node", async () => {
+
+    it("one action with local node", async function () {
       const config = await configure({
         nodes: {
           local: {},

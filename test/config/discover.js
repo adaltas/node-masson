@@ -11,6 +11,7 @@ describe("config.discover", function () {
       },
     });
   });
+
   describe("filesystem layout", function () {
     it("load composite filenames", async function () {
       await nikita(
@@ -33,7 +34,7 @@ describe("config.discover", function () {
               actions: { service: { actions: {
                 component_1: { config: { test: "test 1" } },
                 component_2: { config: { test: "test 2" } } } } } });
-        }
+        },
       );
     });
 
@@ -58,7 +59,7 @@ describe("config.discover", function () {
               actions: { service: { actions:{
                 component_1: { config: { test: 'test 1' } },
                 component_2: { config: { test: 'test 2' } } } } } })
-        }
+        },
       );
     });
   });
@@ -80,7 +81,7 @@ describe("config.discover", function () {
             .should.finally.eql({
               actions: {
                 component_1: { config: { test: 'test 1' } } } })
-        }
+        },
       );
     });
 
@@ -97,15 +98,15 @@ describe("config.discover", function () {
           await this.file({
             target: `${tmpdir}/conf/actions.js`,
             content:
-              "export default { component_1: { config: { test: 'test 1' } } }",
+              "export default { action_1: { config: { test: 'test 1' } } }",
           });
           // prettier-ignore
           await discover ({ masson: { search: `${tmpdir}/conf` } })
             .then( config => ({ actions: config.actions }))
             .should.finally.eql({
               actions: {
-                component_1: { config: { test: 'test 1' } } } })
-        }
+                action_1: { config: { test: 'test 1' } } } })
+        },
       );
     });
 
@@ -127,7 +128,7 @@ describe("config.discover", function () {
             .should.finally.eql({
               actions: {
                 component_1: { config: { test: 'test 1' } } } })
-        }
+        },
       );
     });
 
@@ -148,7 +149,7 @@ describe("config.discover", function () {
             .should.finally.eql({
               actions:{
                 component_1: { config: { test: 'test 1' } } } });
-        }
+        },
       );
     });
   });

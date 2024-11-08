@@ -16,6 +16,7 @@ describe("config.normalize", function () {
       actions: [],
     });
   });
+
   describe("nodes", function () {
     it("name default to key", async function () {
       await normalize({
@@ -75,9 +76,9 @@ describe("config.normalize", function () {
           });
           const actions = await registry.get();
           actions.masson_test[""].metadata.module.should.eql(
-            `${tmpdir}/test.js`
+            `${tmpdir}/test.js`,
           );
-        }
+        },
       );
     });
 
@@ -109,7 +110,7 @@ describe("config.normalize", function () {
             actions,
             masson,
             metadata,
-          }))
+          })),
         )
         .should.finally.eql([
           {
@@ -151,7 +152,7 @@ describe("config.normalize", function () {
             actions,
             masson,
             metadata,
-          }))
+          })),
         )
         .should.finally.eql([
           {
@@ -289,7 +290,7 @@ describe("config.normalize", function () {
       })
         .then(({ actions }) => actions.shift())
         .then((action) =>
-          action.nodes.should.eql(["node_1", "node_2", "node_3"])
+          action.nodes.should.eql(["node_1", "node_2", "node_3"]),
         );
     });
   });
