@@ -9,9 +9,7 @@
     "David Worms <david@adaltas.com> (https://www.adaltas.com)",
     "Pierre Sauvage <pierre@adaltas.com> (https://www.adaltas.com)"
   ],
-  "bin": {
-    "masson": "./bin/masson"
-  },
+  "bin": "./bin/masson",
   "repository": {
     "type": "git",
     "url": "git://github.com/adaltas/node-masson.git"
