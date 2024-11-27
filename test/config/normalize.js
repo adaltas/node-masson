@@ -9,6 +9,7 @@ describe("config.normalize", function () {
     await normalize().should.finally.eql({
       nodes: [],
       masson: {
+        commands: {},
         log: { cli: false, md: false },
         nikita: { $: false },
         register: [],
@@ -30,6 +31,32 @@ describe("config.normalize", function () {
           { name: "node_1", config: { hostname: undefined } },
           { name: "node_2", config: { hostname: undefined } },
         ]);
+    });
+  });
+
+  describe("masson.commands", function () {
+    it("default normalization", async function () {
+      await normalize()
+        .then((config) => config.masson.commands)
+        .should.finally.eql({});
+    });
+
+    it("enrich during action discovery", async function () {
+      await normalize({
+        actions: {
+          action_cmd_1: {
+            commands: "cmd_1",
+          },
+          action_cmd_2: {
+            commands: ["cmd_2"],
+          },
+        },
+      })
+        .then((config) => config.masson.commands)
+        .should.finally.eql({
+          cmd_1: {},
+          cmd_2: {},
+        });
     });
   });
 
@@ -59,7 +86,6 @@ describe("config.normalize", function () {
             dedent`
               // Dependencies
               import registry from "@nikitajs/core/registry";
-
               // Action registration
               await registry.register({
                 masson_test: "{{tmpdir}}/test.js",
