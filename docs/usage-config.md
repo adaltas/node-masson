@@ -7,11 +7,28 @@ Masson configuration is discovered from files and directories. It supports multi
 
 In the command line, the `-c --config` argument list one or multiple search path.
 
+## Configuration structure
+
+Configuration is splitted among the following properties.
+
+- `actions`  
+  [Actions](./config-actions.md) scheduled for execution.
+- `masson`  
+  [Masson]('./config-masson.md) configuration.
+- `nodes`  
+  Nodes where to target action execution.
+- `secrets`  
+  Secrets exposed to your actions.
+
 ## Discovery strategy
 
-If the path match a directory, all the files inside are loaded.
-
 The supported file format are YAML (`.yml`, `.yaml`), JSON (`.json`) and JavaScript (`.js`).
+
+If the path is a directory, all the files present inside are loaded given they match the patterns:
+
+- `**/*.[yaml|yml]`
+- `**/*.json`
+- `**/*.js`
 
 ## Merging strategy
 
