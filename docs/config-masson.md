@@ -8,7 +8,7 @@ It consists of the following properties.
 - `masson.log`  
   Control the various log behavior.
 - `masson.log.cli`  
-  Enable the CLI log ouput.
+  Enable the CLI log ouput, default is `true`.
 - `masson.log.md`  
   Enable the Markdown log ouput.
 - `masson.nikita`  

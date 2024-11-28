@@ -10,7 +10,7 @@ describe("config.normalize", function () {
       nodes: [],
       masson: {
         commands: {},
-        log: { cli: false, md: false },
+        log: { cli: true, md: false },
         nikita: { $: false },
         register: [],
       },
@@ -64,7 +64,7 @@ describe("config.normalize", function () {
     it("default normalization", async function () {
       await normalize()
         .then((config) => config.masson.log)
-        .should.finally.eql({ cli: false, md: false });
+        .should.finally.eql({ cli: true, md: false });
     });
   });
 
