@@ -11,6 +11,7 @@ describe("config.run", function () {
   describe("node", function () {
     it("one action without node", async function () {
       const config = await configure({
+        masson: { log: { cli: false } },
         actions: {
           action_1: {
             handler: () => 1,
@@ -26,6 +27,7 @@ describe("config.run", function () {
 
     it("one action with local node", async function () {
       const config = await configure({
+        masson: { log: { cli: false } },
         nodes: {
           local: {},
         },
@@ -48,14 +50,43 @@ describe("config.run", function () {
   });
 
   describe("command", function () {
-    it("filter based on one command", async function () {
+    it("filter on one command", async function () {
       const config = await configure({
+        masson: { log: { cli: false } },
         actions: {
-          action_no: {
+          action_no_command_defined: {
+            handler: () => "no",
+          },
+          action_no_match: {
+            commands: "no-match",
             handler: () => "no",
           },
           action_yes: {
             commands: "test",
+            handler: () => "yes",
+          },
+        },
+      });
+      await run(config, { command: "test" }).then((action) => {
+        should(action["local://action_no"]).be.undefined();
+        action["local://action_yes"].should.match({
+          output: "yes",
+        });
+      });
+    });
+
+    it.skip("filter on multiple command", async function () {
+      const config = await configure({
+        actions: {
+          action_no_command_defined: {
+            handler: () => "no",
+          },
+          action_no_match: {
+            commands: ["no-match-1", "no-match-2"],
+            handler: () => "no",
+          },
+          action_yes: {
+            commands: ["test-1", "test-2"],
             handler: () => "yes",
           },
         },
