@@ -53,7 +53,7 @@
   },
   "scripts": {
     "dev:links": "npm link nikita && npm link @nikitajs/core && npm link @nikitajs/logs && npm link @nikitajs/file && npm link @nikitajs/utils",
-    "test": "mocha test/**/*.js"
+    "test": "mocha"
   },
   "type": "module"
 }

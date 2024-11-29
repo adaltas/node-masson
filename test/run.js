@@ -1,5 +1,6 @@
 import configure from "../lib/configure.js";
 import run from "../lib/run.js";
+import should from "should";
 
 describe("config.run", function () {
   it("default without arguments", async function () {
@@ -41,6 +42,28 @@ describe("config.run", function () {
             name: "local",
           },
           output: 1,
+        });
+      });
+    });
+  });
+
+  describe("command", function () {
+    it("filter based on one command", async function () {
+      const config = await configure({
+        actions: {
+          action_no: {
+            handler: () => "no",
+          },
+          action_yes: {
+            commands: "test",
+            handler: () => "yes",
+          },
+        },
+      });
+      await run(config, { command: "test" }).then((action) => {
+        should(action["local://action_no"]).be.undefined();
+        action["local://action_yes"].should.match({
+          output: "yes",
         });
       });
     });
