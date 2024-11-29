@@ -28,8 +28,8 @@ describe("config.normalize", function () {
       })
         .then(({ nodes }) => nodes)
         .should.finally.eql([
-          { name: "node_1", config: { hostname: undefined } },
-          { name: "node_2", config: { hostname: undefined } },
+          { name: "node_1", config: {} },
+          { name: "node_2", config: {} },
         ]);
     });
   });
