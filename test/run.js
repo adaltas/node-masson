@@ -68,7 +68,8 @@ describe("config.run", function () {
         },
       });
       await run(config, { command: "test" }).then((action) => {
-        should(action["local://action_no"]).be.undefined();
+        should(action["local://action_no_command_defined"]).be.undefined();
+        should(action["local://action_no_match"]).be.undefined();
         action["local://action_yes"].should.match({
           output: "yes",
         });
@@ -92,7 +93,8 @@ describe("config.run", function () {
         },
       });
       await run(config, { command: "test" }).then((action) => {
-        should(action["local://action_no"]).be.undefined();
+        should(action["local://action_no_command_defined"]).be.undefined();
+        should(action["local://action_no_match"]).be.undefined();
         action["local://action_yes"].should.match({
           output: "yes",
         });
