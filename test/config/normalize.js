@@ -13,6 +13,11 @@ describe("config.normalize", function () {
         log: { cli: true, md: false },
         nikita: { $: false },
         register: [],
+        shell: {
+          name: "masson",
+          description:
+            "Automatisation for deployment, management and any creazy ideas that comes to mind.",
+        },
       },
       actions: [],
     });

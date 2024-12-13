@@ -12,6 +12,11 @@ describe("configure", function () {
         patterns: ["**/*.yml", "**/*.yaml", "**/*.js", "**/*.json"],
         register: [],
         search: [],
+        shell: {
+          name: "masson",
+          description:
+            "Automatisation for deployment, management and any creazy ideas that comes to mind.",
+        },
       },
       actions: [],
     });
