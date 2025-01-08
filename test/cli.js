@@ -12,12 +12,15 @@ describe("cli", function () {
         ],
       ],
       async (tmpdir) => {
-        await cli([
-          "-c",
-          `${tmpdir}/conf`,
-          "run",
-          "cmd_1",
-        ]).should.finally.match({
+        await cli(["-c", `${tmpdir}/conf`, "run", "cmd_1"], {
+          config: {
+            masson: {
+              log: {
+                cli: false,
+              },
+            },
+          },
+        }).should.finally.match({
           "local://action_cmd_1": {
             masson: {
               namespace: [Array],
