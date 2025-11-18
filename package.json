@@ -17,7 +17,7 @@
   "license": "MIT",
   "dependencies": {
     "each": "^2.7.2",
-    "glob": "^11.0.0",
+    "glob": "^11.1.0",
     "mixme": "^1.1.0",
     "multimatch": "^7.0.0",
     "nikita": "^1.0.0-alpha.9",
